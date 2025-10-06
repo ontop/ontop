@@ -65,10 +65,10 @@ public class LJWithNestingOnRightToInnerJoinOptimizer implements IQTreeVariableG
 
     @Override
     public IQTree transform(IQTree tree, VariableGenerator variableGenerator) {
-        return transform(tree, tree::getVariableNullability, variableGenerator);
+        return transformWithVariableNullability(tree, tree::getVariableNullability, variableGenerator);
     }
 
-    private IQTree transform(IQTree tree, Supplier<VariableNullability> variableNullabilitySupplier, VariableGenerator variableGenerator) {
+    private IQTree transformWithVariableNullability(IQTree tree, Supplier<VariableNullability> variableNullabilitySupplier, VariableGenerator variableGenerator) {
         return tree.acceptVisitor(new Transformer(variableNullabilitySupplier, variableGenerator));
     }
 
@@ -77,7 +77,7 @@ public class LJWithNestingOnRightToInnerJoinOptimizer implements IQTreeVariableG
 
         Transformer(Supplier<VariableNullability> variableNullabilitySupplier,
                               VariableGenerator variableGenerator) {
-            super(t -> transform(t, t::getVariableNullability, variableGenerator),
+            super(t -> transformWithVariableNullability(t, t::getVariableNullability, variableGenerator),
                     variableNullabilitySupplier,
                     variableGenerator,
                     LJWithNestingOnRightToInnerJoinOptimizer.this.rightProvenanceNormalizer,
@@ -139,7 +139,7 @@ public class LJWithNestingOnRightToInnerJoinOptimizer implements IQTreeVariableG
             Supplier<VariableNullability> variableNullabilitySupplier =
                     () -> computeRightChildVariableNullability(rightChild, ljCondition);
 
-            return transform(rightChild, variableNullabilitySupplier, variableGenerator);
+            return transformWithVariableNullability(rightChild, variableNullabilitySupplier, variableGenerator);
         }
 
         private boolean canLJBeReduced(IQTree leftChild, IQTree safeLeftOfRightDescendant) {

@@ -19,7 +19,7 @@ public class DefaultRecursiveIQTreeVisitingInnerJoinTransformer extends DefaultR
     @Override
     public IQTree transformInnerJoin(NaryIQTree tree, InnerJoinNode rootNode, ImmutableList<IQTree> children) {
         // Recursive
-        ImmutableList<IQTree> liftedChildren = NaryIQTreeTools.transformChildren(children, this::transformChild);
+        ImmutableList<IQTree> liftedChildren = NaryIQTreeTools.transformChildren(children, this::transform);
 
         return transformer.transformInnerJoin(tree, rootNode, liftedChildren)
                 .orElseGet(() -> withTransformedChildren(tree, liftedChildren));

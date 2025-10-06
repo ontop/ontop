@@ -14,7 +14,7 @@ import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.impl.NaryIQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
-import it.unibz.inf.ontop.iq.visit.IQVisitor;
+import it.unibz.inf.ontop.iq.visit.IQTreeVisitor;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
@@ -133,7 +133,7 @@ public class IQTree2SelectFromWhereConverterImpl implements IQTree2SelectFromWhe
     }
 
     private SQLExpression convertIntoOrdinaryExpression(IQTree tree) {
-        return tree.acceptVisitor(new IQVisitor<>() {
+        return tree.acceptVisitor(new IQTreeVisitor<>() {
             @Override
             public SQLExpression transformIntensionalData(IntensionalDataNode dataNode) {
                 throw new MinorOntopInternalBugException("unexpected intensional data node: " + dataNode);

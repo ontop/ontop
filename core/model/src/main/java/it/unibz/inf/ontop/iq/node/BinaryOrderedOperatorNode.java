@@ -8,16 +8,13 @@ import it.unibz.inf.ontop.iq.IQTreeCache;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.iq.request.FunctionalDependencies;
 import it.unibz.inf.ontop.iq.request.VariableNonRequirement;
-import it.unibz.inf.ontop.iq.visit.IQVisitor;
-import it.unibz.inf.ontop.model.term.ImmutableExpression;
+import it.unibz.inf.ontop.iq.visit.IQTreeVisitor;
 import it.unibz.inf.ontop.model.term.NonVariableTerm;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
 import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.InjectiveSubstitution;
 import it.unibz.inf.ontop.utils.VariableGenerator;
-
-import java.util.Optional;
 
 /**
  * The ordering of the operands is meaningful procedurally,
@@ -33,7 +30,7 @@ public interface BinaryOrderedOperatorNode extends QueryNode {
 
     ImmutableSet<Substitution<NonVariableTerm>> getPossibleVariableDefinitions(IQTree leftChild, IQTree rightChild);
 
-    <T> T acceptVisitor(BinaryNonCommutativeIQTree tree, IQVisitor<T> visitor, IQTree leftChild, IQTree rightChild);
+    <T> T acceptVisitor(BinaryNonCommutativeIQTree tree, IQTreeVisitor<T> visitor, IQTree leftChild, IQTree rightChild);
 
     IQTree normalizeForOptimization(IQTree leftChild, IQTree rightChild, VariableGenerator variableGenerator,
                                     IQTreeCache treeCache);

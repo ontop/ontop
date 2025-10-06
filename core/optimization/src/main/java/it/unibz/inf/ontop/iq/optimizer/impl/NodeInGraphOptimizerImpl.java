@@ -77,7 +77,7 @@ public class NodeInGraphOptimizerImpl extends AbstractIQOptimizer implements Nod
         @Override
         public IQTree transformInnerJoin(NaryIQTree tree, InnerJoinNode rootNode, ImmutableList<IQTree> children) {
             // Recursive
-            var updatedChildren = NaryIQTreeTools.transformChildren(children, this::transformChild);
+            var updatedChildren = NaryIQTreeTools.transformChildren(children, this::transform);
 
             var nodeInGraphContextMultimap = extractNodeInGraphContexts(updatedChildren);
             var removableNodeInGraphAtoms = selectRemovableNodeInGraphAtoms(nodeInGraphContextMultimap.keySet(), updatedChildren);

@@ -80,7 +80,7 @@ public class PushProjectedOrderByTermsNormalizer implements DialectExtraNormaliz
         @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
         Optional<IQTree> transform(Optional<DistinctNode> distinctNode, Optional<ConstructionNode> constructionNode, Optional<OrderByNode> orderByNode, IQTree descendantTree) {
 
-            var newDescendantTree = transformChild(descendantTree);
+            var newDescendantTree = transform(descendantTree);
 
             if (!(constructionNode.isPresent() && orderByNode.isPresent())) {
                 return descendantTree.equals(newDescendantTree)

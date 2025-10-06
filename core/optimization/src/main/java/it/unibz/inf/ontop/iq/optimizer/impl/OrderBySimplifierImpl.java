@@ -83,7 +83,7 @@ public class OrderBySimplifierImpl extends AbstractIQOptimizer implements OrderB
             // Makes sure no new variable is projected by the returned tree
             return iqTreeTools.unaryIQTreeBuilder(child.getVariables())
                     .append(iqFactory.createOrderByNode(newComparators))
-                    .build(transformChild(pushDownChildTree));
+                    .build(transform(pushDownChildTree));
         }
 
         private Stream<ComparatorSimplification> simplifyComparator(OrderByNode.OrderComparator comparator,

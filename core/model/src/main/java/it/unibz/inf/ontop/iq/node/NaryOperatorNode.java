@@ -9,13 +9,11 @@ import it.unibz.inf.ontop.iq.NaryIQTree;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.iq.request.FunctionalDependencies;
 import it.unibz.inf.ontop.iq.request.VariableNonRequirement;
-import it.unibz.inf.ontop.iq.visit.IQVisitor;
+import it.unibz.inf.ontop.iq.visit.IQTreeVisitor;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.InjectiveSubstitution;
 import it.unibz.inf.ontop.utils.VariableGenerator;
-
-import java.util.Optional;
 
 /**
  * Has at least two children
@@ -43,7 +41,7 @@ public interface NaryOperatorNode extends QueryNode {
 
     IQTree propagateDownConstraint(DownPropagation dp, ImmutableList<IQTree> children);
 
-    <T> T acceptVisitor(NaryIQTree tree, IQVisitor<T> visitor, ImmutableList<IQTree> children);
+    <T> T acceptVisitor(NaryIQTree tree, IQTreeVisitor<T> visitor, ImmutableList<IQTree> children);
 
     /**
      * Only validates the node, not its children

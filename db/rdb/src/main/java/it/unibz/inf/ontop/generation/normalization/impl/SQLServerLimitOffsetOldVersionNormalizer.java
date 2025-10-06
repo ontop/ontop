@@ -88,12 +88,10 @@ public class SQLServerLimitOffsetOldVersionNormalizer implements DialectExtraNor
                     .append(construction.getOptionalNode())
                     .build(orderBy.getTail());
 
-            IQTree normalizedChild = transformChild(newChild);
-
             IQTree newTree = iqTreeTools.unaryIQTreeBuilder()
                     .append(newFilter)
                     .append(newConstruction)
-                    .build(normalizedChild);
+                    .build(transform(newChild));
 
             // Additional CONSTRUCTION necessary when subtree leaf in NaryIQTree (e.g. sub-query)
             return iqFactory.createUnaryIQTree(

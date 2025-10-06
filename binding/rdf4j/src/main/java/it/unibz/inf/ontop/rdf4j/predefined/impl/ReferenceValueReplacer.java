@@ -61,7 +61,7 @@ public class ReferenceValueReplacer {
                 var newConstructionNode = iqTreeTools.replaceSubstitution(
                         node, s -> s.transform(this::transformTerm));
 
-                return iqFactory.createUnaryIQTree(newConstructionNode, transformChild(child));
+                return iqFactory.createUnaryIQTree(newConstructionNode, transform(child));
             }
 
             @Override

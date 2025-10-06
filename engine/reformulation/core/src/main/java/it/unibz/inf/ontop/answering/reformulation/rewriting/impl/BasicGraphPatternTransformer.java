@@ -44,7 +44,7 @@ public abstract class BasicGraphPatternTransformer  {
                 else {
                     addTransformedBGP(builderChildren, builderBGP.build());
                     builderBGP = ImmutableList.builder();
-                    builderChildren.add(transformChild(child));
+                    builderChildren.add(transform(child));
                 }
             }
             addTransformedBGP(builderChildren, builderBGP.build());

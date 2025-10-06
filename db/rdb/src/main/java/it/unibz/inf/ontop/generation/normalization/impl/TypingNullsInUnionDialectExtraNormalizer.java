@@ -38,7 +38,7 @@ public class TypingNullsInUnionDialectExtraNormalizer extends AbstractTypingNull
 
     @Override
     public IQTree transformUnion(NaryIQTree tree, UnionNode rootNode, ImmutableList<IQTree> children) {
-        ImmutableList<IQTree> updatedChildren = NaryIQTreeTools.transformChildren(children, this::transformChild);
+        ImmutableList<IQTree> updatedChildren = NaryIQTreeTools.transformChildren(children, this::transform);
 
         ImmutableSet<Variable> nullVariables = UnaryIQTreeDecomposition.getNodeStream(
                         UnaryIQTreeDecomposition.of(updatedChildren, ConstructionNode.class))

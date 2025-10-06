@@ -19,7 +19,7 @@ import it.unibz.inf.ontop.iq.optimizer.impl.CaseInsensitiveIQTreeTransformerAdap
 import it.unibz.inf.ontop.iq.transform.IQTreeTransformer;
 import it.unibz.inf.ontop.iq.transform.IQTreeVariableGeneratorTransformer;
 import it.unibz.inf.ontop.iq.transform.impl.DelegatingIQTreeVariableGeneratorTransformer;
-import it.unibz.inf.ontop.iq.visit.IQVisitor;
+import it.unibz.inf.ontop.iq.visit.IQTreeVisitor;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
@@ -55,7 +55,7 @@ public class CardinalityInsensitiveJoinTransferLJOptimizer extends DelegatingIQT
                 new CaseInsensitiveIQTreeTransformerAdapter(coreSingletons.getIQFactory()) {
                     @Override
                     protected IQTree transformCardinalityInsensitiveTree(IQTree tree) {
-                        IQVisitor<IQTree> transformer = new CardinalityInsensitiveTransformer(
+                        IQTreeVisitor<IQTree> transformer = new CardinalityInsensitiveTransformer(
                                 IQTreeTransformer.of(this),
                                 tree::getVariableNullability,
                                 vg);

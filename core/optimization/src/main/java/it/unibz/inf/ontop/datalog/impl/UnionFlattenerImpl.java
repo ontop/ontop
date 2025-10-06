@@ -59,7 +59,7 @@ public class UnionFlattenerImpl extends DelegatingIQTreeVariableGeneratorTransfo
         @Override
         public IQTree transformConstruction(UnaryIQTree tree, ConstructionNode rootCn, IQTree child) {
 
-            IQTree transformedChild = transformChild(child);
+            IQTree transformedChild = transform(child);
 
             // if the child is a union, lift it
             var union = NaryIQTreeTools.UnionDecomposition.of(transformedChild);
@@ -81,7 +81,7 @@ public class UnionFlattenerImpl extends DelegatingIQTreeVariableGeneratorTransfo
         // merge consecutive unions
         public IQTree transformUnion(NaryIQTree tree, UnionNode rootNode, ImmutableList<IQTree> children) {
 
-            ImmutableList<IQTree> transformedChildren = NaryIQTreeTools.transformChildren(children, this::transformChild);
+            ImmutableList<IQTree> transformedChildren = NaryIQTreeTools.transformChildren(children, this::transform);
 
             ImmutableList<IQTree> unionGrandChildren = transformedChildren.stream()
                     .filter(t -> t.getRootNode() instanceof UnionNode)

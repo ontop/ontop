@@ -179,7 +179,7 @@ public class SecondPhaseQueryMergingTransformer extends AbstractMultiPhaseQueryM
 
     @Override
     public final IQTree transformLeftJoin(BinaryNonCommutativeIQTree tree, LeftJoinNode rootNode, IQTree leftChild, IQTree rightChild) {
-        IQTree newLeftChild = transformChild(leftChild);
+        IQTree newLeftChild = transform(leftChild);
         IQTree newRightChild = transformChildWithNewTransformer(rightChild);
         return withTransformedChildren(tree, newLeftChild, newRightChild);
     }

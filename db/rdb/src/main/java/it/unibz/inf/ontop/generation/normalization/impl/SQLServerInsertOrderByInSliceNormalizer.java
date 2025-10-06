@@ -60,7 +60,7 @@ public class SQLServerInsertOrderByInSliceNormalizer implements DialectExtraNorm
                     .append(topConstruct)
                     .append(orderByNode)
                     .append(bottomConstruct)
-                    .build(transformChild(child));
+                    .build(transform(child));
         }
     }
 }

@@ -41,10 +41,10 @@ public class CardinalitySensitiveJoinTransferLJOptimizer implements IQTreeVariab
 
     @Override
     public IQTree transform(IQTree tree, VariableGenerator variableGenerator) {
-        return transform(tree, tree::getVariableNullability, variableGenerator);
+        return transformWithVariableNullability(tree, tree::getVariableNullability, variableGenerator);
     }
 
-    private IQTree transform(IQTree tree, Supplier<VariableNullability> variableNullabilitySupplier, VariableGenerator variableGenerator) {
+    private IQTree transformWithVariableNullability(IQTree tree, Supplier<VariableNullability> variableNullabilitySupplier, VariableGenerator variableGenerator) {
         return tree.acceptVisitor(new Transformer(variableNullabilitySupplier, variableGenerator));
     }
 
@@ -52,7 +52,7 @@ public class CardinalitySensitiveJoinTransferLJOptimizer implements IQTreeVariab
 
         Transformer(Supplier<VariableNullability> variableNullabilitySupplier,
                               VariableGenerator variableGenerator) {
-            super(t -> transform(t, t::getVariableNullability, variableGenerator),
+            super(t -> transformWithVariableNullability(t, t::getVariableNullability, variableGenerator),
                     variableNullabilitySupplier,
                     variableGenerator,
                     CardinalitySensitiveJoinTransferLJOptimizer.this.requiredDataNodeExtractor,
@@ -99,14 +99,14 @@ public class CardinalitySensitiveJoinTransferLJOptimizer implements IQTreeVariab
         @Override
         public IQTree transformConstruction(UnaryIQTree tree, ConstructionNode rootNode, IQTree child) {
             return transformUnaryNode(tree, rootNode, child,
-                    t -> transform(t,
+                    t -> transformWithVariableNullability(t,
                             () -> computeChildVariableNullabilityFromConstructionParent(tree, rootNode, child), variableGenerator));
         }
 
 
         @Override
         protected IQTree preTransformLJRightChild(IQTree rightChild, Optional<ImmutableExpression> ljCondition, ImmutableSet<Variable> leftVariables) {
-            return transform(rightChild,
+            return transformWithVariableNullability(rightChild,
                     () -> computeRightChildVariableNullability(rightChild, ljCondition), variableGenerator);
         }
     }

@@ -64,14 +64,14 @@ public class DefaultIQTreeStreamVisitingTransformer<T> extends AbstractIQTreeVis
     }
 
     protected final Stream<T> transformUnaryNode(UnaryIQTree tree, UnaryOperatorNode node, IQTree child) {
-        return transformChild(child);
+        return transform(child);
     }
 
     protected final Stream<T> transformNaryCommutativeNode(NaryIQTree tree, NaryOperatorNode node, ImmutableList<IQTree> children) {
-        return children.stream().flatMap(this::transformChild);
+        return children.stream().flatMap(this::transform);
     }
 
     protected final Stream<T> transformBinaryNonCommutativeNode(BinaryNonCommutativeIQTree tree, BinaryNonCommutativeOperatorNode node, IQTree leftChild, IQTree rightChild) {
-        return Stream.of(leftChild, rightChild).flatMap(this::transformChild);
+        return Stream.of(leftChild, rightChild).flatMap(this::transform);
     }
 }

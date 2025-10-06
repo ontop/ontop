@@ -47,7 +47,7 @@ public class BasicFlattenLifterImpl implements BasicFlattenLifter {
 
         @Override
         public IQTree transformFilter(UnaryIQTree tree, FilterNode rootNode, IQTree child) {
-            IQTree updatedChild = transformChild(child);
+            IQTree updatedChild = transform(child);
 
             // just to avoid unnecessary splitting of the FILTER node
             var flatten = IQTreeTools.UnaryIQTreeDecomposition.of(updatedChild, FlattenNode.class);
@@ -73,7 +73,7 @@ public class BasicFlattenLifterImpl implements BasicFlattenLifter {
 
         @Override
         public IQTree transformConstruction(UnaryIQTree tree, ConstructionNode cn, IQTree child) {
-            IQTree updatedChild = transformChild(child);
+            IQTree updatedChild = transform(child);
             if (tree == topRoot) // prevents FLATTEN above the top CONSTRUCTION node in an IQ
                 return iqFactory.createUnaryIQTree(cn, updatedChild);
 
@@ -101,7 +101,7 @@ public class BasicFlattenLifterImpl implements BasicFlattenLifter {
          */
         @Override
         public IQTree transformInnerJoin(NaryIQTree tree, InnerJoinNode join, ImmutableList<IQTree> initialChildren) {
-            ImmutableList<IQTree> children = NaryIQTreeTools.transformChildren(initialChildren, this::transformChild);
+            ImmutableList<IQTree> children = NaryIQTreeTools.transformChildren(initialChildren, this::transform);
 
             ImmutableSet<Variable> blockingVars = NaryIQTreeTools.coOccurringVariablesStream(children)
                     .collect(ImmutableCollectors.toSet());
@@ -127,8 +127,8 @@ public class BasicFlattenLifterImpl implements BasicFlattenLifter {
          */
         @Override
         public IQTree transformLeftJoin(BinaryNonCommutativeIQTree tree, LeftJoinNode rootNode, IQTree initialLeftChild, IQTree initialRightChild) {
-            IQTree leftChild = transformChild(initialLeftChild);
-            IQTree rightChild = transformChild(initialRightChild);
+            IQTree leftChild = transform(initialLeftChild);
+            IQTree rightChild = transform(initialRightChild);
 
             // all variables involved in the joining condition are blocking
             ImmutableSet<Variable> blockingVars = Stream.concat(

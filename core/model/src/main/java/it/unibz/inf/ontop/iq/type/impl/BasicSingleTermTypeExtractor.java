@@ -12,7 +12,7 @@ import it.unibz.inf.ontop.iq.NaryIQTree;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.type.SingleTermTypeExtractor;
-import it.unibz.inf.ontop.iq.visit.impl.AbstractIQVisitor;
+import it.unibz.inf.ontop.iq.visit.impl.AbstractIQTreeVisitor;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.TermType;
@@ -74,7 +74,7 @@ public class BasicSingleTermTypeExtractor implements SingleTermTypeExtractor {
     }
 
 
-    private class TermTypeVariableVisitor extends AbstractIQVisitor<Optional<TermType>> {
+    private class TermTypeVariableVisitor extends AbstractIQTreeVisitor<Optional<TermType>> {
 
         private final Variable variable;
 
@@ -138,7 +138,7 @@ public class BasicSingleTermTypeExtractor implements SingleTermTypeExtractor {
 
         @Override
         public Optional<TermType> transformFilter(UnaryIQTree tree, FilterNode rootNode, IQTree child) {
-            return transformChild(child);
+            return transform(child);
         }
 
         @Override
@@ -152,22 +152,22 @@ public class BasicSingleTermTypeExtractor implements SingleTermTypeExtractor {
             if (flattenNode.getIndexVariable().isPresent() && variable.equals(flattenNode.getIndexVariable().get())) {
                 return flattenNode.getIndexVariableType();
             }
-            return transformChild(child);
+            return transform(child);
         }
 
         @Override
         public Optional<TermType> transformDistinct(UnaryIQTree tree, DistinctNode rootNode, IQTree child) {
-            return transformChild(child);
+            return transform(child);
         }
 
         @Override
         public Optional<TermType> transformSlice(UnaryIQTree tree, SliceNode sliceNode, IQTree child) {
-            return transformChild(child);
+            return transform(child);
         }
 
         @Override
         public Optional<TermType> transformOrderBy(UnaryIQTree tree, OrderByNode rootNode, IQTree child) {
-            return transformChild(child);
+            return transform(child);
         }
 
         /**
@@ -176,10 +176,10 @@ public class BasicSingleTermTypeExtractor implements SingleTermTypeExtractor {
         @Override
         public Optional<TermType> transformLeftJoin(BinaryNonCommutativeIQTree tree, LeftJoinNode rootNode, IQTree leftChild, IQTree rightChild) {
             if (leftChild.getVariables().contains(variable)) {
-                return transformChild(leftChild);
+                return transform(leftChild);
             }
             else if (rightChild.getVariables().contains(variable)) {
-                return transformChild(rightChild);
+                return transform(rightChild);
             }
             else
                 return Optional.empty();
@@ -194,7 +194,7 @@ public class BasicSingleTermTypeExtractor implements SingleTermTypeExtractor {
         @Override
         public Optional<TermType> transformInnerJoin(NaryIQTree tree, InnerJoinNode rootNode, ImmutableList<IQTree> children) {
             return children.stream()
-                    .map(this::transformChild)
+                    .map(this::transform)
                     .flatMap(Optional::stream)
                     .findAny(); // pick any of them
         }
@@ -202,7 +202,7 @@ public class BasicSingleTermTypeExtractor implements SingleTermTypeExtractor {
         @Override
         public Optional<TermType> transformUnion(NaryIQTree tree, UnionNode rootNode, ImmutableList<IQTree> children) {
             return children.stream()
-                    .map(this::transformChild)
+                    .map(this::transform)
                     .flatMap(Optional::stream)
                     .findAny(); // pick any of them
         }

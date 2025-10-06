@@ -165,7 +165,7 @@ public class ExplicitEqualityTransformerImpl extends DelegatingIQTreeVariableGen
         private ImmutableList<IQTree> updateJoinChildren(ImmutableList<InjectiveSubstitution<Variable>> substitutions, ImmutableList<IQTree> children) {
             return IntStream.range(0, substitutions.size())
                     .mapToObj(i -> iqTreeTools.applyDownPropagation(substitutions.get(i), children.get(i)))
-                    .map(this::transformChild)
+                    .map(this::transform)
                     .collect(ImmutableCollectors.toList());
         }
 
@@ -230,8 +230,8 @@ public class ExplicitEqualityTransformerImpl extends DelegatingIQTreeVariableGen
 
         @Override
         public IQTree transformLeftJoin(BinaryNonCommutativeIQTree tree, LeftJoinNode rootNode, IQTree leftChild, IQTree rightChild) {
-            IQTree transformedLeftChild = transformChild(leftChild);
-            IQTree transformedRightChild = transformChild(rightChild);
+            IQTree transformedLeftChild = transform(leftChild);
+            IQTree transformedRightChild = transform(rightChild);
 
             var leftFilter = UnaryIQTreeDecomposition.of(transformedLeftChild, FilterNode.class);
             var rightFilter = UnaryIQTreeDecomposition.of(transformedRightChild, FilterNode.class);
@@ -252,7 +252,7 @@ public class ExplicitEqualityTransformerImpl extends DelegatingIQTreeVariableGen
 
         @Override
         public IQTree transformInnerJoin(NaryIQTree tree, InnerJoinNode rootNode, ImmutableList<IQTree> children) {
-            ImmutableList<IQTree> transformedChildren = NaryIQTreeTools.transformChildren(children, this::transformChild);
+            ImmutableList<IQTree> transformedChildren = NaryIQTreeTools.transformChildren(children, this::transform);
             var filters = UnaryIQTreeDecomposition.of(transformedChildren, FilterNode.class);
 
             if (filters.stream().anyMatch(IQTreeTools.IQTreeDecomposition::isPresent))
@@ -268,7 +268,7 @@ public class ExplicitEqualityTransformerImpl extends DelegatingIQTreeVariableGen
 
         @Override
         public IQTree transformFilter(UnaryIQTree tree, FilterNode rootNode, IQTree child) {
-            IQTree transformedChild = transformChild(child);
+            IQTree transformedChild = transform(child);
             var filter = UnaryIQTreeDecomposition.of(transformedChild, FilterNode.class);
             if (filter.isPresent())
                     return iqFactory.createUnaryIQTree(iqFactory.createFilterNode(
@@ -316,7 +316,7 @@ public class ExplicitEqualityTransformerImpl extends DelegatingIQTreeVariableGen
 
         @Override
         public IQTree transformConstruction(UnaryIQTree tree, ConstructionNode node, IQTree child) {
-            IQTree transformedChild = transformChild(child);
+            IQTree transformedChild = transform(child);
             var construction = UnaryIQTreeDecomposition.of(transformedChild, ConstructionNode.class);
             if (isProjectionConstructionNode(construction))
                 return iqFactory.createUnaryIQTree(node, construction.getChild());
@@ -344,7 +344,7 @@ public class ExplicitEqualityTransformerImpl extends DelegatingIQTreeVariableGen
         }
 
         private IQTree defaultTransformUnaryNode(UnaryIQTree tree, UnaryOperatorNode node, IQTree child) {
-            IQTree transformedChild = transformChild(child);
+            IQTree transformedChild = transform(child);
             var construction = UnaryIQTreeDecomposition.of(transformedChild, ConstructionNode.class);
             if (isProjectionConstructionNode(construction))
                 return iqTreeTools.unaryIQTreeBuilder()
@@ -357,7 +357,7 @@ public class ExplicitEqualityTransformerImpl extends DelegatingIQTreeVariableGen
 
         @Override
         public IQTree transformInnerJoin(NaryIQTree tree, InnerJoinNode node, ImmutableList<IQTree> children) {
-            ImmutableList<IQTree> transformedChildren = NaryIQTreeTools.transformChildren(children, this::transformChild);
+            ImmutableList<IQTree> transformedChildren = NaryIQTreeTools.transformChildren(children, this::transform);
             var constructions = UnaryIQTreeDecomposition.of(transformedChildren, ConstructionNode.class);
             if (constructions.stream().anyMatch(this::isProjectionConstructionNode))
                     return iqFactory.createUnaryIQTree(
@@ -372,8 +372,8 @@ public class ExplicitEqualityTransformerImpl extends DelegatingIQTreeVariableGen
 
         @Override
         public IQTree transformLeftJoin(BinaryNonCommutativeIQTree tree, LeftJoinNode node, IQTree leftChild, IQTree rightChild) {
-            IQTree transformedLeftChild = transformChild(leftChild);
-            IQTree transformedRightChild = transformChild(rightChild);
+            IQTree transformedLeftChild = transform(leftChild);
+            IQTree transformedRightChild = transform(rightChild);
 
             var leftConstruction = UnaryIQTreeDecomposition.of(transformedLeftChild, ConstructionNode.class);
             var rightConstruction = UnaryIQTreeDecomposition.of(transformedRightChild, ConstructionNode.class);

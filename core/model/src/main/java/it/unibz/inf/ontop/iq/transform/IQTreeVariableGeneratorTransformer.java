@@ -3,7 +3,7 @@ package it.unibz.inf.ontop.iq.transform;
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.iq.IQTree;
-import it.unibz.inf.ontop.iq.visit.IQVisitor;
+import it.unibz.inf.ontop.iq.visit.IQTreeVisitor;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.function.Function;
@@ -12,11 +12,11 @@ import java.util.function.Function;
 public interface IQTreeVariableGeneratorTransformer {
     IQTree transform(IQTree tree, VariableGenerator variableGenerator);
 
-    static IQTreeVariableGeneratorTransformer of(Function<VariableGenerator, IQVisitor<IQTree>> constructor) {
+    static IQTreeVariableGeneratorTransformer of(Function<VariableGenerator, IQTreeVisitor<IQTree>> constructor) {
         return (t, vg) -> t.acceptVisitor(constructor.apply(vg));
     }
 
-    static IQTreeVariableGeneratorTransformer of(IQVisitor<IQTree> visitor) {
+    static IQTreeVariableGeneratorTransformer of(IQTreeVisitor<IQTree> visitor) {
         return (t, vg) -> t.acceptVisitor(visitor);
     }
 

@@ -81,7 +81,7 @@ public class ProjectOrderByTermsNormalizer implements DialectExtraNormalizer {
             var initialDescendantTree = orderBy.getTail();
 
             //Recursive
-            IQTree newDescendantTree = transformChild(initialDescendantTree);
+            IQTree newDescendantTree = transform(initialDescendantTree);
 
             Optional<ConstructionNode> newOptionalConstructionNode = orderBy.isPresent()
                     ? normalize(distinct.getOptionalNode(),

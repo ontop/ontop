@@ -45,7 +45,7 @@ public class FilterLifterImpl implements FilterLifter {
 
         @Override
         public IQTree transformConstruction(UnaryIQTree tree, ConstructionNode cn, IQTree child) {
-            IQTree transformedChild = transformChild(child);
+            IQTree transformedChild = transform(child);
 
             if (tree.getRootNode().equals(cn)) {
                 return iqFactory.createUnaryIQTree(cn, transformedChild);
@@ -63,7 +63,7 @@ public class FilterLifterImpl implements FilterLifter {
 
         @Override
         public IQTree transformFilter(UnaryIQTree tree, FilterNode rootNode, IQTree child) {
-            IQTree transformedChild = transformChild(child);
+            IQTree transformedChild = transform(child);
             var filter = UnaryIQTreeDecomposition.of(transformedChild, FilterNode.class);
 
             return iqFactory.createUnaryIQTree(
@@ -76,7 +76,7 @@ public class FilterLifterImpl implements FilterLifter {
 
         @Override
         public IQTree transformFlatten(UnaryIQTree tree, FlattenNode fn, IQTree child) {
-            IQTree transformedChild = transformChild(child);
+            IQTree transformedChild = transform(child);
             var filter = UnaryIQTreeDecomposition.of(transformedChild, FilterNode.class);
             // TODO: check why this is sound
             return iqTreeTools.unaryIQTreeBuilder()
@@ -87,7 +87,7 @@ public class FilterLifterImpl implements FilterLifter {
 
         @Override
         public IQTree transformUnion(NaryIQTree tree, UnionNode rootNode, ImmutableList<IQTree> children) {
-            ImmutableList<IQTree> transformedChildren = NaryIQTreeTools.transformChildren(children, this::transformChild);
+            ImmutableList<IQTree> transformedChildren = NaryIQTreeTools.transformChildren(children, this::transform);
             var filters = UnaryIQTreeDecomposition.of(transformedChildren, FilterNode.class);
 
             // TODO: check why this is sound
@@ -106,7 +106,7 @@ public class FilterLifterImpl implements FilterLifter {
 
         @Override
         public IQTree transformInnerJoin(NaryIQTree tree, InnerJoinNode joinNode, ImmutableList<IQTree> children) {
-            ImmutableList<IQTree> transformedChildren = NaryIQTreeTools.transformChildren(children, this::transformChild);
+            ImmutableList<IQTree> transformedChildren = NaryIQTreeTools.transformChildren(children, this::transform);
             var filters = UnaryIQTreeDecomposition.of(transformedChildren, FilterNode.class);
 
             var optionalFilter = iqTreeTools.createOptionalFilterNode(termFactory.getConjunction(Stream.concat(
@@ -125,8 +125,8 @@ public class FilterLifterImpl implements FilterLifter {
 
         @Override
         public IQTree transformLeftJoin(BinaryNonCommutativeIQTree tree, LeftJoinNode rootNode, IQTree leftChild, IQTree rightChild) {
-            IQTree transformedLeftChild = transformChild(leftChild);
-            IQTree transformedRightChild = transformChild(rightChild);
+            IQTree transformedLeftChild = transform(leftChild);
+            IQTree transformedRightChild = transform(rightChild);
 
             var leftFilter = UnaryIQTreeDecomposition.of(transformedLeftChild, FilterNode.class);
             var rightFilter = UnaryIQTreeDecomposition.of(transformedRightChild, FilterNode.class);

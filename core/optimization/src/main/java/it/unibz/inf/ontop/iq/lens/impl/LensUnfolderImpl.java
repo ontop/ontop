@@ -11,7 +11,6 @@ import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.iq.node.impl.ExtensionalDataNodeImpl;
 import it.unibz.inf.ontop.iq.optimizer.impl.AbstractIQOptimizer;
 import it.unibz.inf.ontop.iq.transform.IQTreeVariableGeneratorTransformer;
-import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.iq.visit.impl.DefaultRecursiveIQTreeVisitingTransformerWithVariableGenerator;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 

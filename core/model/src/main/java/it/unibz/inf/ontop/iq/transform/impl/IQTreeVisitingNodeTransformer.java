@@ -106,7 +106,7 @@ public final class IQTreeVisitingNodeTransformer extends DefaultIQTreeVisitingTr
 
     @Override
     protected IQTree transformUnaryNode(UnaryIQTree tree, UnaryOperatorNode newNode, IQTree child) {
-        IQTree newChild = transformChild(child);
+        IQTree newChild = transform(child);
         return (newChild == child && newNode.equals(tree.getRootNode()))
                 ? tree
                 : iqFactory.createUnaryIQTree(newNode,  newChild);
@@ -114,7 +114,7 @@ public final class IQTreeVisitingNodeTransformer extends DefaultIQTreeVisitingTr
 
     @Override
     protected IQTree transformNaryCommutativeNode(NaryIQTree tree, NaryOperatorNode newNode, ImmutableList<IQTree> children) {
-        ImmutableList<IQTree> newChildren = NaryIQTreeTools.transformChildren(children, this::transformChild);
+        ImmutableList<IQTree> newChildren = NaryIQTreeTools.transformChildren(children, this::transform);
         return IntStream.range(0, children.size())
                 .allMatch(i -> newChildren.get(i) == children.get(i)
                         && newNode.equals(tree.getRootNode()))
@@ -124,8 +124,8 @@ public final class IQTreeVisitingNodeTransformer extends DefaultIQTreeVisitingTr
 
     @Override
     protected IQTree transformBinaryNonCommutativeNode(BinaryNonCommutativeIQTree tree, BinaryNonCommutativeOperatorNode newNode, IQTree leftChild, IQTree rightChild) {
-        IQTree newLeftChild = transformChild(leftChild);
-        IQTree newRightChild = transformChild(rightChild);
+        IQTree newLeftChild = transform(leftChild);
+        IQTree newRightChild = transform(rightChild);
         return (newLeftChild == leftChild && newRightChild == rightChild && newNode.equals(tree.getRootNode()))
                 ? tree
                 : iqFactory.createBinaryNonCommutativeIQTree(newNode,  newLeftChild, newRightChild);

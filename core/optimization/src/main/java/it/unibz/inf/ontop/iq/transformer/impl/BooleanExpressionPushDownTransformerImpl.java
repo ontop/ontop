@@ -13,7 +13,6 @@ import it.unibz.inf.ontop.iq.impl.NaryIQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
 import it.unibz.inf.ontop.iq.transformer.BooleanExpressionPushDownTransformer;
-import it.unibz.inf.ontop.iq.visit.impl.AbstractIQVisitor;
 import it.unibz.inf.ontop.iq.visit.impl.DefaultIQTreeOptionalVisitingTransformer;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.TermFactory;
@@ -54,7 +53,7 @@ public class BooleanExpressionPushDownTransformerImpl implements BooleanExpressi
         public IQTree transformFilter(UnaryIQTree tree, FilterNode rootNode, IQTree child) {
 
             PushResult<IQTree> result = pushExpressionDown(
-                    transformChild(child),
+                    transform(child),
                     rootNode.getFilterCondition(),
                     this::pushExpressionDown);
 
@@ -72,8 +71,8 @@ public class BooleanExpressionPushDownTransformerImpl implements BooleanExpressi
             if (rootNode.getOptionalFilterCondition().isEmpty())
                 return super.transformLeftJoin(tree, rootNode, leftChild, rightChild);
 
-            IQTree transformedLeftChild = transformChild(leftChild);
-            IQTree transformedRightChild = transformChild(rightChild);
+            IQTree transformedLeftChild = transform(leftChild);
+            IQTree transformedRightChild = transform(rightChild);
 
             // Expressions involving variables not on the right are not pushed
             PushResult<IQTree> result = pushExpressionDown(
@@ -90,7 +89,7 @@ public class BooleanExpressionPushDownTransformerImpl implements BooleanExpressi
             if (rootNode.getOptionalFilterCondition().isEmpty())
                 return super.transformInnerJoin(tree, rootNode, children);
 
-            ImmutableList<IQTree> transformedChildren = NaryIQTreeTools.transformChildren(children, this::transformChild);
+            ImmutableList<IQTree> transformedChildren = NaryIQTreeTools.transformChildren(children, this::transform);
 
             PushResult<ImmutableList<IQTree>> result = pushExpressionDown(
                     transformedChildren,
@@ -172,7 +171,7 @@ public class BooleanExpressionPushDownTransformerImpl implements BooleanExpressi
          */
         @Override
         public Optional<IQTree> transformFilter(UnaryIQTree tree, FilterNode rootNode, IQTree child) {
-            Optional<IQTree> newChild = transformChild(child);
+            Optional<IQTree> newChild = transform(child);
 
             UnaryIQTree newTree = newChild
                     .map(c -> iqFactory.createUnaryIQTree(rootNode, c))
@@ -210,7 +209,7 @@ public class BooleanExpressionPushDownTransformerImpl implements BooleanExpressi
         }
 
         private Optional<IQTree> visitPassingUnaryNode(UnaryOperatorNode rootNode, IQTree child) {
-            IQTree newChild = transformChild(child)
+            IQTree newChild = transform(child)
                     .orElseGet(() -> wrapInFilter(expressionToPushDown, child));
 
             return Optional.of(iqFactory.createUnaryIQTree(rootNode, newChild));
@@ -224,7 +223,7 @@ public class BooleanExpressionPushDownTransformerImpl implements BooleanExpressi
         @Override
         public Optional<IQTree> transformLeftJoin(BinaryNonCommutativeIQTree tree, LeftJoinNode rootNode, IQTree leftChild, IQTree rightChild) {
             return leftChild.getVariables().containsAll(expressionToPushDown.getVariables())
-                ? transformChild(leftChild)
+                ? transform(leftChild)
                         .map(l -> iqFactory.createBinaryNonCommutativeIQTree(rootNode, l, rightChild))
                 : Optional.empty();
         }
@@ -235,7 +234,7 @@ public class BooleanExpressionPushDownTransformerImpl implements BooleanExpressi
 
             ImmutableList<IQTree> newChildren = NaryIQTreeTools.transformChildren(children,
                     c -> c.getVariables().containsAll(expressionVariables)
-                            ? transformChild(c).orElse(c)
+                            ? transform(c).orElse(c)
                             : c);
 
             InnerJoinNode newJoinNode = newChildren.equals(children)
@@ -249,7 +248,7 @@ public class BooleanExpressionPushDownTransformerImpl implements BooleanExpressi
         @Override
         public Optional<IQTree> transformUnion(NaryIQTree tree, UnionNode rootNode, ImmutableList<IQTree> children) {
             ImmutableList<IQTree> newChildren = NaryIQTreeTools.transformChildren(children,
-                    c -> transformChild(c)
+                    c -> transform(c)
                             .orElseGet(() -> wrapInFilter(expressionToPushDown, c)));
 
             return Optional.of(iqFactory.createNaryIQTree(rootNode, newChildren));

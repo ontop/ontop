@@ -9,7 +9,7 @@ import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.transform.IQTreeTransformer;
 import it.unibz.inf.ontop.iq.transform.IQTreeVariableGeneratorTransformer;
 import it.unibz.inf.ontop.iq.transform.impl.DelegatingIQTreeVariableGeneratorTransformer;
-import it.unibz.inf.ontop.iq.visit.IQVisitor;
+import it.unibz.inf.ontop.iq.visit.IQTreeVisitor;
 import it.unibz.inf.ontop.iq.visitor.RequiredExtensionalDataNodeExtractor;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -30,7 +30,7 @@ public class BelowDistinctJoinWithClassUnionOptimizer extends DelegatingIQTreeVa
         this.coreSingletons = coreSingletons;
         this.requiredExtensionalDataNodeExtractor = requiredExtensionalDataNodeExtractor;
         this.lookForDistinctTransformer = IQTreeVariableGeneratorTransformer.of(new CaseInsensitiveIQTreeTransformerAdapter(coreSingletons.getIQFactory()) {
-            private final IQVisitor<IQTree> transformer = new BelowDistinctTransformer(IQTreeTransformer.of(this), iqFactory, new JoinWithClassUnionTransformer());
+            private final IQTreeVisitor<IQTree> transformer = new BelowDistinctTransformer(IQTreeTransformer.of(this), iqFactory, new JoinWithClassUnionTransformer());
 
             @Override
             protected IQTree transformCardinalityInsensitiveTree(IQTree tree) {

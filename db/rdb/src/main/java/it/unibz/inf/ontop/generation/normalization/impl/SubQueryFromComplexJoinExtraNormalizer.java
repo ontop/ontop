@@ -58,7 +58,7 @@ public class SubQueryFromComplexJoinExtraNormalizer implements DialectExtraNorma
         }
 
         private IQTree createSubQueryIfJoin(IQTree child) {
-            IQTree transformedChild = transformChild(child);
+            IQTree transformedChild = transform(child);
 
             if (transformedChild.getRootNode() instanceof LeftJoinNode
                     || transformedChild.getRootNode() instanceof InnerJoinNode) {

@@ -16,7 +16,7 @@ import it.unibz.inf.ontop.iq.optimizer.impl.CaseInsensitiveIQTreeTransformerAdap
 import it.unibz.inf.ontop.iq.transform.IQTreeTransformer;
 import it.unibz.inf.ontop.iq.transform.IQTreeVariableGeneratorTransformer;
 import it.unibz.inf.ontop.iq.transform.impl.DelegatingIQTreeVariableGeneratorTransformer;
-import it.unibz.inf.ontop.iq.visit.IQVisitor;
+import it.unibz.inf.ontop.iq.visit.IQTreeVisitor;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
@@ -62,7 +62,7 @@ public class NullableFDSelfLJOptimizer extends DelegatingIQTreeVariableGenerator
 
         this.transformer = IQTreeVariableGeneratorTransformer.of(vg ->
                 new CaseInsensitiveIQTreeTransformerAdapter(iqFactory) {
-                    private final IQVisitor<IQTree> transformer = new CardinalityInsensitiveTransformer(
+                    private final IQTreeVisitor<IQTree> transformer = new CardinalityInsensitiveTransformer(
                             IQTreeTransformer.of(this),
                             vg);
                     @Override
@@ -88,7 +88,7 @@ public class NullableFDSelfLJOptimizer extends DelegatingIQTreeVariableGenerator
 
         @Override
         public IQTree transformConstruction(UnaryIQTree tree, ConstructionNode rootNode, IQTree child) {
-            return transformUnaryNode(tree, rootNode, child, this::transformChild);
+            return transformUnaryNode(tree, rootNode, child, this::transform);
         }
 
         @Override
@@ -256,7 +256,7 @@ public class NullableFDSelfLJOptimizer extends DelegatingIQTreeVariableGenerator
         @Override
         protected IQTree preTransformLJRightChild(IQTree rightChild, Optional<ImmutableExpression> ljCondition,
                                                   ImmutableSet<Variable> leftVariables) {
-            return transformChild(rightChild);
+            return transform(rightChild);
         }
 
         private class Transfer {

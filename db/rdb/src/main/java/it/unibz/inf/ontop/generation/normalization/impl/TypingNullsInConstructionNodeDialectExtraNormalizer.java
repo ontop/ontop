@@ -36,7 +36,7 @@ public class TypingNullsInConstructionNodeDialectExtraNormalizer extends Abstrac
                         v -> v,
                         v -> termFactory.getTypedNull(defaultType)));
 
-        IQTree newChild = transformChild(child);
+        IQTree newChild = transform(child);
         return updateSubQuery(iqFactory.createUnaryIQTree(rootNode, newChild), typedNullMap);
     }
 }

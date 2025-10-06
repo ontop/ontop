@@ -70,7 +70,7 @@ public class DefinitionPushDownTransformerImpl implements DefinitionPushDownTran
             if (newRequest.equals(request))
                 return iqFactory.createUnaryIQTree(
                         iqFactory.createConstructionNode(newProjectedVariables, initialSubstitution),
-                        transformChild(child));
+                        transform(child));
 
             ImmutableExpression newCondition = newRequest.getCondition();
             Optional<ImmutableTerm> optionalLocalDefinition = newCondition.evaluate2VL(termFactory.createDummyVariableNullability(newCondition))
@@ -121,13 +121,13 @@ public class DefinitionPushDownTransformerImpl implements DefinitionPushDownTran
             if (leftChild.getVariables().containsAll(requestVariables))
                 return iqFactory.createBinaryNonCommutativeIQTree(
                         rootNode,
-                        transformChild(leftChild),
+                        transform(leftChild),
                         rightChild);
             else if (rightChild.getVariables().containsAll(requestVariables))
                 return iqFactory.createBinaryNonCommutativeIQTree(
                         rootNode,
                         leftChild,
-                        transformChild(rightChild));
+                        transform(rightChild));
             else
                 return blockDefinition(tree);
         }
@@ -147,7 +147,7 @@ public class DefinitionPushDownTransformerImpl implements DefinitionPushDownTran
             ImmutableList<IQTree> newChildren = IntStream.range(0, children.size())
                             .mapToObj(j -> i == j
                                     // Pushes down the definition to selected child
-                                    ? transformChild(children.get(j))
+                                    ? transform(children.get(j))
                                     : children.get(j))
                             .collect(ImmutableCollectors.toList());
 
@@ -156,7 +156,7 @@ public class DefinitionPushDownTransformerImpl implements DefinitionPushDownTran
 
         @Override
         public IQTree transformUnion(NaryIQTree tree, UnionNode rootNode, ImmutableList<IQTree> children) {
-            ImmutableList<IQTree> newChildren = NaryIQTreeTools.transformChildren(children, this::transformChild);
+            ImmutableList<IQTree> newChildren = NaryIQTreeTools.transformChildren(children, this::transform);
 
             ImmutableSet<Variable> newRootNodeVariables = newChildren.stream()
                     .findAny()

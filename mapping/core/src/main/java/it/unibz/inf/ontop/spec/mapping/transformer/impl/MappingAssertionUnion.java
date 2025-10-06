@@ -13,7 +13,6 @@ import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.tools.UnionBasedQueryMerger;
-import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.iq.visit.impl.DefaultIQTreeOptionalVisitingTransformer;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;

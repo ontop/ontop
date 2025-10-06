@@ -33,11 +33,6 @@ public class RequiredExtensionalDataNodeExtractorImpl extends DefaultIQTreeStrea
     }
 
     @Override
-    public Stream<ExtensionalDataNode> transform(IQTree tree) {
-        return tree.acceptVisitor(this);
-    }
-
-    @Override
     public Stream<ExtensionalDataNode> transformExtensionalData(ExtensionalDataNode dataNode) {
         return Stream.of(dataNode);
     }
@@ -51,7 +46,7 @@ public class RequiredExtensionalDataNodeExtractorImpl extends DefaultIQTreeStrea
     @Override
     public Stream<ExtensionalDataNode> transformLeftJoin(BinaryNonCommutativeIQTree tree, LeftJoinNode rootNode, IQTree leftChild, IQTree rightChild) {
         // Only considers the left child
-        return transformChild(leftChild);
+        return transform(leftChild);
     }
 
     /**

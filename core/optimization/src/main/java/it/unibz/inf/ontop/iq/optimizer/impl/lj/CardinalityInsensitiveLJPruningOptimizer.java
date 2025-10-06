@@ -9,14 +9,13 @@ import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.impl.BinaryNonCommutativeIQTreeTools;
-import it.unibz.inf.ontop.iq.impl.NaryIQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.optimizer.impl.CaseInsensitiveIQTreeTransformerAdapter;
 import it.unibz.inf.ontop.iq.transform.IQTreeTransformer;
 import it.unibz.inf.ontop.iq.transform.IQTreeVariableGeneratorTransformer;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
 import it.unibz.inf.ontop.iq.transform.impl.DelegatingIQTreeVariableGeneratorTransformer;
-import it.unibz.inf.ontop.iq.visit.IQVisitor;
+import it.unibz.inf.ontop.iq.visit.IQTreeVisitor;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.Variable;
@@ -42,7 +41,7 @@ public class CardinalityInsensitiveLJPruningOptimizer extends DelegatingIQTreeVa
         this.transformer = IQTreeVariableGeneratorTransformer.of(new CaseInsensitiveIQTreeTransformerAdapter(iqFactory) {
             @Override
             protected IQTree transformCardinalityInsensitiveTree(IQTree tree) {
-                IQVisitor<IQTree> transformer = new CardinalityInsensitiveLJPruningTransformer(
+                IQTreeVisitor<IQTree> transformer = new CardinalityInsensitiveLJPruningTransformer(
                         IQTreeTransformer.of(this),
                         tree.getVariables());
                 return tree.acceptVisitor(transformer);
@@ -106,18 +105,18 @@ public class CardinalityInsensitiveLJPruningOptimizer extends DelegatingIQTreeVa
         @Override
         public IQTree transformConstruction(UnaryIQTree tree, ConstructionNode rootNode, IQTree child) {
             var newTransformer = getTransformer(rootNode.getLocallyRequiredVariables());
-            return transformUnaryNode(tree, rootNode, child, newTransformer::transformChild);
+            return transformUnaryNode(tree, rootNode, child, newTransformer::transform);
         }
 
         @Override
         public IQTree transformFilter(UnaryIQTree tree, FilterNode rootNode, IQTree child) {
             var newTransformer = getTransformer(getVariables(rootNode.getOptionalFilterCondition()));
-            return transformUnaryNode(tree, rootNode, child, newTransformer::transformChild);
+            return transformUnaryNode(tree, rootNode, child, newTransformer::transform);
         }
 
         @Override
         public IQTree transformOrderBy(UnaryIQTree tree, OrderByNode rootNode, IQTree child) {
-            return transformUnaryNode(tree, rootNode, child, this::transformChild);
+            return transformUnaryNode(tree, rootNode, child, this::transform);
         }
 
         @Override
@@ -126,24 +125,24 @@ public class CardinalityInsensitiveLJPruningOptimizer extends DelegatingIQTreeVa
             if (treeVariables.isEmpty()
                     || leftChild.getVariables().containsAll(Sets.intersection(variablesUsedByAncestors, treeVariables)))
                 // Prunes the right child
-                return transformChild(leftChild);
+                return transform(leftChild);
 
             var commonVariables = BinaryNonCommutativeIQTreeTools.commonVariables(leftChild, rightChild);
             var newTransformer = getTransformer(Sets.union(commonVariables,
                     getVariables(rootNode.getOptionalFilterCondition())));
 
-            return transformBinaryNonCommutativeNode(tree, rootNode, leftChild, rightChild, newTransformer::transformChild);
+            return transformBinaryNonCommutativeNode(tree, rootNode, leftChild, rightChild, newTransformer::transform);
         }
 
         @Override
         public IQTree transformUnion(NaryIQTree tree, UnionNode rootNode, ImmutableList<IQTree> children) {
-            return transformNaryCommutativeNode(tree, rootNode, children, this::transformChild);
+            return transformNaryCommutativeNode(tree, rootNode, children, this::transform);
         }
 
         @Override
         public IQTree transformInnerJoin(NaryIQTree tree, InnerJoinNode rootNode, ImmutableList<IQTree> children) {
             var newTransformer = getTransformer(getVariables(rootNode.getOptionalFilterCondition()));
-            return transformNaryCommutativeNode(tree, rootNode, children, newTransformer::transformChild);
+            return transformNaryCommutativeNode(tree, rootNode, children, newTransformer::transform);
         }
     }
 }

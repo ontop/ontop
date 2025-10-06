@@ -13,7 +13,7 @@ import it.unibz.inf.ontop.iq.node.*;
  *  (if the result is identical to the input).
  */
 
-public interface IQVisitor<T> {
+public interface IQTreeVisitor<T> {
 
     T transformIntensionalData(IntensionalDataNode dataNode);
     T transformExtensionalData(ExtensionalDataNode dataNode);

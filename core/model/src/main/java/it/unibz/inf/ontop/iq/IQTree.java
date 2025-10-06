@@ -7,13 +7,11 @@ import it.unibz.inf.ontop.iq.node.QueryNode;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.iq.request.FunctionalDependencies;
 import it.unibz.inf.ontop.iq.request.VariableNonRequirement;
-import it.unibz.inf.ontop.iq.visit.IQVisitor;
+import it.unibz.inf.ontop.iq.visit.IQTreeVisitor;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.InjectiveSubstitution;
 import it.unibz.inf.ontop.utils.VariableGenerator;
-
-import java.util.Optional;
 
 
 public interface IQTree {
@@ -27,7 +25,7 @@ public interface IQTree {
      */
     ImmutableSet<Variable> getVariables();
 
-    <T> T acceptVisitor(IQVisitor<T> visitor);
+    <T> T acceptVisitor(IQTreeVisitor<T> visitor);
 
     IQTree normalizeForOptimization(VariableGenerator variableGenerator);
 

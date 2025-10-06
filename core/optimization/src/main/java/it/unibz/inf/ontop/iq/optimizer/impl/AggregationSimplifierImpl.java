@@ -66,14 +66,14 @@ public class AggregationSimplifierImpl extends AbstractIQOptimizer implements Ag
         @Override
         public IQTree transformAggregation(UnaryIQTree tree, AggregationNode rootNode, IQTree child) {
             // In case of aggregation nodes in the sub-tree
-            IQTree normalizedChild = transformChild(child)
+            IQTree normalizedChild = transform(child)
                     .normalizeForOptimization(variableGenerator);
 
             QueryNode newChildRoot = normalizedChild.getRootNode();
 
             // May need to renormalize the tree (RECURSIVE)
             if ((newChildRoot instanceof ConstructionNode) && (!child.getRootNode().equals(newChildRoot)))
-                return transformChild(iqFactory.createUnaryIQTree(rootNode, normalizedChild)
+                return transform(iqFactory.createUnaryIQTree(rootNode, normalizedChild)
                         .normalizeForOptimization(variableGenerator));
 
             Substitution<ImmutableFunctionalTerm> initialSubstitution = rootNode.getSubstitution();

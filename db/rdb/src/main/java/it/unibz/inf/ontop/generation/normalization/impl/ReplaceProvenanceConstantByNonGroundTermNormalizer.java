@@ -54,8 +54,8 @@ public class ReplaceProvenanceConstantByNonGroundTermNormalizer implements Diale
 
         @Override
         public IQTree transformLeftJoin(BinaryNonCommutativeIQTree tree, LeftJoinNode rootNode, IQTree leftChild, IQTree rightChild) {
-            IQTree newLeftChild = transformChild(leftChild);
-            IQTree newRightChild = transformChild(rightChild);
+            IQTree newLeftChild = transform(leftChild);
+            IQTree newRightChild = transform(rightChild);
 
             var construction = UnaryIQTreeDecomposition.of(rightChild, ConstructionNode.class);
             if (!construction.isPresent())

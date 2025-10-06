@@ -61,7 +61,7 @@ public class EliminateLimitsFromSubQueriesNormalizer implements DialectExtraNorm
         @Override
         public IQTree transformLeftJoin(BinaryNonCommutativeIQTree tree, LeftJoinNode rootNode, IQTree leftChild, IQTree rightChild) {
             return withTransformedChildren(tree,
-                    transformChild(tree.getLeftChild()),
+                    transform(tree.getLeftChild()),
                     defaultToParentTransformer(tree.getRightChild()));
         }
 
@@ -73,7 +73,7 @@ public class EliminateLimitsFromSubQueriesNormalizer implements DialectExtraNorm
             if (sliceNode.getOffset() != 0 || sliceNode.getLimit().isEmpty() || sliceNode.getLimit().getAsLong() < currentBounds)
                 return defaultToParentTransformer(tree);
 
-            return transformChild(tree.getChildren().get(0));
+            return transform(tree.getChildren().get(0));
         }
 
         @Override

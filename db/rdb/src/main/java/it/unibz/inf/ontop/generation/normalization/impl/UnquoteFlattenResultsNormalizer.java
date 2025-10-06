@@ -58,7 +58,7 @@ public class UnquoteFlattenResultsNormalizer implements DialectExtraNormalizer {
          */
         @Override
         public IQTree transformFlatten(UnaryIQTree tree, FlattenNode rootNode, IQTree child) {
-            IQTree newChild = transformChild(child);
+            IQTree newChild = transform(child);
             Variable newOutputVariable = variableGenerator.generateNewVariableFromVar(rootNode.getOutputVariable());
             ImmutableTerm resultSubstitution = termFactory.getDBCase(
                     Stream.of(Maps.immutableEntry(

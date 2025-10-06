@@ -4,7 +4,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
 import it.unibz.inf.ontop.dbschema.RelationDefinition;
 import it.unibz.inf.ontop.iq.LeafIQTree;
-import it.unibz.inf.ontop.iq.visit.IQVisitor;
+import it.unibz.inf.ontop.iq.visit.IQTreeVisitor;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
 import it.unibz.inf.ontop.substitution.InjectiveSubstitution;
@@ -25,7 +25,7 @@ public interface ExtensionalDataNode extends LeafIQTree {
     ExtensionalDataNode applyFreshRenaming(InjectiveSubstitution<Variable> renamingSubstitution);
 
     @Override
-    default <T> T acceptVisitor(IQVisitor<T> visitor) {
+    default <T> T acceptVisitor(IQTreeVisitor<T> visitor) {
         return visitor.transformExtensionalData(this);
     }
 

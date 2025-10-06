@@ -38,7 +38,7 @@ public abstract class DefaultRecursiveIQTreeVisitingTransformer extends DefaultI
 
     @Override
     protected final IQTree transformUnaryNode(UnaryIQTree tree, UnaryOperatorNode node, IQTree child) {
-        return transformUnaryNode(tree, node, child, this::transformChild);
+        return transformUnaryNode(tree, node, child, this::transform);
     }
 
     protected final IQTree transformUnaryNode(UnaryIQTree tree, UnaryOperatorNode rootNode, IQTree child,
@@ -54,7 +54,7 @@ public abstract class DefaultRecursiveIQTreeVisitingTransformer extends DefaultI
 
     @Override
     protected final IQTree transformNaryCommutativeNode(NaryIQTree tree, NaryOperatorNode node, ImmutableList<IQTree> children) {
-        return transformNaryCommutativeNode(tree, node, children, this::transformChild);
+        return transformNaryCommutativeNode(tree, node, children, this::transform);
     }
 
     protected final IQTree transformNaryCommutativeNode(NaryIQTree tree, NaryOperatorNode node, ImmutableList<IQTree> children,
@@ -70,7 +70,7 @@ public abstract class DefaultRecursiveIQTreeVisitingTransformer extends DefaultI
 
     @Override
     protected final IQTree transformBinaryNonCommutativeNode(BinaryNonCommutativeIQTree tree, BinaryNonCommutativeOperatorNode node, IQTree leftChild, IQTree rightChild) {
-        return transformBinaryNonCommutativeNode(tree, node, leftChild, rightChild, this::transformChild);
+        return transformBinaryNonCommutativeNode(tree, node, leftChild, rightChild, this::transform);
     }
 
     protected final IQTree transformBinaryNonCommutativeNode(BinaryNonCommutativeIQTree tree, BinaryNonCommutativeOperatorNode rootNode,

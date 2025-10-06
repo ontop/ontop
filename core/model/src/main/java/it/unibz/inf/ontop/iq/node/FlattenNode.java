@@ -3,7 +3,7 @@ package it.unibz.inf.ontop.iq.node;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
-import it.unibz.inf.ontop.iq.visit.IQVisitor;
+import it.unibz.inf.ontop.iq.visit.IQTreeVisitor;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.TermType;
@@ -80,7 +80,7 @@ public interface FlattenNode extends UnaryOperatorNode {
     FlattenNode applyFreshRenaming(InjectiveSubstitution<Variable> renamingSubstitution);
 
     @Override
-    default <T> T acceptVisitor(UnaryIQTree tree, IQVisitor<T> visitor, IQTree child) {
+    default <T> T acceptVisitor(UnaryIQTree tree, IQTreeVisitor<T> visitor, IQTree child) {
         return visitor.transformFlatten(tree, this, child);
     }
 }

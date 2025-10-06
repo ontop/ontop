@@ -85,8 +85,8 @@ public class MergeLJOptimizer extends DelegatingIQTreeVariableGeneratorTransform
 
         @Override
         public IQTree transformLeftJoin(BinaryNonCommutativeIQTree tree, LeftJoinNode rootNode, IQTree leftChild, IQTree rightChild) {
-            IQTree newLeftChild = transformChild(leftChild);
-            IQTree newRightChild = transformChild(rightChild);
+            IQTree newLeftChild = transform(leftChild);
+            IQTree newRightChild = transform(rightChild);
 
             LeftJoinDecomposition newLJ = LeftJoinDecomposition.of(rootNode, newLeftChild, newRightChild);
 

@@ -72,7 +72,7 @@ public class AggregationSplitterImpl extends AbstractIQOptimizer implements Aggr
         // uses == for withTransformedChild
         @Override
         public IQTree transformAggregation(UnaryIQTree tree, AggregationNode rootNode, IQTree child) {
-            IQTree liftedChild = transformChild(child);
+            IQTree liftedChild = transform(child);
 
             ImmutableSet<Variable> groupingVariables = rootNode.getGroupingVariables();
 

@@ -87,7 +87,7 @@ public class TermTypeTermLifterImpl extends DelegatingIQTreeVariableGeneratorTra
             // Recursive (children are normalized separately)
             // RDF type constants are replaced by functional terms
             ImmutableList<IQTree> normalizedChildren = NaryIQTreeTools.transformChildren(children,
-                    c -> replaceTypeTermConstants(transformChild(c)));
+                    c -> replaceTypeTermConstants(transform(c)));
 
             ImmutableSet<Variable> metaTermTypeVariables = rootNode.getVariables().stream()
                     .filter(v -> normalizedChildren.stream()
@@ -288,7 +288,7 @@ public class TermTypeTermLifterImpl extends DelegatingIQTreeVariableGeneratorTra
          * Useful for dealing with COALESCE and CASEs
          */
         private IQTree transformNodeBlockingNonInjectiveBindings(UnaryOperatorNode rootNode, IQTree child) {
-            IQTree normalizedChild = replaceTypeTermConstants(transformChild(child));
+            IQTree normalizedChild = replaceTypeTermConstants(transform(child));
             return iqFactory.createUnaryIQTree(rootNode, normalizedChild)
                     .normalizeForOptimization(variableGenerator);
         }

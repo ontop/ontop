@@ -4,7 +4,7 @@ import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
-import it.unibz.inf.ontop.iq.visit.IQVisitor;
+import it.unibz.inf.ontop.iq.visit.IQTreeVisitor;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.NonGroundTerm;
 import it.unibz.inf.ontop.model.term.Variable;
@@ -37,7 +37,7 @@ public interface OrderByNode extends QueryModifierNode {
     OrderByNode applyFreshRenaming(InjectiveSubstitution<Variable> freshRenamingSubstitution);
 
     @Override
-    default <T> T acceptVisitor(UnaryIQTree tree, IQVisitor<T> visitor, IQTree child) {
+    default <T> T acceptVisitor(UnaryIQTree tree, IQTreeVisitor<T> visitor, IQTree child) {
         return visitor.transformOrderBy(tree, this, child);
     }
 }

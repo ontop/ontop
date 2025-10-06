@@ -25,7 +25,7 @@ public abstract class AbstractLJTransformer extends DefaultRecursiveIQTreeVisiti
 
     @Override
     public IQTree transformLeftJoin(BinaryNonCommutativeIQTree tree, LeftJoinNode rootNode, IQTree leftChild, IQTree rightChild) {
-        IQTree transformedLeftChild = transformChild(leftChild);
+        IQTree transformedLeftChild = transform(leftChild);
         // Cannot reuse
         IQTree transformedRightChild = preTransformLJRightChild(rightChild, rootNode.getOptionalFilterCondition(), leftChild.getVariables());
 
