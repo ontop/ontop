@@ -7,6 +7,8 @@ import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.transform.IQTreeTransformer;
+import it.unibz.inf.ontop.iq.transform.IQTreeVariableGeneratorTransformer;
+import it.unibz.inf.ontop.iq.transform.impl.AbstractDelegatingIQTreeVariableGeneratorTransformer;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
@@ -15,7 +17,7 @@ import javax.inject.Inject;
 /**
 Used to get rid of limits in sub-queries that are not necessary, for dialects like Denodo, that don't allow limits in sub-queries.
  */
-public class EliminateLimitsFromSubQueriesNormalizer implements DialectExtraNormalizer {
+public class EliminateLimitsFromSubQueriesNormalizer extends AbstractDelegatingIQTreeVariableGeneratorTransformer implements DialectExtraNormalizer {
 
     private final IntermediateQueryFactory iqFactory;
     private final IQTreeTransformer parentTransformer;
@@ -27,8 +29,8 @@ public class EliminateLimitsFromSubQueriesNormalizer implements DialectExtraNorm
     }
 
     @Override
-    public IQTree transform(IQTree tree, VariableGenerator variableGenerator) {
-        return parentTransformer.transform(tree);
+    protected IQTreeVariableGeneratorTransformer getTransformer() {
+        return IQTreeVariableGeneratorTransformer.of2(parentTransformer);
     }
 
     private class Transformer extends DefaultRecursiveIQTreeVisitingTransformer {

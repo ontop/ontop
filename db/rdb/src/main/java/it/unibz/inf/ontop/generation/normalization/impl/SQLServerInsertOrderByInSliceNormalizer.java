@@ -9,36 +9,33 @@ import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
+import it.unibz.inf.ontop.iq.transform.IQTreeVariableGeneratorTransformer;
+import it.unibz.inf.ontop.iq.transform.impl.DefaultDelegatingIQTreeVariableGeneratorTransformer;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
 import it.unibz.inf.ontop.iq.visit.impl.DefaultRecursiveIQTreeVisitingTransformerWithVariableGenerator;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
-public class SQLServerInsertOrderByInSliceNormalizer implements DialectExtraNormalizer {
-
-    private final SubstitutionFactory substitutionFactory;
-    private final TermFactory termFactory;
-    private final IntermediateQueryFactory iqFactory;
-    private final IQTreeTools iqTreeTools;
+public class SQLServerInsertOrderByInSliceNormalizer extends DefaultDelegatingIQTreeVariableGeneratorTransformer implements DialectExtraNormalizer {
 
     @Inject
     protected SQLServerInsertOrderByInSliceNormalizer(CoreSingletons coreSingletons) {
-        this.substitutionFactory = coreSingletons.getSubstitutionFactory();
-        this.termFactory = coreSingletons.getTermFactory();
-        this.iqFactory = coreSingletons.getIQFactory();
-        this.iqTreeTools = coreSingletons.getIQTreeTools();
+        super(IQTreeVariableGeneratorTransformer.of(
+                vg -> new Transformer(vg, coreSingletons)));
     }
 
-    @Override
-    public IQTree transform(IQTree tree, VariableGenerator variableGenerator) {
-        return tree.acceptVisitor(new Transformer(variableGenerator));
-    }
+    private static class Transformer extends DefaultRecursiveIQTreeVisitingTransformerWithVariableGenerator {
 
-    private class Transformer extends DefaultRecursiveIQTreeVisitingTransformerWithVariableGenerator {
+        private final SubstitutionFactory substitutionFactory;
+        private final TermFactory termFactory;
+        private final IQTreeTools iqTreeTools;
 
-        Transformer(VariableGenerator variableGenerator) {
-            super(SQLServerInsertOrderByInSliceNormalizer.this.iqFactory,  variableGenerator);
+        Transformer(VariableGenerator variableGenerator, CoreSingletons coreSingletons) {
+            super(coreSingletons.getIQFactory(), variableGenerator);
+            this.substitutionFactory = coreSingletons.getSubstitutionFactory();
+            this.termFactory = coreSingletons.getTermFactory();
+            this.iqTreeTools = coreSingletons.getIQTreeTools();
         }
 
         @Override

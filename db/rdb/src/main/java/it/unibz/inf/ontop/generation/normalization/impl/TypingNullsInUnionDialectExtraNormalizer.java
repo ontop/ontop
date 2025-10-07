@@ -24,11 +24,9 @@ import static it.unibz.inf.ontop.iq.impl.IQTreeTools.UnaryIQTreeDecomposition;
 public class TypingNullsInUnionDialectExtraNormalizer extends DefaultDelegatingIQTreeVariableGeneratorTransformer implements DialectExtraNormalizer {
 
     @Inject
-    protected TypingNullsInUnionDialectExtraNormalizer(CoreSingletons coreSingletons,
-                                                       SingleTermTypeExtractor uniqueTermTypeExtractor) {
+    protected TypingNullsInUnionDialectExtraNormalizer(CoreSingletons coreSingletons, SingleTermTypeExtractor uniqueTermTypeExtractor) {
         super(new Transformer(coreSingletons, uniqueTermTypeExtractor)::transform);
     }
-
 
     private static class Transformer extends AbstractTypingNullsTransformer {
         private final SingleTermTypeExtractor uniqueTermTypeExtractor;

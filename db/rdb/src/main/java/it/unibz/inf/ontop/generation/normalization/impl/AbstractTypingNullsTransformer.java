@@ -18,7 +18,7 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import java.util.Optional;
 import java.util.function.Function;
 
-public abstract class AbstractTypingNullsTransformer extends DefaultRecursiveIQTreeVisitingTransformer {
+/*public*/ abstract class AbstractTypingNullsTransformer extends DefaultRecursiveIQTreeVisitingTransformer {
 
     protected final IQTreeTools iqTreeTools;
     protected final TermFactory termFactory;
@@ -29,11 +29,11 @@ public abstract class AbstractTypingNullsTransformer extends DefaultRecursiveIQT
         this.termFactory = coreSingletons.getTermFactory();
     }
 
-    protected ImmutableSet<Variable> extractNullVariables(ConstructionNode constructionNode) {
+    protected final ImmutableSet<Variable> extractNullVariables(ConstructionNode constructionNode) {
         return constructionNode.getSubstitution().getPreImage(ImmutableTerm::isNull);
     }
 
-    protected ImmutableMap<Variable, ImmutableFunctionalTerm> extractTypedNullMap(ImmutableSet<Variable> nullVariables, Function<Variable, Optional<DBTermType>> typeMapper) {
+    protected final ImmutableMap<Variable, ImmutableFunctionalTerm> extractTypedNullMap(ImmutableSet<Variable> nullVariables, Function<Variable, Optional<DBTermType>> typeMapper) {
         return nullVariables.stream()
                 .map(v -> typeMapper.apply(v)
                         .map(termFactory::getTypedNull)
@@ -45,7 +45,7 @@ public abstract class AbstractTypingNullsTransformer extends DefaultRecursiveIQT
     /**
      * Replaces NULL bindings in top construction nodes if a type is defined
      */
-    protected IQTree updateSubTree(IQTree child, ImmutableMap<Variable, ImmutableFunctionalTerm> typedNullMap) {
+    protected final IQTree updateSubTree(IQTree child, ImmutableMap<Variable, ImmutableFunctionalTerm> typedNullMap) {
         var construction = IQTreeTools.UnaryIQTreeDecomposition.of(child, ConstructionNode.class);
         if (construction.isPresent()) {
             return iqFactory.createUnaryIQTree(

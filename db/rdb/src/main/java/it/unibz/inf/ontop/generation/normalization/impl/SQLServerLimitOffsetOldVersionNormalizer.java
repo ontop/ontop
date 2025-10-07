@@ -9,6 +9,8 @@ import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
+import it.unibz.inf.ontop.iq.transform.IQTreeVariableGeneratorTransformer;
+import it.unibz.inf.ontop.iq.transform.impl.AbstractDelegatingIQTreeVariableGeneratorTransformer;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
 import it.unibz.inf.ontop.iq.visit.impl.DefaultRecursiveIQTreeVisitingTransformerWithVariableGenerator;
 import it.unibz.inf.ontop.model.term.*;
@@ -25,7 +27,7 @@ import static it.unibz.inf.ontop.iq.impl.IQTreeTools.UnaryIQTreeDecomposition;
 /**
  * SQL Server extra normalizer which can handle limit and offset for Microsoft SQL Server 2000 through 2008
  */
-public class SQLServerLimitOffsetOldVersionNormalizer implements DialectExtraNormalizer {
+public class SQLServerLimitOffsetOldVersionNormalizer extends AbstractDelegatingIQTreeVariableGeneratorTransformer implements DialectExtraNormalizer {
 
     private final IntermediateQueryFactory iqFactory;
     private final SubstitutionFactory substitutionFactory;
@@ -47,12 +49,8 @@ public class SQLServerLimitOffsetOldVersionNormalizer implements DialectExtraNor
     }
 
     @Override
-    public IQTree transform(IQTree tree, VariableGenerator variableGenerator) {
-        return getTransformer(variableGenerator).transform(tree);
-    }
-
-    private Transformer getTransformer(VariableGenerator variableGenerator) {
-        return new Transformer(variableGenerator);
+    protected IQTreeVariableGeneratorTransformer getTransformer() {
+        return IQTreeVariableGeneratorTransformer.of(Transformer::new);
     }
 
     private class Transformer extends DefaultRecursiveIQTreeVisitingTransformerWithVariableGenerator {

@@ -3,11 +3,13 @@ package it.unibz.inf.ontop.generation.normalization.impl;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
 import it.unibz.inf.ontop.generation.normalization.DialectExtraNormalizer;
-import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
+import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.FlattenNode;
+import it.unibz.inf.ontop.iq.transform.IQTreeVariableGeneratorTransformer;
+import it.unibz.inf.ontop.iq.transform.impl.DefaultDelegatingIQTreeVariableGeneratorTransformer;
 import it.unibz.inf.ontop.iq.visit.impl.DefaultRecursiveIQTreeVisitingTransformerWithVariableGenerator;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.Substitution;
@@ -23,32 +25,24 @@ import java.util.stream.Stream;
  * These quotation marks have to be removed with an additional construction.
  */
 @Singleton
-public class UnquoteFlattenResultsNormalizer implements DialectExtraNormalizer {
-
-    private final TermFactory termFactory;
-    private final SubstitutionFactory substitutionFactory;
-    private final IntermediateQueryFactory iqFactory;
-    private final IQTreeTools iqTreeTools;
+public class UnquoteFlattenResultsNormalizer extends DefaultDelegatingIQTreeVariableGeneratorTransformer implements DialectExtraNormalizer {
 
     @Inject
-    protected UnquoteFlattenResultsNormalizer(IntermediateQueryFactory iqFactory,
-                                              SubstitutionFactory substitutionFactory,
-                                              TermFactory termFactory,
-                                              IQTreeTools iqTreeTools) {
-        this.iqFactory = iqFactory;
-        this.termFactory = termFactory;
-        this.substitutionFactory = substitutionFactory;
-        this.iqTreeTools = iqTreeTools;
+    protected UnquoteFlattenResultsNormalizer(CoreSingletons coreSingletons) {
+        super(IQTreeVariableGeneratorTransformer.of(
+                vg -> new Transformer(vg, coreSingletons)));
     }
 
-    @Override
-    public IQTree transform(IQTree tree, VariableGenerator variableGenerator) {
-        return tree.acceptVisitor(new Transformer(variableGenerator));
-    }
+    private static class Transformer extends DefaultRecursiveIQTreeVisitingTransformerWithVariableGenerator {
+        private final TermFactory termFactory;
+        private final SubstitutionFactory substitutionFactory;
+        private final IQTreeTools iqTreeTools;
 
-    private class Transformer extends DefaultRecursiveIQTreeVisitingTransformerWithVariableGenerator {
-        Transformer(VariableGenerator variableGenerator) {
-            super(UnquoteFlattenResultsNormalizer.this.iqFactory, variableGenerator);
+        Transformer(VariableGenerator variableGenerator, CoreSingletons coreSingletons) {
+            super(coreSingletons.getIQFactory(), variableGenerator);
+            this.termFactory = coreSingletons.getTermFactory();
+            this.substitutionFactory = coreSingletons.getSubstitutionFactory();
+            this.iqTreeTools = coreSingletons.getIQTreeTools();
         }
 
         /**
