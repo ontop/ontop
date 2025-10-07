@@ -27,12 +27,11 @@ public class SplitIsNullOverConjunctionDisjunctionNormalizer extends DefaultDele
 
     @Inject
     protected SplitIsNullOverConjunctionDisjunctionNormalizer(CoreSingletons coreSingletons) {
-        super(new ExpressionTransformer(coreSingletons).treeTransformer());
+        super(new TermTransformer(coreSingletons).treeTransformer());
     }
 
-    private static class ExpressionTransformer extends AbstractTermTransformer {
-
-        ExpressionTransformer(CoreSingletons coreSingletons) {
+    private static class TermTransformer extends AbstractTermTransformer {
+        TermTransformer(CoreSingletons coreSingletons) {
             super(coreSingletons.getIQFactory(), coreSingletons.getTermFactory());
         }
 

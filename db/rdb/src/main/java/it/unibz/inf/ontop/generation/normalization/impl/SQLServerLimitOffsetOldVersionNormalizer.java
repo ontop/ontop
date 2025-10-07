@@ -38,8 +38,8 @@ public class SQLServerLimitOffsetOldVersionNormalizer extends AbstractDelegating
 
     @Inject
     protected SQLServerLimitOffsetOldVersionNormalizer(DatabaseInfoSupplier databaseInfoSupplier,
-                                                     DBFunctionSymbolFactory dbFunctionSymbolFactory,
-                                                     CoreSingletons coreSingletons) {
+                                                       DBFunctionSymbolFactory dbFunctionSymbolFactory,
+                                                       CoreSingletons coreSingletons) {
         this.substitutionFactory = coreSingletons.getSubstitutionFactory();
         this.termFactory = coreSingletons.getTermFactory();
         this.databaseInfoSupplier = databaseInfoSupplier;

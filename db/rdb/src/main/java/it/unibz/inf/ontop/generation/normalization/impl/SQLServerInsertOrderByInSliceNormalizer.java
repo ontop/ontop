@@ -26,7 +26,6 @@ public class SQLServerInsertOrderByInSliceNormalizer extends DefaultDelegatingIQ
     }
 
     private static class Transformer extends DefaultRecursiveIQTreeVisitingTransformerWithVariableGenerator {
-
         private final SubstitutionFactory substitutionFactory;
         private final TermFactory termFactory;
         private final IQTreeTools iqTreeTools;

@@ -33,7 +33,6 @@ public class ReplaceProvenanceConstantByNonGroundTermNormalizer extends DefaultD
     }
 
     private static class Transformer extends DefaultRecursiveIQTreeVisitingTransformer {
-
         private final TermFactory termFactory;
         private final IQTreeTools iqTreeTools;
 

@@ -32,7 +32,6 @@ public class SubQueryFromComplexJoinExtraNormalizer extends DefaultDelegatingIQT
     }
 
     private static class Transformer extends DefaultRecursiveIQTreeVisitingTransformer {
-
         Transformer(IntermediateQueryFactory iqFactory) {
             super(iqFactory);
         }

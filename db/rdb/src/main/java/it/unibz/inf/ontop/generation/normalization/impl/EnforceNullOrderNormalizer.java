@@ -20,13 +20,13 @@ public class EnforceNullOrderNormalizer extends DefaultDelegatingIQTreeVariableG
 
     @Inject
     protected EnforceNullOrderNormalizer(CoreSingletons coreSingletons) {
-        super(new EnforceNullOrderIQTreeVisitingTransformer(coreSingletons).treeTransformer());
+        super(new Transformer(coreSingletons).treeTransformer());
     }
 
-    private static class EnforceNullOrderIQTreeVisitingTransformer extends DefaultQueryNodeTransformer {
+    private static class Transformer extends DefaultQueryNodeTransformer {
         private final TermFactory termFactory;
 
-        EnforceNullOrderIQTreeVisitingTransformer(CoreSingletons coreSingletons) {
+        Transformer(CoreSingletons coreSingletons) {
             super(coreSingletons.getIQFactory());
             this.termFactory = coreSingletons.getTermFactory();
         }
