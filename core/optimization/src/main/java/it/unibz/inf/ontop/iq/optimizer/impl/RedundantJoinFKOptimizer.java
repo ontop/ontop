@@ -13,7 +13,7 @@ import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.iq.node.InnerJoinNode;
 import it.unibz.inf.ontop.iq.transform.IQTreeVariableGeneratorTransformer;
-import it.unibz.inf.ontop.iq.transform.impl.DelegatingIQTreeVariableGeneratorTransformer;
+import it.unibz.inf.ontop.iq.transform.impl.AbstractDelegatingIQTreeVariableGeneratorTransformer;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
@@ -23,7 +23,7 @@ import javax.inject.Inject;
 import java.util.*;
 import java.util.stream.Stream;
 
-public class RedundantJoinFKOptimizer extends DelegatingIQTreeVariableGeneratorTransformer implements IQTreeVariableGeneratorTransformer {
+public class RedundantJoinFKOptimizer extends AbstractDelegatingIQTreeVariableGeneratorTransformer implements IQTreeVariableGeneratorTransformer {
 
     private final IQTreeTools iqTreeTools;
     private final TermFactory termFactory;

@@ -13,7 +13,7 @@ import it.unibz.inf.ontop.iq.impl.NaryIQTreeTools;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.UnionNode;
 import it.unibz.inf.ontop.iq.transform.IQTreeVariableGeneratorTransformer;
-import it.unibz.inf.ontop.iq.transform.impl.DelegatingIQTreeVariableGeneratorTransformer;
+import it.unibz.inf.ontop.iq.transform.impl.AbstractDelegatingIQTreeVariableGeneratorTransformer;
 import it.unibz.inf.ontop.iq.visit.impl.DefaultRecursiveIQTreeVisitingTransformerWithVariableGenerator;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
@@ -28,7 +28,7 @@ import static it.unibz.inf.ontop.iq.impl.IQTreeTools.UnaryIQTreeDecomposition;
  * <p>
  * This normalization may be needed for datalog-based mapping optimizers.
  */
-public class UnionFlattenerImpl extends DelegatingIQTreeVariableGeneratorTransformer implements UnionFlattener {
+public class UnionFlattenerImpl extends AbstractDelegatingIQTreeVariableGeneratorTransformer implements UnionFlattener {
 
     private final IntermediateQueryFactory iqFactory;
     private final IQTreeTools iqTreeTools;

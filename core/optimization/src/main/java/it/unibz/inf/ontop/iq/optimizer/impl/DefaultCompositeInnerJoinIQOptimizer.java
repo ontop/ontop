@@ -2,11 +2,11 @@ package it.unibz.inf.ontop.iq.optimizer.impl;
 
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.optimizer.*;
-import it.unibz.inf.ontop.iq.transform.impl.CompositeIQTreeVariableGeneratorTransformer;
+import it.unibz.inf.ontop.iq.transform.impl.DefaultDelegatingIQTreeVariableGeneratorTransformer;
 
 import javax.inject.Inject;
 
-public class DefaultCompositeInnerJoinIQOptimizer extends CompositeIQTreeVariableGeneratorTransformer implements InnerJoinIQOptimizer {
+public class DefaultCompositeInnerJoinIQOptimizer extends DefaultDelegatingIQTreeVariableGeneratorTransformer implements InnerJoinIQOptimizer {
 
     @Inject
     private DefaultCompositeInnerJoinIQOptimizer(

@@ -2,11 +2,13 @@ package it.unibz.inf.ontop.generation.normalization.impl;
 
 import com.google.common.collect.Maps;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
+import it.unibz.inf.ontop.generation.normalization.DialectExtraNormalizer;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.OrderByNode;
+import it.unibz.inf.ontop.iq.transform.impl.DefaultDelegatingIQTreeVariableGeneratorTransformer;
 import it.unibz.inf.ontop.iq.transform.node.DefaultQueryNodeTransformer;
 import it.unibz.inf.ontop.model.term.*;
 
@@ -18,7 +20,7 @@ import java.util.stream.Stream;
  * For DBMS such as SQLServer and Oracle that do not expect boolean expressions to be projected
  */
 @Singleton
-public class WrapProjectedOrOrderByExpressionNormalizer extends DialectExtraNormalizerBase {
+public class WrapProjectedOrOrderByExpressionNormalizer extends DefaultDelegatingIQTreeVariableGeneratorTransformer implements DialectExtraNormalizer {
 
     @Inject
     protected WrapProjectedOrOrderByExpressionNormalizer(CoreSingletons coreSingletons) {

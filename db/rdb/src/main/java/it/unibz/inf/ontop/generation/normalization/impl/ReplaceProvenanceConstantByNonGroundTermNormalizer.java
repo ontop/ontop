@@ -2,12 +2,14 @@ package it.unibz.inf.ontop.generation.normalization.impl;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import it.unibz.inf.ontop.generation.normalization.DialectExtraNormalizer;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.iq.BinaryNonCommutativeIQTree;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.LeftJoinNode;
+import it.unibz.inf.ontop.iq.transform.impl.DefaultDelegatingIQTreeVariableGeneratorTransformer;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
 import it.unibz.inf.ontop.model.term.DBConstant;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
@@ -23,7 +25,7 @@ import static it.unibz.inf.ontop.iq.impl.IQTreeTools.UnaryIQTreeDecomposition;
  * (causing a MINUS encoded with a LJ and filter is null not to work)
  */
 @Singleton
-public class ReplaceProvenanceConstantByNonGroundTermNormalizer extends DialectExtraNormalizerBase {
+public class ReplaceProvenanceConstantByNonGroundTermNormalizer extends DefaultDelegatingIQTreeVariableGeneratorTransformer implements DialectExtraNormalizer {
 
     @Inject
     protected ReplaceProvenanceConstantByNonGroundTermNormalizer(CoreSingletons coreSingletons) {

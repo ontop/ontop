@@ -2,10 +2,12 @@ package it.unibz.inf.ontop.generation.normalization.impl;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
+import it.unibz.inf.ontop.generation.normalization.DialectExtraNormalizer;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.ValuesNode;
+import it.unibz.inf.ontop.iq.transform.impl.DefaultDelegatingIQTreeVariableGeneratorTransformer;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
@@ -18,7 +20,7 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
  *
  * @author Lukas Sundqvist
  */
-public class ConvertValuesToUnionNormalizer extends DialectExtraNormalizerBase {
+public class ConvertValuesToUnionNormalizer extends DefaultDelegatingIQTreeVariableGeneratorTransformer implements DialectExtraNormalizer {
 
     @Inject
     protected ConvertValuesToUnionNormalizer(CoreSingletons coreSingletons) {

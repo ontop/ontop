@@ -17,7 +17,7 @@ import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.optimizer.TermTypeTermLifter;
 import it.unibz.inf.ontop.iq.tools.TypeConstantDictionary;
 import it.unibz.inf.ontop.iq.transform.IQTreeVariableGeneratorTransformer;
-import it.unibz.inf.ontop.iq.transform.impl.DelegatingIQTreeVariableGeneratorTransformer;
+import it.unibz.inf.ontop.iq.transform.impl.AbstractDelegatingIQTreeVariableGeneratorTransformer;
 import it.unibz.inf.ontop.iq.visit.impl.DefaultRecursiveIQTreeVisitingTransformerWithVariableGenerator;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
@@ -36,7 +36,7 @@ import java.util.stream.Stream;
 import static it.unibz.inf.ontop.iq.impl.IQTreeTools.UnaryIQTreeDecomposition;
 
 @Singleton
-public class TermTypeTermLifterImpl extends DelegatingIQTreeVariableGeneratorTransformer implements TermTypeTermLifter {
+public class TermTypeTermLifterImpl extends AbstractDelegatingIQTreeVariableGeneratorTransformer implements TermTypeTermLifter {
 
     private final IntermediateQueryFactory iqFactory;
     private final TermFactory termFactory;

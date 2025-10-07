@@ -5,6 +5,7 @@ import com.google.common.collect.Maps;
 import it.unibz.inf.ontop.generation.normalization.DialectExtraNormalizer;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.iq.IQTree;
+import it.unibz.inf.ontop.iq.transform.impl.DefaultDelegatingIQTreeVariableGeneratorTransformer;
 import it.unibz.inf.ontop.iq.type.impl.AbstractTermTransformer;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
@@ -22,7 +23,7 @@ CASE WHEN <expr1> OR|AND <expr2> THEN FALSE[TRUE] WHEN NOT <expr1> OR|AND <expr2
 for dialects such as Denodo that do not allow IS [NOT] NULL to be executed on conjunctions/disjunctions.
  */
 @Singleton
-public class SplitIsNullOverConjunctionDisjunctionNormalizer extends DialectExtraNormalizerBase implements DialectExtraNormalizer {
+public class SplitIsNullOverConjunctionDisjunctionNormalizer extends DefaultDelegatingIQTreeVariableGeneratorTransformer implements DialectExtraNormalizer {
 
     @Inject
     protected SplitIsNullOverConjunctionDisjunctionNormalizer(CoreSingletons coreSingletons) {

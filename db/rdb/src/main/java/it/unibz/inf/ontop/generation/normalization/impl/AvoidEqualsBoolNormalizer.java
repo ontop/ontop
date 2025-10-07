@@ -2,8 +2,10 @@ package it.unibz.inf.ontop.generation.normalization.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
+import it.unibz.inf.ontop.generation.normalization.DialectExtraNormalizer;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.iq.IQTree;
+import it.unibz.inf.ontop.iq.transform.impl.DefaultDelegatingIQTreeVariableGeneratorTransformer;
 import it.unibz.inf.ontop.iq.type.impl.AbstractTermTransformer;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
@@ -17,7 +19,7 @@ import java.util.Optional;
  * the generated queries under certain conditions. This normalizer searches such cases and replaces them by just `<expression>`.
  * `<expression> = false` is handled similarly.
  */
-public class AvoidEqualsBoolNormalizer extends DialectExtraNormalizerBase {
+public class AvoidEqualsBoolNormalizer extends DefaultDelegatingIQTreeVariableGeneratorTransformer implements DialectExtraNormalizer {
 
     @Inject
     protected AvoidEqualsBoolNormalizer(CoreSingletons coreSingletons) {

@@ -9,7 +9,7 @@ import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.iq.transform.IQTreeVariableGeneratorTransformer;
-import it.unibz.inf.ontop.iq.transform.impl.DelegatingIQTreeVariableGeneratorTransformer;
+import it.unibz.inf.ontop.iq.transform.impl.DefaultDelegatingIQTreeVariableGeneratorTransformer;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
@@ -24,21 +24,14 @@ import java.util.stream.Stream;
 /**
  * TODO: explain
  */
-public class ArgumentTransferInnerJoinFDIQOptimizer extends DelegatingIQTreeVariableGeneratorTransformer implements IQTreeVariableGeneratorTransformer {
-
-    private final IQTreeVariableGeneratorTransformer transformer;
+public class ArgumentTransferInnerJoinFDIQOptimizer extends DefaultDelegatingIQTreeVariableGeneratorTransformer implements IQTreeVariableGeneratorTransformer {
 
     @Inject
     protected ArgumentTransferInnerJoinFDIQOptimizer(CoreSingletons coreSingletons) {
-        this.transformer = IQTreeVariableGeneratorTransformer.of(
+        super(IQTreeVariableGeneratorTransformer.of(
                 vg -> new DefaultRecursiveIQTreeVisitingInnerJoinTransformer(
                         coreSingletons.getIQFactory(),
-                        new SelfJoinFDSimplifier(coreSingletons, vg)));
-    }
-
-    @Override
-    protected IQTreeVariableGeneratorTransformer getTransformer() {
-        return transformer;
+                        new SelfJoinFDSimplifier(coreSingletons, vg))));
     }
 
     private static class SelfJoinFDSimplifier extends AbstractSelfJoinSimplifier<FunctionalDependency> {

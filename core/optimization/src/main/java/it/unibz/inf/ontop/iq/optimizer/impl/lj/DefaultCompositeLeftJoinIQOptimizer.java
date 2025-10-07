@@ -3,9 +3,9 @@ package it.unibz.inf.ontop.iq.optimizer.impl.lj;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.optimizer.LeftJoinIQOptimizer;
-import it.unibz.inf.ontop.iq.transform.impl.CompositeIQTreeVariableGeneratorTransformer;
+import it.unibz.inf.ontop.iq.transform.impl.DefaultDelegatingIQTreeVariableGeneratorTransformer;
 
-public class DefaultCompositeLeftJoinIQOptimizer extends CompositeIQTreeVariableGeneratorTransformer implements LeftJoinIQOptimizer {
+public class DefaultCompositeLeftJoinIQOptimizer extends DefaultDelegatingIQTreeVariableGeneratorTransformer implements LeftJoinIQOptimizer {
 
     @Inject
     private DefaultCompositeLeftJoinIQOptimizer(

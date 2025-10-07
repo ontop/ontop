@@ -15,7 +15,7 @@ import it.unibz.inf.ontop.iq.impl.NaryIQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.transform.IQTreeVariableGeneratorTransformer;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
-import it.unibz.inf.ontop.iq.transform.impl.DelegatingIQTreeVariableGeneratorTransformer;
+import it.unibz.inf.ontop.iq.transform.impl.AbstractDelegatingIQTreeVariableGeneratorTransformer;
 import it.unibz.inf.ontop.iq.transformer.ExplicitEqualityTransformer;
 import it.unibz.inf.ontop.iq.visit.impl.DefaultRecursiveIQTreeVisitingTransformerWithVariableGenerator;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
@@ -36,7 +36,7 @@ import java.util.stream.Stream;
 import static it.unibz.inf.ontop.iq.impl.IQTreeTools.UnaryIQTreeDecomposition;
 
 
-public class ExplicitEqualityTransformerImpl extends DelegatingIQTreeVariableGeneratorTransformer implements ExplicitEqualityTransformer {
+public class ExplicitEqualityTransformerImpl extends AbstractDelegatingIQTreeVariableGeneratorTransformer implements ExplicitEqualityTransformer {
 
     private final IntermediateQueryFactory iqFactory;
     private final AtomFactory atomFactory;

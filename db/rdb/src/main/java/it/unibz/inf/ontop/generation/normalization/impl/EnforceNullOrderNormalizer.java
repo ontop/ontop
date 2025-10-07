@@ -1,10 +1,12 @@
 package it.unibz.inf.ontop.generation.normalization.impl;
 
 import com.google.inject.Inject;
+import it.unibz.inf.ontop.generation.normalization.DialectExtraNormalizer;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.node.OrderByNode;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
+import it.unibz.inf.ontop.iq.transform.impl.DefaultDelegatingIQTreeVariableGeneratorTransformer;
 import it.unibz.inf.ontop.iq.transform.node.DefaultQueryNodeTransformer;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.NonGroundTerm;
@@ -14,7 +16,7 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-public class EnforceNullOrderNormalizer extends DialectExtraNormalizerBase {
+public class EnforceNullOrderNormalizer extends DefaultDelegatingIQTreeVariableGeneratorTransformer implements DialectExtraNormalizer {
 
     @Inject
     protected EnforceNullOrderNormalizer(CoreSingletons coreSingletons) {

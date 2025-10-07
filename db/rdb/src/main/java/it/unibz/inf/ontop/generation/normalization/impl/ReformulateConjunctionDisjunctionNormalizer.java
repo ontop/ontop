@@ -2,8 +2,10 @@ package it.unibz.inf.ontop.generation.normalization.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
+import it.unibz.inf.ontop.generation.normalization.DialectExtraNormalizer;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.iq.IQTree;
+import it.unibz.inf.ontop.iq.transform.impl.DefaultDelegatingIQTreeVariableGeneratorTransformer;
 import it.unibz.inf.ontop.iq.type.impl.AbstractTermTransformer;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
@@ -16,7 +18,7 @@ import java.util.Optional;
  * The CDataDynamoDB driver seems to be struggling with the boolean operators AND and OR.
  * However, converting them to the opposite operators using De Morgan's law seems to fix these issues.
  */
-public class ReformulateConjunctionDisjunctionNormalizer extends DialectExtraNormalizerBase {
+public class ReformulateConjunctionDisjunctionNormalizer extends DefaultDelegatingIQTreeVariableGeneratorTransformer implements DialectExtraNormalizer {
 
     @Inject
     protected ReformulateConjunctionDisjunctionNormalizer(CoreSingletons coreSingletons) {

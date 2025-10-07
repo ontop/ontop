@@ -8,7 +8,7 @@ import it.unibz.inf.ontop.iq.impl.NaryIQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.transform.IQTreeTransformer;
 import it.unibz.inf.ontop.iq.transform.IQTreeVariableGeneratorTransformer;
-import it.unibz.inf.ontop.iq.transform.impl.DelegatingIQTreeVariableGeneratorTransformer;
+import it.unibz.inf.ontop.iq.transform.impl.AbstractDelegatingIQTreeVariableGeneratorTransformer;
 import it.unibz.inf.ontop.iq.visit.IQTreeVisitor;
 import it.unibz.inf.ontop.iq.visitor.RequiredExtensionalDataNodeExtractor;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
@@ -18,7 +18,7 @@ import javax.inject.Inject;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-public class BelowDistinctJoinWithClassUnionOptimizer extends DelegatingIQTreeVariableGeneratorTransformer implements IQTreeVariableGeneratorTransformer {
+public class BelowDistinctJoinWithClassUnionOptimizer extends AbstractDelegatingIQTreeVariableGeneratorTransformer implements IQTreeVariableGeneratorTransformer {
 
     private final IQTreeVariableGeneratorTransformer lookForDistinctTransformer;
     private final CoreSingletons coreSingletons;

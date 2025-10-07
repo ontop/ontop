@@ -4,7 +4,7 @@ import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.transform.IQTreeVariableGeneratorTransformer;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
-public abstract class DelegatingIQTreeVariableGeneratorTransformer implements IQTreeVariableGeneratorTransformer {
+public abstract class AbstractDelegatingIQTreeVariableGeneratorTransformer implements IQTreeVariableGeneratorTransformer {
 
     @Override
     public IQTree transform(IQTree tree, VariableGenerator variableGenerator) {
