@@ -64,22 +64,18 @@ public abstract class JoinLikeNodeImpl extends JoinOrFilterNodeImpl implements J
                         .map(v -> Maps.immutableEntry(v, r.getCondition(v))))
                 .collect(ImmutableCollectors.toMultimap());
 
-        ImmutableMap<Variable, ImmutableSet<Variable>> candidates = childRequirementMultimap.asMap().entrySet().stream()
-                .filter(e -> e.getValue().size() == 1)
+        VariableNonRequirement candidate = VariableNonRequirement.of(childRequirementMultimap.asMap().entrySet().stream()
+                .filter(e -> ImmutableSet.copyOf(e.getValue()).size() == 1)
                 .collect(ImmutableCollectors.toMap(
                         Map.Entry::getKey,
-                        e -> e.getValue().iterator().next()));
+                        e -> e.getValue().iterator().next())));
 
         // All variables are required
-        if (candidates.isEmpty())
-            return VariableNonRequirement.empty();
+        if (candidate.isEmpty())
+            return candidate;
 
-        ImmutableSet<Variable> notSharedVariables = NaryIQTreeTools.singleOccurrenceVariables(
-                children.stream().map(IQTree::getVariables).flatMap(Collection::stream));
-
-        return VariableNonRequirement.of(
-                candidates.entrySet().stream()
-                        .filter(e -> notSharedVariables.contains(e.getKey()))
-                        .collect(ImmutableCollectors.toMap()));
+        return candidate.withRequiredVariables(
+                NaryIQTreeTools.coOccurringVariablesStream(children)
+                        .collect(ImmutableCollectors.toSet()));
     }
 }

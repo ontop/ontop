@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.iq.request.impl;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import it.unibz.inf.ontop.iq.request.VariableNonRequirement;
 import it.unibz.inf.ontop.model.term.Variable;
@@ -40,11 +41,24 @@ public class VariableNonRequirementImpl implements VariableNonRequirement {
     }
 
     @Override
-    public VariableNonRequirement filter(BiPredicate<Variable, ImmutableSet<Variable>> predicate) {
+    public VariableNonRequirement withRequiredVariables(ImmutableSet<Variable> requiredVariables) {
+        if (isEmpty() || requiredVariables.isEmpty())
+            return this;
+
         return new VariableNonRequirementImpl(conditions.entrySet().stream()
-                .filter(e -> predicate.test(e.getKey(), e.getValue()))
+                .filter(e -> !requiredVariables.contains(e.getKey()))
                 .collect(ImmutableCollectors.toMap()));
     }
+
+    @Override
+    public VariableNonRequirement withExtendedCondition(ImmutableSet<Variable> variables, ImmutableSet<Variable> extendedCondition) {
+        return new VariableNonRequirementImpl(conditions.entrySet().stream()
+                .map(e -> variables.contains(e.getKey())
+                        ? Maps.immutableEntry(e.getKey(), Sets.union(e.getValue(), extendedCondition).immutableCopy())
+                        : e)
+                .collect(ImmutableCollectors.toMap()));
+    }
+
 
     @Override
     public VariableNonRequirement rename(InjectiveSubstitution<Variable> renamingSubstitution, SubstitutionFactory substitutionFactory) {
@@ -65,7 +79,7 @@ public class VariableNonRequirementImpl implements VariableNonRequirement {
                 Sets.difference(projectedVariables, requiredVariables),
                 getNotRequiredVariables()));
 
-        while(true) {
+        while (true) {
             var variablesToKeep = variablesToRemove.stream()
                     .filter(v -> !variablesToRemove.containsAll(getCondition(v)))
                     .collect(ImmutableCollectors.toSet());
@@ -80,14 +94,5 @@ public class VariableNonRequirementImpl implements VariableNonRequirement {
     @Override
     public boolean isEmpty() {
         return conditions.isEmpty();
-    }
-
-    @Override
-    public VariableNonRequirement transformConditions(BiFunction<Variable, ImmutableSet<Variable>, ImmutableSet<Variable>> fct) {
-        return new VariableNonRequirementImpl(
-                conditions.entrySet().stream()
-                        .collect(ImmutableCollectors.toMap(
-                                Map.Entry::getKey,
-                                e -> fct.apply(e.getKey(), e.getValue()))));
     }
 }

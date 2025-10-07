@@ -19,14 +19,9 @@ public interface VariableNonRequirement {
      */
     ImmutableSet<Variable> getCondition(Variable variable);
 
-    VariableNonRequirement filter(BiPredicate<Variable, ImmutableSet<Variable>> predicate);
+    VariableNonRequirement withRequiredVariables(ImmutableSet<Variable> requiredVariables);
 
-    default VariableNonRequirement withRequiredVariables(ImmutableSet<Variable> requiredVariables) {
-        if (isEmpty() || requiredVariables.isEmpty())
-            return this;
-
-        return filter((v, conds) -> !requiredVariables.contains(v));
-    }
+    VariableNonRequirement withExtendedCondition(ImmutableSet<Variable> variables, ImmutableSet<Variable> extendedCondition);
 
     VariableNonRequirement rename(InjectiveSubstitution<Variable> renamingSubstitution, SubstitutionFactory substitutionFactory);
 
@@ -34,8 +29,6 @@ public interface VariableNonRequirement {
                                                     ImmutableSet<Variable> requiredVariables);
 
     boolean isEmpty();
-
-    VariableNonRequirement transformConditions(BiFunction<Variable, ImmutableSet<Variable>, ImmutableSet<Variable>> fct);
 
     static VariableNonRequirement of(ImmutableSet<Variable> variables) {
         return new VariableNonRequirementImpl(variables);

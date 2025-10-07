@@ -528,15 +528,9 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
                 && rightChild.inferUniqueConstraints().stream()
                     .anyMatch(commonVariables::containsAll)) {
 
-            Set<Variable> rightSpecificNonRequiredVariables = Sets.intersection(
-                    rightSpecificVariables, nonRequirementBeforeFilter.getNotRequiredVariables());
-
-            ImmutableSet<Variable> filterVariables = getLocallyRequiredVariables();
-
-            return nonRequirementBeforeFilter.transformConditions(
-                    (v, conditions) -> filterVariables.contains(v)
-                            ? Sets.union(conditions, rightSpecificNonRequiredVariables).immutableCopy()
-                            : conditions);
+            return nonRequirementBeforeFilter.withExtendedCondition(
+                    getLocallyRequiredVariables(),
+                    Sets.intersection(rightSpecificVariables, nonRequirementBeforeFilter.getNotRequiredVariables()).immutableCopy());
         }
         else
             return nonRequirementBeforeFilter.withRequiredVariables(getLocallyRequiredVariables());

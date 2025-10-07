@@ -57,9 +57,9 @@ public class NotRequiredVariableRemoverImpl implements NotRequiredVariableRemove
      *
      */
     private class VariableRemoverTransformer extends DefaultRecursiveIQTreeVisitingTransformerWithVariableGenerator {
-        protected final ImmutableSet<Variable> variablesToRemove;
+        private final ImmutableSet<Variable> variablesToRemove;
 
-        private VariableRemoverTransformer(ImmutableSet<Variable> variablesToRemove, VariableGenerator variableGenerator) {
+        VariableRemoverTransformer(ImmutableSet<Variable> variablesToRemove, VariableGenerator variableGenerator) {
             super(NotRequiredVariableRemoverImpl.this.iqFactory, variableGenerator);
             this.variablesToRemove = variablesToRemove;
         }
@@ -84,11 +84,12 @@ public class NotRequiredVariableRemoverImpl implements NotRequiredVariableRemove
 
         @Override
         public IQTree transformValues(ValuesNode valuesNode) {
+            var variablesToKeep = getVariablesToKeep(valuesNode);
             return iqFactory.createValuesNode(
-                    Sets.difference(valuesNode.getVariables(), variablesToRemove).immutableCopy(),
+                    variablesToKeep,
                     valuesNode.getValueMaps().stream()
                             .map(m -> m.entrySet().stream()
-                                    .filter(e -> !variablesToRemove.contains(e.getKey()))
+                                    .filter(e -> variablesToKeep.contains(e.getKey()))
                                     .collect(ImmutableCollectors.toMap()))
                             .collect(ImmutableCollectors.toList()));
         }
@@ -146,23 +147,19 @@ public class NotRequiredVariableRemoverImpl implements NotRequiredVariableRemove
          * Transforms a given child only if necessary
          */
         private IQTree transformJoinChild(IQTree child) {
-            ImmutableSet<Variable> childVariablesToRemove = Sets.intersection(child.getVariables(), variablesToRemove).immutableCopy();
+            var childVariablesToRemove = Sets.intersection(child.getVariables(), variablesToRemove).immutableCopy();
             return childVariablesToRemove.isEmpty()
                     ? child
-                    : childVariablesToRemove.equals(variablesToRemove)
-                        ? transform(child)
-                        : getTransformer(childVariablesToRemove, variableGenerator).transform(child);
+                    : getTransformer(childVariablesToRemove, variableGenerator).transform(child);
         }
 
         @Override
         public IQTree transformUnion(NaryIQTree tree, UnionNode rootNode, ImmutableList<IQTree> children) {
-            ImmutableSet<Variable> variablesToKeep = getVariablesToKeep(tree);
-
-            if (variablesToKeep.equals(tree.getVariables()))
-                return tree.normalizeForOptimization(variableGenerator);
-
-            IQTree unionTree = iqTreeTools.createUnionTree(variablesToKeep,
-                    NaryIQTreeTools.transformChildren(children,
+            var variablesToKeep = getVariablesToKeep(tree);
+            IQTree unionTree = variablesToKeep.equals(tree.getVariables())
+                    ? tree
+                    : iqTreeTools.createUnionTree(variablesToKeep,
+                            NaryIQTreeTools.transformChildren(children,
                             c -> iqTreeTools.unaryIQTreeBuilder(variablesToKeep).build(c)));
 
             // New removal opportunities may appear in the subtree ("RECURSIVE")

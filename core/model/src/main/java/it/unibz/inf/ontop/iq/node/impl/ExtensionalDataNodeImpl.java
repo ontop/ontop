@@ -229,7 +229,7 @@ public class ExtensionalDataNodeImpl extends LeafIQTreeImpl implements Extension
 
 
     /**
-     * Only co-occuring variables are required.
+     * Only co-occurring variables are required.
      */
     @Override
     public synchronized VariableNonRequirement getVariableNonRequirement() {
