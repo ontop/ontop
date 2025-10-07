@@ -73,11 +73,6 @@ public class CardinalityInsensitiveLJPruningOptimizer extends AbstractDelegating
                                 Sets.union(variablesUsedByAncestors, additionalVariables).immutableCopy());
         }
 
-        @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
-        private ImmutableSet<Variable> getVariables(Optional<ImmutableExpression> optionalExpression) {
-            return optionalExpression.map(ImmutableFunctionalTerm::getVariables).orElseGet(ImmutableSet::of);
-        }
-
         public IQTree defaultTransformUnaryNode(UnaryIQTree tree) {
             return lookForDistinctTransformer.transform(tree);
         }
@@ -110,7 +105,7 @@ public class CardinalityInsensitiveLJPruningOptimizer extends AbstractDelegating
 
         @Override
         public IQTree transformFilter(UnaryIQTree tree, FilterNode rootNode, IQTree child) {
-            var newTransformer = getTransformer(getVariables(rootNode.getOptionalFilterCondition()));
+            var newTransformer = getTransformer(rootNode.getLocallyRequiredVariables());
             return transformUnaryNode(tree, rootNode, child, newTransformer::transform);
         }
 
@@ -128,8 +123,7 @@ public class CardinalityInsensitiveLJPruningOptimizer extends AbstractDelegating
                 return transform(leftChild);
 
             var commonVariables = BinaryNonCommutativeIQTreeTools.commonVariables(leftChild, rightChild);
-            var newTransformer = getTransformer(Sets.union(commonVariables,
-                    getVariables(rootNode.getOptionalFilterCondition())));
+            var newTransformer = getTransformer(Sets.union(commonVariables, rootNode.getLocallyRequiredVariables()));
 
             return transformBinaryNonCommutativeNode(tree, rootNode, leftChild, rightChild, newTransformer::transform);
         }
@@ -141,7 +135,7 @@ public class CardinalityInsensitiveLJPruningOptimizer extends AbstractDelegating
 
         @Override
         public IQTree transformInnerJoin(NaryIQTree tree, InnerJoinNode rootNode, ImmutableList<IQTree> children) {
-            var newTransformer = getTransformer(getVariables(rootNode.getOptionalFilterCondition()));
+            var newTransformer = getTransformer(rootNode.getLocallyRequiredVariables());
             return transformNaryCommutativeNode(tree, rootNode, children, newTransformer::transform);
         }
     }

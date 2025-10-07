@@ -5,6 +5,7 @@ import com.google.inject.Inject;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.*;
+import it.unibz.inf.ontop.iq.impl.BinaryNonCommutativeIQTreeTools;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.impl.NaryIQTreeTools;
 import it.unibz.inf.ontop.iq.impl.UnaryIQTreeBuilder;
@@ -134,7 +135,7 @@ public class BasicFlattenLifterImpl implements BasicFlattenLifter {
 
             // all variables involved in the joining condition are blocking
             ImmutableSet<Variable> blockingVars = Stream.concat(
-                    NaryIQTreeTools.coOccurringVariablesStream(ImmutableList.of(leftChild, rightChild)),
+                    BinaryNonCommutativeIQTreeTools.commonVariables(leftChild, rightChild).stream(),
                     rootNode.getLocallyRequiredVariables().stream())
                     .collect(ImmutableCollectors.toSet());
 
