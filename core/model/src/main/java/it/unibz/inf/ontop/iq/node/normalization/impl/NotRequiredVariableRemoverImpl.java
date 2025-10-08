@@ -119,12 +119,14 @@ public class NotRequiredVariableRemoverImpl implements NotRequiredVariableRemove
                     .normalizeForOptimization(variableGenerator);
         }
 
+        /**
+         * If filter condition involves a variable to remove, we are in the special case
+         *  where the right child can be removed
+         *
+         *  {@link it.unibz.inf.ontop.iq.node.impl.LeftJoinNodeImpl#computeVariableNonRequirement(IQTree, IQTree)}
+         */
         @Override
         public IQTree transformLeftJoin(BinaryNonCommutativeIQTree tree, LeftJoinNode rootNode, IQTree leftChild, IQTree rightChild) {
-            /*
-             * If filter condition involves a variable to remove, we are in the special case
-             *  where the right child can be removed (see LeftJoinNodeImpl.applyFilterToVariableNonRequirement)
-             */
             if (rootNode.getOptionalFilterCondition()
                     .filter(c -> c.getVariableStream().anyMatch(variablesToRemove::contains))
                     .isPresent())

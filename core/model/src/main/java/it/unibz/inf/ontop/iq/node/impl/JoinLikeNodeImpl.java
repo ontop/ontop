@@ -64,13 +64,16 @@ public abstract class JoinLikeNodeImpl extends JoinOrFilterNodeImpl implements J
                         .map(v -> Maps.immutableEntry(v, r.getCondition(v))))
                 .collect(ImmutableCollectors.toMultimap());
 
+        /*
+         * More than one condition means, in particular, that the variable is co-occurring
+         * and would be removed below anyway
+         */
         VariableNonRequirement candidate = VariableNonRequirement.of(childRequirementMultimap.asMap().entrySet().stream()
-                .filter(e -> ImmutableSet.copyOf(e.getValue()).size() == 1)
+                .filter(e -> e.getValue().size() == 1)
                 .collect(ImmutableCollectors.toMap(
                         Map.Entry::getKey,
                         e -> e.getValue().iterator().next())));
 
-        // All variables are required
         if (candidate.isEmpty())
             return candidate;
 

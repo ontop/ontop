@@ -518,15 +518,14 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
 
         /*
          * If the right child has no impact on cardinality (i.e. at most one match per row on the left),
-         *  it can potentially be eliminated if no right-specific variables is used above the LJ.
+         *  it can potentially be eliminated if no right-specific variable is used above the LJ.
          *
-         * Not required variables (before the LJ condition) that are involved in the LJ condition can be eliminated
-         *   if all the right-specific variables are removed too.
+         * Not required variables (before the LJ condition) that are involved in the LJ condition
+         * can be eliminated if all the right-specific variables are removed too.
          */
         Set<Variable> commonVariables = commonVariables(leftChild, rightChild);
-        if ((!commonVariables.isEmpty())
-                && rightChild.inferUniqueConstraints().stream()
-                    .anyMatch(commonVariables::containsAll)) {
+        if (!commonVariables.isEmpty()
+                && rightChild.inferUniqueConstraints().stream().anyMatch(commonVariables::containsAll)) {
 
             return nonRequirementBeforeFilter.withExtendedCondition(
                     getLocallyRequiredVariables(),
