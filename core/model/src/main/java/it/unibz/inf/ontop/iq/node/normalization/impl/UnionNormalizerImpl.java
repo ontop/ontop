@@ -392,16 +392,7 @@ public class UnionNormalizerImpl implements UnionNormalizer {
         Substitution<ImmutableTerm> normalizedEta = substitutionFactory.onImmutableTerms().unifierBuilder(tmpNormalizedSubstitution)
                 .unify(mergedSubstitution.stream(), Map.Entry::getKey, Map.Entry::getValue)
                 .build()
-                /*
-                 * Normalizes eta so as to avoid projected variables to be substituted by non-projected variables.
-                 *
-                 * This normalization can be understood as a way to select a MGU (eta) among a set of equivalent MGUs.
-                 * Such a "selection" is done a posteriori.
-                 *
-                 * Due to the current implementation of MGUS, the normalization should have no effect
-                 * (already in a normal form). Here for safety.
-                 */
-                .map(eta -> substitutionFactory.getPrioritizingRenaming(eta, projectedVariables).compose(eta))
+                .map(eta -> substitutionFactory.getNormalizedUnifier(substitutionFactory.onImmutableTerms(), eta, projectedVariables))
                 .orElseThrow(() -> new QueryNodeSubstitutionException("The descending substitution " + mergedSubstitution
                         + " is incompatible with " + tmpNormalizedSubstitution));
 

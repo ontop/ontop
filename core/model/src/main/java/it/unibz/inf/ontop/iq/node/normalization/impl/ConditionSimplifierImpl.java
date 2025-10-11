@@ -82,8 +82,7 @@ public class ConditionSimplifierImpl implements ConditionSimplifier {
         Substitution<NonFunctionalTerm> normalizedUnifier = substitutionFactory.onNonFunctionalTerms().unifierBuilder()
                 .unify(functionFreeEqualities.stream(), eq -> (NonFunctionalTerm)eq.getTerm(0), eq -> (NonFunctionalTerm)eq.getTerm(1))
                 .build()
-                // TODO: merge priorityRenaming with the orientate() method
-                .map(u -> substitutionFactory.onNonFunctionalTerms().compose(substitutionFactory.getPrioritizingRenaming(u, nonLiftableVariables), u))
+                .map(u -> substitutionFactory.getNormalizedUnifier(substitutionFactory.onNonFunctionalTerms(), u, nonLiftableVariables))
                 .orElseThrow(DownPropagation.InconsistentDownPropagationException::new);
 
         ImmutableSet<Variable> rejectedByChildrenVariablesEqToConstant = normalizedUnifier.getDomain().stream()

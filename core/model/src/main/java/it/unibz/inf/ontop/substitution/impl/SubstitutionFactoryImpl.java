@@ -79,18 +79,6 @@ public class SubstitutionFactoryImpl implements SubstitutionFactory {
     }
 
 
-
-
-    @Override
-    public InjectiveSubstitution<Variable> extractAnInjectiveVar2VarSubstitutionFromInverseOf(Substitution<Variable> substitution) {
-        return createSubstitution(substitution.inverseMap().entrySet().stream()
-                .collect(ImmutableCollectors.toMap(
-                        Map.Entry::getKey,
-                        e -> e.getValue().iterator().next())))
-                .injective();
-    }
-
-
     @Override
     public <T extends ImmutableTerm> Substitution<T> union(Substitution<? extends T> substitution1, Substitution<? extends T> substitution2) {
 
@@ -202,15 +190,19 @@ public class SubstitutionFactoryImpl implements SubstitutionFactory {
     }
 
     @Override
-    public InjectiveSubstitution<Variable> getPrioritizingRenaming(Substitution<?> substitution, ImmutableSet<Variable> priorityVariables) {
+    public InjectiveSubstitution<Variable> extractRenamingSubstitution(Substitution<?> substitution, ImmutableSet<Variable> priorityVariables)  {
         Substitution<Variable> renaming = substitution.builder()
-                .restrictDomainTo(priorityVariables)
                 .restrictRangeTo(Variable.class)
                 .restrictRange(t -> !priorityVariables.contains(t))
                 .build();
 
-        return extractAnInjectiveVar2VarSubstitutionFromInverseOf(renaming);
+        return createSubstitution(renaming.inverseMap().entrySet().stream()
+                .collect(ImmutableCollectors.toMap(
+                        Map.Entry::getKey,
+                        e -> e.getValue().iterator().next())))
+                .injective();
     }
+
 
     @Override
     public SubstitutionOperations<NonFunctionalTerm> onNonFunctionalTerms() {

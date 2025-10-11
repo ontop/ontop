@@ -48,8 +48,6 @@ public interface SubstitutionFactory {
 
 
 
-    InjectiveSubstitution<Variable> extractAnInjectiveVar2VarSubstitutionFromInverseOf(Substitution<Variable> substitution);
-
 
     InjectiveSubstitution<Variable> generateNotConflictingRenaming(VariableGenerator variableGenerator, ImmutableSet<Variable> variables);
 
@@ -79,8 +77,22 @@ public interface SubstitutionFactory {
 
     default Optional<Substitution<ImmutableTerm>> unify(ImmutableTerm t1, ImmutableTerm t2) { return onImmutableTerms().unify(t1, t2); }
 
-    InjectiveSubstitution<Variable> getPrioritizingRenaming(Substitution<?> substitution, ImmutableSet<Variable> priorityVariables);
+    InjectiveSubstitution<Variable> extractRenamingSubstitution(Substitution<?> substitution, ImmutableSet<Variable> priorityVariables);
 
+    /**
+     * Normalizes eta so as to avoid projected variables to be substituted by non-projected variables.
+     *
+     * This normalization can be understood as a way to select a MGU (eta) among a set of equivalent MGUs.
+     * Such a "selection" is done a posteriori.
+     *
+     * TODO: find the right place
+     */
+
+    default <T extends ImmutableTerm> Substitution<T> getNormalizedUnifier(SubstitutionOperations<T> operations, Substitution<T> eta, ImmutableSet<Variable> priorityVariables) {
+        Substitution<T> restriction = eta.restrictDomainTo(priorityVariables);
+        Substitution<T> renaming = (Substitution<T>) extractRenamingSubstitution(restriction, priorityVariables);
+        return operations.compose(renaming, eta);
+    }
 
 
     SubstitutionOperations<NonFunctionalTerm> onNonFunctionalTerms();

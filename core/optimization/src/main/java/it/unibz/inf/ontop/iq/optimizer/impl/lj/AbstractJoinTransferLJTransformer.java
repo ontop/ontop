@@ -7,7 +7,7 @@ import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.BinaryNonCommutativeIQTree;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.NaryIQTree;
-import it.unibz.inf.ontop.iq.DownPropagation;
+import it.unibz.inf.ontop.iq.impl.BinaryNonCommutativeIQTreeTools;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.node.impl.JoinOrFilterVariableNullabilityTools;
@@ -59,23 +59,20 @@ public abstract class AbstractJoinTransferLJTransformer extends AbstractLJTransf
                                                         IQTree rightChild) {
         ImmutableSet<ExtensionalDataNode> leftDataNodes = requiredDataNodeExtractor.extractSomeRequiredNodesFromLeft(leftChild)
                 .collect(ImmutableCollectors.toSet());
-
         if (leftDataNodes.isEmpty())
             return Optional.empty();
 
         ImmutableSet<ExtensionalDataNode> rightDataNodes = extractRightUniqueDataNodes(rightChild);
-
         if (rightDataNodes.isEmpty())
             return Optional.empty();
 
         ImmutableSet<SelectedNode> selectedRightDataNodes = selectRightDataNodesToTransfer(leftDataNodes, rightDataNodes);
-
         if (selectedRightDataNodes.isEmpty())
             return Optional.empty();
 
         Optional<IQTree> rightChildWithConstructionNodeMovedAside = moveTopConstructionNodeAside(rightChild);
         return rightChildWithConstructionNodeMovedAside
-                .map(newRightChild -> transfer(rootNode, leftChild, newRightChild, selectedRightDataNodes, rightChild.getVariables())
+                .map(newRightChild -> transfer(rootNode, leftChild, newRightChild, selectedRightDataNodes, BinaryNonCommutativeIQTreeTools.projectedVariables(leftChild, rightChild).immutableCopy())
                         .normalizeForOptimization(variableGenerator));
     }
 
@@ -124,7 +121,6 @@ public abstract class AbstractJoinTransferLJTransformer extends AbstractLJTransf
                                          ImmutableMap<Integer, ? extends VariableOrGroundTerm> rightArgumentMap) {
 
         ImmutableList<Integer> indexes = getIndexes(uniqueConstraint.getDeterminants().stream());
-                ;
         if (!rightArgumentMap.keySet().containsAll(indexes))
             return Optional.empty();
 
@@ -222,15 +218,13 @@ public abstract class AbstractJoinTransferLJTransformer extends AbstractLJTransf
 
                 return Optional.of(newTree);
             }
-            else
-                return Optional.empty();
+            return Optional.empty();
         }
-        else
-            return Optional.of(rightTree);
+        return Optional.of(rightTree);
     }
 
     private IQTree transfer(LeftJoinNode rootNode, IQTree leftChild, IQTree transformedRightChild,
-                            ImmutableSet<SelectedNode> selectedNodes, ImmutableSet<Variable> initialRightVariables) {
+                            ImmutableSet<SelectedNode> selectedNodes, ImmutableSet<Variable> projectedVariables) {
 
         if (selectedNodes.isEmpty())
             throw new IllegalArgumentException("selectedNodes must not be empty");
@@ -251,7 +245,7 @@ public abstract class AbstractJoinTransferLJTransformer extends AbstractLJTransf
                 .map(n -> n.getSubstitution(substitutionFactory))
                 .reduce(substitutionFactory.getSubstitution(), substitutionFactory::union);
 
-        InjectiveSubstitution<Variable> renamingSubstitution = extractRenamingSubstitution(replacementSubstitution, leftChild.getVariables());
+        InjectiveSubstitution<Variable> renamingSubstitution = substitutionFactory.extractRenamingSubstitution(replacementSubstitution, leftChild.getVariables());
 
         ImmutableSet<ImmutableExpression> equalities = extractEqualities(replacementSubstitution, leftChild.getVariables());
 
@@ -271,8 +265,6 @@ public abstract class AbstractJoinTransferLJTransformer extends AbstractLJTransf
                 newLeftChild, rightProvenance.getRightTree());
 
         Variable provenanceVariable = rightProvenance.getProvenanceVariable();
-        ImmutableSet<Variable> projectedVariables = Sets.union(leftChild.getVariables(), initialRightVariables)
-                .immutableCopy();
 
         ImmutableExpression condition = termFactory.getDBIsNotNull(provenanceVariable);
 
@@ -284,16 +276,6 @@ public abstract class AbstractJoinTransferLJTransformer extends AbstractLJTransf
         ConstructionNode constructionNode = iqFactory.createConstructionNode(projectedVariables, substitution);
 
         return iqFactory.createUnaryIQTree(constructionNode, newLeftJoinTree);
-    }
-
-    private InjectiveSubstitution<Variable> extractRenamingSubstitution(Substitution<VariableOrGroundTerm> replacementSub,
-                                                                              ImmutableSet<Variable> leftVariables) {
-
-        return substitutionFactory.extractAnInjectiveVar2VarSubstitutionFromInverseOf(
-                replacementSub.builder()
-                        .restrictRangeTo(Variable.class)
-                        .restrictRange(t -> !leftVariables.contains(t))
-                        .build());
     }
 
     private ImmutableSet<ImmutableExpression> extractEqualities(Substitution<VariableOrGroundTerm> replacementSub,

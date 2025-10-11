@@ -83,8 +83,7 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
         Substitution<NonFunctionalTerm> newEta = substitutionFactory.onNonFunctionalTerms().unifierBuilder(thetaC)
                 .unify(tauC.stream(), Map.Entry::getKey, Map.Entry::getValue)
                 .build()
-                .map(eta -> substitutionFactory.onNonFunctionalTerms()
-                        .compose(substitutionFactory.getPrioritizingRenaming(eta, projectedVariablesAfterTauC), eta))
+                .map(eta -> substitutionFactory.getNormalizedUnifier(substitutionFactory.onNonFunctionalTerms(), eta, projectedVariablesAfterTauC))
                 .orElseThrow(DownPropagation.InconsistentDownPropagationException::new);
 
         Substitution<NonFunctionalTerm> thetaCBar = newEta.restrictDomainTo(projectedVariablesAfterTauC);
