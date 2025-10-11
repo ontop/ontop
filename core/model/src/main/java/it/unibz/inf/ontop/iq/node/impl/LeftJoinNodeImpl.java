@@ -505,15 +505,20 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
                 ImmutableList.of(leftChild, rightChild));
     }
 
+    /**
+     *
+     * @param leftChild
+     * @param rightChild
+     * @return
+     *
+     * @see it.unibz.inf.ontop.iq.node.normalization.impl.NotRequiredVariableRemoverImpl.Transformer#transformLeftJoin(BinaryNonCommutativeIQTree, LeftJoinNode, IQTree, IQTree)
+     */
+
     @Override
     public VariableNonRequirement computeVariableNonRequirement(IQTree leftChild, IQTree rightChild) {
 
         var nonRequirementBeforeFilter = computeVariableNonRequirementForChildren(ImmutableList.of(leftChild, rightChild));
         if (nonRequirementBeforeFilter.isEmpty())
-            return nonRequirementBeforeFilter;
-
-        Set<Variable> rightSpecificVariables = rightSpecificVariables(leftChild, rightChild);
-        if (rightSpecificVariables.isEmpty())
             return nonRequirementBeforeFilter;
 
         /*
@@ -527,11 +532,15 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
         if (!commonVariables.isEmpty()
                 && rightChild.inferUniqueConstraints().stream().anyMatch(commonVariables::containsAll)) {
 
+            Set<Variable> rightSpecificVariables = rightSpecificVariables(leftChild, rightChild);
+            if (rightSpecificVariables.isEmpty())
+                return nonRequirementBeforeFilter;
+
             return nonRequirementBeforeFilter.withExtendedCondition(
                     getLocallyRequiredVariables(),
                     Sets.intersection(rightSpecificVariables, nonRequirementBeforeFilter.getNotRequiredVariables()).immutableCopy());
         }
-        else
-            return nonRequirementBeforeFilter.withRequiredVariables(getLocallyRequiredVariables());
+
+        return nonRequirementBeforeFilter.withRequiredVariables(getLocallyRequiredVariables());
     }
 }

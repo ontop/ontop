@@ -46,8 +46,8 @@ public class NotRequiredVariableRemoverImpl implements NotRequiredVariableRemove
         return getTransformer(variablesToRemove, variableGenerator).transform(tree);
     }
 
-    private VariableRemoverTransformer getTransformer(ImmutableSet<Variable> variablesToRemove, VariableGenerator variableGenerator) {
-        return new VariableRemoverTransformer(variablesToRemove, variableGenerator);
+    private Transformer getTransformer(ImmutableSet<Variable> variablesToRemove, VariableGenerator variableGenerator) {
+        return new Transformer(variablesToRemove, variableGenerator);
     }
 
     /**
@@ -56,10 +56,10 @@ public class NotRequiredVariableRemoverImpl implements NotRequiredVariableRemove
      * {@code ---> } Not called for trees not having any variable to remove.
      *
      */
-    private class VariableRemoverTransformer extends DefaultRecursiveIQTreeVisitingTransformerWithVariableGenerator {
+    private class Transformer extends DefaultRecursiveIQTreeVisitingTransformerWithVariableGenerator {
         private final ImmutableSet<Variable> variablesToRemove;
 
-        VariableRemoverTransformer(ImmutableSet<Variable> variablesToRemove, VariableGenerator variableGenerator) {
+        Transformer(ImmutableSet<Variable> variablesToRemove, VariableGenerator variableGenerator) {
             super(NotRequiredVariableRemoverImpl.this.iqFactory, variableGenerator);
             this.variablesToRemove = variablesToRemove;
         }
@@ -120,10 +120,10 @@ public class NotRequiredVariableRemoverImpl implements NotRequiredVariableRemove
         }
 
         /**
-         * If filter condition involves a variable to remove, we are in the special case
-         *  where the right child can be removed
+         * If the filter condition involves a variable to remove,
+         * then we are in the special case where the right child can be removed
          *
-         *  {@link it.unibz.inf.ontop.iq.node.impl.LeftJoinNodeImpl#computeVariableNonRequirement(IQTree, IQTree)}
+         *  @see it.unibz.inf.ontop.iq.node.impl.LeftJoinNodeImpl#computeVariableNonRequirement(IQTree, IQTree)
          */
         @Override
         public IQTree transformLeftJoin(BinaryNonCommutativeIQTree tree, LeftJoinNode rootNode, IQTree leftChild, IQTree rightChild) {
@@ -162,6 +162,7 @@ public class NotRequiredVariableRemoverImpl implements NotRequiredVariableRemove
                     ? tree
                     : iqTreeTools.createUnionTree(variablesToKeep,
                             NaryIQTreeTools.transformChildren(children,
+                            // TODO: inserts a possibly removable CONSTRUCT - can it be eliminated by using a child transformer?
                             c -> iqTreeTools.unaryIQTreeBuilder(variablesToKeep).build(c)));
 
             // New removal opportunities may appear in the subtree ("RECURSIVE")

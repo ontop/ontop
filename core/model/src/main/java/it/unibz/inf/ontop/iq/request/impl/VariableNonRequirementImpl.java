@@ -54,7 +54,7 @@ public class VariableNonRequirementImpl implements VariableNonRequirement {
     public VariableNonRequirement withExtendedCondition(ImmutableSet<Variable> variables, ImmutableSet<Variable> extendedCondition) {
         return new VariableNonRequirementImpl(conditions.entrySet().stream()
                 .map(e -> variables.contains(e.getKey())
-                        ? Maps.immutableEntry(e.getKey(), Sets.union(e.getValue(), extendedCondition).immutableCopy())
+                        ? Maps.immutableEntry(e.getKey(), Sets.difference(Sets.union(e.getValue(), extendedCondition), ImmutableSet.of(e.getKey())).immutableCopy())
                         : e)
                 .collect(ImmutableCollectors.toMap()));
     }
@@ -75,20 +75,20 @@ public class VariableNonRequirementImpl implements VariableNonRequirement {
             return ImmutableSet.of();
 
         // Mutable
-        final Set<Variable> variablesToRemove = Sets.newHashSet(Sets.intersection(
+        final Set<Variable> nonRequiredVariables = Sets.newHashSet(Sets.intersection(
                 Sets.difference(projectedVariables, requiredVariables),
                 getNotRequiredVariables()));
 
         while (true) {
-            var variablesToKeep = variablesToRemove.stream()
-                    .filter(v -> !variablesToRemove.containsAll(getCondition(v)))
+            var variablesNotMeetingCondition = nonRequiredVariables.stream()
+                    .filter(v -> !nonRequiredVariables.containsAll(getCondition(v)))
                     .collect(ImmutableCollectors.toSet());
-            if (variablesToKeep.isEmpty())
+            if (variablesNotMeetingCondition.isEmpty())
                 break;
-            variablesToRemove.removeAll(variablesToKeep);
+            nonRequiredVariables.removeAll(variablesNotMeetingCondition);
         }
 
-        return ImmutableSet.copyOf(variablesToRemove);
+        return ImmutableSet.copyOf(nonRequiredVariables);
     }
 
     @Override
