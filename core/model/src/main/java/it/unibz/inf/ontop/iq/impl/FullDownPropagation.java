@@ -28,26 +28,21 @@ public class FullDownPropagation extends AbstractDownPropagation implements Down
     }
 
     @Override
-    public Optional<Substitution<? extends VariableOrGroundTerm>> getOptionalDescendingSubstitution() {
-        return Optional.of(substitution);
-    }
-
-    @Override
-    public <R, T extends R> R withSubstitution(T value, BiFunction<Substitution<? extends VariableOrGroundTerm>, T, R> function) {
-        return function.apply(substitution, value);
+    public Substitution<? extends VariableOrGroundTerm> getDescendingSubstitution() {
+        return substitution;
     }
 
     @Override
     protected DownPropagation withConstraint(Optional<ImmutableExpression> optionalConstraint,  ImmutableSet<Variable> variables) {
-        var optionalReducedSubstitution = reduceDescendingSubstitution(substitution, variables);
+        var reducedSubstitution = reduceDescendingSubstitution(substitution, variables);
         var optionalNormalizedConstraint = normalizeConstraint(optionalConstraint, () -> variables, termFactory);
-        if (optionalReducedSubstitution.isPresent()) {
-            var optionalRenaming = transformIntoFreshRenaming(optionalReducedSubstitution.get(), variables);
+        if (!reducedSubstitution.isEmpty()) {
+            var optionalRenaming = transformIntoFreshRenaming(reducedSubstitution, variables);
             return optionalRenaming.isPresent()
                     ? new RenamingDownPropagation(optionalRenaming.get(), optionalNormalizedConstraint, variables, variableGenerator, termFactory)
-                    : new FullDownPropagation(optionalReducedSubstitution.get(), optionalNormalizedConstraint, variables, variableGenerator, termFactory);
+                    : new FullDownPropagation(reducedSubstitution, optionalNormalizedConstraint, variables, variableGenerator, termFactory);
         }
-        return new ConstraintOnlyDownPropagation(optionalNormalizedConstraint, variables, variableGenerator, termFactory);
+        return new ConstraintOnlyDownPropagation(reducedSubstitution, optionalNormalizedConstraint, variables, variableGenerator, termFactory);
     }
 
     @Override

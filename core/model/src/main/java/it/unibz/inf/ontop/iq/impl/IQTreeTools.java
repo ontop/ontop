@@ -357,10 +357,9 @@ public class IQTreeTools {
                                                  ImmutableSet<Variable> projectedVariables,
                                                  VariableGenerator variableGenerator) throws DownPropagation.InconsistentDownPropagationException {
 
-        var optionalReducedSubstitution = AbstractDownPropagation.reduceDescendingSubstitution(descendingSubstitution, projectedVariables);
+        var reducedSubstitution = AbstractDownPropagation.reduceDescendingSubstitution(descendingSubstitution, projectedVariables);
 
-        if (optionalReducedSubstitution.isPresent()) {
-            var reducedSubstitution = optionalReducedSubstitution.get();
+        if (!reducedSubstitution.isEmpty()) {
             if (reducedSubstitution.rangeAnyMatch(ImmutableTerm::isNull))
                 throw new DownPropagation.InconsistentDownPropagationException();
 
@@ -380,7 +379,7 @@ public class IQTreeTools {
 
     public DownPropagation createDownPropagation(Optional<ImmutableExpression> optionalConstraint, ImmutableSet<Variable> variables, VariableGenerator variableGenerator) {
         var optionalNormalizedConstraint = AbstractDownPropagation.normalizeConstraint(optionalConstraint, () -> variables, termFactory);
-        return new ConstraintOnlyDownPropagation(optionalNormalizedConstraint, variables, variableGenerator, termFactory);
+        return new ConstraintOnlyDownPropagation(substitutionFactory.getSubstitution(), optionalNormalizedConstraint, variables, variableGenerator, termFactory);
     }
 
 
@@ -401,7 +400,7 @@ public class IQTreeTools {
         InjectiveSubstitution<Variable> restriction = renaming.restrictDomainTo(variables);
         // variable generator is null as it is not used in the implementation of propagation
         return restriction.isEmpty()
-                ? new ConstraintOnlyDownPropagation(Optional.empty(), variables, null, termFactory)
+                ? new ConstraintOnlyDownPropagation(substitutionFactory.getSubstitution(), Optional.empty(), variables, null, termFactory)
                 : new RenamingDownPropagation(restriction, Optional.empty(), variables, null, termFactory);
     }
 

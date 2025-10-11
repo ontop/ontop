@@ -21,9 +21,12 @@ public interface DownPropagation {
 
     ImmutableSet<Variable> computeProjectedVariables();
 
-    Optional<Substitution<? extends VariableOrGroundTerm>> getOptionalDescendingSubstitution();
-
-    <R, T extends R> R withSubstitution(T value, BiFunction<Substitution<? extends VariableOrGroundTerm>, T, R> function);
+    /**
+     * can be empty
+     *
+     * @return
+     */
+    Substitution<? extends VariableOrGroundTerm> getDescendingSubstitution();
 
     Optional<ImmutableExpression> getConstraint();
 

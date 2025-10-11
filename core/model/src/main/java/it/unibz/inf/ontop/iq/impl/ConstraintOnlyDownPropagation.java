@@ -8,6 +8,7 @@ import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
 import it.unibz.inf.ontop.substitution.Substitution;
+import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.Optional;
@@ -15,9 +16,12 @@ import java.util.function.BiFunction;
 
 public class ConstraintOnlyDownPropagation extends AbstractDownPropagation implements DownPropagation {
 
+    private final Substitution<? extends VariableOrGroundTerm> emptySubstitution;
+
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
-    ConstraintOnlyDownPropagation(Optional<ImmutableExpression> optionalConstraint, ImmutableSet<Variable> variables, VariableGenerator variableGenerator, TermFactory termFactory) {
+    ConstraintOnlyDownPropagation(Substitution<? extends VariableOrGroundTerm> emptySubstitution, Optional<ImmutableExpression> optionalConstraint, ImmutableSet<Variable> variables, VariableGenerator variableGenerator, TermFactory termFactory) {
         super(optionalConstraint, variables, variableGenerator, termFactory);
+        this.emptySubstitution = emptySubstitution;
     }
 
     @Override
@@ -26,18 +30,13 @@ public class ConstraintOnlyDownPropagation extends AbstractDownPropagation imple
     }
 
     @Override
-    public Optional<Substitution<? extends VariableOrGroundTerm>> getOptionalDescendingSubstitution() {
-        return Optional.empty();
-    }
-
-    @Override
-    public <R, T extends R> R withSubstitution(T value, BiFunction<Substitution<? extends VariableOrGroundTerm>, T, R> function) {
-        return value;
+    public Substitution<? extends VariableOrGroundTerm> getDescendingSubstitution() {
+        return emptySubstitution;
     }
 
     @Override
     protected DownPropagation withConstraint(Optional<ImmutableExpression> optionalConstraint,  ImmutableSet<Variable> variables) {
-        return new ConstraintOnlyDownPropagation(
+        return new ConstraintOnlyDownPropagation(emptySubstitution,
                 normalizeConstraint(optionalConstraint, () -> variables, termFactory),
                 variables, variableGenerator, termFactory);
     }

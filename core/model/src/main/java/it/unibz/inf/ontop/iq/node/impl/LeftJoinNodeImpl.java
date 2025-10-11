@@ -196,7 +196,7 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
     @Override
     public IQTree applyDescendingSubstitution(DownPropagation dp, IQTree leftChild, IQTree rightChild) {
 
-        var descendingSubstitution = dp.getOptionalDescendingSubstitution().get();
+        var descendingSubstitution = dp.getDescendingSubstitution();
 
         if (isRejectingRightSpecificNulls(dp.getConstraint(), leftChild, rightChild)
                 || containsEqualityRightSpecificVariable(descendingSubstitution, leftChild, rightChild)) {

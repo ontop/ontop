@@ -91,13 +91,8 @@ public abstract class AbstractDownPropagation implements DownPropagation {
 
 
 
-    static <T extends VariableOrGroundTerm> Optional<Substitution<T>> reduceDescendingSubstitution(Substitution<T> descendingSubstitution, ImmutableSet<Variable> projectedVariables) {
-        Substitution<T> reducedSubstitution = descendingSubstitution.restrictDomainTo(projectedVariables);
-
-        if (reducedSubstitution.isEmpty())
-            return Optional.empty();
-
-        return Optional.of(reducedSubstitution);
+    static <T extends VariableOrGroundTerm> Substitution<T> reduceDescendingSubstitution(Substitution<T> descendingSubstitution, ImmutableSet<Variable> projectedVariables) {
+        return descendingSubstitution.restrictDomainTo(projectedVariables);
     }
 
     static Optional<ImmutableExpression> normalizeConstraint(Optional<ImmutableExpression> optionalConstraint, Supplier<ImmutableSet<Variable>> projectedVariablesSupplier, TermFactory termFactory) {

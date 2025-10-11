@@ -510,9 +510,8 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
     @Override
     public IQTree applyDescendingSubstitution(DownPropagation dp, IQTree child) {
         return applyDescendingSubstitution(
-                dp.getOptionalDescendingSubstitution().get(),
+                dp.getDescendingSubstitution(),
                 child,
-                dp.getVariableGenerator(),
                 r -> propagateDescendingSubstitutionToChild(child, r, dp),
                 iqTreeTools::createOptionalConstructionNode);
     }
@@ -523,7 +522,6 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
         return applyDescendingSubstitution(
                 descendingSubstitution,
                 child,
-                variableGenerator,
                 r -> iqTreeTools.applyDownPropagationWithoutOptimization(child, r.delta, variableGenerator),
                 iqTreeTools::createOptionalConstructionNode);
     }

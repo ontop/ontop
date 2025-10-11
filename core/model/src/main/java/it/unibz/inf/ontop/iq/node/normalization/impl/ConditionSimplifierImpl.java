@@ -128,17 +128,16 @@ public class ConditionSimplifierImpl implements ConditionSimplifier {
                                                                      VariableNullability variableNullability) throws DownPropagation.InconsistentDownPropagationException {
         // TODO: also consider the constraint for simplifying the condition
         var simplification = simplifyCondition(
-                downPropagation.withSubstitution(expression,
-                        (ds, e) -> e.map(ds::apply)),
+                expression.map(e -> downPropagation.getDescendingSubstitution().apply(e)),
                 ImmutableSet.of(),
                 children,
                 variableNullability);
 
-        var downSubstitution =
-                downPropagation.withSubstitution(simplification.getSubstitution(),
-                        (ds, s) -> substitutionFactory.onVariableOrGroundTerms().compose(ds, s));
-
         var newConstraint = iqTreeTools.updateDownPropagationConstraint(downPropagation, simplification.getSubstitution(), simplification.getOptionalExpression(), () -> variableNullability);
+
+        var downSubstitution = substitutionFactory.onVariableOrGroundTerms().compose(
+                downPropagation.getDescendingSubstitution(),
+                simplification.getSubstitution());
 
         var extendedDownConstraint = iqTreeTools.createDownPropagation(downSubstitution, newConstraint, downPropagation.getVariables(), downPropagation.getVariableGenerator());
 

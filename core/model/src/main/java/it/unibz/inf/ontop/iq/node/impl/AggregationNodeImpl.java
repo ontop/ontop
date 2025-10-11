@@ -58,7 +58,7 @@ public class AggregationNodeImpl extends ExtendedProjectionNodeImpl implements A
     @Override
     public IQTree applyDescendingSubstitution(DownPropagation dp, IQTree child) {
         return applyDescendingSubstitutionOrBlock(
-                dp.getOptionalDescendingSubstitution().get(),
+                dp.getDescendingSubstitution(),
                 child,
                 dp.getVariableGenerator(),
                 r -> propagateDescendingSubstitutionToChild(child, r, dp),
@@ -107,7 +107,7 @@ public class AggregationNodeImpl extends ExtendedProjectionNodeImpl implements A
                 substitutionFactory.union(blockedGroundTermSubstitution, blockedVariableSubstitution);
 
         Substitution<? extends VariableOrGroundTerm> nonBlockedSubstitution = descendingSubstitution.removeFromDomain(blockedSubstitution.getDomain());
-        IQTree newSubTree = applyDescendingSubstitution(nonBlockedSubstitution, child, variableGenerator, updateChildFct, ctr);
+        IQTree newSubTree = applyDescendingSubstitution(nonBlockedSubstitution, child, updateChildFct, ctr);
 
         if (blockedSubstitution.isEmpty())
             return newSubTree;

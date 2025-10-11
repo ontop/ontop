@@ -73,8 +73,7 @@ public abstract class LeafIQTreeImpl extends AbstractIQTree implements LeafIQTre
      */
     @Override
     public final IQTree applyDescendingSubstitution(DownPropagation dp) {
-        return dp.<IQTree, LeafIQTree>withSubstitution(this,
-                (ds, t) -> t.applyDescendingSubstitutionWithoutOptimizing(ds, dp.getVariableGenerator()));
+        return applyDescendingSubstitutionWithoutOptimizing(dp.getDescendingSubstitution(), dp.getVariableGenerator());
     }
 
     @Override

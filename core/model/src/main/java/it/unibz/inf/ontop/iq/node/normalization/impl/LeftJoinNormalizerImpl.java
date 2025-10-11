@@ -463,14 +463,14 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
                         variableNullabilityTools.getChildrenVariableNullability(subTree.children()));
 
                 DownPropagation dp = iqTreeTools.createDownPropagation(simplificationResults.getSubstitution(), simplificationResults.getOptionalExpression(), subTree.rightChild().getVariables(), variableGenerator);
-                if (dp.getOptionalDescendingSubstitution().isEmpty()) {
+                if (dp.getDescendingSubstitution().isEmpty()) {
                     return state.replace(t -> t.replaceRight(simplificationResults.getOptionalExpression(), t.rightChild()));
                 }
 
                 IQTree updatedRightChild = dp.propagate(subTree.rightChild());
 
                 var rightProvenance = new OptionalRightProvenance(
-                        updatedRightChild, dp.getOptionalDescendingSubstitution().get(), subTree.leftChild().getVariables());
+                        updatedRightChild, dp.getDescendingSubstitution(), subTree.leftChild().getVariables());
 
                 return state.lift(
                         createConstructionNode(subTree, rightProvenance.computeLiftableSubstitution()),

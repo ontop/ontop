@@ -69,7 +69,7 @@ public class OrderByNodeImpl extends QueryModifierNodeImpl implements OrderByNod
     @Override
     public IQTree applyDescendingSubstitution(DownPropagation dp, IQTree child) {
         return iqTreeTools.unaryIQTreeBuilder()
-                .append(applySubstitution(dp.getOptionalDescendingSubstitution().get()))
+                .append(applySubstitution(dp.getDescendingSubstitution()))
                 .build(dp.propagateToChild(child));
     }
 

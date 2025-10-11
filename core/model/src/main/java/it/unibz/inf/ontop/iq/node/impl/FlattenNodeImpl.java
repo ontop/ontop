@@ -138,7 +138,7 @@ public class FlattenNodeImpl extends CompositeQueryNodeImpl implements FlattenNo
 
     @Override
     public IQTree applyDescendingSubstitution(DownPropagation dp, IQTree child) {
-        return applyDescendingSubstitution(dp.getOptionalDescendingSubstitution().get(), dp.getVariableGenerator(),
+        return applyDescendingSubstitution(dp.getDescendingSubstitution(), dp.getVariableGenerator(),
                 (s) -> propagateToChild(s, dp, child));
     }
 

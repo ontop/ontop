@@ -29,30 +29,25 @@ public class RenamingDownPropagation extends AbstractDownPropagation implements 
     }
 
     @Override
-    public Optional<Substitution<? extends VariableOrGroundTerm>> getOptionalDescendingSubstitution() {
-        return Optional.of(substitution);
-    }
-
-    @Override
-    public <R, T extends R> R withSubstitution(T value, BiFunction<Substitution<? extends VariableOrGroundTerm>, T, R> function) {
-        return function.apply(substitution, value);
+    public Substitution<? extends VariableOrGroundTerm> getDescendingSubstitution() {
+        return substitution;
     }
 
     @Override
     protected DownPropagation withConstraint(Optional<ImmutableExpression> optionalConstraint, ImmutableSet<Variable> variables) {
-        var optionalReducedSubstitution = reduceDescendingSubstitution(substitution, variables);
+        var reducedSubstitution = reduceDescendingSubstitution(substitution, variables);
         var optionalNormalizedConstraint = normalizeConstraint(optionalConstraint, () -> variables, termFactory);
-        if (optionalReducedSubstitution.isPresent()) {
-            return new RenamingDownPropagation(optionalReducedSubstitution.get().injective(), optionalNormalizedConstraint, variables, variableGenerator, termFactory);
+        if (!reducedSubstitution.isEmpty()) {
+            return new RenamingDownPropagation(reducedSubstitution.injective(), optionalNormalizedConstraint, variables, variableGenerator, termFactory);
         }
-        return new ConstraintOnlyDownPropagation(optionalNormalizedConstraint, variables, variableGenerator, termFactory);
+        return new ConstraintOnlyDownPropagation(reducedSubstitution, optionalNormalizedConstraint, variables, variableGenerator, termFactory);
     }
 
     @Override
     public IQTree propagate(IQTree tree) {
         IQTree renamedTree = tree.applyFreshRenaming(substitution);
         return optionalConstraint.isPresent()
-                ? renamedTree.propagateDownConstraint(new ConstraintOnlyDownPropagation(
+                ? renamedTree.propagateDownConstraint(new ConstraintOnlyDownPropagation(substitution.restrictDomainTo(ImmutableSet.of()),
                 optionalConstraint, computeProjectedVariables(), variableGenerator, termFactory))
                 : renamedTree;
     }
