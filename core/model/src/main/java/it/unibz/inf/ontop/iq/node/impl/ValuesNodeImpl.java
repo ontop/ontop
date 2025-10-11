@@ -27,6 +27,7 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import javax.annotation.Nullable;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -134,9 +135,7 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
             ConstructionNode constructionNode = iqFactory.createConstructionNode(projectedVariables, substitution);
 
             ImmutableList<ImmutableMap<Variable, Constant>> newValuesNodeValues = valueMaps.stream()
-                    .map(tuple -> tuple.entrySet().stream()
-                            .filter(e -> !singleValueVariables.contains(e.getKey()))
-                            .collect(ImmutableCollectors.toMap()))
+                    .map(tuple -> removeFromTuple(tuple, singleValueVariables).collect(ImmutableCollectors.toMap()))
                     .collect(ImmutableCollectors.toList());
 
             ValuesNode valuesNode = iqFactory.createValuesNode(
@@ -151,6 +150,10 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
         return furtherNormalize(this);
     }
 
+    private static Stream<Map.Entry<Variable, Constant>> removeFromTuple(ImmutableMap<Variable, Constant> tuple, ImmutableSet<Variable> variables) {
+        return tuple.entrySet().stream()
+                .filter(e -> !variables.contains(e.getKey()));
+    }
 
     private LeafIQTree furtherNormalize(ValuesNodeImpl valuesNode) {
         if (valuesNode.isDeclaredAsEmpty()) {
@@ -258,9 +261,7 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
                 .filter(tuple -> tuple.entrySet().stream()
                         .filter(e -> substitution.isDefining(e.getKey()))
                         .allMatch(e -> e.getValue().equals(substitution.get(e.getKey()))))
-                .map(tuple -> tuple.entrySet().stream()
-                        .filter(e -> !substitution.isDefining(e.getKey()))
-                        .collect(ImmutableCollectors.toMap()))
+                .map(tuple -> removeFromTuple(tuple, substitution.getDomain()).collect(ImmutableCollectors.toMap()))
                 .collect(ImmutableCollectors.toList());
 
         return iqFactory.createValuesNode(newProjectionVariables, newValues);
@@ -373,7 +374,6 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
                 .orElseThrow(() -> new MinorOntopInternalBugException("A projected variable was expected as argument"));
 
         Optional<ImmutableFunctionalTerm> optionalFunctionalArgument = binaryStrictEquality.getTerms().stream()
-                .filter(t -> !t.equals(variable))
                 .filter(t -> t instanceof ImmutableFunctionalTerm)
                 .map(t -> (ImmutableFunctionalTerm) t)
                 .findAny();
@@ -413,8 +413,7 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
                         .map(c -> (DBConstant) c)
                         .flatMap(c -> decomposer.decompose(c)
                                 .map(additionalColumns -> Streams.concat(
-                                        tuple.entrySet().stream()
-                                                .filter(e -> !e.getKey().equals(variableToReplace)),
+                                        removeFromTuple(tuple, ImmutableSet.of(variableToReplace)),
                                         IntStream.range(0, newVariables.size())
                                                 .mapToObj(i -> Maps.<Variable, Constant>immutableEntry(newVariables.get(i), additionalColumns.get(i))))
                                         .collect(ImmutableCollectors.toMap()))))
@@ -430,8 +429,8 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
 
         ValuesNode newValueNode = iqFactory.createValuesNode(newProjectedVariables, newValues);
 
-        ConstructionNode constructionNode = iqTreeTools.createExtendingConstructionNode(
-                newProjectedVariables,
+        ConstructionNode constructionNode = iqFactory.createConstructionNode(
+                projectedVariables,
                 substitutionFactory.getSubstitution(variableToReplace,
                         termFactory.getImmutableFunctionalTerm(functionSymbol, newVariables)));
 

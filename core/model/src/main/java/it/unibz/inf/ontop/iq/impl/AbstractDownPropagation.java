@@ -50,19 +50,19 @@ public abstract class AbstractDownPropagation implements DownPropagation {
     }
 
     @Override
-    public DownPropagation reduceScope(ImmutableSet<Variable> variables) {
-        if (!this.variables.containsAll(variables))
-            throw new IllegalArgumentException("Variables " +  variables + " are not included in " + this.variables);
+    public IQTree propagateToChild(IQTree child) {
+        ImmutableSet<Variable> childVariables = checkScope(child.getVariables());
 
-        if (this.variables.size() == variables.size())
-            return this;
+        if (this.variables.size() == childVariables.size())
+            return propagate(child);
 
-        return withConstraint(optionalConstraint, variables);
+        return withConstraint(optionalConstraint, childVariables).propagate(child);
     }
 
-    @Override
-    public IQTree propagateToChild(IQTree child) {
-        return reduceScope(child.getVariables()).propagate(child);
+    protected final ImmutableSet<Variable> checkScope(ImmutableSet<Variable> variables) {
+        if (!this.variables.containsAll(variables))
+            throw new IllegalArgumentException("Variables " + variables + " are not included in " + this.variables);
+        return variables;
     }
 
     @Override

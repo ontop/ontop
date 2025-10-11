@@ -35,8 +35,6 @@ public interface DownPropagation {
 
     IQTree propagateWithConstraint(Optional<ImmutableExpression> constraint, IQTree tree);
 
-    DownPropagation reduceScope(ImmutableSet<Variable> variables);
-
     /**
      * Thrown when a "null" variable is propagated down or when the constraint is inconsistent
      */
