@@ -382,6 +382,15 @@ public class IQTreeTools {
         return new ConstraintOnlyDownPropagation(substitutionFactory.getSubstitution(), optionalNormalizedConstraint, variables, variableGenerator, termFactory);
     }
 
+    public DownPropagation removeFromDomain(DownPropagation dp, ImmutableSet<Variable> variables) {
+        if (dp.getDescendingSubstitution().isEmpty())
+            return dp;
+
+        var optionalRenaming = AbstractDownPropagation.transformIntoFreshRenaming(dp.getDescendingSubstitution(), dp.getVariables());
+        return optionalRenaming.isPresent()
+                ? new RenamingDownPropagation(optionalRenaming.get(), dp.getConstraint(), dp.getVariables(), dp.getVariableGenerator(), termFactory)
+                : new FullDownPropagation(dp.getDescendingSubstitution(), dp.getConstraint(), dp.getVariables(), dp.getVariableGenerator(), termFactory);
+    }
 
     /**
      * Applies renaming to the projected variables in the tree.

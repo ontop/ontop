@@ -4,6 +4,7 @@ package it.unibz.inf.ontop.iq.node.impl;
 import com.google.common.collect.*;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
+import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.OntopModelSettings;
 import it.unibz.inf.ontop.iq.*;
@@ -510,19 +511,24 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
     @Override
     public IQTree applyDescendingSubstitution(DownPropagation dp, IQTree child) {
         return applyDescendingSubstitution(
-                dp.getDescendingSubstitution(),
+                dp,
                 child,
-                r -> propagateDescendingSubstitutionToChild(child, r, dp),
-                iqTreeTools::createOptionalConstructionNode);
+                r -> r.propagateToChild(child),
+                (r, c) -> iqTreeTools.createOptionalConstructionNode(r.getVariables(), r.getSubstitution(), c));
     }
 
     @Override
     public IQTree applyDescendingSubstitutionWithoutOptimizing(Substitution<? extends VariableOrGroundTerm> descendingSubstitution,
                                                                IQTree child, VariableGenerator variableGenerator) {
-        return applyDescendingSubstitution(
-                descendingSubstitution,
-                child,
-                r -> iqTreeTools.applyDownPropagationWithoutOptimization(child, r.delta, variableGenerator),
-                iqTreeTools::createOptionalConstructionNode);
+        try {
+            return applyDescendingSubstitution(
+                    iqTreeTools.createDownPropagation(descendingSubstitution, Optional.empty(), getVariables(), variableGenerator),
+                    child,
+                    r -> iqTreeTools.applyDownPropagationWithoutOptimization(child, r.getResultingDownPropagation().getDescendingSubstitution(), variableGenerator),
+                    (r, c) -> iqTreeTools.createOptionalConstructionNode(r.getVariables(), r.getSubstitution(), c));
+        }
+        catch (DownPropagation.InconsistentDownPropagationException e) {
+            throw new MinorOntopInternalBugException("cannot happen");
+        }
     }
 }
