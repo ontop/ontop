@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collector;
+import java.util.stream.Stream;
 
 /**
  * Accessible through Guice (recommended) or through CoreSingletons.
@@ -78,6 +79,8 @@ public interface SubstitutionFactory {
     default Optional<Substitution<ImmutableTerm>> unify(ImmutableTerm t1, ImmutableTerm t2) { return onImmutableTerms().unify(t1, t2); }
 
     InjectiveSubstitution<Variable> extractRenamingSubstitution(Substitution<?> substitution, ImmutableSet<Variable> priorityVariables);
+
+    <T extends ImmutableTerm> Substitution<T> extractSubstitution(Stream<? extends Map.Entry<? extends ImmutableTerm, T>> stream, ImmutableSet<Variable> priorityVariables);
 
     /**
      * Normalizes eta so as to avoid projected variables to be substituted by non-projected variables.

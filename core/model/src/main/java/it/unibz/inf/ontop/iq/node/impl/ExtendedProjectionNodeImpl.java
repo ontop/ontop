@@ -1,8 +1,6 @@
 package it.unibz.inf.ontop.iq.node.impl;
 
-import com.google.common.collect.ImmutableMultimap;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Sets;
+import com.google.common.collect.*;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.DownPropagation;
@@ -78,7 +76,7 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
         Substitution<NonFunctionalTerm> tauC = descendingSubstitution.restrictRangeTo(NonFunctionalTerm.class);
         Substitution<NonFunctionalTerm> thetaC = substitution.restrictRangeTo(NonFunctionalTerm.class);
 
-        ImmutableSet<Variable> projectedVariablesAfterTauC = DownPropagation.computeProjectedVariables(tauC, getVariables());
+        ImmutableSet<Variable> projectedVariablesAfterTauC = DownPropagation.computeProjectedVariables(tauC, projectedVariables);
 
         Substitution<NonFunctionalTerm> newEta = substitutionFactory.onNonFunctionalTerms().unifierBuilder(thetaC)
                 .unify(tauC.stream(), Map.Entry::getKey, Map.Entry::getValue)
@@ -89,8 +87,7 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
         Substitution<NonFunctionalTerm> thetaCBar = newEta.restrictDomainTo(projectedVariablesAfterTauC);
 
         Substitution<NonFunctionalTerm> deltaC = newEta.builder()
-                .removeFromDomain(thetaC.getDomain())
-                .removeFromDomain(Sets.difference(thetaCBar.getDomain(), projectedVariables))
+                .removeFromDomain(Sets.union(thetaC.getDomain(), Sets.difference(thetaCBar.getDomain(), projectedVariables)))
                 .build();
 
         //  deltaC to thetaF
@@ -98,32 +95,19 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
         Substitution<ImmutableFunctionalTerm> thetaF = substitution.restrictRangeTo(ImmutableFunctionalTerm.class);
 
         // deltaC applied to thetaF as a list of equalities
-        ImmutableMultimap<NonFunctionalTerm, ImmutableFunctionalTerm> m = thetaF.stream()
-                .collect(ImmutableCollectors.toMultimap(
-                        e -> substitutionFactory.onNonFunctionalTerms().apply(deltaC, e.getKey()),
-                        e -> substitutionFactory.onImmutableTerms().apply(deltaC, e.getValue())));
+        ImmutableList<Map.Entry<NonFunctionalTerm, ImmutableFunctionalTerm>> deltaCThetaFEqualities = thetaF.stream()
+                .map(e -> Maps.immutableEntry(
+                        substitutionFactory.onNonFunctionalTerms().apply(deltaC, e.getKey()),
+                        deltaC.apply(e.getValue())))
+                .collect(ImmutableCollectors.toList());
 
-        // for each Variable key (not in childVariables), picks one value from the group
-        Substitution<ImmutableFunctionalTerm> thetaFBar = m.asMap().entrySet().stream()
-                .filter(e -> e.getKey() instanceof Variable)
-                .filter(e -> !childVariables.contains((Variable)e.getKey()))
-                .collect(substitutionFactory.toSubstitution(
-                        e -> (Variable) e.getKey(),
-                        e -> e.getValue().iterator().next())); // choose some
+        Substitution<ImmutableFunctionalTerm> thetaFBar = substitutionFactory.extractSubstitution(deltaCThetaFEqualities.stream(), childVariables);
 
-        // compare with AbstractJoinTransferLJTransformer.extractEqualities
-        // gets all entries of m that are not in thetaFBar
-        Stream<ImmutableExpression> thetaFRemainingEqualities = m.entries().stream()
-                .filter(e ->
-                        !((e.getKey() instanceof Variable)
-                        && thetaFBar.isDefining((Variable) e.getKey())
-                        && thetaFBar.get((Variable) e.getKey()).equals(e.getValue())))
-                .map(e -> termFactory.getStrictEquality(thetaFBar.applyToTerm(e.getKey()), e.getValue()));
+        Stream<ImmutableExpression> thetaFRemainingEqualities = iqTreeTools.getRemainingEqualities(deltaCThetaFEqualities, thetaFBar);
 
         Substitution<ImmutableTerm> gamma = deltaC.builder()
-                .removeFromDomain(thetaF.getDomain())
-                .removeFromDomain(Sets.difference(thetaFBar.getDomain(), projectedVariables))
-                .transform(v -> substitutionFactory.onImmutableTerms().applyToTerm(thetaFBar, v))
+                .removeFromDomain(Sets.union(thetaF.getDomain(), Sets.difference(thetaFBar.getDomain(), projectedVariables)))
+                .transform(thetaFBar::applyToTerm)
                 .build();
 
         Substitution<NonFunctionalTerm> newDeltaC = gamma.restrictRangeTo(NonFunctionalTerm.class);
@@ -135,7 +119,8 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
         // tauF propagation
 
         Substitution<GroundFunctionalTerm> tauF = descendingSubstitution.restrictRangeTo(GroundFunctionalTerm.class);
-        Substitution<ImmutableTerm> thetaBar = thetaFBar.compose(thetaCBar);
+        Substitution<ImmutableTerm> thetaBar = substitutionFactory.union(thetaFBar, thetaCBar);
+        Substitution<ImmutableTerm> newTheta = thetaBar.builder().removeFromDomain(tauF.getDomain()).build();
 
         Substitution<VariableOrGroundTerm> delta = substitutionFactory.onVariableOrGroundTerms().compose(
                 tauF.builder()
@@ -143,8 +128,6 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
                         .removeFromDomain(newDeltaC.getDomain())
                         .build(),
                 newDeltaC);
-
-        Substitution<ImmutableTerm> newTheta = thetaBar.builder().removeFromDomain(tauF.getDomain()).build();
 
         Optional<ImmutableExpression> newF = termFactory.getConjunction(Stream.concat(
                 Stream.concat(thetaFRemainingEqualities, blockedExpressions),

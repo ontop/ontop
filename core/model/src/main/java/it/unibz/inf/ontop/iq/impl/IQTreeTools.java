@@ -435,4 +435,10 @@ public class IQTreeTools {
 
         return queryRenamer.applyInDepthRenaming(renamingSubstitution, iq);
     }
+
+    public <T extends ImmutableTerm> Stream<ImmutableExpression> getRemainingEqualities(ImmutableList<? extends Map.Entry<? extends ImmutableTerm, T>> equalities, Substitution<T> sub) {
+        return equalities.stream()
+                .filter(e -> sub.stream().noneMatch(e::equals))
+                .map(e -> termFactory.getStrictEquality(sub.applyToTerm(e.getKey()), e.getValue()));
+    }
 }

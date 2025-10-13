@@ -190,17 +190,20 @@ public class SubstitutionFactoryImpl implements SubstitutionFactory {
     }
 
     @Override
-    public InjectiveSubstitution<Variable> extractRenamingSubstitution(Substitution<?> substitution, ImmutableSet<Variable> priorityVariables)  {
-        Substitution<Variable> renaming = substitution.builder()
-                .restrictRangeTo(Variable.class)
-                .restrictRange(t -> !priorityVariables.contains(t))
-                .build();
-
-        return createSubstitution(renaming.inverseMap().entrySet().stream()
-                .collect(ImmutableCollectors.toMap(
-                        Map.Entry::getKey,
-                        e -> e.getValue().iterator().next())))
+    public InjectiveSubstitution<Variable> extractRenamingSubstitution(Substitution<? extends ImmutableTerm> substitution, ImmutableSet<Variable> priorityVariables)  {
+        return extractSubstitution(substitution.stream().map(e -> Maps.immutableEntry(e.getValue(), e.getKey())), priorityVariables)
                 .injective();
+    }
+
+    @Override
+    public <T extends ImmutableTerm> Substitution<T> extractSubstitution(Stream<? extends Map.Entry<? extends ImmutableTerm, T>> stream, ImmutableSet<Variable> priorityVariables) {
+        return  createSubstitution(stream
+                .filter(e -> e.getKey() instanceof Variable)
+                .filter(e -> !priorityVariables.contains(e.getKey()))
+                .collect(ImmutableCollectors.toMap(
+                        e -> (Variable)e.getKey(),
+                        Map.Entry::getValue,
+                        (ex, up) -> ex))); // prefer the existing value to an update
     }
 
 

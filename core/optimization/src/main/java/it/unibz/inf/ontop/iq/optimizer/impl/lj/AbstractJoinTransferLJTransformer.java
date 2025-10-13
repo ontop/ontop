@@ -22,7 +22,6 @@ import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
-import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Supplier;
@@ -245,9 +244,15 @@ public abstract class AbstractJoinTransferLJTransformer extends AbstractLJTransf
                 .map(n -> n.getSubstitution(substitutionFactory))
                 .reduce(substitutionFactory.getSubstitution(), substitutionFactory::union);
 
-        InjectiveSubstitution<Variable> renamingSubstitution = substitutionFactory.extractRenamingSubstitution(replacementSubstitution, leftChild.getVariables());
+        ImmutableList<Map.Entry<VariableOrGroundTerm, Variable>> list = replacementSubstitution.stream()
+                .map(e -> Maps.immutableEntry(e.getValue(), e.getKey()))
+                .collect(ImmutableCollectors.toList());
 
-        ImmutableSet<ImmutableExpression> equalities = extractEqualities(replacementSubstitution, leftChild.getVariables());
+        InjectiveSubstitution<Variable> renamingSubstitution = substitutionFactory.extractSubstitution(list.stream(), leftChild.getVariables())
+                .injective();
+
+        ImmutableSet<ImmutableExpression> equalities = iqTreeTools.getRemainingEqualities(list, renamingSubstitution)
+                .collect(ImmutableCollectors.toSet());
 
         Optional<ImmutableExpression> newLeftJoinCondition = termFactory.getConjunction(
                 rootNode.getOptionalFilterCondition()
@@ -276,28 +281,6 @@ public abstract class AbstractJoinTransferLJTransformer extends AbstractLJTransf
         ConstructionNode constructionNode = iqFactory.createConstructionNode(projectedVariables, substitution);
 
         return iqFactory.createUnaryIQTree(constructionNode, newLeftJoinTree);
-    }
-
-    private ImmutableSet<ImmutableExpression> extractEqualities(Substitution<VariableOrGroundTerm> replacementSub,
-                                                                ImmutableSet<Variable> leftVariables) {
-
-        ImmutableMap<VariableOrGroundTerm, Collection<Variable>> replacement = replacementSub.inverseMap();
-
-        Stream<ImmutableExpression> newVarEqualities = replacement.values().stream()
-                .filter(variables -> variables.size() > 1)
-                .map(variables -> termFactory.getStrictEquality(ImmutableList.copyOf(variables)));
-
-        Stream<ImmutableExpression> equalitiesWithLeftVariable = replacement.entrySet().stream()
-                .filter(e -> e.getKey() instanceof Variable)
-                .filter(e -> leftVariables.contains(e.getKey()))
-                .map(e -> termFactory.getStrictEquality(e.getKey(), e.getValue().iterator().next()));
-
-        Stream<ImmutableExpression> groundTermEqualities = replacement.entrySet().stream()
-                .filter(e -> e.getKey() instanceof GroundTerm)
-                .map(e -> termFactory.getStrictEquality(e.getKey(), e.getValue().iterator().next()));
-
-        return Stream.concat(Stream.concat(newVarEqualities, equalitiesWithLeftVariable), groundTermEqualities)
-                .collect(ImmutableCollectors.toSet());
     }
 
 
