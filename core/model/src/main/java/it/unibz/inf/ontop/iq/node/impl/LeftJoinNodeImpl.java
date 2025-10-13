@@ -564,8 +564,6 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
 
         Set<Variable> rightSpecificVariables = Sets.difference(rightChild.getVariables(), leftChild.getVariables());
 
-        if (rightSpecificVariables.isEmpty())
-            return nonRequirementBeforeFilter;
 
         Set<Variable> commonVariables = Sets.intersection(leftChild.getVariables(), rightChild.getVariables());
 
@@ -579,6 +577,9 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
         if ((!commonVariables.isEmpty())
                 && rightChild.inferUniqueConstraints().stream()
                     .anyMatch(commonVariables::containsAll)) {
+
+            if (rightSpecificVariables.isEmpty())
+                return nonRequirementBeforeFilter;
 
             Set<Variable> rightSpecificNonRequiredVariables = Sets.intersection(
                     rightSpecificVariables, nonRequirementBeforeFilter.getNotRequiredVariables());
