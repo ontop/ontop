@@ -5,7 +5,6 @@ import com.google.inject.Inject;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.*;
 import it.unibz.inf.ontop.utils.CoreUtilsFactory;
-import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.Collection;
@@ -190,20 +189,8 @@ public class SubstitutionFactoryImpl implements SubstitutionFactory {
     }
 
     @Override
-    public InjectiveSubstitution<Variable> extractRenamingSubstitution(Substitution<? extends ImmutableTerm> substitution, ImmutableSet<Variable> priorityVariables)  {
-        return extractSubstitution(substitution.stream().map(e -> Maps.immutableEntry(e.getValue(), e.getKey())), priorityVariables)
-                .injective();
-    }
-
-    @Override
-    public <T extends ImmutableTerm> Substitution<T> extractSubstitution(Stream<? extends Map.Entry<? extends ImmutableTerm, T>> stream, ImmutableSet<Variable> priorityVariables) {
-        return  createSubstitution(stream
-                .filter(e -> e.getKey() instanceof Variable)
-                .filter(e -> !priorityVariables.contains(e.getKey()))
-                .collect(ImmutableCollectors.toMap(
-                        e -> (Variable)e.getKey(),
-                        Map.Entry::getValue,
-                        (ex, up) -> ex))); // prefer the existing value to an update
+    public <T extends ImmutableTerm> Substitution<T> extractSubstitution(Stream<? extends Map.Entry<T, ? extends ImmutableTerm>> stream, ImmutableSet<Variable> priorityVariables) {
+        return createSubstitution(AbstractUnifierBuilder.extractSubstitutionMap(stream, priorityVariables));
     }
 
 
@@ -216,8 +203,13 @@ public class SubstitutionFactoryImpl implements SubstitutionFactory {
             }
 
             @Override
-            public AbstractUnifierBuilder<NonFunctionalTerm> unifierBuilder(Substitution<NonFunctionalTerm> substitution) {
-                return new AbstractUnifierBuilder<>(termFactory, this, substitution) {
+            public AbstractUnifierBuilder<NonFunctionalTerm> unifierBuilder() {
+                return new AbstractUnifierBuilder<NonFunctionalTerm>(termFactory, this) {
+                    @Override
+                    protected UnifierBuilder<NonFunctionalTerm> unifySubstitution(Substitution<NonFunctionalTerm> substitution) {
+                        return unify(substitution.stream(), Map.Entry::getKey, Map.Entry::getValue);
+                    }
+
                     @Override
                     protected UnifierBuilder<NonFunctionalTerm> unifyUnequalTerms(NonFunctionalTerm term1, NonFunctionalTerm term2) {
                         return attemptUnifying(term1, term2)
@@ -241,13 +233,17 @@ public class SubstitutionFactoryImpl implements SubstitutionFactory {
             }
 
             @Override
-            public AbstractUnifierBuilder<VariableOrGroundTerm> unifierBuilder(Substitution<VariableOrGroundTerm> substitution) {
-                return new AbstractUnifierBuilder<>(termFactory, this, substitution) {
+            public AbstractUnifierBuilder<VariableOrGroundTerm> unifierBuilder() {
+                return new AbstractUnifierBuilder<VariableOrGroundTerm>(termFactory, this) {
                     @Override
                     protected UnifierBuilder<VariableOrGroundTerm> unifyUnequalTerms(VariableOrGroundTerm term1, VariableOrGroundTerm term2) {
                         return attemptUnifying(term1, term2)
                                 .or(() -> attemptUnifying(term2, term1))
                                 .orElseGet(this::empty);
+                    }
+                    @Override
+                    protected UnifierBuilder<VariableOrGroundTerm> unifySubstitution(Substitution<VariableOrGroundTerm> substitution) {
+                        return unify(substitution.stream(), Map.Entry::getKey, Map.Entry::getValue);
                     }
                 };
             }
@@ -264,12 +260,16 @@ public class SubstitutionFactoryImpl implements SubstitutionFactory {
             }
 
             @Override
-            public AbstractUnifierBuilder<Variable> unifierBuilder(Substitution<Variable> substitution) {
-                return new AbstractUnifierBuilder<>(termFactory, this, substitution) {
+            public AbstractUnifierBuilder<Variable> unifierBuilder() {
+                return new AbstractUnifierBuilder<Variable>(termFactory, this) {
                     @Override
                     protected UnifierBuilder<Variable> unifyUnequalTerms(Variable term1, Variable term2) {
                         //noinspection OptionalGetWithoutIsPresent
                         return attemptUnifying(term1, term2).get();
+                    }
+                    @Override
+                    protected UnifierBuilder<Variable> unifySubstitution(Substitution<Variable> substitution) {
+                        return unify(substitution.stream(), Map.Entry::getKey, Map.Entry::getValue);
                     }
                 };
             }

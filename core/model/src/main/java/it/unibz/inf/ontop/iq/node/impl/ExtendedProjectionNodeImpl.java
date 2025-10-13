@@ -74,31 +74,29 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
         // tauC to thetaC
 
         Substitution<NonFunctionalTerm> tauC = descendingSubstitution.restrictRangeTo(NonFunctionalTerm.class);
-        Substitution<NonFunctionalTerm> thetaC = substitution.restrictRangeTo(NonFunctionalTerm.class);
-
         ImmutableSet<Variable> projectedVariablesAfterTauC = DownPropagation.computeProjectedVariables(tauC, projectedVariables);
 
-        Substitution<NonFunctionalTerm> newEta = substitutionFactory.onNonFunctionalTerms().unifierBuilder(thetaC)
-                .unify(tauC.stream(), Map.Entry::getKey, Map.Entry::getValue)
-                .build()
-                .map(eta -> substitutionFactory.getNormalizedUnifier(substitutionFactory.onNonFunctionalTerms(), eta, projectedVariablesAfterTauC))
+        Substitution<NonFunctionalTerm> thetaC = substitution.restrictRangeTo(NonFunctionalTerm.class);
+
+        Substitution<NonFunctionalTerm> newEta = substitutionFactory.onNonFunctionalTerms().unifierBuilder()
+                .unify(thetaC)
+                .unify(tauC)
+                .buildNormalized(projectedVariablesAfterTauC)
                 .orElseThrow(DownPropagation.InconsistentDownPropagationException::new);
 
         Substitution<NonFunctionalTerm> thetaCBar = newEta.restrictDomainTo(projectedVariablesAfterTauC);
 
-        Substitution<NonFunctionalTerm> deltaC = newEta.builder()
-                .removeFromDomain(Sets.union(thetaC.getDomain(), Sets.difference(thetaCBar.getDomain(), projectedVariables)))
-                .build();
+        Substitution<NonFunctionalTerm> deltaC = newEta
+                .removeFromDomain(Sets.union(thetaC.getDomain(), Sets.difference(thetaCBar.getDomain(), projectedVariables)));
 
         //  deltaC to thetaF
 
         Substitution<ImmutableFunctionalTerm> thetaF = substitution.restrictRangeTo(ImmutableFunctionalTerm.class);
 
-        // deltaC applied to thetaF as a list of equalities
-        ImmutableList<Map.Entry<NonFunctionalTerm, ImmutableFunctionalTerm>> deltaCThetaFEqualities = thetaF.stream()
+        ImmutableList<Map.Entry<ImmutableFunctionalTerm, NonFunctionalTerm>> deltaCThetaFEqualities = thetaF.stream()
                 .map(e -> Maps.immutableEntry(
-                        substitutionFactory.onNonFunctionalTerms().apply(deltaC, e.getKey()),
-                        deltaC.apply(e.getValue())))
+                        deltaC.apply(e.getValue()),
+                        substitutionFactory.onNonFunctionalTerms().apply(deltaC, e.getKey())))
                 .collect(ImmutableCollectors.toList());
 
         Substitution<ImmutableFunctionalTerm> thetaFBar = substitutionFactory.extractSubstitution(deltaCThetaFEqualities.stream(), childVariables);
@@ -120,13 +118,9 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
 
         Substitution<GroundFunctionalTerm> tauF = descendingSubstitution.restrictRangeTo(GroundFunctionalTerm.class);
         Substitution<ImmutableTerm> thetaBar = substitutionFactory.union(thetaFBar, thetaCBar);
-        Substitution<ImmutableTerm> newTheta = thetaBar.builder().removeFromDomain(tauF.getDomain()).build();
 
         Substitution<VariableOrGroundTerm> delta = substitutionFactory.onVariableOrGroundTerms().compose(
-                tauF.builder()
-                        .removeFromDomain(thetaBar.getDomain())
-                        .removeFromDomain(newDeltaC.getDomain())
-                        .build(),
+                tauF.removeFromDomain(Sets.union(thetaBar.getDomain(), newDeltaC.getDomain())),
                 newDeltaC);
 
         Optional<ImmutableExpression> newF = termFactory.getConjunction(Stream.concat(
@@ -135,13 +129,15 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
                         matchingEqualities(tauF, thetaBar),
                         matchingEqualities(tauF, newDeltaC))));
 
-        return new PropagationResults(tau, newTheta, delta, newF);
+        return new PropagationResults(tau,
+                thetaBar.removeFromDomain(tauF.getDomain()),
+                delta,
+                newF);
     }
 
     private Stream<ImmutableExpression> matchingEqualities(Substitution<?> sub1, Substitution<?> sub2) {
-        return sub1.builder()
-                .restrictDomainTo(sub2.getDomain())
-                .toStream((v, t) -> termFactory.getStrictEquality(sub2.apply(v), t));
+        return Sets.intersection(sub1.getDomain(), sub2.getDomain()).stream()
+                .map(v -> termFactory.getStrictEquality(sub1.apply(v), sub2.apply(v)));
     }
 
     @Override

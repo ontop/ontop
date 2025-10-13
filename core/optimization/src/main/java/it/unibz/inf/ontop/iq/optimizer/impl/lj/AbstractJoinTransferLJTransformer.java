@@ -244,8 +244,7 @@ public abstract class AbstractJoinTransferLJTransformer extends AbstractLJTransf
                 .map(n -> n.getSubstitution(substitutionFactory))
                 .reduce(substitutionFactory.getSubstitution(), substitutionFactory::union);
 
-        ImmutableList<Map.Entry<VariableOrGroundTerm, Variable>> list = replacementSubstitution.stream()
-                .map(e -> Maps.immutableEntry(e.getValue(), e.getKey()))
+        ImmutableList<Map.Entry<Variable, VariableOrGroundTerm>> list = replacementSubstitution.stream()
                 .collect(ImmutableCollectors.toList());
 
         InjectiveSubstitution<Variable> renamingSubstitution = substitutionFactory.extractSubstitution(list.stream(), leftChild.getVariables())

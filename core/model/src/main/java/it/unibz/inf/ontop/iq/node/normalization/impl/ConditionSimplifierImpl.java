@@ -81,8 +81,7 @@ public class ConditionSimplifierImpl implements ConditionSimplifier {
 
         Substitution<NonFunctionalTerm> normalizedUnifier = substitutionFactory.onNonFunctionalTerms().unifierBuilder()
                 .unify(functionFreeEqualities.stream(), eq -> (NonFunctionalTerm)eq.getTerm(0), eq -> (NonFunctionalTerm)eq.getTerm(1))
-                .build()
-                .map(u -> substitutionFactory.getNormalizedUnifier(substitutionFactory.onNonFunctionalTerms(), u, nonLiftableVariables))
+                .buildNormalized(nonLiftableVariables)
                 .orElseThrow(DownPropagation.InconsistentDownPropagationException::new);
 
         ImmutableSet<Variable> rejectedByChildrenVariablesEqToConstant = normalizedUnifier.getDomain().stream()
@@ -95,7 +94,6 @@ public class ConditionSimplifierImpl implements ConditionSimplifier {
 
         Optional<ImmutableExpression> partiallySimplifiedExpression = termFactory.getConjunction(
                 Stream.concat(
-                        // Expressions that are not function-free equalities
                         expressions.stream()
                                 .filter(e -> !functionFreeEqualities.contains(e))
                                 .map(normalizedUnifier::apply),
@@ -106,18 +104,19 @@ public class ConditionSimplifierImpl implements ConditionSimplifier {
                                 .toStream(termFactory::getStrictEquality)
                                 .sorted(Comparator.comparing(eq -> (Variable) eq.getTerm(0)))));
 
-        Optional<Substitution<GroundFunctionalTerm>> groundFunctionalSubstitution = partiallySimplifiedExpression
-                .flatMap(e -> extractGroundFunctionalSubstitution(expression, children));
+        Substitution<GroundFunctionalTerm> groundFunctionalSubstitution = partiallySimplifiedExpression
+                .map(e -> extractGroundFunctionalSubstitution(expression, children))
+                .orElseGet(substitutionFactory::getSubstitution);
 
-        Optional<ImmutableExpression> newExpression = groundFunctionalSubstitution.isPresent()
+        Optional<ImmutableExpression> newExpression = !groundFunctionalSubstitution.isEmpty()
             ? evaluateCondition(
-                groundFunctionalSubstitution.get().apply(partiallySimplifiedExpression.get()),
+                groundFunctionalSubstitution.apply(partiallySimplifiedExpression.get()),
                     variableNullability)
             : partiallySimplifiedExpression;
 
         Substitution<VariableOrGroundTerm> ascendingSubstitution = substitutionFactory.union(
                         normalizedUnifier.removeFromDomain(variablesToRemainInEqualities),
-                        groundFunctionalSubstitution.orElseGet(substitutionFactory::getSubstitution));
+                        groundFunctionalSubstitution);
 
         return new ExpressionAndSubstitutionImpl(newExpression, ascendingSubstitution);
     }
@@ -194,35 +193,29 @@ public class ConditionSimplifierImpl implements ConditionSimplifier {
      * Treated differently from non-functional terms because functional terms are not robust to unification.
      * Does not include in the substitution ground terms that are "rejected" by all the children using the variable
      */
-    private Optional<Substitution<GroundFunctionalTerm>> extractGroundFunctionalSubstitution(
+    private Substitution<GroundFunctionalTerm> extractGroundFunctionalSubstitution(
             ImmutableExpression expression, ImmutableList<IQTree> children) {
 
         ImmutableMultimap<Variable, GroundFunctionalTerm> binaryEqualitiesSubset = expression.flattenAND()
                 .filter(e -> e.getFunctionSymbol() instanceof DBStrictEqFunctionSymbol)
                 .map(ImmutableFunctionalTerm::getTerms)
                 .filter(args ->
-                        args.stream().anyMatch(t -> t instanceof Variable)
-                        && args.stream().anyMatch(t -> t instanceof GroundFunctionalTerm)
-                        && args.stream().allMatch(t -> t instanceof Variable || t instanceof GroundFunctionalTerm))
+                        args.stream().allMatch(t -> t instanceof Variable || t instanceof GroundFunctionalTerm))
                 .flatMap(args -> args.stream()
                         .filter(t -> t instanceof Variable)
-                        .map(t -> (Variable)t)
                         .flatMap(v -> args.stream()
                                 .filter(t -> t instanceof GroundFunctionalTerm)
-                                .map(t -> (GroundFunctionalTerm)t)
-                                .map(g -> Maps.immutableEntry(v, g))))
+                                .map(t -> Maps.immutableEntry((Variable)v, (GroundFunctionalTerm)t))))
                 .collect(ImmutableCollectors.toMultimap());
 
-        return Optional.of(binaryEqualitiesSubset)
-                .map(m -> m.asMap().entrySet().stream()
-                        // Filter out ground terms that would be "rejected" by all the children using the variable
-                        .filter(e -> children.stream()
-                                .filter(c -> c.getVariables().contains(e.getKey()))
-                                .anyMatch(c -> !c.getRootNode().wouldKeepDescendingGroundTermInFilterAbove(e.getKey(), false)))
-                        .collect(substitutionFactory.toSubstitution(
-                                Map.Entry::getKey,
-                                // Picks one of the ground functional terms
-                                e -> e.getValue().iterator().next())))
-                .filter(s -> !s.isEmpty());
+        return binaryEqualitiesSubset.asMap().entrySet().stream()
+                // Filter out ground terms that would be "rejected" by all the children using the variable
+                .filter(e -> children.stream()
+                        .filter(c -> c.getVariables().contains(e.getKey()))
+                        .anyMatch(c -> !c.getRootNode().wouldKeepDescendingGroundTermInFilterAbove(e.getKey(), false)))
+                .collect(substitutionFactory.toSubstitution(
+                        Map.Entry::getKey,
+                        // Picks one of the ground functional terms
+                        e -> e.getValue().iterator().next()));
     }
 }

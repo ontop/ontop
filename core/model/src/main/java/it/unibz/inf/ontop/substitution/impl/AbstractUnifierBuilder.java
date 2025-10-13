@@ -2,14 +2,15 @@ package it.unibz.inf.ontop.substitution.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
-import it.unibz.inf.ontop.substitution.Substitution;
-import it.unibz.inf.ontop.substitution.SubstitutionBasicOperations;
-import it.unibz.inf.ontop.substitution.UnifierBuilder;
+import it.unibz.inf.ontop.substitution.*;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
+import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.IntFunction;
@@ -23,11 +24,22 @@ public abstract class AbstractUnifierBuilder<T extends ImmutableTerm> implements
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
     private Optional<Substitution<T>> optionalSubstitution;
 
-    AbstractUnifierBuilder(TermFactory termFactory, SubstitutionBasicOperations<T> operations, Substitution<T> substitution) {
+    AbstractUnifierBuilder(TermFactory termFactory, SubstitutionBasicOperations<T> operations) {
         this.termFactory = termFactory;
         this.operations = operations;
-        this.optionalSubstitution = Optional.of(substitution);
+        this.optionalSubstitution = Optional.of(termFactory.getSubstitution(ImmutableMap.of()));
     }
+
+    @Override
+    public UnifierBuilder<T> unify(Substitution<T> substitution) {
+        if (optionalSubstitution.isPresent() &&  optionalSubstitution.get().isEmpty()) {
+            optionalSubstitution = Optional.of(substitution);
+            return this;
+        }
+        return unifySubstitution(substitution);
+    }
+
+    protected abstract UnifierBuilder<T> unifySubstitution(Substitution<T> substitution);
 
     @Override
     public UnifierBuilder<T> unify(ImmutableList<? extends T> args1, ImmutableList<? extends T> args2) {
@@ -102,6 +114,28 @@ public abstract class AbstractUnifierBuilder<T extends ImmutableTerm> implements
     public Optional<Substitution<T>> build() {
         return optionalSubstitution;
     }
+
+    public Optional<Substitution<T>> buildNormalized(ImmutableSet<Variable> priorityVariables) {
+        return optionalSubstitution
+                .map(eta -> getNormalizedUnifier(eta, priorityVariables));
+    }
+
+    private Substitution<T> getNormalizedUnifier(Substitution<T> eta, ImmutableSet<Variable> priorityVariables) {
+        Substitution<T> restriction = eta.restrictDomainTo(priorityVariables);
+        Substitution<T> renaming = (Substitution<T>)termFactory.getSubstitution(extractSubstitutionMap(restriction.stream(), priorityVariables));
+        return operations.compose(renaming, eta);
+    }
+
+    public static <T extends ImmutableTerm> ImmutableMap<Variable, T> extractSubstitutionMap(Stream<? extends Map.Entry<T, ? extends ImmutableTerm>> stream, ImmutableSet<Variable> priorityVariables) {
+        return stream
+                .filter(e -> e.getValue() instanceof Variable)
+                .filter(e -> !priorityVariables.contains(e.getValue()))
+                .collect(ImmutableCollectors.toMap(
+                        e -> (Variable)e.getValue(),
+                        Map.Entry::getKey,
+                        (ex, up) -> ex)); // prefer the existing value to an update
+    }
+
 
     @SuppressWarnings("UnusedReturnValue")
     AbstractUnifierBuilder<T> merge(UnifierBuilder<T> another) {

@@ -286,16 +286,15 @@ public class UnionNormalizerImpl implements UnionNormalizer {
 
     private Optional<ImmutableTerm> mergeDefinitions(
             Variable variable,
-            ImmutableCollection<Substitution<ImmutableTerm>> childSubstitutions,
+            ImmutableCollection<Substitution<ImmutableTerm>> tmpNormalizedChildSubstitutions,
             VariableGenerator variableGenerator) {
 
-        if (childSubstitutions.stream()
+        if (tmpNormalizedChildSubstitutions.stream()
                 .anyMatch(s -> !s.isDefining(variable)))
             return Optional.empty();
 
-        return childSubstitutions.stream()
+        return tmpNormalizedChildSubstitutions.stream()
                 .map(s -> s.get(variable))
-                .map(this::normalizeNullAndRDFConstants)
                 .map(Optional::of)
                 .reduce((od1, od2) -> od1
                         .flatMap(d1 -> od2
@@ -387,12 +386,10 @@ public class UnionNormalizerImpl implements UnionNormalizer {
                                Substitution<ImmutableTerm> tmpNormalizedSubstitution,
                                ImmutableSet<Variable> projectedVariables, VariableGenerator variableGenerator) {
 
-        ImmutableSet<Variable> formerV = constructionNode.getVariables();
-
-        Substitution<ImmutableTerm> normalizedEta = substitutionFactory.onImmutableTerms().unifierBuilder(tmpNormalizedSubstitution)
-                .unify(mergedSubstitution.stream(), Map.Entry::getKey, Map.Entry::getValue)
-                .build()
-                .map(eta -> substitutionFactory.getNormalizedUnifier(substitutionFactory.onImmutableTerms(), eta, projectedVariables))
+        Substitution<ImmutableTerm> normalizedEta = substitutionFactory.onImmutableTerms().unifierBuilder()
+                .unify(tmpNormalizedSubstitution)
+                .unify(mergedSubstitution)
+                .buildNormalized(projectedVariables)
                 .orElseThrow(() -> new QueryNodeSubstitutionException("The descending substitution " + mergedSubstitution
                         + " is incompatible with " + tmpNormalizedSubstitution));
 
@@ -403,8 +400,7 @@ public class UnionNormalizerImpl implements UnionNormalizer {
                 .build();
 
         Substitution<VariableOrGroundTerm> descendingSubstitution = normalizedEta.builder()
-                .removeFromDomain(tmpNormalizedSubstitution.getDomain())
-                .removeFromDomain(Sets.difference(newTheta.getDomain(), formerV))
+                .removeFromDomain(Sets.union(tmpNormalizedSubstitution.getDomain(), Sets.difference(newTheta.getDomain(), constructionNode.getVariables())))
                 // NB: this is expected to be ok given that the expected compatibility of the merged substitution with
                 // this construction node
                 .transform(t -> (VariableOrGroundTerm)t)

@@ -1,9 +1,6 @@
 package it.unibz.inf.ontop.iq.impl;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Sets;
+import com.google.common.collect.*;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
@@ -436,8 +433,9 @@ public class IQTreeTools {
         return queryRenamer.applyInDepthRenaming(renamingSubstitution, iq);
     }
 
-    public <T extends ImmutableTerm> Stream<ImmutableExpression> getRemainingEqualities(ImmutableList<? extends Map.Entry<? extends ImmutableTerm, T>> equalities, Substitution<T> sub) {
+    public <T extends ImmutableTerm> Stream<ImmutableExpression> getRemainingEqualities(ImmutableList<? extends Map.Entry<T, ? extends ImmutableTerm>> equalities, Substitution<T> sub) {
         return equalities.stream()
+                .map(e -> Maps.immutableEntry(e.getValue(), e.getKey()))
                 .filter(e -> sub.stream().noneMatch(e::equals))
                 .map(e -> termFactory.getStrictEquality(sub.applyToTerm(e.getKey()), e.getValue()));
     }
