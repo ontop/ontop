@@ -68,14 +68,6 @@ public abstract class LeafIQTreeImpl extends AbstractIQTree implements LeafIQTre
         return false;
     }
 
-    /**
-     * NB: the constraint is irrelevant here
-     */
-    @Override
-    public final IQTree applyDescendingSubstitution(DownPropagation dp) {
-        return applyDescendingSubstitutionWithoutOptimizing(dp.getDescendingSubstitution(), dp.getVariableGenerator());
-    }
-
     @Override
     public IQTree propagateDownConstraint(DownPropagation dp) {
         return this;

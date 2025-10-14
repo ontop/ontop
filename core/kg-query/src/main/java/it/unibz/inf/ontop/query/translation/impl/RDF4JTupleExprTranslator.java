@@ -678,38 +678,29 @@ public class RDF4JTupleExprTranslator {
     private TranslationResult translate(Projection projection) throws OntopInvalidKGQueryException, OntopUnsupportedKGQueryException {
         TranslationResult child = translate(projection.getArg());
 
-        ImmutableMap<Variable, Variable> map = projection.getProjectionElemList().getElements().stream()
-                .collect(ImmutableCollectors.toMap(
-                        pe -> termFactory.getVariable(pe.getName()),
-                        pe -> termFactory.getVariable(pe.getProjectionAlias().orElse(pe.getName()))));
+        /*
+            pe.getProjectionAlias().takes only 4 possible values ("subject", "predicate", "object" and "context")
+            and used as an optional "target" to identify the components of triples / quads in the CONSTRUCT part of a SPARQL query
+            the WHERE part of a SPARQL query does not use pe.getProjectionAlias()
+         */
 
-        Substitution<Variable> substitution = map.entrySet().stream()
-                .collect(substitutionFactory.toSubstitutionSkippingIdentityEntries());
-
-        ImmutableSet<Variable> projectedVars = ImmutableSet.copyOf(map.values());
-
-        if (substitution.isEmpty() && projectedVars.equals(child.iqTree.getVariables())) {
+        ImmutableSet<Variable> projectedVars = projection.getProjectionElemList().getElements().stream()
+                .map(pe -> termFactory.getVariable(pe.getName()))
+                .collect(ImmutableSet.toImmutableSet());
+        
+        if (projectedVars.equals(child.iqTree.getVariables())) {
             return child;
         }
 
-        if (!substitution.isEmpty()) {
-            System.out.println("GOTCHA: " + substitution + " " + projection);
-            throw new NullPointerException();
-        }
-
-        IQTree subQuery = applyDownPropagationWithoutOptimization(child.iqTree, substitution);
-
         // Substitution for possibly unbound variables
-        Substitution<ImmutableTerm> newSubstitution = Sets.difference(projectedVars, subQuery.getVariables()).stream()
+        Substitution<ImmutableTerm> newSubstitution = Sets.difference(projectedVars, child.iqTree.getVariables()).stream()
                 .collect(substitutionFactory.toSubstitution(v -> termFactory.getNullConstant()));
 
         ConstructionNode projectNode = iqFactory.createConstructionNode(projectedVars, newSubstitution);
-        UnaryIQTree constructTree = iqFactory.createUnaryIQTree(projectNode, subQuery);
-
-        ImmutableSet<Variable> nullableVariables = substitutionFactory.apply(substitution, child.nullableVariables);
+        UnaryIQTree constructTree = iqFactory.createUnaryIQTree(projectNode, child.iqTree);
 
         IQTree iqTree = applyExternalBindingFilter(constructTree, projectNode.getSubstitution().getDomain());
-        return createTranslationResult(iqTree, nullableVariables);
+        return createTranslationResult(iqTree, child.nullableVariables);
     }
 
     private TranslationResult translate(Union union) throws OntopInvalidKGQueryException, OntopUnsupportedKGQueryException {
@@ -931,10 +922,6 @@ public class RDF4JTupleExprTranslator {
     private InjectiveSubstitution<Variable> getFreshRenamingSubstitution(Set<Variable> variables) {
         return variables.stream()
                 .collect(substitutionFactory.toFreshRenamingSubstitution(variableGenerator));
-    }
-
-    private IQTree applyDownPropagationWithoutOptimization(IQTree tree, Substitution<? extends VariableOrGroundTerm> descendingSubstitution) {
-        return iqTreeTools.applyDownPropagationWithoutOptimization(tree, descendingSubstitution, variableGenerator);
     }
 
     private IQTree applyShallowRenaming(IQTree tree, InjectiveSubstitution<Variable> descendingSubstitution) {

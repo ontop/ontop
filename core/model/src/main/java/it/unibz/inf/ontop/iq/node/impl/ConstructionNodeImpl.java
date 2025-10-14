@@ -517,18 +517,4 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
                 (r, c) -> iqTreeTools.createOptionalConstructionNode(r.getVariables(), r.getSubstitution(), c));
     }
 
-    @Override
-    public IQTree applyDescendingSubstitutionWithoutOptimizing(Substitution<? extends VariableOrGroundTerm> descendingSubstitution,
-                                                               IQTree child, VariableGenerator variableGenerator) {
-        try {
-            return applyDescendingSubstitution(
-                    iqTreeTools.createDownPropagation(descendingSubstitution, Optional.empty(), getVariables(), variableGenerator),
-                    child,
-                    r -> iqTreeTools.applyDownPropagationWithoutOptimization(child, r.getResultingDownPropagation().getDescendingSubstitution(), variableGenerator),
-                    (r, c) -> iqTreeTools.createOptionalConstructionNode(r.getVariables(), r.getSubstitution(), c));
-        }
-        catch (DownPropagation.InconsistentDownPropagationException e) {
-            throw new MinorOntopInternalBugException("cannot happen");
-        }
-    }
 }

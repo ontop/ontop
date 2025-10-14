@@ -39,9 +39,6 @@ public interface BinaryOrderedOperatorNode extends QueryNode {
 
     IQTree applyDescendingSubstitution(DownPropagation dp, IQTree leftChild, IQTree rightChild);
 
-    IQTree applyDescendingSubstitutionWithoutOptimizing(Substitution<? extends VariableOrGroundTerm> descendingSubstitution,
-                                                        IQTree leftChild, IQTree rightChild, VariableGenerator variableGenerator);
-
     BinaryNonCommutativeOperatorNode applyFreshRenaming(InjectiveSubstitution<Variable> renamingSubstitution);
 
     boolean isConstructed(Variable variable, IQTree leftChild, IQTree rightChild);

@@ -78,6 +78,11 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
     }
 
     @Override
+    public FilterNode applyFreshRenaming(InjectiveSubstitution<Variable> renamingSubstitution) {
+        return iqFactory.createFilterNode(renamingSubstitution.apply(getFilterCondition()));
+    }
+
+    @Override
     public IQTree propagateDownConstraint(DownPropagation dp, IQTree child) {
         VariableNullability extendedChildVariableNullability
                 = dp.extendVariableNullability(child.getVariableNullability());
@@ -108,24 +113,6 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
             return iqTreeTools.createEmptyNode(dp);
         }
     }
-
-    @Override
-    public FilterNode applyFreshRenaming(InjectiveSubstitution<Variable> renamingSubstitution) {
-        return applyDescendingSubstitution(renamingSubstitution);
-    }
-
-    @Override
-    public IQTree applyDescendingSubstitutionWithoutOptimizing(Substitution<? extends VariableOrGroundTerm> descendingSubstitution,
-                                                               IQTree child, VariableGenerator variableGenerator) {
-        return iqFactory.createUnaryIQTree(
-                applyDescendingSubstitution(descendingSubstitution),
-                iqTreeTools.applyDownPropagationWithoutOptimization(child, descendingSubstitution, variableGenerator));
-    }
-
-    private FilterNode applyDescendingSubstitution(Substitution<? extends VariableOrGroundTerm> descendingSubstitution) {
-        return iqFactory.createFilterNode(descendingSubstitution.apply(getFilterCondition()));
-    }
-
 
     @Override
     public void validateNode(IQTree child) throws InvalidIntermediateQueryException {

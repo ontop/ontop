@@ -70,12 +70,6 @@ public class BinaryNonCommutativeIQTreeImpl extends AbstractCompositeIQTree<Bina
     }
 
     @Override
-    public IQTree applyDescendingSubstitutionWithoutOptimizing(Substitution<? extends VariableOrGroundTerm> descendingSubstitution, VariableGenerator variableGenerator) {
-        return getRootNode().applyDescendingSubstitutionWithoutOptimizing(descendingSubstitution, getLeftChild(), getRightChild(), variableGenerator);
-    }
-
-
-    @Override
     protected IQTree doNormalizeForOptimization(VariableGenerator variableGenerator, IQTreeCache treeCache) {
         return getRootNode().normalizeForOptimization(getLeftChild(), getRightChild(), variableGenerator, treeCache);
     }
@@ -102,6 +96,13 @@ public class BinaryNonCommutativeIQTreeImpl extends AbstractCompositeIQTree<Bina
         return getRootNode().applyDescendingSubstitution(dp, getLeftChild(), getRightChild());
     }
 
+    @Override
+    public IQTree propagateDownConstraint(DownPropagation dp) {
+        IQTree newTree = getRootNode().propagateDownConstraint(dp, getLeftChild(), getRightChild());
+        return equals(newTree)
+                ? this
+                : newTree;
+    }
 
     @Override
     public boolean isConstructed(Variable variable) {
@@ -116,14 +117,6 @@ public class BinaryNonCommutativeIQTreeImpl extends AbstractCompositeIQTree<Bina
     @Override
     protected VariableNullability computeVariableNullability() {
         return getRootNode().getVariableNullability(getLeftChild(), getRightChild());
-    }
-
-    @Override
-    public IQTree propagateDownConstraint(DownPropagation dp) {
-        IQTree newTree = getRootNode().propagateDownConstraint(dp, getLeftChild(), getRightChild());
-        return equals(newTree)
-                ? this
-                : newTree;
     }
 
     @Override

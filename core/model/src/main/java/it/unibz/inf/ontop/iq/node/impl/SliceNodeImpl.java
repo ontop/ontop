@@ -13,7 +13,6 @@ import it.unibz.inf.ontop.iq.node.normalization.SliceNormalizer;
 import it.unibz.inf.ontop.iq.request.FunctionalDependencies;
 import it.unibz.inf.ontop.iq.request.VariableNonRequirement;
 import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.InjectiveSubstitution;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
@@ -29,14 +28,12 @@ public class SliceNodeImpl extends QueryModifierNodeImpl implements SliceNode {
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
     private final OptionalLong limit;
 
-    private final IQTreeTools iqTreeTools;
     private final SliceNormalizer sliceNormalizer;
 
     @AssistedInject
     private SliceNodeImpl(@Assisted("offset") long offset, @Assisted("limit") long limit,
-                          IntermediateQueryFactory iqFactory, SliceNormalizer sliceNormalizer, TermFactory termFactory, IQTreeTools iqTreeTools) {
+                          IntermediateQueryFactory iqFactory, SliceNormalizer sliceNormalizer, TermFactory termFactory) {
         super(iqFactory, termFactory);
-        this.iqTreeTools = iqTreeTools;
         if (offset < 0)
             throw new IllegalArgumentException("The offset must not be negative");
         if (limit < 0)
@@ -47,9 +44,8 @@ public class SliceNodeImpl extends QueryModifierNodeImpl implements SliceNode {
     }
 
     @AssistedInject
-    private SliceNodeImpl(@Assisted long offset, IntermediateQueryFactory iqFactory, SliceNormalizer sliceNormalizer, TermFactory termFactory, IQTreeTools iqTreeTools) {
+    private SliceNodeImpl(@Assisted long offset, IntermediateQueryFactory iqFactory, SliceNormalizer sliceNormalizer, TermFactory termFactory) {
         super(iqFactory, termFactory);
-        this.iqTreeTools = iqTreeTools;
         if (offset < 0)
             throw new IllegalArgumentException("The offset must not be negative");
         this.offset = offset;
@@ -70,6 +66,11 @@ public class SliceNodeImpl extends QueryModifierNodeImpl implements SliceNode {
         return sliceNormalizer.normalizeForOptimization(this, child, variableGenerator, treeCache);
     }
 
+    @Override
+    public SliceNode applyFreshRenaming(InjectiveSubstitution<Variable> renamingSubstitution) {
+        return this;
+    }
+
     /**
      * Stops constraints
      */
@@ -81,18 +82,6 @@ public class SliceNodeImpl extends QueryModifierNodeImpl implements SliceNode {
     @Override
     public IQTree applyDescendingSubstitution(DownPropagation dp, IQTree child) {
         return iqFactory.createUnaryIQTree(this, dp.propagateToChild(child));
-    }
-
-    @Override
-    public IQTree applyDescendingSubstitutionWithoutOptimizing(Substitution<? extends VariableOrGroundTerm> descendingSubstitution,
-                                                               IQTree child, VariableGenerator variableGenerator) {
-        return iqFactory.createUnaryIQTree(this,
-                iqTreeTools.applyDownPropagationWithoutOptimization(child, descendingSubstitution, variableGenerator));
-    }
-
-    @Override
-    public SliceNode applyFreshRenaming(InjectiveSubstitution<Variable> renamingSubstitution) {
-        return this;
     }
 
     @Override

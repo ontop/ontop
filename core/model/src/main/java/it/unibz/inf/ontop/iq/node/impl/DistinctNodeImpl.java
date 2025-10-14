@@ -9,13 +9,11 @@ import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.IQTreeCache;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
-import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.node.normalization.DistinctNormalizer;
 import it.unibz.inf.ontop.iq.request.FunctionalDependencies;
 import it.unibz.inf.ontop.iq.request.VariableNonRequirement;
 import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.InjectiveSubstitution;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
@@ -25,14 +23,12 @@ public class DistinctNodeImpl extends QueryModifierNodeImpl implements DistinctN
 
     private static final String DISTINCT_NODE_STR = "DISTINCT";
 
-    private final IQTreeTools iqTreeTools;
     private final DistinctNormalizer normalizer;
 
     @Inject
-    private DistinctNodeImpl(IntermediateQueryFactory iqFactory, DistinctNormalizer normalizer, TermFactory termFactory, IQTreeTools iqTreeTools) {
+    private DistinctNodeImpl(IntermediateQueryFactory iqFactory, DistinctNormalizer normalizer, TermFactory termFactory) {
         super(iqFactory, termFactory);
         this.normalizer = normalizer;
-        this.iqTreeTools = iqTreeTools;
     }
 
     /**
@@ -50,20 +46,18 @@ public class DistinctNodeImpl extends QueryModifierNodeImpl implements DistinctN
     }
 
     @Override
-    public IQTree applyDescendingSubstitution(DownPropagation dp, IQTree child) {
-        return iqFactory.createUnaryIQTree(this, dp.propagateToChild(child));
-    }
-
-    @Override
     public DistinctNode applyFreshRenaming(InjectiveSubstitution<Variable> renamingSubstitution) {
         return this;
     }
 
     @Override
-    public IQTree applyDescendingSubstitutionWithoutOptimizing(Substitution<? extends VariableOrGroundTerm> descendingSubstitution,
-                                                               IQTree child, VariableGenerator variableGenerator) {
-        return iqFactory.createUnaryIQTree(this,
-                iqTreeTools.applyDownPropagationWithoutOptimization(child, descendingSubstitution, variableGenerator));
+    public IQTree propagateDownConstraint(DownPropagation dp, IQTree child) {
+        return iqFactory.createUnaryIQTree(this, dp.propagateToChild(child));
+    }
+
+    @Override
+    public IQTree applyDescendingSubstitution(DownPropagation dp, IQTree child) {
+        return iqFactory.createUnaryIQTree(this, dp.propagateToChild(child));
     }
 
     @Override

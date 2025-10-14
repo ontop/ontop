@@ -124,6 +124,11 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
     }
 
     @Override
+    public InnerJoinNode applyFreshRenaming(InjectiveSubstitution<Variable> renamingSubstitution) {
+        return iqFactory.createInnerJoinNode(getOptionalFilterCondition().map(renamingSubstitution::apply));
+    }
+
+    @Override
     public IQTree applyDescendingSubstitution(DownPropagation dp, ImmutableList<IQTree> children) {
         VariableNullability simplifiedChildFutureVariableNullability = variableNullabilityTools.getSimplifiedVariableNullability(
                 dp.computeProjectedVariables());
@@ -155,24 +160,6 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
         catch (DownPropagation.InconsistentDownPropagationException e) {
             return iqTreeTools.createEmptyNode(dp);
         }
-    }
-
-    @Override
-    public IQTree applyDescendingSubstitutionWithoutOptimizing(Substitution<? extends VariableOrGroundTerm> descendingSubstitution,
-                                                               ImmutableList<IQTree> children, VariableGenerator variableGenerator) {
-        return iqFactory.createNaryIQTree(
-                applyDescendingSubstitution(descendingSubstitution),
-                NaryIQTreeTools.transformChildren(
-                        children, c -> iqTreeTools.applyDownPropagationWithoutOptimization(c, descendingSubstitution, variableGenerator)));
-    }
-
-    @Override
-    public InnerJoinNode applyFreshRenaming(InjectiveSubstitution<Variable> renamingSubstitution) {
-        return applyDescendingSubstitution(renamingSubstitution);
-    }
-
-    private InnerJoinNode applyDescendingSubstitution(Substitution<? extends VariableOrGroundTerm> descendingSubstitution) {
-        return iqFactory.createInnerJoinNode(getOptionalFilterCondition().map(descendingSubstitution::apply));
     }
 
     @Override

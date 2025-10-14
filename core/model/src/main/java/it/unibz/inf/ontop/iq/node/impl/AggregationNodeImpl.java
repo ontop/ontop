@@ -66,21 +66,6 @@ public class AggregationNodeImpl extends ExtendedProjectionNodeImpl implements A
                 this::createAggregationNode);
     }
 
-    @Override
-    public IQTree applyDescendingSubstitutionWithoutOptimizing(Substitution<? extends VariableOrGroundTerm> descendingSubstitution,
-                                                               IQTree child, VariableGenerator variableGenerator) {
-        try {
-            return applyDescendingSubstitutionOrBlock(
-                    iqTreeTools.createDownPropagation(descendingSubstitution, Optional.empty(), getVariables(), variableGenerator),
-                    child,
-                    r -> iqTreeTools.applyDownPropagationWithoutOptimization(child, r.getResultingDownPropagation().getDescendingSubstitution(), variableGenerator),
-                    this::createAggregationNode);
-        }
-        catch (DownPropagation.InconsistentDownPropagationException e) {
-            throw new MinorOntopInternalBugException("cannot happen");
-        }
-    }
-
     private Optional<AggregationNode> createAggregationNode(PropagationResults r, IQTree newChild) {
         return Optional.of(iqFactory.createAggregationNode(
                 Sets.difference(r.getVariables(), r.getSubstitution().getDomain()).immutableCopy(),

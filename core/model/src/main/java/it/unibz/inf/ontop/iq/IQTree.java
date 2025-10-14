@@ -69,14 +69,6 @@ public interface IQTree {
     IQTree applyFreshRenaming(InjectiveSubstitution<Variable> freshRenamingSubstitution);
 
     /**
-     * Applies the descending substitution WITHOUT applying any additional optimization.
-     *
-     * Called only during SPARQL to IQTree translation.
-     */
-    IQTree applyDescendingSubstitutionWithoutOptimizing(Substitution<? extends VariableOrGroundTerm> descendingSubstitution,
-                                                        VariableGenerator variableGenerator);
-
-    /**
      * Variables present in the tree
      */
     ImmutableSet<Variable> getKnownVariables();

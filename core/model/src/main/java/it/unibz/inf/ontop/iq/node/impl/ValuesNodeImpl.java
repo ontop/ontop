@@ -214,15 +214,14 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
     }
 
     @Override
-    public IQTree applyDescendingSubstitutionWithoutOptimizing(Substitution<? extends VariableOrGroundTerm> descendingSubstitution,
-                                                               VariableGenerator variableGenerator) {
+    public IQTree applyDescendingSubstitution(DownPropagation dp) {
         final UnaryIQTreeBuilder<UnaryOperatorNode> iqTreeBuilder;
         ValuesNode valuesNode = this;
 
-        Substitution<GroundFunctionalTerm> functionalSubstitutionFragment = descendingSubstitution.restrictRangeTo(GroundFunctionalTerm.class);
+        Substitution<GroundFunctionalTerm> functionalSubstitutionFragment = dp.getDescendingSubstitution().restrictRangeTo(GroundFunctionalTerm.class);
         if (!functionalSubstitutionFragment.isEmpty()) {
             InjectiveSubstitution<Variable> renaming = Sets.intersection(valuesNode.getVariables(), functionalSubstitutionFragment.getDomain()).stream()
-                    .collect(substitutionFactory.toFreshRenamingSubstitution(variableGenerator));
+                    .collect(substitutionFactory.toFreshRenamingSubstitution(dp.getVariableGenerator()));
 
             ImmutableExpression filterCondition = termFactory.getConjunction(
                     substitutionFactory.rename(renaming, functionalSubstitutionFragment)
@@ -232,7 +231,7 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
 
             iqTreeBuilder = iqTreeTools.unaryIQTreeBuilder()
                         .append(iqFactory.createConstructionNode(
-                                Sets.difference(valuesNode.getVariables(), descendingSubstitution.getDomain()).immutableCopy()))
+                                Sets.difference(valuesNode.getVariables(), dp.getDescendingSubstitution().getDomain()).immutableCopy()))
                         .append(iqFactory.createFilterNode(filterCondition));
 
             valuesNode = valuesNode.applyFreshRenaming(renaming);
@@ -241,10 +240,10 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
             iqTreeBuilder = iqTreeTools.unaryIQTreeBuilder();
         }
 
-        Substitution<Constant> constantSubstitutionFragment = descendingSubstitution.restrictRangeTo(Constant.class);
+        Substitution<Constant> constantSubstitutionFragment = dp.getDescendingSubstitution().restrictRangeTo(Constant.class);
         valuesNode = substituteConstants(constantSubstitutionFragment, valuesNode);
 
-        Substitution<Variable> variableSubstitutionFragment = descendingSubstitution.restrictRangeTo(Variable.class);
+        Substitution<Variable> variableSubstitutionFragment = dp.getDescendingSubstitution().restrictRangeTo(Variable.class);
         valuesNode = substituteVariables(variableSubstitutionFragment, valuesNode);
 
         return iqTreeBuilder.build(valuesNode);

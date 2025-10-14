@@ -101,9 +101,8 @@ public class IntensionalDataNodeImpl extends LeafIQTreeImpl implements Intension
     }
 
     @Override
-    public IQTree applyDescendingSubstitutionWithoutOptimizing(
-            Substitution<? extends VariableOrGroundTerm> descendingSubstitution, VariableGenerator variableGenerator) {
-        return applyDescendingSubstitution(descendingSubstitution);
+    public IQTree applyDescendingSubstitution(DownPropagation dp) {
+        return applyDescendingSubstitution(dp.getDescendingSubstitution());
     }
 
     private IntensionalDataNode applyDescendingSubstitution(Substitution<? extends VariableOrGroundTerm> descendingSubstitution) {

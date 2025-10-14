@@ -88,8 +88,11 @@ public class NaryIQTreeImpl extends AbstractCompositeIQTree<NaryOperatorNode> im
     }
 
     @Override
-    public IQTree applyDescendingSubstitutionWithoutOptimizing(Substitution<? extends VariableOrGroundTerm> descendingSubstitution, VariableGenerator variableGenerator) {
-        return getRootNode().applyDescendingSubstitutionWithoutOptimizing(descendingSubstitution, getChildren(), variableGenerator);
+    public IQTree propagateDownConstraint(DownPropagation dp) {
+        IQTree newTree = getRootNode().propagateDownConstraint(dp, getChildren());
+        return equals(newTree)
+                ? this
+                : newTree;
     }
 
     /**
@@ -103,14 +106,6 @@ public class NaryIQTreeImpl extends AbstractCompositeIQTree<NaryOperatorNode> im
     @Override
     protected boolean computeIsDistinct() {
         return getRootNode().isDistinct(this, getChildren());
-    }
-
-    @Override
-    public IQTree propagateDownConstraint(DownPropagation dp) {
-        IQTree newTree = getRootNode().propagateDownConstraint(dp, getChildren());
-        return equals(newTree)
-                ? this
-                : newTree;
     }
 
     @Override

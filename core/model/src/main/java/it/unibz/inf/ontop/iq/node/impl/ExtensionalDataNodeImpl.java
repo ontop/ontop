@@ -103,9 +103,8 @@ public class ExtensionalDataNodeImpl extends LeafIQTreeImpl implements Extension
 
 
     @Override
-    public IQTree applyDescendingSubstitutionWithoutOptimizing(
-            Substitution<? extends VariableOrGroundTerm> descendingSubstitution, VariableGenerator variableGenerator) {
-        ImmutableMap<Integer, VariableOrGroundTerm> newArguments = substitutionFactory.onVariableOrGroundTerms().applyToTerms(descendingSubstitution, argumentMap);
+    public IQTree applyDescendingSubstitution(DownPropagation dp) {
+        ImmutableMap<Integer, VariableOrGroundTerm> newArguments = substitutionFactory.onVariableOrGroundTerms().applyToTerms(dp.getDescendingSubstitution(), argumentMap);
         return iqFactory.createExtensionalDataNode(relationDefinition, newArguments);
     }
 

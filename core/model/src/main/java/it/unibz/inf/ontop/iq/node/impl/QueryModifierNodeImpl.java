@@ -34,11 +34,6 @@ public abstract class QueryModifierNodeImpl implements QueryModifierNode {
     }
 
     @Override
-    public IQTree propagateDownConstraint(DownPropagation dp, IQTree child) {
-        return iqFactory.createUnaryIQTree(this, dp.propagateToChild(child));
-    }
-
-    @Override
     public ImmutableSet<Substitution<NonVariableTerm>> getPossibleVariableDefinitions(IQTree child) {
         return child.getPossibleVariableDefinitions();
     }

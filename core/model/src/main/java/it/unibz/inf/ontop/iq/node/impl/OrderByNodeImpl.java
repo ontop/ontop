@@ -67,26 +67,23 @@ public class OrderByNodeImpl extends QueryModifierNodeImpl implements OrderByNod
     }
 
     @Override
-    public IQTree applyDescendingSubstitution(DownPropagation dp, IQTree child) {
-        return iqTreeTools.unaryIQTreeBuilder()
-                .append(applySubstitution(dp.getDescendingSubstitution()))
-                .build(dp.propagateToChild(child));
-    }
-
-    @Override
-    public IQTree applyDescendingSubstitutionWithoutOptimizing(Substitution<? extends VariableOrGroundTerm> descendingSubstitution,
-                                                               IQTree child, VariableGenerator variableGenerator) {
-        return iqTreeTools.unaryIQTreeBuilder()
-                .append(applySubstitution(descendingSubstitution))
-                .build(iqTreeTools.applyDownPropagationWithoutOptimization(child, descendingSubstitution, variableGenerator));
-    }
-
-    @Override
     public OrderByNode applyFreshRenaming(InjectiveSubstitution<Variable> renamingSubstitution) {
         var factory = substitutionFactory.onNonGroundTerms();
         var newComparators = iqTreeTools.transformComparators(
                 comparators, t -> factory.rename(renamingSubstitution, t));
         return iqFactory.createOrderByNode(newComparators);
+    }
+
+    @Override
+    public IQTree propagateDownConstraint(DownPropagation dp, IQTree child) {
+        return iqFactory.createUnaryIQTree(this, dp.propagateToChild(child));
+    }
+
+    @Override
+    public IQTree applyDescendingSubstitution(DownPropagation dp, IQTree child) {
+        return iqTreeTools.unaryIQTreeBuilder()
+                .append(applySubstitution(dp.getDescendingSubstitution()))
+                .build(dp.propagateToChild(child));
     }
 
     @Override

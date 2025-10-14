@@ -23,12 +23,11 @@ public interface UnaryOperatorNode extends QueryNode {
 
     IQTree normalizeForOptimization(IQTree child, VariableGenerator variableGenerator, IQTreeCache treeCache);
 
-    IQTree applyDescendingSubstitution(DownPropagation dp, IQTree child);
-
-    IQTree applyDescendingSubstitutionWithoutOptimizing(Substitution<? extends VariableOrGroundTerm> descendingSubstitution,
-                                                        IQTree child, VariableGenerator variableGenerator);
-
     UnaryOperatorNode applyFreshRenaming(InjectiveSubstitution<Variable> renamingSubstitution);
+
+    IQTree propagateDownConstraint(DownPropagation dp, IQTree child);
+
+    IQTree applyDescendingSubstitution(DownPropagation dp, IQTree child);
 
     VariableNullability getVariableNullability(IQTree child);
 
@@ -38,8 +37,6 @@ public interface UnaryOperatorNode extends QueryNode {
 
     @Deprecated
     IQTree liftIncompatibleDefinitions(Variable variable, IQTree child, VariableGenerator variableGenerator);
-
-    IQTree propagateDownConstraint(DownPropagation dp, IQTree child);
 
     <T> T acceptVisitor(UnaryIQTree tree, IQTreeVisitor<T> visitor, IQTree child);
 

@@ -438,6 +438,11 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
     }
 
     @Override
+    public UnionNode applyFreshRenaming(InjectiveSubstitution<Variable> renamingSubstitution) {
+        return iqFactory.createUnionNode(DownPropagation.computeProjectedVariables(renamingSubstitution, projectedVariables));
+    }
+
+    @Override
     public IQTree propagateDownConstraint(DownPropagation dp, ImmutableList<IQTree> children) {
         return propagateDown(dp, children);
     }
@@ -461,22 +466,5 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
             default:
                 return iqTreeTools.createUnionTree(dp.computeProjectedVariables(), updatedChildren);
         }
-    }
-
-    @Override
-    public IQTree applyDescendingSubstitutionWithoutOptimizing(Substitution<? extends VariableOrGroundTerm> descendingSubstitution,
-                                                               ImmutableList<IQTree> children, VariableGenerator variableGenerator) {
-        return iqFactory.createNaryIQTree(applyDescendingSubstitution(descendingSubstitution),
-                NaryIQTreeTools.transformChildren(children,
-                        c -> iqTreeTools.applyDownPropagationWithoutOptimization(c, descendingSubstitution, variableGenerator)));
-    }
-
-    @Override
-    public UnionNode applyFreshRenaming(InjectiveSubstitution<Variable> renamingSubstitution) {
-        return applyDescendingSubstitution(renamingSubstitution);
-    }
-
-    private UnionNode applyDescendingSubstitution(Substitution<? extends VariableOrGroundTerm> descendingSubstitution) {
-        return iqFactory.createUnionNode(DownPropagation.computeProjectedVariables(descendingSubstitution, projectedVariables));
     }
 }
