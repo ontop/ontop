@@ -205,17 +205,11 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
          */
         public IQTree propagateToChild(IQTree child) throws DownPropagation.InconsistentDownPropagationException {
 
-            DownPropagation dpN = getResultingDownPropagation();
+            DownPropagation dpN = iqTreeTools.createDownPropagation(delta, dp.getConstraint(), dp.getVariables(), dp.getVariableGenerator());
 
             var newConstraint = iqTreeTools.updateDownPropagationConstraint(dp, theta, Optional.empty(), child::getVariableNullability);
 
             return dpN.propagateWithConstraint(newConstraint, child);
         }
-
-        public DownPropagation getResultingDownPropagation() throws DownPropagation.InconsistentDownPropagationException {
-            return iqTreeTools.createDownPropagation(delta, dp.getConstraint(), dp.getVariables(), dp.getVariableGenerator());
-        }
-
     }
-
 }

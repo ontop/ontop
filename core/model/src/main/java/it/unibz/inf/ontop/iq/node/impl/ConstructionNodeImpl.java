@@ -515,5 +515,4 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
                 child,
                 (r, c) -> iqTreeTools.createOptionalConstructionNode(r.getVariables(), r.getSubstitution(), c));
     }
-
 }
