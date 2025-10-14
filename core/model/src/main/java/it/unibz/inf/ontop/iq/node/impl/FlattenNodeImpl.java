@@ -6,7 +6,6 @@ import com.google.common.collect.Sets;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
-import it.unibz.inf.ontop.exception.OntopInternalBugException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.IQTreeCache;
@@ -188,7 +187,7 @@ public class FlattenNodeImpl extends CompositeQueryNodeImpl implements FlattenNo
         }
     }
 
-    private Variable applySubstitution(Variable var, Substitution<? extends VariableOrGroundTerm> sub) {
+    private Variable applySubstitution(Substitution<? extends VariableOrGroundTerm> sub, Variable var) {
         VariableOrGroundTerm newVar = substitutionFactory.onVariableOrGroundTerms().apply(sub, var);
         if (!(newVar instanceof Variable))
             throw new InvalidIntermediateQueryException("This substitution application should yield a variable");
@@ -196,18 +195,12 @@ public class FlattenNodeImpl extends CompositeQueryNodeImpl implements FlattenNo
         return (Variable) newVar;
     }
 
-    /**
-     * Avoids creating an instance if unnecessary (a similar optimization is implemented for Filter Nodes)
-     */
     private FlattenNode applyDescendingSubstitution(Substitution<? extends VariableOrGroundTerm> sub) {
-        Variable sFlattenedVar = applySubstitution(flattenedVariable, sub);
-        Variable sOutputVar = applySubstitution(outputVariable, sub);
-        Optional<Variable> sIndexVar = indexVariable.map(index -> applySubstitution(index, sub));
-        return sFlattenedVar.equals(flattenedVariable) &&
-                sOutputVar.equals(outputVariable) &&
-                sIndexVar.equals(indexVariable)
-                ? this
-                : iqFactory.createFlattenNode(sOutputVar, sFlattenedVar, sIndexVar, flattenedType);
+        return iqFactory.createFlattenNode(
+                applySubstitution(sub, outputVariable),
+                applySubstitution(sub, flattenedVariable),
+                indexVariable.map(index -> applySubstitution(sub, index)),
+                flattenedType);
     }
 
 

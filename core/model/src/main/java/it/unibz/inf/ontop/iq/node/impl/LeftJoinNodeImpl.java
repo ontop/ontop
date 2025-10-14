@@ -270,11 +270,7 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
 
     @Override
     public LeftJoinNode applyFreshRenaming(InjectiveSubstitution<Variable> renamingSubstitution) {
-        return applySubstitution(renamingSubstitution);
-    }
-
-    private LeftJoinNode applySubstitution(Substitution<? extends VariableOrGroundTerm> descendingSubstitution) {
-        return iqFactory.createLeftJoinNode(getOptionalFilterCondition().map(descendingSubstitution::apply));
+        return iqFactory.createLeftJoinNode(getOptionalFilterCondition().map(renamingSubstitution::apply));
     }
 
     @Override

@@ -68,9 +68,8 @@ public class OrderByNodeImpl extends QueryModifierNodeImpl implements OrderByNod
 
     @Override
     public OrderByNode applyFreshRenaming(InjectiveSubstitution<Variable> renamingSubstitution) {
-        var factory = substitutionFactory.onNonGroundTerms();
         var newComparators = iqTreeTools.transformComparators(
-                comparators, t -> factory.rename(renamingSubstitution, t));
+                comparators, t -> substitutionFactory.onNonGroundTerms().rename(renamingSubstitution, t));
         return iqFactory.createOrderByNode(newComparators);
     }
 

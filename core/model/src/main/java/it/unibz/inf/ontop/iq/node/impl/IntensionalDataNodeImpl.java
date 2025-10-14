@@ -96,8 +96,8 @@ public class IntensionalDataNodeImpl extends LeafIQTreeImpl implements Intension
 
 
     @Override
-    public IntensionalDataNode applyFreshRenaming(InjectiveSubstitution<Variable> freshRenamingSubstitution) {
-        return applyDescendingSubstitution(freshRenamingSubstitution);
+    public IntensionalDataNode applyFreshRenaming(InjectiveSubstitution<Variable> renamingSubstitution) {
+        return applyDescendingSubstitution(renamingSubstitution);
     }
 
     @Override

@@ -66,7 +66,7 @@ public interface IQTree {
      * (e.g. it remains normalized if it was already)
      *
      */
-    IQTree applyFreshRenaming(InjectiveSubstitution<Variable> freshRenamingSubstitution);
+    IQTree applyFreshRenaming(InjectiveSubstitution<Variable> renamingSubstitution);
 
     /**
      * Variables present in the tree

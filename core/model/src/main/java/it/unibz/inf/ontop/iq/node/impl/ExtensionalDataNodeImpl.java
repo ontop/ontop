@@ -113,12 +113,12 @@ public class ExtensionalDataNodeImpl extends LeafIQTreeImpl implements Extension
      * Useful the data node has a lot of columns.
      */
     @Override
-    public ExtensionalDataNode applyFreshRenaming(InjectiveSubstitution<Variable> freshRenamingSubstitution) {
-        ImmutableMap<Integer, VariableOrGroundTerm> newArgumentMap = substitutionFactory.onVariableOrGroundTerms().applyToTerms(freshRenamingSubstitution, argumentMap);
+    public ExtensionalDataNode applyFreshRenaming(InjectiveSubstitution<Variable> renamingSubstitution) {
+        ImmutableMap<Integer, VariableOrGroundTerm> newArgumentMap = substitutionFactory.onVariableOrGroundTerms().applyToTerms(renamingSubstitution, argumentMap);
         return (variableNullability == null)
                 ? iqFactory.createExtensionalDataNode(relationDefinition, newArgumentMap)
                 : iqFactory.createExtensionalDataNode(relationDefinition, newArgumentMap,
-                variableNullability.applyFreshRenaming(freshRenamingSubstitution));
+                variableNullability.applyFreshRenaming(renamingSubstitution));
     }
 
 

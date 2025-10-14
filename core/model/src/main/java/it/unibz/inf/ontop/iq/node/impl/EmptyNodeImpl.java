@@ -10,14 +10,11 @@ import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.request.FunctionalDependencies;
 import it.unibz.inf.ontop.iq.request.VariableNonRequirement;
-import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
-import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.substitution.InjectiveSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.CoreUtilsFactory;
-import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.Objects;
 
@@ -42,18 +39,14 @@ public class EmptyNodeImpl extends LeafIQTreeImpl implements EmptyNode {
     }
 
     @Override
-    public EmptyNode applyFreshRenaming(InjectiveSubstitution<Variable> freshRenamingSubstitution) {
-        return applyDescendingSubstitution(freshRenamingSubstitution);
+    public EmptyNode applyFreshRenaming(InjectiveSubstitution<Variable> renamingSubstitution) {
+        return iqFactory.createEmptyNode(
+                DownPropagation.computeProjectedVariables(renamingSubstitution, projectedVariables));
     }
 
     @Override
     public IQTree applyDescendingSubstitution(DownPropagation dp) {
-        return applyDescendingSubstitution(dp.getDescendingSubstitution());
-    }
-
-    private EmptyNode applyDescendingSubstitution(Substitution<? extends VariableOrGroundTerm> descendingSubstitution) {
-        return iqFactory.createEmptyNode(
-                DownPropagation.computeProjectedVariables(descendingSubstitution, projectedVariables));
+        return iqFactory.createEmptyNode(dp.computeProjectedVariables());
     }
 
     @Override

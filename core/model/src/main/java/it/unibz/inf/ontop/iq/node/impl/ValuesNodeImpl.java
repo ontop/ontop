@@ -198,16 +198,15 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
     }
 
     @Override
-    public ValuesNode applyFreshRenaming(InjectiveSubstitution<Variable> freshRenamingSubstitution) {
-        ImmutableSet<Variable> newVariables = substitutionFactory.apply(freshRenamingSubstitution, projectedVariables);
+    public ValuesNode applyFreshRenaming(InjectiveSubstitution<Variable> renamingSubstitution) {
+        var newVariables = substitutionFactory.apply(renamingSubstitution, projectedVariables);
+        var newValueMaps = applyRenaming(renamingSubstitution, valueMaps);
 
         var newUniqueConstraints = uniqueConstraints == null
                 ? null
                 : uniqueConstraints.stream()
-                .map(s -> substitutionFactory.apply(freshRenamingSubstitution, s))
+                .map(s -> substitutionFactory.apply(renamingSubstitution, s))
                 .collect(ImmutableCollectors.toSet());
-
-        var newValueMaps = applyRenaming(freshRenamingSubstitution, valueMaps);
 
         return new ValuesNodeImpl(newVariables, newValueMaps, newUniqueConstraints, iqTreeTools, iqFactory,
                 coreUtilsFactory, settings, substitutionFactory, termFactory);
@@ -272,7 +271,6 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
                         .map(e -> Maps.immutableEntry(substitutionFactory.apply(renaming, e.getKey()), e.getValue()))
                         .collect(ImmutableCollectors.toMap()))
                 .collect(ImmutableCollectors.toList());
-
     }
 
     private ValuesNode substituteVariables(Substitution<Variable> variableSubstitutionFragment, ValuesNode valuesNode) {
