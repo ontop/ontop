@@ -37,15 +37,16 @@ public interface BinaryOrderedOperatorNode extends QueryNode {
 
     IQTree liftIncompatibleDefinitions(Variable variable, IQTree leftChild, IQTree rightChild, VariableGenerator variableGenerator);
 
-    IQTree applyDescendingSubstitution(DownPropagation dp, IQTree leftChild, IQTree rightChild);
-
     BinaryNonCommutativeOperatorNode applyFreshRenaming(InjectiveSubstitution<Variable> renamingSubstitution);
+
+    IQTree propagateDownConstraint(DownPropagation dp, IQTree leftChild, IQTree rightChild);
+
+    IQTree applyDescendingSubstitution(DownPropagation dp, IQTree leftChild, IQTree rightChild);
 
     boolean isConstructed(Variable variable, IQTree leftChild, IQTree rightChild);
 
     boolean isDistinct(IQTree tree, IQTree leftChild, IQTree rightChild);
 
-    IQTree propagateDownConstraint(DownPropagation dp, IQTree leftChild, IQTree rightChild);
 
     /**
      * Only validates the node, not its children

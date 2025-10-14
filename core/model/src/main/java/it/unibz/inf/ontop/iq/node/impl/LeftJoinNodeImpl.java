@@ -196,10 +196,8 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
     @Override
     public IQTree applyDescendingSubstitution(DownPropagation dp, IQTree leftChild, IQTree rightChild) {
 
-        var descendingSubstitution = dp.getDescendingSubstitution();
-
         if (isRejectingRightSpecificNulls(dp.getConstraint(), leftChild, rightChild)
-                || containsEqualityRightSpecificVariable(descendingSubstitution, leftChild, rightChild)) {
+                || containsEqualityRightSpecificVariable(dp.getDescendingSubstitution(), leftChild, rightChild)) {
             return dp.propagate(transformIntoInnerJoinTree(leftChild, rightChild));
         }
 
@@ -209,10 +207,10 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
         if (initialExpression.isPresent()) {
             try {
                 ExpressionAndSubstitution expressionAndCondition = applyDescendingSubstitutionToExpression(
-                        initialExpression.get(), descendingSubstitution, leftChild.getVariables(), rightChild.getVariables());
+                        initialExpression.get(), dp.getDescendingSubstitution(), leftChild.getVariables(), rightChild.getVariables());
 
                 Substitution<? extends VariableOrGroundTerm> rightDescendingSubstitution =
-                        substitutionFactory.onVariableOrGroundTerms().compose(expressionAndCondition.getSubstitution(), descendingSubstitution);
+                        substitutionFactory.onVariableOrGroundTerms().compose(expressionAndCondition.getSubstitution(), dp.getDescendingSubstitution());
 
                 DownPropagation dpR = iqTreeTools.createDownPropagation(rightDescendingSubstitution, Optional.empty(), rightChild.getVariables(), dp.getVariableGenerator());
                 IQTree updatedRightChild = dpR.propagate(rightChild);
@@ -225,7 +223,7 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
                         updatedLeftChild, updatedRightChild);
             }
             catch (DownPropagation.InconsistentDownPropagationException e) {
-                ImmutableSet<Variable> newlyProjectedVariables = DownPropagation.computeProjectedVariables(descendingSubstitution,
+                ImmutableSet<Variable> newlyProjectedVariables = DownPropagation.computeProjectedVariables(dp.getDescendingSubstitution(),
                                 projectedVariables(leftChild, rightChild).immutableCopy());
 
                 Substitution<?> paddingSubstitution = Sets.difference(newlyProjectedVariables, updatedLeftChild.getVariables()).stream()

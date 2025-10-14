@@ -23,9 +23,12 @@ public interface NaryOperatorNode extends QueryNode {
     IQTree normalizeForOptimization(ImmutableList<IQTree> children, VariableGenerator variableGenerator,
                                     IQTreeCache treeCache);
 
+    NaryOperatorNode applyFreshRenaming(InjectiveSubstitution<Variable> renamingSubstitution);
+
+    IQTree propagateDownConstraint(DownPropagation dp, ImmutableList<IQTree> children);
+
     IQTree applyDescendingSubstitution(DownPropagation dp, ImmutableList<IQTree> children);
 
-    NaryOperatorNode applyFreshRenaming(InjectiveSubstitution<Variable> renamingSubstitution);
 
     VariableNullability getVariableNullability(ImmutableList<IQTree> children);
 
@@ -35,8 +38,6 @@ public interface NaryOperatorNode extends QueryNode {
 
     @Deprecated
     IQTree liftIncompatibleDefinitions(Variable variable, ImmutableList<IQTree> children, VariableGenerator variableGenerator);
-
-    IQTree propagateDownConstraint(DownPropagation dp, ImmutableList<IQTree> children);
 
     <T> T acceptVisitor(NaryIQTree tree, IQTreeVisitor<T> visitor, ImmutableList<IQTree> children);
 

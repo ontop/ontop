@@ -43,23 +43,6 @@ public interface IQTree {
     }
 
     /**
-     * Applies the descending substitution and performs SOME optimizations.
-     *
-     * Designed to be called DURING the "structural/semantic optimization" phase.
-     *
-     */
-    IQTree applyDescendingSubstitution(DownPropagation dp);
-
-    /**
-     * TODO: explain
-     *
-     * The constraint is used for pruning. It remains enforced by
-     * a parent tree.
-     *
-     */
-    IQTree propagateDownConstraint(DownPropagation dp);
-
-    /**
      * Particular type of descending substitution: only renaming some variables by external ones.
      *
      * Isolated from regular descending substitutions as it preserves the properties of the tree
@@ -67,6 +50,23 @@ public interface IQTree {
      *
      */
     IQTree applyFreshRenaming(InjectiveSubstitution<Variable> renamingSubstitution);
+
+    /**
+     * TODO: explain
+     *
+     * The constraint is used for pruning. It remains enforced by the parent tree.
+     *
+     */
+    IQTree propagateDownConstraint(DownPropagation dp);
+
+    /**
+     * Applies the descending substitution and performs SOME optimizations.
+     *
+     * Designed to be called DURING the "structural/semantic optimization" phase.
+     *
+     */
+    IQTree applyDescendingSubstitution(DownPropagation dp);
+
 
     /**
      * Variables present in the tree

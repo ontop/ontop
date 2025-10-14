@@ -137,8 +137,13 @@ public class FlattenNodeImpl extends CompositeQueryNodeImpl implements FlattenNo
 
     @Override
     public IQTree propagateDownConstraint(DownPropagation dp, IQTree child) {
-        return iqFactory.createUnaryIQTree(this,
-                propagateToChild(substitutionFactory.getSubstitution(), dp, child));
+        try {
+            DownPropagation dp1 = iqTreeTools.createDownPropagation(substitutionFactory.getSubstitution(), dp.getConstraint(), child.getVariables(), dp.getVariableGenerator());
+            return iqFactory.createUnaryIQTree(this, dp1.propagate(child));
+        }
+        catch (DownPropagation.InconsistentDownPropagationException e) {
+            throw new MinorOntopInternalBugException("cannot happen", e);
+        }
     }
 
     @Override
@@ -175,16 +180,6 @@ public class FlattenNodeImpl extends CompositeQueryNodeImpl implements FlattenNo
         return iqTreeTools.unaryIQTreeBuilder()
                 .append(iqFactory.createConstructionNode(dp.computeProjectedVariables()))
                 .build(newFlattenTree);
-    }
-
-    private IQTree propagateToChild(Substitution<? extends VariableOrGroundTerm> descendingSubstitution, DownPropagation dp0, IQTree child) {
-        try {
-            DownPropagation dp = iqTreeTools.createDownPropagation(descendingSubstitution, dp0.getConstraint(), child.getVariables(), dp0.getVariableGenerator());
-            return dp.propagate(child);
-        }
-        catch (DownPropagation.InconsistentDownPropagationException e) {
-            throw new MinorOntopInternalBugException("cannot happen", e);
-        }
     }
 
     private Variable applySubstitution(Substitution<? extends VariableOrGroundTerm> sub, Variable var) {
