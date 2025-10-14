@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.iq.optimizer.impl.lj;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Multiset;
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -146,12 +147,25 @@ public class CardinalityInsensitiveLJPruningOptimizer implements LeftJoinIQOptim
 
         @Override
         public IQTree transformInnerJoin(IQTree tree, InnerJoinNode rootNode, ImmutableList<IQTree> children) {
-            var newTransformer = rootNode.getOptionalFilterCondition()
+            var filterVariables = rootNode.getOptionalFilterCondition()
                     .map(ImmutableFunctionalTerm::getVariables)
-                    .filter(vs -> !vs.isEmpty())
-                    .map(vs -> Sets.union(variablesUsedByAncestors, vs).immutableCopy())
-                    .map(this::computeNewTransformer)
-                    .orElse(this);
+                    .orElseGet(ImmutableSet::of);
+
+            var variableCounts = children.stream()
+                    .flatMap(c -> c.getVariables().stream())
+                    .collect(ImmutableCollectors.toMultiset());
+
+            var coOccurringVariables = variableCounts.entrySet().stream()
+                    .filter(e -> e.getCount() > 1)
+                    .map(Multiset.Entry::getElement)
+                    .collect(ImmutableSet.toImmutableSet());
+
+            var variablesUsed = Sets.union(Sets.union(variablesUsedByAncestors, filterVariables), coOccurringVariables)
+                    .immutableCopy();
+
+            var newTransformer = variablesUsedByAncestors.equals(variablesUsed)
+                    ? this
+                    : computeNewTransformer(variablesUsed);
 
             ImmutableList<IQTree> newChildren = children.stream()
                     .map(t -> t.acceptTransformer(newTransformer))
