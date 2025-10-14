@@ -6,6 +6,7 @@ import com.google.common.collect.Sets;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
+import it.unibz.inf.ontop.exception.OntopInternalBugException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.IQTreeCache;
@@ -147,30 +148,34 @@ public class FlattenNodeImpl extends CompositeQueryNodeImpl implements FlattenNo
                 .restrictRangeTo(GroundTerm.class)
                 .restrictDomainTo(getLocallyDefinedVariables());
 
-        InjectiveSubstitution<Variable> renaming = blockedSubstitution.getDomain().stream()
-                .collect(substitutionFactory.toFreshRenamingSubstitution(dp.getVariableGenerator()));
+        DownPropagation newDp = iqTreeTools.removeFromDomain(dp, blockedSubstitution.getDomain());
 
-        // same as descendingSubstitution except "var -> fresh var" replaces "var -> ground term"
-        Substitution<? extends VariableOrGroundTerm> newDescendingSubstitution = substitutionFactory.union(
-                renaming,
-                dp.getDescendingSubstitution().removeFromDomain(blockedSubstitution.getDomain()));
-
+        DownPropagation childDp;
+        try {
+            childDp = iqTreeTools.createDownPropagation(newDp.getDescendingSubstitution(), newDp.getConstraint(), child.getVariables(), newDp.getVariableGenerator());
+        }
+        catch (DownPropagation.InconsistentDownPropagationException e) {
+            throw new MinorOntopInternalBugException("cannot happen");
+        }
         UnaryIQTree flattenTree = iqFactory.createUnaryIQTree(
-                applyDescendingSubstitution(newDescendingSubstitution),
-                propagateToChild(newDescendingSubstitution, dp, child));
+                applyDescendingSubstitution(newDp.getDescendingSubstitution()),
+                childDp.propagate(child));
 
         if (blockedSubstitution.isEmpty())
             return flattenTree;
 
-        Substitution<?> renamedBlockedSubstitution = substitutionFactory.rename(renaming, blockedSubstitution);
         ImmutableExpression condition = termFactory.getConjunction(
-                renamedBlockedSubstitution.builder().toStream(termFactory::getStrictEquality).collect(ImmutableCollectors.toList()));
+                blockedSubstitution.builder().toStream(termFactory::getStrictEquality).collect(ImmutableCollectors.toList()));
+
+        InjectiveSubstitution<Variable> renaming = condition.getVariableStream()
+                .collect(substitutionFactory.toFreshRenamingSubstitution(dp.getVariableGenerator()));
+
+        IQTree newFlattenTree = iqTreeTools.applyDownPropagation(renaming,
+                iqFactory.createUnaryIQTree(iqFactory.createFilterNode(condition), flattenTree));
 
         return iqTreeTools.unaryIQTreeBuilder()
-                .append(iqFactory.createConstructionNode(
-                        Sets.difference(flattenTree.getVariables(), renaming.getRangeSet()).immutableCopy()))
-                .append(iqFactory.createFilterNode(condition))
-                .build(flattenTree);
+                .append(iqFactory.createConstructionNode(dp.computeProjectedVariables()))
+                .build(newFlattenTree);
     }
 
     private IQTree propagateToChild(Substitution<? extends VariableOrGroundTerm> descendingSubstitution, DownPropagation dp0, IQTree child) {

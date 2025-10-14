@@ -383,10 +383,11 @@ public class IQTreeTools {
         if (dp.getDescendingSubstitution().isEmpty())
             return dp;
 
-        var optionalRenaming = AbstractDownPropagation.transformIntoFreshRenaming(dp.getDescendingSubstitution(), dp.getVariables());
+        var newDescendingSubstitution = dp.getDescendingSubstitution().removeFromDomain(variables);
+        var optionalRenaming = AbstractDownPropagation.transformIntoFreshRenaming(newDescendingSubstitution, dp.getVariables());
         return optionalRenaming.isPresent()
                 ? new RenamingDownPropagation(optionalRenaming.get(), dp.getConstraint(), dp.getVariables(), dp.getVariableGenerator(), termFactory)
-                : new FullDownPropagation(dp.getDescendingSubstitution(), dp.getConstraint(), dp.getVariables(), dp.getVariableGenerator(), termFactory);
+                : new FullDownPropagation(newDescendingSubstitution, dp.getConstraint(), dp.getVariables(), dp.getVariableGenerator(), termFactory);
     }
 
     /**
