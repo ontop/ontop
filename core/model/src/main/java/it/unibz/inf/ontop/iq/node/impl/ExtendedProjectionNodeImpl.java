@@ -38,17 +38,26 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
     }
 
 
-
+    @Override
+    public IQTree propagateDownConstraint(DownPropagation dp, IQTree child) {
+        try {
+            var newConstraint = iqTreeTools.updateDownPropagationConstraint(dp, getSubstitution(), Optional.empty(), child::getVariableNullability);
+            IQTree newChild = dp.propagateWithConstraint(newConstraint, child);
+            return iqFactory.createUnaryIQTree(this, newChild);
+        }
+        catch (DownPropagation.InconsistentDownPropagationException e) {
+            return iqTreeTools.createEmptyNode(dp);
+        }
+    }
 
     protected final IQTree applyDescendingSubstitution(DownPropagation tau,
                                                        IQTree child,
-                                                       DescendingSubstitutionChildUpdateFunction updateChildFct,
                                                        ExtendedProjectionNodeConstructor ctr) {
 
         try {
             PropagationResults tauPropagationResults = propagateTau(tau, child.getVariables());
 
-            IQTree newChild = updateChildFct.apply(tauPropagationResults);
+            IQTree newChild = tauPropagationResults.propagateToChild(child);
 
             Optional<? extends ExtendedProjectionNode> projectionNode = ctr.create(
                     tauPropagationResults,
@@ -141,18 +150,6 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
     }
 
     @Override
-    public IQTree propagateDownConstraint(DownPropagation dp, IQTree child) {
-        try {
-            var newConstraint = iqTreeTools.updateDownPropagationConstraint(dp, getSubstitution(), Optional.empty(), child::getVariableNullability);
-            IQTree newChild = dp.propagateWithConstraint(newConstraint, child);
-            return iqFactory.createUnaryIQTree(this, newChild);
-        }
-        catch (DownPropagation.InconsistentDownPropagationException e) {
-            return iqTreeTools.createEmptyNode(dp);
-        }
-    }
-
-    @Override
     public VariableNullability getVariableNullability(IQTree child) {
         return child.getVariableNullability().update(getSubstitution(), getVariables());
     }
@@ -161,12 +158,6 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
     public boolean isConstructed(Variable variable, IQTree child) {
         return getSubstitution().isDefining(variable)
                 || (getChildVariables().contains(variable) && child.isConstructed(variable));
-    }
-
-    @FunctionalInterface
-    protected interface DescendingSubstitutionChildUpdateFunction {
-        IQTree apply(PropagationResults tauFPropagationResults)
-                throws DownPropagation.InconsistentDownPropagationException;
     }
 
     @FunctionalInterface
