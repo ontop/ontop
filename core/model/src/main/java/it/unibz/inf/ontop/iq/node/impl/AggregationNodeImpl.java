@@ -64,13 +64,12 @@ public class AggregationNodeImpl extends ExtendedProjectionNodeImpl implements A
     @Override
     public IQTree applyDescendingSubstitution(DownPropagation dp, IQTree child) {
 
-        ImmutableSet<Variable> aggregationVariables = substitution.getDomain();
-
         Substitution<GroundTerm> blockedGroundTermSubstitution = dp.getDescendingSubstitution().builder()
-                .restrictDomainTo(aggregationVariables)
                 .restrictRangeTo(GroundTerm.class)
+                .restrictDomainTo(getLocallyDefinedVariables())
                 .build();
 
+        ImmutableSet<Variable> aggregationVariables = substitution.getDomain();
         Substitution<Variable> descendingVar2Var = dp.getDescendingSubstitution().restrictRangeTo(Variable.class);
         // Variables whose entries are blocked
         ImmutableSet<Variable> blockedVariables = descendingVar2Var.getRangeSet().stream()
@@ -93,10 +92,10 @@ public class AggregationNodeImpl extends ExtendedProjectionNodeImpl implements A
 
         FilterNode filterNode = iqFactory.createFilterNode(condition);
 
-        InjectiveSubstitution<Variable> renamingSubstitution = filterNode.getLocalVariables().stream()
+        InjectiveSubstitution<Variable> renaming = filterNode.getLocalVariables().stream()
                 .collect(substitutionFactory.toFreshRenamingSubstitution(dp.getVariableGenerator()));
 
-        IQTree filterTree = iqTreeTools.applyDownPropagation(renamingSubstitution, iqFactory.createUnaryIQTree(filterNode, newSubTree));
+        IQTree filterTree = iqTreeTools.applyDownPropagation(renaming, iqFactory.createUnaryIQTree(filterNode, newSubTree));
 
         return iqFactory.createUnaryIQTree(
                 iqFactory.createConstructionNode(dp.computeProjectedVariables()),

@@ -145,7 +145,7 @@ public class FlattenNodeImpl extends CompositeQueryNodeImpl implements FlattenNo
     public IQTree applyDescendingSubstitution(DownPropagation dp, IQTree child) {
         Substitution<GroundTerm> blockedSubstitution = dp.getDescendingSubstitution()
                 .restrictRangeTo(GroundTerm.class)
-                .restrictDomainTo(extendWithIndexVariable(ImmutableSet.of(outputVariable, flattenedVariable)));
+                .restrictDomainTo(getLocallyDefinedVariables());
 
         InjectiveSubstitution<Variable> renaming = blockedSubstitution.getDomain().stream()
                 .collect(substitutionFactory.toFreshRenamingSubstitution(dp.getVariableGenerator()));
@@ -162,9 +162,6 @@ public class FlattenNodeImpl extends CompositeQueryNodeImpl implements FlattenNo
         if (blockedSubstitution.isEmpty())
             return flattenTree;
 
-        // TODO: compare with ValuesNode
-        // renamedBlockedSubstitution maps from fresh variables to old ground terms,
-        // but it's really required to produce equalities of the form "fresh var = ground term"
         Substitution<?> renamedBlockedSubstitution = substitutionFactory.rename(renaming, blockedSubstitution);
         ImmutableExpression condition = termFactory.getConjunction(
                 renamedBlockedSubstitution.builder().toStream(termFactory::getStrictEquality).collect(ImmutableCollectors.toList()));

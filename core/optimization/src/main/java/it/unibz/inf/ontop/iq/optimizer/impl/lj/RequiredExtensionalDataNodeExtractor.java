@@ -2,8 +2,6 @@ package it.unibz.inf.ontop.iq.optimizer.impl.lj;
 
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
-import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.node.*;
@@ -11,7 +9,6 @@ import it.unibz.inf.ontop.model.term.ImmutableTerm;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
-import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import static it.unibz.inf.ontop.iq.impl.IQTreeTools.UnaryIQTreeDecomposition;
