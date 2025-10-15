@@ -6,7 +6,6 @@ import com.google.inject.Singleton;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.node.*;
-import it.unibz.inf.ontop.iq.node.normalization.impl.ConditionSimplifierImpl;
 import it.unibz.inf.ontop.iq.request.FunctionalDependencies;
 import it.unibz.inf.ontop.iq.transform.QueryRenamer;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
@@ -331,16 +330,6 @@ public class IQTreeTools {
                 tree.getChildren().stream().anyMatch(t -> contains(t, nodeClass));
     }
 
-
-    public Optional<ImmutableExpression> updateDownPropagationConstraint(DownPropagation dp, Substitution<? extends ImmutableTerm> substitution, Optional<ImmutableExpression> optionalExpression, Supplier<VariableNullability> variableNullabilitySupplier) throws DownPropagation.InconsistentDownPropagationException {
-        Optional<ImmutableExpression> optionalSubstitutedConstraint = dp.getConstraint().map(substitution::apply);
-
-        return optionalSubstitutedConstraint.isPresent()
-                ? ConditionSimplifierImpl.evaluateCondition(getConjunction(
-                optionalExpression,
-                optionalSubstitutedConstraint.get()), dp.extendVariableNullability(variableNullabilitySupplier.get()))
-                : optionalExpression;
-    }
 
     /**
      * Excludes the variables that are not projected by the IQTree

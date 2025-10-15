@@ -57,11 +57,6 @@ public abstract class AbstractDownPropagation implements DownPropagation {
         return tree;
     }
 
-    @Override
-    public IQTree propagateWithConstraint(Optional<ImmutableExpression> constraint, IQTree tree) {
-        return withConstraint(constraint, tree.getVariables()).propagate(tree);
-    }
-
     protected abstract DownPropagation withConstraint(Optional<ImmutableExpression> constraint, ImmutableSet<Variable> variables);
 
     protected final Optional<ImmutableExpression> getFilteredConstraint(Predicate<ImmutableExpression> filter) {

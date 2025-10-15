@@ -20,6 +20,7 @@ import java.util.Comparator;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 @Singleton
@@ -122,25 +123,31 @@ public class ConditionSimplifierImpl implements ConditionSimplifier {
     }
 
     @Override
-    public ExpressionAndSubstitutionAndChildren simplifyAndPropagate(DownPropagation downPropagation, Optional<ImmutableExpression> expression, ImmutableList<IQTree> children,
+    public ExpressionAndSubstitutionAndChildren simplifyAndPropagate(DownPropagation dp,
+                                                                     Optional<ImmutableExpression> expression,
+                                                                     ImmutableList<IQTree> children,
                                                                      VariableNullability variableNullability) throws DownPropagation.InconsistentDownPropagationException {
         // TODO: also consider the constraint for simplifying the condition
         var simplification = simplifyCondition(
-                expression.map(e -> downPropagation.getDescendingSubstitution().apply(e)),
+                expression.map(e -> dp.getDescendingSubstitution().apply(e)),
                 ImmutableSet.of(),
                 children,
                 variableNullability);
 
-        var newConstraint = iqTreeTools.updateDownPropagationConstraint(downPropagation, simplification.getSubstitution(), simplification.getOptionalExpression(), () -> variableNullability);
+        var newConstraint = dp.getConstraint().isPresent()
+                ? evaluateCondition(
+                        iqTreeTools.getConjunction(simplification.getOptionalExpression(), simplification.getSubstitution().apply(dp.getConstraint().get())),
+                        dp.extendVariableNullability(variableNullability))
+                : simplification.getOptionalExpression();
 
         var downSubstitution = substitutionFactory.onVariableOrGroundTerms().compose(
-                downPropagation.getDescendingSubstitution(),
+                dp.getDescendingSubstitution(),
                 simplification.getSubstitution());
 
-        var extendedDownConstraint = iqTreeTools.createDownPropagation(downSubstitution, newConstraint, downPropagation.getVariables(), downPropagation.getVariableGenerator());
+        var extendedDownConstraint = iqTreeTools.createDownPropagation(downSubstitution, newConstraint, dp.getVariables(), dp.getVariableGenerator());
 
         return new ExpressionAndSubstitutionAndChildrenImpl(
-                iqTreeTools.createOptionalConstructionNode(downPropagation::computeProjectedVariables, simplification.getSubstitution()),
+                iqTreeTools.createOptionalConstructionNode(dp::computeProjectedVariables, simplification.getSubstitution()),
                 simplification.getOptionalExpression(),
                 NaryIQTreeTools.transformChildren(children, extendedDownConstraint::propagateWithRestrictedScope));
     }

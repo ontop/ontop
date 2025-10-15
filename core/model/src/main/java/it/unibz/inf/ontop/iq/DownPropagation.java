@@ -37,8 +37,6 @@ public interface DownPropagation {
 
     IQTree propagate(IQTree tree);
 
-    IQTree propagateWithConstraint(Optional<ImmutableExpression> constraint, IQTree tree);
-
     DownPropagation filterConstraint(Predicate<ImmutableExpression> filter);
 
     DownPropagation applySubstitutionToConstraint(Substitution<? extends ImmutableTerm> substitution, Supplier<VariableNullability> variableNullabilitySupplier) throws InconsistentDownPropagationException;
@@ -61,5 +59,4 @@ public interface DownPropagation {
         ImmutableSet<Variable> newVariables = substitution.restrictDomainTo(projectedVariables).getRangeVariables();
         return Sets.union(newVariables, Sets.difference(projectedVariables, substitution.getDomain())).immutableCopy();
     }
-    
 }

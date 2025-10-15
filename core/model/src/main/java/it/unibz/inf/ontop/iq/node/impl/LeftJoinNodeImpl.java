@@ -4,6 +4,7 @@ import com.google.common.collect.*;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.evaluator.TermNullabilityEvaluator;
+import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.DownPropagation;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
@@ -235,11 +236,17 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
             }
         }
         else {
-            IQTree updatedRightChild = dp.propagateWithConstraint(Optional.empty(), rightChild);
-            if (updatedRightChild.isDeclaredAsEmpty())
-                return paddingWithNull(updatedLeftChild, updatedRightChild);
+            try {
+                DownPropagation dpR = iqTreeTools.createDownPropagation(dp.getDescendingSubstitution(), Optional.empty(), rightChild.getVariables(), dp.getVariableGenerator());
+                IQTree updatedRightChild = dpR.propagate(rightChild);
+                if (updatedRightChild.isDeclaredAsEmpty())
+                    return paddingWithNull(updatedLeftChild, updatedRightChild);
 
-            return iqFactory.createBinaryNonCommutativeIQTree(this, updatedLeftChild, updatedRightChild);
+                return iqFactory.createBinaryNonCommutativeIQTree(this, updatedLeftChild, updatedRightChild);
+            }
+            catch (DownPropagation.InconsistentDownPropagationException e) {
+                throw new MinorOntopInternalBugException("cannot happen");
+            }
         }
     }
 
