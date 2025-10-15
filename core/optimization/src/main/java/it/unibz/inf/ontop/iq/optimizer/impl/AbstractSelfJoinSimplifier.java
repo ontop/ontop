@@ -110,7 +110,7 @@ public abstract class AbstractSelfJoinSimplifier<C extends FunctionalDependency>
 
         try {
             DownPropagation dp = iqTreeTools.createDownPropagation(unifier, Optional.empty(), NaryIQTreeTools.projectedVariables(newChildren), variableGenerator);
-            ImmutableList<IQTree> newChildrenPropagated = NaryIQTreeTools.transformChildren(newChildren, dp::propagateToChild);
+            ImmutableList<IQTree> newChildrenPropagated = NaryIQTreeTools.transformChildren(newChildren, dp::propagateWithRestrictedScope);
 
             Optional<ImmutableExpression> newExpression = termFactory.getConjunction(
                     innerJoinNode.getOptionalFilterCondition(),

@@ -76,9 +76,6 @@ public class UnaryIQTreeImpl extends AbstractCompositeIQTree<UnaryOperatorNode> 
 
     @Override
     public IQTree propagateDownConstraint(DownPropagation dp) {
-        if (!dp.getVariables().equals(getVariables()))
-            throw new IllegalStateException("VARIABLE SET MISMATCH: " + dp.getVariables() + " v " + getVariables());
-
         IQTree newTree = getRootNode().propagateDownConstraint(dp, getChild());
         return equals(newTree)
                 ? this

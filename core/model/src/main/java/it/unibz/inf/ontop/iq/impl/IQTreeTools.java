@@ -376,7 +376,7 @@ public class IQTreeTools {
 
     public DownPropagation createDownPropagation(Optional<ImmutableExpression> optionalConstraint, ImmutableSet<Variable> variables, VariableGenerator variableGenerator) {
         var optionalNormalizedConstraint = AbstractDownPropagation.normalizeConstraint(optionalConstraint, () -> variables, termFactory);
-        return new ConstraintOnlyDownPropagation(substitutionFactory.getSubstitution(), optionalNormalizedConstraint, variables, variableGenerator, termFactory);
+        return new ConstraintOnlyDownPropagation(optionalNormalizedConstraint, variables, variableGenerator, termFactory);
     }
 
     public DownPropagation removeFromDomain(DownPropagation dp, ImmutableSet<Variable> variables) {
@@ -407,7 +407,7 @@ public class IQTreeTools {
         InjectiveSubstitution<Variable> restriction = renaming.restrictDomainTo(variables);
         // variable generator is null as it is not used in the implementation of propagation
         return restriction.isEmpty()
-                ? new ConstraintOnlyDownPropagation(substitutionFactory.getSubstitution(), Optional.empty(), variables, null, termFactory)
+                ? new ConstraintOnlyDownPropagation(Optional.empty(), variables, null, termFactory)
                 : new RenamingDownPropagation(restriction, Optional.empty(), variables, null, termFactory);
     }
 

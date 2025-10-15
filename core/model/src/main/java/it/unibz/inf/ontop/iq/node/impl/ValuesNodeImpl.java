@@ -309,8 +309,8 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
     }
 
     @Override
-    public IQTree propagateDownConstraint(DownPropagation initialDp) {
-        ImmutableExpression constraint = initialDp.getConstraint().get();
+    public IQTree propagateDownConstraint(DownPropagation dp) {
+        ImmutableExpression constraint = dp.getConstraint().get();
         if (constraint.isGround())
             return this;
 
@@ -334,26 +334,21 @@ public class ValuesNodeImpl extends LeafIQTreeImpl implements ValuesNode {
         }
 
         ImmutableExpression firstStrictEquality = strictEqualities.get(0);
-
-        Optional<IQTree> optionalReshapedTree = tryToReshapeValuesNodeToConstructFunctionalTerm(firstStrictEquality, initialDp.getVariableGenerator());
+        Optional<IQTree> optionalReshapedTree = tryToReshapeValuesNodeToConstructFunctionalTerm(firstStrictEquality, dp.getVariableGenerator());
         if (optionalReshapedTree.isPresent()) {
-            // Propagates down other constraints
-            return initialDp.propagateWithConstraint(
-                    termFactory.getConjunction(constraint.flattenAND()
-                        .filter(c -> !c.equals(firstStrictEquality))),
-                    optionalReshapedTree.get());
+            return dp
+                    .filterConstraint(c -> !c.equals(firstStrictEquality))
+                    .propagate(optionalReshapedTree.get());
         }
 
-        IQTree filteredValuesNode = filterValuesNodeEntries(termFactory.getConjunction(
-                        Stream.concat(
-                                Stream.of(firstStrictEquality),
-                                otherConditions.stream())
-                                .collect(ImmutableCollectors.toList())));
+        var firstStrictEqualityAndOtherConditions = Stream.concat(
+                        Stream.of(firstStrictEquality), otherConditions.stream())
+                .collect(ImmutableCollectors.toList());
 
-        ImmutableList<ImmutableExpression> otherStrictEqualities = strictEqualities.subList(1, strictEqualities.size());
-        return initialDp.propagateWithConstraint(
-                termFactory.getConjunction(otherStrictEqualities.stream()),
-                filteredValuesNode);
+        IQTree filteredValuesNode = filterValuesNodeEntries(termFactory.getConjunction(firstStrictEqualityAndOtherConditions));
+        return dp
+                .filterConstraint(c -> !firstStrictEqualityAndOtherConditions.contains(c))
+                .propagate(filteredValuesNode);
     }
 
     /**

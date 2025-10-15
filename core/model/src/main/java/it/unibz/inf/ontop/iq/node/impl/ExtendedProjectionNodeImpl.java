@@ -41,8 +41,10 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
     @Override
     public IQTree propagateDownConstraint(DownPropagation dp, IQTree child) {
         try {
-            var newConstraint = iqTreeTools.updateDownPropagationConstraint(dp, getSubstitution(), Optional.empty(), child::getVariableNullability);
-            IQTree newChild = dp.propagateWithConstraint(newConstraint, child);
+            IQTree newChild = dp
+                    .applySubstitutionToConstraint(getSubstitution(), child::getVariableNullability)
+                    .extendToChildVariables(child.getVariables())
+                    .propagate(child);
             return iqFactory.createUnaryIQTree(this, newChild);
         }
         catch (DownPropagation.InconsistentDownPropagationException e) {

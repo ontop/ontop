@@ -81,7 +81,7 @@ public class SliceNodeImpl extends QueryModifierNodeImpl implements SliceNode {
 
     @Override
     public IQTree applyDescendingSubstitution(DownPropagation dp, IQTree child) {
-        return iqFactory.createUnaryIQTree(this, dp.propagateToChild(child));
+        return iqFactory.createUnaryIQTree(this, dp.propagate(child));
     }
 
     @Override

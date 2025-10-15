@@ -201,7 +201,7 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
             return dp.propagate(transformIntoInnerJoinTree(leftChild, rightChild));
         }
 
-        IQTree updatedLeftChild = dp.propagateToChild(leftChild);
+        IQTree updatedLeftChild = dp.propagateWithRestrictedScope(leftChild);
 
         Optional<ImmutableExpression> initialExpression = getOptionalFilterCondition();
         if (initialExpression.isPresent()) {
@@ -261,7 +261,7 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
             return dp.propagate(transformIntoInnerJoinTree(leftChild, rightChild));
         }
 
-        IQTree newLeftChild = dp.propagateToChild(leftChild);
+        IQTree newLeftChild = dp.propagateWithRestrictedScope(leftChild);
         return iqFactory.createBinaryNonCommutativeIQTree(this, newLeftChild, rightChild);
     }
 

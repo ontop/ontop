@@ -11,6 +11,7 @@ import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.Optional;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 
@@ -49,20 +50,11 @@ public abstract class AbstractDownPropagation implements DownPropagation {
         return variableGenerator;
     }
 
-    @Override
-    public IQTree propagateToChild(IQTree child) {
-        ImmutableSet<Variable> childVariables = checkScope(child.getVariables());
 
-        if (this.variables.size() == childVariables.size())
-            return propagate(child);
-
-        return withConstraint(optionalConstraint, childVariables).propagate(child);
-    }
-
-    protected final ImmutableSet<Variable> checkScope(ImmutableSet<Variable> variables) {
-        if (!this.variables.containsAll(variables))
-            throw new IllegalArgumentException("Variables " + variables + " are not included in " + this.variables);
-        return variables;
+    protected final IQTree checkScope(IQTree tree) {
+        if (!this.variables.equals(tree.getVariables()))
+            throw new IllegalArgumentException("Variables " + variables + " do not match " + tree);
+        return tree;
     }
 
     @Override
@@ -72,6 +64,21 @@ public abstract class AbstractDownPropagation implements DownPropagation {
 
     protected abstract DownPropagation withConstraint(Optional<ImmutableExpression> constraint, ImmutableSet<Variable> variables);
 
+    protected final Optional<ImmutableExpression> getFilteredConstraint(Predicate<ImmutableExpression> filter) {
+        return optionalConstraint.flatMap(
+                constraint -> termFactory.getConjunction(constraint.flattenAND().filter(filter)));
+    }
+
+    @Override
+    public DownPropagation restrictScope(ImmutableSet<Variable> newVariables) {
+        if (!variables.containsAll(newVariables))
+            throw new IllegalArgumentException("Variables " + newVariables + " are not included in " + this.variables);
+
+        if (variables.size() == newVariables.size())
+            return this;
+
+        return withConstraint(optionalConstraint, newVariables);
+    }
 
     /**
      * If the substitution is a fresh renaming, returns it as an injective substitution

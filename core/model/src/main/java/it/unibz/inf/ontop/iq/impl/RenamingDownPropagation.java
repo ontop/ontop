@@ -3,16 +3,16 @@ package it.unibz.inf.ontop.iq.impl;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.iq.DownPropagation;
 import it.unibz.inf.ontop.iq.IQTree;
-import it.unibz.inf.ontop.model.term.ImmutableExpression;
-import it.unibz.inf.ontop.model.term.TermFactory;
-import it.unibz.inf.ontop.model.term.Variable;
-import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
+import it.unibz.inf.ontop.iq.node.VariableNullability;
+import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.InjectiveSubstitution;
 import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.Optional;
 import java.util.function.BiFunction;
+import java.util.function.Predicate;
+import java.util.function.Supplier;
 
 public class RenamingDownPropagation extends AbstractDownPropagation implements DownPropagation {
     private final InjectiveSubstitution<Variable> substitution;
@@ -40,15 +40,33 @@ public class RenamingDownPropagation extends AbstractDownPropagation implements 
         if (!reducedSubstitution.isEmpty()) {
             return new RenamingDownPropagation(reducedSubstitution.injective(), optionalNormalizedConstraint, variables, variableGenerator, termFactory);
         }
-        return new ConstraintOnlyDownPropagation(reducedSubstitution, optionalNormalizedConstraint, variables, variableGenerator, termFactory);
+        return new ConstraintOnlyDownPropagation(optionalNormalizedConstraint, variables, variableGenerator, termFactory);
     }
 
     @Override
     public IQTree propagate(IQTree tree) {
-        IQTree renamedTree = tree.applyFreshRenaming(substitution);
+        IQTree renamedTree = checkScope(tree).applyFreshRenaming(substitution);
         return optionalConstraint.isPresent()
-                ? renamedTree.propagateDownConstraint(new ConstraintOnlyDownPropagation(substitution.restrictDomainTo(ImmutableSet.of()),
-                optionalConstraint, computeProjectedVariables(), variableGenerator, termFactory))
+                ? renamedTree.propagateDownConstraint(new ConstraintOnlyDownPropagation(optionalConstraint, computeProjectedVariables(), variableGenerator, termFactory))
                 : renamedTree;
     }
+
+    @Override
+    public DownPropagation filterConstraint(Predicate<ImmutableExpression> filter) {
+        return new RenamingDownPropagation(substitution, getFilteredConstraint(filter), variables, variableGenerator, termFactory);
+    }
+
+    @Override
+    public DownPropagation applySubstitutionToConstraint(Substitution<? extends ImmutableTerm> substitution, Supplier<VariableNullability> variableNullabilitySupplier) throws InconsistentDownPropagationException {
+        throw new UnsupportedOperationException("RenamingDownPropagation does not support applySubstitutionToConstraint");
+    }
+
+    @Override
+    public DownPropagation extendToChildVariables(ImmutableSet<Variable> childVariables) {
+        if (!childVariables.containsAll(variables))
+            throw new IllegalArgumentException("Child variables must contain all of the variables in the same constraint");
+
+        return new RenamingDownPropagation(substitution, optionalConstraint, childVariables, variableGenerator, termFactory);
+    }
+
 }

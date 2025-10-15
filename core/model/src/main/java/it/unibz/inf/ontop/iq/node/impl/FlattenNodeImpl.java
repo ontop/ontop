@@ -33,9 +33,11 @@ public class FlattenNodeImpl extends CompositeQueryNodeImpl implements FlattenNo
 
     private final Variable flattenedVariable;
     private final Variable outputVariable;
+    @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
     private final Optional<Variable> indexVariable;
     private final DBTermType flattenedType;
     private final FlattenNormalizer normalizer;
+    private final Substitution<ImmutableTerm> wouldBeSubstitution;
 
     @AssistedInject
     private FlattenNodeImpl(@Assisted("outputVariable") Variable outputVariable,
@@ -53,6 +55,8 @@ public class FlattenNodeImpl extends CompositeQueryNodeImpl implements FlattenNo
         this.indexVariable = indexVariable;
         this.flattenedType = flattenedType;
         this.normalizer = normalizer;
+        this.wouldBeSubstitution = extendWithIndexVariable(ImmutableSet.of(outputVariable)).stream()
+                .collect(substitutionFactory.toSubstitution(v -> flattenedVariable));
     }
 
     @Override
@@ -102,7 +106,7 @@ public class FlattenNodeImpl extends CompositeQueryNodeImpl implements FlattenNo
     @Override
     public ImmutableSet<Variable> getVariables(ImmutableSet<Variable> childVariables) {
         return Sets.union(
-                        Sets.difference(childVariables, ImmutableSet.of(flattenedVariable)),
+                        Sets.difference(childVariables, getLocallyRequiredVariables()),
                         getLocallyDefinedVariables())
                 .immutableCopy();
     }
@@ -114,7 +118,7 @@ public class FlattenNodeImpl extends CompositeQueryNodeImpl implements FlattenNo
 
     @Override
     public ImmutableSet<Variable> getLocallyDefinedVariables() {
-        return extendWithIndexVariable(ImmutableSet.of(outputVariable));
+        return wouldBeSubstitution.getDomain();
     }
 
     @Override
@@ -137,13 +141,12 @@ public class FlattenNodeImpl extends CompositeQueryNodeImpl implements FlattenNo
 
     @Override
     public IQTree propagateDownConstraint(DownPropagation dp, IQTree child) {
-        try {
-            DownPropagation dp1 = iqTreeTools.createDownPropagation(substitutionFactory.getSubstitution(), dp.getConstraint(), child.getVariables(), dp.getVariableGenerator());
-            return iqFactory.createUnaryIQTree(this, dp1.propagate(child));
-        }
-        catch (DownPropagation.InconsistentDownPropagationException e) {
-            throw new MinorOntopInternalBugException("cannot happen", e);
-        }
+        IQTree newChild = dp
+                .restrictScope(Sets.difference(child.getVariables(), getLocallyRequiredVariables()).immutableCopy())
+                .extendToChildVariables(child.getVariables())
+                .propagate(child);
+
+        return iqFactory.createUnaryIQTree(this, newChild);
     }
 
     @Override

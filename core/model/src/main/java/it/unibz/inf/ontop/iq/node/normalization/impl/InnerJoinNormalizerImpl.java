@@ -215,7 +215,7 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
                         variableGenerator);
 
                 ImmutableList<IQTree> newChildren = provisionalNewChildren.stream()
-                        .map(dp::propagateToChild)
+                        .map(dp::propagateWithRestrictedScope)
                         .map(normalization::applyDownRenamingSubstitution)
                         .collect(ImmutableCollectors.toList());
 

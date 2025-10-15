@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
+import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
 import it.unibz.inf.ontop.substitution.Substitution;
@@ -11,6 +12,8 @@ import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.Optional;
 import java.util.function.BiFunction;
+import java.util.function.Predicate;
+import java.util.function.Supplier;
 
 @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 public interface DownPropagation {
@@ -34,9 +37,19 @@ public interface DownPropagation {
 
     IQTree propagate(IQTree tree);
 
-    IQTree propagateToChild(IQTree child);
-
     IQTree propagateWithConstraint(Optional<ImmutableExpression> constraint, IQTree tree);
+
+    DownPropagation filterConstraint(Predicate<ImmutableExpression> filter);
+
+    DownPropagation applySubstitutionToConstraint(Substitution<? extends ImmutableTerm> substitution, Supplier<VariableNullability> variableNullabilitySupplier) throws InconsistentDownPropagationException;
+
+    DownPropagation extendToChildVariables(ImmutableSet<Variable> childVariables);
+
+    DownPropagation restrictScope(ImmutableSet<Variable> variables);
+
+    default IQTree propagateWithRestrictedScope(IQTree tree) {
+        return restrictScope(tree.getVariables()).propagate(tree);
+    }
 
     /**
      * Thrown when a "null" variable is propagated down or when the constraint is inconsistent

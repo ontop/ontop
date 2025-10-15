@@ -52,12 +52,12 @@ public class DistinctNodeImpl extends QueryModifierNodeImpl implements DistinctN
 
     @Override
     public IQTree propagateDownConstraint(DownPropagation dp, IQTree child) {
-        return iqFactory.createUnaryIQTree(this, dp.propagateToChild(child));
+        return iqFactory.createUnaryIQTree(this, dp.propagate(child));
     }
 
     @Override
     public IQTree applyDescendingSubstitution(DownPropagation dp, IQTree child) {
-        return iqFactory.createUnaryIQTree(this, dp.propagateToChild(child));
+        return iqFactory.createUnaryIQTree(this, dp.propagate(child));
     }
 
     @Override

@@ -454,7 +454,7 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
 
     private IQTree propagateDown(DownPropagation dp, ImmutableList<IQTree> children) {
         ImmutableList<IQTree> updatedChildren = children.stream()
-                .map(dp::propagateToChild)
+                .map(dp::propagate)
                 .filter(c -> !c.isDeclaredAsEmpty())
                 .collect(ImmutableCollectors.toList());
 

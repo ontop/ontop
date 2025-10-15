@@ -75,14 +75,14 @@ public class OrderByNodeImpl extends QueryModifierNodeImpl implements OrderByNod
 
     @Override
     public IQTree propagateDownConstraint(DownPropagation dp, IQTree child) {
-        return iqFactory.createUnaryIQTree(this, dp.propagateToChild(child));
+        return iqFactory.createUnaryIQTree(this, dp.propagate(child));
     }
 
     @Override
     public IQTree applyDescendingSubstitution(DownPropagation dp, IQTree child) {
         return iqTreeTools.unaryIQTreeBuilder()
                 .append(applySubstitution(dp.getDescendingSubstitution()))
-                .build(dp.propagateToChild(child));
+                .build(dp.propagate(child));
     }
 
     @Override
