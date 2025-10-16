@@ -11,10 +11,12 @@ import it.unibz.inf.ontop.iq.NaryIQTree;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.DownPropagation;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
+import it.unibz.inf.ontop.iq.impl.NaryIQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.node.normalization.ConditionSimplifier;
 import it.unibz.inf.ontop.iq.node.normalization.FilterNormalizer;
 import it.unibz.inf.ontop.iq.visit.impl.DefaultIQTreeOptionalVisitingTransformer;
+import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
@@ -127,18 +129,18 @@ public class FilterNormalizerImpl implements FilterNormalizer {
             FilterNode filterNode = subTree.getOptionalNode().get();
             IQTree child = subTree.getChild();
             try {
-                var childVariableNullability = child.getVariableNullability();
-
-                var simplification = conditionSimplifier.simplifyAndPropagate(
-                        iqTreeTools.createDownPropagation(Optional.empty(), child.getVariables(), variableGenerator),
+                var simplification = conditionSimplifier.simplifyCondition(
                         Optional.of(filterNode.getFilterCondition()),
+                        ImmutableSet.of(),
                         ImmutableList.of(child),
-                        childVariableNullability);
+                        child.getVariableNullability());
+
+                var extendedDownConstraint = iqTreeTools.getDownPropagation(simplification, child.getVariables(), variableGenerator);
 
                 return state.lift(
-                        simplification.getConstructionNode(),
+                        iqTreeTools.createOptionalConstructionNode(child::getVariables, simplification.getSubstitution()),
                         UnarySubTree.of(iqTreeTools.createOptionalFilterNode(simplification.getOptionalExpression()),
-                                normalizeSubTreeRecursively(simplification.getChildren().get(0))));
+                                normalizeSubTreeRecursively(extendedDownConstraint.propagate(child))));
             }
             catch (DownPropagation.InconsistentDownPropagationException e) {
                 return State.initial(UnarySubTree.finalSubTree(createEmptyNode()));

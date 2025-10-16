@@ -11,6 +11,7 @@ import it.unibz.inf.ontop.iq.DownPropagation;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.impl.NaryIQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
+import it.unibz.inf.ontop.iq.node.normalization.impl.ConditionSimplifierImpl;
 import it.unibz.inf.ontop.iq.request.FunctionalDependencies;
 import it.unibz.inf.ontop.iq.request.VariableNonRequirement;
 import it.unibz.inf.ontop.iq.node.normalization.ConditionSimplifier;
@@ -98,16 +99,18 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
 
     private IQTree propagateDown(DownPropagation dp, IQTree child, VariableNullability variableNullability) {
         try {
-            var simplification = conditionSimplifier.simplifyAndPropagate(
-                    dp,
-                    getOptionalFilterCondition(),
+            var simplification = conditionSimplifier.simplifyCondition(
+                    dp.applyDescendingSubstitution(getOptionalFilterCondition()),
+                    ImmutableSet.of(),
                     ImmutableList.of(child),
                     variableNullability);
 
+            var extendedDownConstraint = conditionSimplifier.getCombinedDownPropagation(dp, simplification, variableNullability);
+
             return iqTreeTools.unaryIQTreeBuilder()
-                    .append(simplification.getConstructionNode())
+                    .append(iqTreeTools.createOptionalConstructionNode(dp::computeProjectedVariables, simplification.getSubstitution()))
                     .append(iqTreeTools.createOptionalFilterNode(simplification.getOptionalExpression()))
-                    .build(simplification.getChildren().get(0));
+                    .build(extendedDownConstraint.propagate(child));
         }
         catch (DownPropagation.InconsistentDownPropagationException e) {
             return iqTreeTools.createEmptyNode(dp);

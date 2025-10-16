@@ -6,6 +6,7 @@ import com.google.inject.Singleton;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.node.*;
+import it.unibz.inf.ontop.iq.node.normalization.ConditionSimplifier;
 import it.unibz.inf.ontop.iq.request.FunctionalDependencies;
 import it.unibz.inf.ontop.iq.transform.QueryRenamer;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
@@ -330,6 +331,10 @@ public class IQTreeTools {
                 tree.getChildren().stream().anyMatch(t -> contains(t, nodeClass));
     }
 
+
+    public DownPropagation getDownPropagation(ConditionSimplifier.ExpressionAndSubstitution expressionAndSubstitution, ImmutableSet<Variable> projectedVariables, VariableGenerator variablesGenerator) throws DownPropagation.InconsistentDownPropagationException {
+        return createDownPropagation(expressionAndSubstitution.getSubstitution(), expressionAndSubstitution.getOptionalExpression(), projectedVariables, variablesGenerator);
+    }
 
     /**
      * Excludes the variables that are not projected by the IQTree

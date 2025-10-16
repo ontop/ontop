@@ -240,18 +240,20 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
                 return state;
 
             try {
-                // cache in the state?
-                var childrenVariableNullability = variableNullabilityTools.getChildrenVariableNullability(subTree.children());
-
-                var simplification = conditionSimplifier.simplifyAndPropagate(
-                        iqTreeTools.createDownPropagation(Optional.empty(), subTree.projectedVariables(), variableGenerator),
+                var simplification = conditionSimplifier.simplifyCondition(
                         subTree.joiningCondition(),
+                        ImmutableSet.of(),
                         subTree.children(),
-                        childrenVariableNullability);
+                        // cache in the state?
+                        variableNullabilityTools.getChildrenVariableNullability(subTree.children()));
+
+                var extendedDownConstraint = iqTreeTools.getDownPropagation(simplification, subTree.projectedVariables(), variableGenerator);
 
                 return state.lift(
-                        simplification.getConstructionNode(),
-                        new InnerJoinSubTree(simplification.getOptionalExpression(), simplification.getChildren()));
+                        iqTreeTools.createOptionalConstructionNode(subTree::projectedVariables, simplification.getSubstitution()),
+                        new InnerJoinSubTree(
+                                simplification.getOptionalExpression(),
+                                NaryIQTreeTools.transformChildren(subTree.children(), extendedDownConstraint::propagateWithRestrictedScope)));
             }
             catch (DownPropagation.InconsistentDownPropagationException e) {
                 return declareAsEmpty();

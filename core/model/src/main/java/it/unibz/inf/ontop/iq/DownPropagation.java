@@ -31,6 +31,10 @@ public interface DownPropagation {
      */
     Substitution<? extends VariableOrGroundTerm> getDescendingSubstitution();
 
+    default Optional<ImmutableExpression> applyDescendingSubstitution(Optional<ImmutableExpression> optionalExpression) {
+        return optionalExpression.map(e -> getDescendingSubstitution().apply(e));
+    }
+
     Optional<ImmutableExpression> getConstraint();
 
     VariableNullability extendVariableNullability(VariableNullability variableNullability);

@@ -12,6 +12,7 @@ import it.unibz.inf.ontop.iq.impl.NaryIQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.node.normalization.ConditionSimplifier;
 import it.unibz.inf.ontop.iq.node.normalization.InnerJoinNormalizer;
+import it.unibz.inf.ontop.iq.node.normalization.impl.ConditionSimplifierImpl;
 import it.unibz.inf.ontop.iq.request.FunctionalDependencies;
 import it.unibz.inf.ontop.iq.request.VariableNonRequirement;
 import it.unibz.inf.ontop.model.term.*;
@@ -143,18 +144,20 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
 
     private IQTree propagateDown(DownPropagation dp, ImmutableList<IQTree> children, VariableNullability variableNullability) {
         try {
-            var simplification = conditionSimplifier.simplifyAndPropagate(
-                    dp,
-                    getOptionalFilterCondition(),
+            var simplification = conditionSimplifier.simplifyCondition(
+                    dp.applyDescendingSubstitution(getOptionalFilterCondition()),
+                    ImmutableSet.of(),
                     children,
                     variableNullability);
 
+            var extendedDownConstraint = conditionSimplifier.getCombinedDownPropagation(dp, simplification, variableNullability);
+
             NaryIQTree joinTree = iqTreeTools.createInnerJoinTree(
                     simplification.getOptionalExpression(),
-                    simplification.getChildren());
+                    NaryIQTreeTools.transformChildren(children, extendedDownConstraint::propagateWithRestrictedScope));
 
             return iqTreeTools.unaryIQTreeBuilder()
-                    .append(simplification.getConstructionNode())
+                    .append(iqTreeTools.createOptionalConstructionNode(dp::computeProjectedVariables, simplification.getSubstitution()))
                     .build(joinTree);
         }
         catch (DownPropagation.InconsistentDownPropagationException e) {

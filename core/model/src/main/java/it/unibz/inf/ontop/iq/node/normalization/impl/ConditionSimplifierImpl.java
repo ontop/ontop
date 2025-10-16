@@ -20,7 +20,6 @@ import java.util.Comparator;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 @Singleton
@@ -122,63 +121,22 @@ public class ConditionSimplifierImpl implements ConditionSimplifier {
         return new ExpressionAndSubstitutionImpl(newExpression, ascendingSubstitution);
     }
 
+    // TODO: also consider the constraint for simplifying the condition
     @Override
-    public ExpressionAndSubstitutionAndChildren simplifyAndPropagate(DownPropagation dp,
-                                                                     Optional<ImmutableExpression> expression,
-                                                                     ImmutableList<IQTree> children,
-                                                                     VariableNullability variableNullability) throws DownPropagation.InconsistentDownPropagationException {
-        // TODO: also consider the constraint for simplifying the condition
-        var simplification = simplifyCondition(
-                expression.map(e -> dp.getDescendingSubstitution().apply(e)),
-                ImmutableSet.of(),
-                children,
-                variableNullability);
-
+    public DownPropagation getCombinedDownPropagation(DownPropagation dp, ExpressionAndSubstitution simplification, VariableNullability variableNullability) throws DownPropagation.InconsistentDownPropagationException {
         var newConstraint = dp.getConstraint().isPresent()
                 ? evaluateCondition(
-                        iqTreeTools.getConjunction(simplification.getOptionalExpression(), simplification.getSubstitution().apply(dp.getConstraint().get())),
-                        dp.extendVariableNullability(variableNullability))
+                iqTreeTools.getConjunction(simplification.getOptionalExpression(), simplification.getSubstitution().apply(dp.getConstraint().get())),
+                dp.extendVariableNullability(variableNullability))
                 : simplification.getOptionalExpression();
 
         var downSubstitution = substitutionFactory.onVariableOrGroundTerms().compose(
                 dp.getDescendingSubstitution(),
                 simplification.getSubstitution());
 
-        var extendedDownConstraint = iqTreeTools.createDownPropagation(downSubstitution, newConstraint, dp.getVariables(), dp.getVariableGenerator());
-
-        return new ExpressionAndSubstitutionAndChildrenImpl(
-                iqTreeTools.createOptionalConstructionNode(dp::computeProjectedVariables, simplification.getSubstitution()),
-                simplification.getOptionalExpression(),
-                NaryIQTreeTools.transformChildren(children, extendedDownConstraint::propagateWithRestrictedScope));
+        return iqTreeTools.createDownPropagation(downSubstitution, newConstraint, dp.getVariables(), dp.getVariableGenerator());
     }
 
-    @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
-    private static class ExpressionAndSubstitutionAndChildrenImpl implements ExpressionAndSubstitutionAndChildren {
-        private final Optional<ConstructionNode> optionalConstructionNode;
-        private final Optional<ImmutableExpression> optionalExpression;
-        private final ImmutableList<IQTree> children;
-
-        private ExpressionAndSubstitutionAndChildrenImpl(Optional<ConstructionNode> optionalConstructionNode, Optional<ImmutableExpression> optionalExpression, ImmutableList<IQTree> children) {
-            this.optionalConstructionNode = optionalConstructionNode;
-            this.optionalExpression = optionalExpression;
-            this.children = children;
-        }
-
-        @Override
-        public Optional<ConstructionNode> getConstructionNode() {
-            return optionalConstructionNode;
-        }
-
-        @Override
-        public Optional<ImmutableExpression> getOptionalExpression() {
-            return optionalExpression;
-        }
-
-        @Override
-        public ImmutableList<IQTree> getChildren() {
-            return children;
-        }
-    }
 
     /**
      * Empty means true

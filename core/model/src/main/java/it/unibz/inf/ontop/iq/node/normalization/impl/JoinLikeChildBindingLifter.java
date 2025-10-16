@@ -65,20 +65,20 @@ public class JoinLikeChildBindingLifter {
         Stream<ImmutableExpression> equalities = freshRenaming.builder()
                 .toStream((v, t) -> termFactory.getStrictEquality(substitution.apply(v), t));
 
-        ConditionSimplifier.ExpressionAndSubstitution expressionResults = conditionSimplifier.simplifyCondition(
+        ConditionSimplifier.ExpressionAndSubstitution simplification = conditionSimplifier.simplifyCondition(
                 termFactory.getConjunction(initialJoiningCondition.map(substitution::apply), equalities),
                 nonLiftableVariables, children, variableNullability);
 
-        Optional<ImmutableExpression> newCondition = expressionResults.getOptionalExpression();
+        Optional<ImmutableExpression> newCondition = simplification.getOptionalExpression();
 
         // NB: this substitution is said to be "naive" as further restrictions may be applied
         // to the effective ascending substitution (e.g., for the LJ, in the case of the renaming of right-specific vars)
         Substitution<ImmutableTerm> naiveAscendingSubstitution =
-                expressionResults.getSubstitution().compose(substitution);
+                simplification.getSubstitution().compose(substitution);
 
         Substitution<VariableOrGroundTerm> descendingSubstitution =
                 substitutionFactory.onVariableOrGroundTerms().compose(
-                        expressionResults.getSubstitution(),
+                        simplification.getSubstitution(),
                         substitutionFactory.union(freshRenaming, downPropagableFragment.removeFromDomain(freshRenaming.getDomain())));
 
         return new BindingLift(newCondition, naiveAscendingSubstitution, descendingSubstitution);

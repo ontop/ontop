@@ -4,7 +4,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.iq.DownPropagation;
 import it.unibz.inf.ontop.iq.IQTree;
-import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.Variable;
@@ -21,19 +20,11 @@ public interface ConditionSimplifier {
                     throws DownPropagation.InconsistentDownPropagationException;
 
 
-    ExpressionAndSubstitutionAndChildren simplifyAndPropagate(DownPropagation downPropagation, Optional<ImmutableExpression> expression, ImmutableList<IQTree> children,
-                                                              VariableNullability variableNullability)
-            throws DownPropagation.InconsistentDownPropagationException;
+    DownPropagation getCombinedDownPropagation(DownPropagation dp, ExpressionAndSubstitution simplification, VariableNullability variableNullability) throws DownPropagation.InconsistentDownPropagationException;
 
 
     interface ExpressionAndSubstitution {
         Substitution<VariableOrGroundTerm> getSubstitution();
         Optional<ImmutableExpression> getOptionalExpression();
-    }
-
-    interface ExpressionAndSubstitutionAndChildren {
-        Optional<ConstructionNode> getConstructionNode();
-        Optional<ImmutableExpression> getOptionalExpression();
-        ImmutableList<IQTree> getChildren();
     }
 }

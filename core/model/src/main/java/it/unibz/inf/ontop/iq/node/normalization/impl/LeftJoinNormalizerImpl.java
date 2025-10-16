@@ -459,18 +459,20 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
 
             try {
                 ConditionSimplifier.ExpressionAndSubstitution simplificationResults = conditionSimplifier.simplifyCondition(
-                        subTree.ljCondition(), subTree.leftChild().getVariables(), ImmutableList.of(subTree.rightChild()),
+                        subTree.ljCondition(),
+                        subTree.leftChild().getVariables(),
+                        ImmutableList.of(subTree.rightChild()),
                         variableNullabilityTools.getChildrenVariableNullability(subTree.children()));
 
-                DownPropagation dp = iqTreeTools.createDownPropagation(simplificationResults.getSubstitution(), simplificationResults.getOptionalExpression(), subTree.rightChild().getVariables(), variableGenerator);
-                if (dp.getDescendingSubstitution().isEmpty()) {
+                if (simplificationResults.getSubstitution().isEmpty()) {
                     return state.replace(t -> t.replaceRight(simplificationResults.getOptionalExpression(), t.rightChild()));
                 }
 
+                DownPropagation dp = iqTreeTools.getDownPropagation(simplificationResults, subTree.rightChild().getVariables(), variableGenerator);
                 IQTree updatedRightChild = dp.propagate(subTree.rightChild());
 
                 var rightProvenance = new OptionalRightProvenance(
-                        updatedRightChild, dp.getDescendingSubstitution(), subTree.leftChild().getVariables());
+                        updatedRightChild, simplificationResults.getSubstitution(), subTree.leftChild().getVariables());
 
                 return state.lift(
                         createConstructionNode(subTree, rightProvenance.computeLiftableSubstitution()),
