@@ -41,6 +41,8 @@ public interface DownPropagation {
 
     IQTree propagate(IQTree tree);
 
+    DownPropagation withNoConstraint();
+
     DownPropagation filterConstraint(Predicate<ImmutableExpression> filter);
 
     DownPropagation applySubstitutionToConstraint(Substitution<? extends ImmutableTerm> substitution, Supplier<VariableNullability> variableNullabilitySupplier) throws InconsistentDownPropagationException;

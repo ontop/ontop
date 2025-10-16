@@ -52,8 +52,8 @@ public class RenamingDownPropagation extends AbstractDownPropagation implements 
     }
 
     @Override
-    public DownPropagation filterConstraint(Predicate<ImmutableExpression> filter) {
-        return new RenamingDownPropagation(substitution, getFilteredConstraint(filter), variables, variableGenerator, termFactory);
+    protected DownPropagation updateConstraint(Optional<ImmutableExpression> constraint) {
+        return new RenamingDownPropagation(substitution, constraint, variables, variableGenerator, termFactory);
     }
 
     @Override

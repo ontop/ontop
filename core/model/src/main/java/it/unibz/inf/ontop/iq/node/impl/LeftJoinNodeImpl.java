@@ -204,7 +204,7 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
         IQTree updatedLeftChild = dp.propagateWithRestrictedScope(leftChild);
 
         try {
-            DownPropagation dpNoConstraint = iqTreeTools.createDownPropagation(dp.getDescendingSubstitution(), Optional.empty(), dp.getVariables(), dp.getVariableGenerator());
+            DownPropagation dpNoConstraint = dp.withNoConstraint();
             ExpressionAndSubstitution simplification = conditionSimplifier.simplifyCondition(
                     dpNoConstraint.applyDescendingSubstitution(getOptionalFilterCondition()),
                     coreUtilsFactory::createSimplifiedVariableNullability,

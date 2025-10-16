@@ -51,8 +51,8 @@ public class FullDownPropagation extends AbstractDownPropagation implements Down
     }
 
     @Override
-    public DownPropagation filterConstraint(Predicate<ImmutableExpression> filter) {
-        return new FullDownPropagation(substitution, getFilteredConstraint(filter), variables, variableGenerator, termFactory);
+    protected DownPropagation updateConstraint(Optional<ImmutableExpression> constraint) {
+        return new FullDownPropagation(substitution, constraint, variables, variableGenerator, termFactory);
     }
 
     @Override

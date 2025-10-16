@@ -53,8 +53,8 @@ public class ConstraintOnlyDownPropagation extends AbstractDownPropagation imple
     }
 
     @Override
-    public DownPropagation filterConstraint(Predicate<ImmutableExpression> filter) {
-        return new ConstraintOnlyDownPropagation(getFilteredConstraint(filter), variables, variableGenerator, termFactory);
+    public DownPropagation updateConstraint(Optional<ImmutableExpression> constraint) {
+        return new ConstraintOnlyDownPropagation(constraint, variables, variableGenerator, termFactory);
     }
 
     @Override

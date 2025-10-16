@@ -91,7 +91,17 @@ public abstract class AbstractDownPropagation implements DownPropagation {
         return Optional.of(var2VarFragment.injective());
     }
 
+    @Override
+    public final DownPropagation withNoConstraint() {
+        return updateConstraint( Optional.empty());
+    }
 
+    @Override
+    public final DownPropagation filterConstraint(Predicate<ImmutableExpression> filter) {
+        return updateConstraint(getFilteredConstraint(filter));
+    }
+
+    protected abstract DownPropagation updateConstraint(Optional<ImmutableExpression> constraint);
 
     static <T extends VariableOrGroundTerm> Substitution<T> reduceDescendingSubstitution(Substitution<T> descendingSubstitution, ImmutableSet<Variable> projectedVariables) {
         return descendingSubstitution.restrictDomainTo(projectedVariables);
