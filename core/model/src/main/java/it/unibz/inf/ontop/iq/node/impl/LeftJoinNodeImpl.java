@@ -4,7 +4,6 @@ import com.google.common.collect.*;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.evaluator.TermNullabilityEvaluator;
-import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.DownPropagation;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
@@ -204,61 +203,49 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
 
         IQTree updatedLeftChild = dp.propagateWithRestrictedScope(leftChild);
 
-        Optional<ImmutableExpression> initialExpression = getOptionalFilterCondition();
-        if (initialExpression.isPresent()) {
-            try {
-                ExpressionAndSubstitution expressionAndCondition = applyDescendingSubstitutionToExpression(
-                        initialExpression.get(), dp.getDescendingSubstitution(), leftChild.getVariables(), rightChild.getVariables());
-
-                Substitution<? extends VariableOrGroundTerm> rightDescendingSubstitution =
-                        substitutionFactory.onVariableOrGroundTerms().compose(expressionAndCondition.getSubstitution(), dp.getDescendingSubstitution());
-
-                DownPropagation dpR = iqTreeTools.createDownPropagation(rightDescendingSubstitution, Optional.empty(), rightChild.getVariables(), dp.getVariableGenerator());
-                IQTree updatedRightChild = dpR.propagate(rightChild);
-
-                if (updatedRightChild.isDeclaredAsEmpty())
-                        return paddingWithNull(updatedLeftChild, updatedRightChild);
-
-                return iqTreeTools.createLeftJoinTree(
-                        expressionAndCondition.getOptionalExpression(),
-                        updatedLeftChild, updatedRightChild);
+        var optionalExpression = dp.applyDescendingSubstitution(getOptionalFilterCondition());
+        try {
+            ExpressionAndSubstitution simplification;
+            if (optionalExpression.isPresent()) {
+                // No proper variable nullability information is given for optimizing during descending substitution
+                // (too complicated)
+                // Therefore, please consider normalizing afterwards
+                var expression = optionalExpression.get();
+                var optionalSimplifiedExpression = ConditionSimplifierImpl.evaluateCondition(expression,
+                        coreUtilsFactory.createSimplifiedVariableNullability(expression));
+                simplification = optionalSimplifiedExpression
+                        .map(immutableExpression -> convertIntoExpressionAndSubstitution(immutableExpression, leftChild.getVariables(), rightChild.getVariables()))
+                        .orElseGet(() -> new ExpressionAndSubstitutionImpl(Optional.empty(), dp.getDescendingSubstitution().restrictRangeTo(VariableOrGroundTerm.class)));
             }
-            catch (DownPropagation.InconsistentDownPropagationException e) {
-                ImmutableSet<Variable> newlyProjectedVariables = DownPropagation.computeProjectedVariables(dp.getDescendingSubstitution(),
-                                projectedVariables(leftChild, rightChild).immutableCopy());
+            else
+                simplification = new ExpressionAndSubstitutionImpl(Optional.empty(), substitutionFactory.getSubstitution());
 
-                Substitution<?> paddingSubstitution = Sets.difference(newlyProjectedVariables, updatedLeftChild.getVariables()).stream()
-                        .collect(substitutionFactory.toSubstitution(v -> termFactory.getNullConstant()));
+            Substitution<? extends VariableOrGroundTerm> rightDescendingSubstitution =
+                    substitutionFactory.onVariableOrGroundTerms().compose(simplification.getSubstitution(), dp.getDescendingSubstitution());
 
-                return iqTreeTools.unaryIQTreeBuilder()
-                        .append(iqTreeTools.createOptionalConstructionNode(newlyProjectedVariables, paddingSubstitution, updatedLeftChild))
-                        .build(updatedLeftChild);
-            }
+            DownPropagation dpR = iqTreeTools.createDownPropagation(rightDescendingSubstitution, Optional.empty(), rightChild.getVariables(), dp.getVariableGenerator());
+            IQTree updatedRightChild = dpR.propagate(rightChild);
+
+            if (updatedRightChild.isDeclaredAsEmpty())
+                return buildPaddedLeftChild(updatedLeftChild, dp.computeProjectedVariables());
+
+            return iqTreeTools.createLeftJoinTree(
+                    simplification.getOptionalExpression(),
+                    updatedLeftChild, updatedRightChild);
         }
-        else {
-            try {
-                DownPropagation dpR = iqTreeTools.createDownPropagation(dp.getDescendingSubstitution(), Optional.empty(), rightChild.getVariables(), dp.getVariableGenerator());
-                IQTree updatedRightChild = dpR.propagate(rightChild);
-                if (updatedRightChild.isDeclaredAsEmpty())
-                    return paddingWithNull(updatedLeftChild, updatedRightChild);
-
-                return iqFactory.createBinaryNonCommutativeIQTree(this, updatedLeftChild, updatedRightChild);
-            }
-            catch (DownPropagation.InconsistentDownPropagationException e) {
-                throw new MinorOntopInternalBugException("cannot happen");
-            }
+        catch (DownPropagation.InconsistentDownPropagationException e) {
+            return buildPaddedLeftChild(updatedLeftChild, dp.computeProjectedVariables());
         }
     }
 
-    private IQTree paddingWithNull(IQTree leftChild, IQTree emptyRightChild) {
-        ImmutableSet<Variable> projectedVariables = projectedVariables(leftChild, emptyRightChild).immutableCopy();
+    private IQTree buildPaddedLeftChild(IQTree updatedLeftChild, ImmutableSet<Variable> projectedVariables) {
 
-        Substitution<?> substitution = rightSpecificVariables(leftChild, emptyRightChild).stream()
+        Substitution<?> paddingSubstitution = Sets.difference(projectedVariables, updatedLeftChild.getVariables()).stream()
                 .collect(substitutionFactory.toSubstitution(v -> termFactory.getNullConstant()));
 
         return iqTreeTools.unaryIQTreeBuilder()
-                .append(iqTreeTools.createOptionalConstructionNode(projectedVariables, substitution, leftChild))
-                .build(leftChild);
+                .append(iqTreeTools.createOptionalConstructionNode(projectedVariables, paddingSubstitution, updatedLeftChild))
+                .build(updatedLeftChild);
     }
 
     @Override
@@ -383,25 +370,6 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
         return IQTreeTools.computeStrictDependentsFromFunctionalDependencies(tree);
     }
 
-    private ExpressionAndSubstitution applyDescendingSubstitutionToExpression(
-            ImmutableExpression initialExpression,
-            Substitution<? extends VariableOrGroundTerm> descendingSubstitution,
-            ImmutableSet<Variable> leftChildVariables, ImmutableSet<Variable> rightChildVariables)
-            throws DownPropagation.InconsistentDownPropagationException {
-
-        ImmutableExpression expression = descendingSubstitution.apply(initialExpression);
-        // No proper variable nullability information is given for optimizing during descending substitution
-        // (too complicated)
-        // Therefore, please consider normalizing afterwards
-        var result = ConditionSimplifierImpl.evaluateCondition(expression,
-                coreUtilsFactory.createSimplifiedVariableNullability(expression));
-
-        return result
-                .map(e -> convertIntoExpressionAndSubstitution(e, leftChildVariables, rightChildVariables))
-                .orElseGet(() ->
-                        new ExpressionAndSubstitutionImpl(Optional.empty(), descendingSubstitution.restrictRangeTo(VariableOrGroundTerm.class)));
-    }
-
     /**
      * TODO: explain
      *
@@ -417,11 +385,8 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
         ImmutableSet<ImmutableExpression> downSubstitutionExpressions = expressions.stream()
                 .filter(e -> e.getFunctionSymbol() instanceof DBStrictEqFunctionSymbol)
                 // TODO: refactor it for dealing with n-ary EQs
-                .filter(e -> {
-                    ImmutableList<? extends ImmutableTerm> arguments = e.getTerms();
-                    return arguments.stream().allMatch(t -> t instanceof NonFunctionalTerm)
-                            && arguments.stream().anyMatch(rightVariables::contains);
-                })
+                .filter(e -> e.getTerms().stream().allMatch(t -> t instanceof NonFunctionalTerm)
+                        && e.getTerms().stream().anyMatch(rightVariables::contains))
                 .collect(ImmutableCollectors.toSet());
 
         Substitution<VariableOrGroundTerm> downSubstitution = downSubstitutionExpressions.stream()

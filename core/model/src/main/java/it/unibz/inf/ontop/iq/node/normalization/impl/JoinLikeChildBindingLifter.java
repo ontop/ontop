@@ -67,7 +67,9 @@ public class JoinLikeChildBindingLifter {
 
         ConditionSimplifier.ExpressionAndSubstitution simplification = conditionSimplifier.simplifyCondition(
                 termFactory.getConjunction(initialJoiningCondition.map(substitution::apply), equalities),
-                nonLiftableVariables, children, variableNullability);
+                nonLiftableVariables,
+                children,
+                variableNullability);
 
         Optional<ImmutableExpression> newCondition = simplification.getOptionalExpression();
 

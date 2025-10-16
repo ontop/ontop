@@ -46,7 +46,7 @@ public class ConditionSimplifierImpl implements ConditionSimplifier {
             throws DownPropagation.InconsistentDownPropagationException {
 
         if (nonOptimizedExpression.isPresent()) {
-            Optional<ImmutableExpression> optionalExpression = evaluateCondition(nonOptimizedExpression.get(), variableNullability);
+            var optionalExpression = evaluateCondition(nonOptimizedExpression.get(), variableNullability);
             if (optionalExpression.isPresent())
                 // May throw an exception if unification is rejected
                 return convertIntoExpressionAndSubstitution(optionalExpression.get(), nonLiftableVariables, children, variableNullability);

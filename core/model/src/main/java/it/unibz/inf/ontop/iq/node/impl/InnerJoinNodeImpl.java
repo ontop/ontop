@@ -152,13 +152,11 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
 
             var extendedDownConstraint = conditionSimplifier.getCombinedDownPropagation(dp, simplification, variableNullability);
 
-            NaryIQTree joinTree = iqTreeTools.createInnerJoinTree(
-                    simplification.getOptionalExpression(),
-                    NaryIQTreeTools.transformChildren(children, extendedDownConstraint::propagateWithRestrictedScope));
-
             return iqTreeTools.unaryIQTreeBuilder()
                     .append(iqTreeTools.createOptionalConstructionNode(dp::computeProjectedVariables, simplification.getSubstitution()))
-                    .build(joinTree);
+                    .build(iqTreeTools.createInnerJoinTree(
+                            simplification.getOptionalExpression(),
+                            NaryIQTreeTools.transformChildren(children, extendedDownConstraint::propagateWithRestrictedScope)));
         }
         catch (DownPropagation.InconsistentDownPropagationException e) {
             return iqTreeTools.createEmptyNode(dp);

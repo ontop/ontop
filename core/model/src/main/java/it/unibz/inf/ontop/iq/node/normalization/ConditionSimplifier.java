@@ -15,13 +15,13 @@ import java.util.Optional;
 public interface ConditionSimplifier {
 
     ExpressionAndSubstitution simplifyCondition(Optional<ImmutableExpression> expression,
-                                                ImmutableSet<Variable> nonLiftableVariables, ImmutableList<IQTree> children,
+                                                ImmutableSet<Variable> nonLiftableVariables,
+                                                ImmutableList<IQTree> children,
                                                 VariableNullability variableNullability)
                     throws DownPropagation.InconsistentDownPropagationException;
 
 
     DownPropagation getCombinedDownPropagation(DownPropagation dp, ExpressionAndSubstitution simplification, VariableNullability variableNullability) throws DownPropagation.InconsistentDownPropagationException;
-
 
     interface ExpressionAndSubstitution {
         Substitution<VariableOrGroundTerm> getSubstitution();
