@@ -6257,6 +6257,37 @@ public class LeftJoinOptimizationTest {
         optimizeAndCompare(initialIQ, IQ_FACTORY.createIQ(projectionAtom, expectedTree));
     }
 
+    @Test
+    public void testImplicitVariableNonRemoval() {
+
+        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(
+                ATOM_FACTORY.getRDFAnswerPredicate(2), ImmutableList.of(A, B));
+
+        var dataNode1 = IQ_FACTORY.createExtensionalDataNode(TABLE21, ImmutableMap.of(0, A, 1, C));
+        var dataNode2 = IQ_FACTORY.createExtensionalDataNode(TABLE22, ImmutableMap.of(0, A, 1, B));
+        var dataNode3 = IQ_FACTORY.createExtensionalDataNode(TABLE23, ImmutableMap.of(1, B, 2, C));
+
+        var topProjection = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
+
+        var initialTree = IQ_FACTORY.createUnaryIQTree(
+                IQ_FACTORY.createDistinctNode(),
+                IQ_FACTORY.createUnaryIQTree(
+                        topProjection,
+                        IQ_FACTORY.createNaryIQTree(
+                                IQ_FACTORY.createInnerJoinNode(),
+                                ImmutableList.of(
+                                        dataNode1,
+                                        IQ_FACTORY.createBinaryNonCommutativeIQTree(
+                                                IQ_FACTORY.createLeftJoinNode(),
+                                                dataNode2,
+                                                dataNode3
+                                        )))));
+
+        var initialIQ = IQ_FACTORY.createIQ(projectionAtom, initialTree);
+
+        optimizeAndCompare(initialIQ, initialIQ);
+    }
+
 
 
     private static void optimizeAndCompare(IQ initialIQ, IQ expectedIQ) {
