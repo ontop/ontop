@@ -20,6 +20,9 @@ import java.util.Comparator;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.BiFunction;
+import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 @Singleton
@@ -45,18 +48,27 @@ public class ConditionSimplifierImpl implements ConditionSimplifier {
                                                        VariableNullability variableNullability)
             throws DownPropagation.InconsistentDownPropagationException {
 
-        if (nonOptimizedExpression.isPresent()) {
-            var optionalExpression = evaluateCondition(nonOptimizedExpression.get(), variableNullability);
-            if (optionalExpression.isPresent())
+        return simplifyCondition(
+                nonOptimizedExpression,
+                e -> variableNullability,
+                e -> convertIntoExpressionAndSubstitution(e, nonLiftableVariables, children, variableNullability));
+    }
+
+    @Override
+    public ExpressionAndSubstitution simplifyCondition(Optional<ImmutableExpression> optionalExpression, Function<ImmutableExpression, VariableNullability> variableNullabilitySupplier, Extractor extractor) throws DownPropagation.InconsistentDownPropagationException {
+        if (optionalExpression.isPresent()) {
+            var expression = optionalExpression.get();
+            var variableNullability = variableNullabilitySupplier.apply(expression);
+            var optionalSimplifiedExpression = evaluateCondition(expression, variableNullability);
+            if (optionalSimplifiedExpression.isPresent())
                 // May throw an exception if unification is rejected
-                return convertIntoExpressionAndSubstitution(optionalExpression.get(), nonLiftableVariables, children, variableNullability);
+                return extractor.extract(optionalSimplifiedExpression.get());
             else
                 return new ExpressionAndSubstitutionImpl(Optional.empty(), substitutionFactory.getSubstitution());
         }
         else
             return new ExpressionAndSubstitutionImpl(Optional.empty(), substitutionFactory.getSubstitution());
     }
-
 
 
     /**

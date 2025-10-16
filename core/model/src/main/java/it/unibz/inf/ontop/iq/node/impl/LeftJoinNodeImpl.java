@@ -203,28 +203,15 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
 
         IQTree updatedLeftChild = dp.propagateWithRestrictedScope(leftChild);
 
-        var optionalExpression = dp.applyDescendingSubstitution(getOptionalFilterCondition());
         try {
-            ExpressionAndSubstitution simplification;
-            if (optionalExpression.isPresent()) {
-                // No proper variable nullability information is given for optimizing during descending substitution
-                // (too complicated)
-                // Therefore, please consider normalizing afterwards
-                var expression = optionalExpression.get();
-                var optionalSimplifiedExpression = ConditionSimplifierImpl.evaluateCondition(expression,
-                        coreUtilsFactory.createSimplifiedVariableNullability(expression));
-                simplification = optionalSimplifiedExpression
-                        .map(immutableExpression -> convertIntoExpressionAndSubstitution(immutableExpression, leftChild.getVariables(), rightChild.getVariables()))
-                        .orElseGet(() -> new ExpressionAndSubstitutionImpl(Optional.empty(), dp.getDescendingSubstitution().restrictRangeTo(VariableOrGroundTerm.class)));
-            }
-            else
-                simplification = new ExpressionAndSubstitutionImpl(Optional.empty(), substitutionFactory.getSubstitution());
+            DownPropagation dpNoConstraint = iqTreeTools.createDownPropagation(dp.getDescendingSubstitution(), Optional.empty(), dp.getVariables(), dp.getVariableGenerator());
+            ExpressionAndSubstitution simplification = conditionSimplifier.simplifyCondition(
+                    dpNoConstraint.applyDescendingSubstitution(getOptionalFilterCondition()),
+                    coreUtilsFactory::createSimplifiedVariableNullability,
+                    e -> convertIntoExpressionAndSubstitution(e, leftChild.getVariables(), rightChild.getVariables()));
 
-            Substitution<? extends VariableOrGroundTerm> rightDescendingSubstitution =
-                    substitutionFactory.onVariableOrGroundTerms().compose(simplification.getSubstitution(), dp.getDescendingSubstitution());
-
-            DownPropagation dpR = iqTreeTools.createDownPropagation(rightDescendingSubstitution, Optional.empty(), rightChild.getVariables(), dp.getVariableGenerator());
-            IQTree updatedRightChild = dpR.propagate(rightChild);
+            DownPropagation dpResult = conditionSimplifier.getCombinedDownPropagation(dpNoConstraint, simplification, null);
+            IQTree updatedRightChild = dpResult.propagateWithRestrictedScope(rightChild);
 
             if (updatedRightChild.isDeclaredAsEmpty())
                 return buildPaddedLeftChild(updatedLeftChild, dp.computeProjectedVariables());

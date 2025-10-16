@@ -11,7 +11,10 @@ import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
 import it.unibz.inf.ontop.substitution.Substitution;
 
 import java.util.Optional;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
+@SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 public interface ConditionSimplifier {
 
     ExpressionAndSubstitution simplifyCondition(Optional<ImmutableExpression> expression,
@@ -20,11 +23,18 @@ public interface ConditionSimplifier {
                                                 VariableNullability variableNullability)
                     throws DownPropagation.InconsistentDownPropagationException;
 
+    ExpressionAndSubstitution simplifyCondition(Optional<ImmutableExpression> nonOptimizedExpression,
+                                                Function<ImmutableExpression, VariableNullability> variableNullability,
+                                                Extractor extractor) throws DownPropagation.InconsistentDownPropagationException;
 
     DownPropagation getCombinedDownPropagation(DownPropagation dp, ExpressionAndSubstitution simplification, VariableNullability variableNullability) throws DownPropagation.InconsistentDownPropagationException;
 
     interface ExpressionAndSubstitution {
         Substitution<VariableOrGroundTerm> getSubstitution();
         Optional<ImmutableExpression> getOptionalExpression();
+    }
+
+    interface Extractor {
+        ExpressionAndSubstitution extract(ImmutableExpression expression) throws DownPropagation.InconsistentDownPropagationException;
     }
 }
