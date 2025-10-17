@@ -9,7 +9,7 @@ import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
-import it.unibz.inf.ontop.model.term.ImmutableExpression;
+import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
@@ -17,6 +17,7 @@ import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
 
 /**
  *
@@ -52,40 +53,20 @@ public class RightProvenanceNormalizer {
         this.iqTreeTools = coreSingletons.getIQTreeTools();
     }
 
-    private VariableNullability getRightNullability(IQTree rightTree,
-                                                   Optional<ImmutableExpression> leftJoinExpression) {
-        ImmutableSet<Variable> rightVariables = rightTree.getVariables();
-
-        var optionalFilter = iqTreeTools.createOptionalFilterNode(leftJoinExpression.flatMap(e -> termFactory.getConjunction(
-                e.flattenAND().filter(e1 -> rightVariables.containsAll(e1.getVariables())))));
-
-        return iqTreeTools.unaryIQTreeBuilder()
-                .append(optionalFilter)
-                .build(rightTree)
-                .getVariableNullability();
-    }
-
-    @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
     public RightProvenance normalizeRightProvenance(IQTree rightTree, ImmutableSet<Variable> leftVariables,
                                                     VariableGenerator variableGenerator,
-                                                    Optional<ImmutableExpression> leftJoinExpression) {
+                                                    VariableNullability rightNullability) {
 
-        var rightNullability = getRightNullability(rightTree, leftJoinExpression);
-
-        Optional<Variable> nonNullableRightVariable = getNonNullableRightVariable(rightTree, leftVariables, rightNullability);
+        Optional<Variable> nonNullableRightVariable = rightTree.getVariables().stream()
+                .filter(v -> !leftVariables.contains(v))
+                .filter(v -> !rightNullability.isPossiblyNullable(v))
+                .findFirst();
 
         if (nonNullableRightVariable.isPresent())
             return new RightProvenance(nonNullableRightVariable.get(), rightTree);
 
         Variable provenanceVariable = variableGenerator.generateNewVariable(PROV);
         return new RightProvenance(provenanceVariable, createProvenanceInConstructionNode(provenanceVariable, rightTree));
-    }
-
-    public Optional<Variable> getNonNullableRightVariable(IQTree rightTree, ImmutableSet<Variable> leftVariables, VariableNullability rightNullability) {
-        return rightTree.getVariables().stream()
-                .filter(v -> !leftVariables.contains(v))
-                .filter(v -> !rightNullability.isPossiblyNullable(v))
-                .findFirst();
     }
 
     public UnaryIQTree createProvenanceInConstructionNode(Variable provenanceVariable, IQTree rightTree) {
@@ -106,12 +87,11 @@ public class RightProvenanceNormalizer {
      * - provenance variable: right-specific, not nullable on the right
      * - right tree: may have been updated so as to provide the provenance variable
      */
-    public class RightProvenance {
-
+    public static class RightProvenance {
         private final Variable provenanceVariable;
         private final IQTree tree;
 
-        protected RightProvenance(Variable provenanceVariable, IQTree tree) {
+        RightProvenance(Variable provenanceVariable, IQTree tree) {
             this.provenanceVariable = provenanceVariable;
             this.tree = tree;
         }
@@ -120,13 +100,8 @@ public class RightProvenanceNormalizer {
             return provenanceVariable;
         }
 
-        public ImmutableExpression getProvenanceExpression() {
-            return termFactory.getDBIsNotNull(provenanceVariable);
-        }
-
         public IQTree getTree() {
             return tree;
         }
     }
-
 }

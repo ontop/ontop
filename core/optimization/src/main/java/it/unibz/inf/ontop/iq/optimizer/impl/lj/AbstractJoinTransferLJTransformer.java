@@ -24,6 +24,7 @@ import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -261,16 +262,14 @@ public abstract class AbstractJoinTransferLJTransformer extends AbstractLJTransf
         IQTree simplifiedRightChild = replaceSelectedNodesAndRename(selectedNodes, transformedRightChild,
                 renamingSubstitution);
 
-        ImmutableSet<Variable> leftVariables = newLeftChild.getVariables();
-
-        RightProvenanceNormalizer.RightProvenance rightProvenance = rightProvenanceNormalizer.normalizeRightProvenance(simplifiedRightChild, leftVariables, variableGenerator, newLeftJoinCondition);
+        RightProvenanceNormalizer.RightProvenance rightProvenance = rightProvenanceNormalizer.normalizeRightProvenance(
+                simplifiedRightChild, newLeftChild.getVariables(), variableGenerator, getRightNullability(simplifiedRightChild, newLeftJoinCondition));
 
         BinaryNonCommutativeIQTree newLeftJoinTree = iqTreeTools.createLeftJoinTree(
                 newLeftJoinCondition,
                 newLeftChild, rightProvenance.getTree());
 
-        ImmutableExpression condition = rightProvenance.getProvenanceExpression();
-
+        var condition = termFactory.getDBIsNotNull(rightProvenance.getProvenanceVariable());
         Substitution<ImmutableTerm> substitution = renamingSubstitution.builder()
                 .restrictDomainTo(projectedVariables)
                 .<ImmutableTerm>transform(t -> termFactory.getIfElseNull(condition, t))
@@ -279,6 +278,18 @@ public abstract class AbstractJoinTransferLJTransformer extends AbstractLJTransf
         ConstructionNode constructionNode = iqFactory.createConstructionNode(projectedVariables, substitution);
 
         return iqFactory.createUnaryIQTree(constructionNode, newLeftJoinTree);
+    }
+
+    private VariableNullability getRightNullability(IQTree rightTree, Optional<ImmutableExpression> leftJoinExpression) {
+        ImmutableSet<Variable> rightVariables = rightTree.getVariables();
+
+        var optionalFilter = iqTreeTools.createOptionalFilterNode(leftJoinExpression.flatMap(e -> termFactory.getConjunction(
+                e.flattenAND().filter(e1 -> rightVariables.containsAll(e1.getVariables())))));
+
+        return iqTreeTools.unaryIQTreeBuilder()
+                .append(optionalFilter)
+                .build(rightTree)
+                .getVariableNullability();
     }
 
 

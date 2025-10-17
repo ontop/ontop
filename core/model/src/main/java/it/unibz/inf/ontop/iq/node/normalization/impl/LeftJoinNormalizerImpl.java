@@ -534,14 +534,8 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
                 return new LiftableRightSubtree(rightTree, liftableSubstitutionBuilder.build(Optional.empty()));
             }
 
-            var nonNullableRightVariable = rightProvenanceNormalizer.getNonNullableRightVariable(rightTree, leftVariables, rightTree.getVariableNullability());
-            if (nonNullableRightVariable.isPresent()) {
-                return new LiftableRightSubtree(rightTree, liftableSubstitutionBuilder.build(nonNullableRightVariable));
-            }
-
-            var provenanceVariable = variableGenerator.generateNewVariable(RightProvenanceNormalizer.PROV);
-            var tree = rightProvenanceNormalizer.createProvenanceInConstructionNode(provenanceVariable, rightTree);
-            return new LiftableRightSubtree(tree, liftableSubstitutionBuilder.build(Optional.of(provenanceVariable)));
+            var rightProvenance = rightProvenanceNormalizer.normalizeRightProvenance(rightTree, leftVariables, variableGenerator, rightTree.getVariableNullability());
+            return new LiftableRightSubtree(rightProvenance.getTree(), liftableSubstitutionBuilder.build(Optional.of(rightProvenance.getProvenanceVariable())));
         }
 
         private class LiftableSubstitutionBuilder {

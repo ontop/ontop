@@ -158,11 +158,9 @@ public class MergeLJOptimizer extends AbstractDelegatingIQTreeVariableGeneratorT
                     newLocalRightTreeBeforeRenaming = mergedLocalRightBeforeRenaming;
                 }
                 else {
-                    ImmutableSet<Variable> leftVariables = leftLJ.getTree().getVariables();
-
-                    var localRightProvenance = rightProvenanceNormalizer.normalizeRightProvenance(mergedLocalRightBeforeRenaming, leftVariables, variableGenerator, Optional.empty());
-
-                    newLocalRightTreeBeforeRenaming = localRightProvenance.getTree();
+                    newLocalRightTreeBeforeRenaming = rightProvenanceNormalizer.normalizeRightProvenance(
+                            mergedLocalRightBeforeRenaming, leftLJ.getTree().getVariables(), variableGenerator, mergedLocalRightBeforeRenaming.getVariableNullability())
+                            .getTree();
                 }
 
                 IQTree newLocalRightChild = iqTreeTools.applyDownPropagation(renaming, newLocalRightTreeBeforeRenaming);

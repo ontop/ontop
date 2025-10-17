@@ -44,9 +44,9 @@ public class LeftJoinTools {
     public IQ constructMinusIQ(IQTree tree, IQTree otherTree, Predicate<Variable> isPossiblyNullable) {
         VariableGenerator variableGenerator = coreUtilsFactory.createVariableGenerator(
                 Sets.union(otherTree.getKnownVariables(), tree.getKnownVariables()).immutableCopy());
-        ImmutableSet<Variable> leftVariables = tree.getVariables();
 
-        RightProvenanceNormalizer.RightProvenance rightProvenance = rightProvenanceNormalizer.normalizeRightProvenance(otherTree, leftVariables, variableGenerator, Optional.empty());
+        RightProvenanceNormalizer.RightProvenance rightProvenance = rightProvenanceNormalizer.normalizeRightProvenance(
+                otherTree, tree.getVariables(), variableGenerator, otherTree.getVariableNullability());
 
         Optional<ImmutableExpression> nonNullabilityCondition = termFactory.getConjunction(
                 tree.getVariables().stream()
