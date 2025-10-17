@@ -156,9 +156,6 @@ public abstract class JsonBasicOrJoinLens extends JsonBasicOrJoinOrNestedLens {
         ImmutableList<Variable> projectedVariablesList = extractRelationVariables(addedVariables, hiddenVariables, parentDefinitions, termFactory);
         ImmutableSet<Variable> projectedVariables = ImmutableSet.copyOf(projectedVariablesList);
 
-        ConstructionSubstitutionNormalizer.ConstructionSubstitutionNormalization normalization =
-                substitutionNormalizer.normalizeSubstitution(substitution, projectedVariables);
-
         ImmutableList<IQTree> parents = parentDefinitions.stream()
                 .map(p -> iqFactory.createExtensionalDataNode(p.relation, p.getArgumentMap()))
                 .collect(ImmutableCollectors.toList());
@@ -166,18 +163,14 @@ public abstract class JsonBasicOrJoinLens extends JsonBasicOrJoinOrNestedLens {
         IQTree parentTree = iqTreeTools.createOptionalInnerJoinTree(Optional.empty(), parents)
                 .orElseThrow(() -> new MetadataExtractionException("At least one base relation was expected"));
 
-        ImmutableList<ImmutableExpression> filterConditions = extractFilter(parentAttributeMap, idFactory, coreSingletons);
+        Optional<ImmutableExpression> optionalFilterCondition = extractFilter(parentAttributeMap, idFactory, coreSingletons).stream()
+                .reduce(termFactory::getConjunction);
 
-        var optionalFilter = iqTreeTools.createOptionalFilterNode(filterConditions.stream().reduce(termFactory::getConjunction));
         IQTree filterTree = iqTreeTools.unaryIQTreeBuilder()
-                .append(optionalFilter)
+                .append(iqTreeTools.createOptionalFilterNode(optionalFilterCondition))
                 .build(parentTree);
 
-        IQTree updatedParentDataNode = normalization.applyDownRenamingSubstitution(filterTree);
-
-        IQTree iqTreeBeforeIRISafeConstraints = iqTreeTools.unaryIQTreeBuilder(projectedVariables)
-                .append(normalization.createOptionalConstructionNode())
-                .build(updatedParentDataNode);
+        IQTree iqTreeBeforeIRISafeConstraints = substitutionNormalizer.createNormalizedOptionalConstructionTree(substitution, projectedVariables, filterTree);
 
         IQTree iqTree = addIRISafeConstraints(iqTreeBeforeIRISafeConstraints, dbParameters);
 

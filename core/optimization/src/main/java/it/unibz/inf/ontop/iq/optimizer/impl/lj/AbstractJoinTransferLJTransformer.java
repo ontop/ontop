@@ -247,7 +247,7 @@ public abstract class AbstractJoinTransferLJTransformer extends AbstractLJTransf
         ImmutableList<Map.Entry<Variable, VariableOrGroundTerm>> list = replacementSubstitution.stream()
                 .collect(ImmutableCollectors.toList());
 
-        InjectiveSubstitution<Variable> renamingSubstitution = substitutionFactory.extractSubstitution(list.stream(), leftChild.getVariables())
+        InjectiveSubstitution<Variable> renamingSubstitution = substitutionFactory.extractInverseSubstitution(list.stream(), leftChild.getVariables())
                 .injective();
 
         ImmutableSet<ImmutableExpression> equalities = iqTreeTools.getRemainingEqualities(list, renamingSubstitution)

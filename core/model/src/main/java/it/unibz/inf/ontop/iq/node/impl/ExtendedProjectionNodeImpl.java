@@ -110,7 +110,7 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
                         substitutionFactory.onNonFunctionalTerms().apply(deltaC, e.getKey())))
                 .collect(ImmutableCollectors.toList());
 
-        Substitution<ImmutableFunctionalTerm> thetaFBar = substitutionFactory.extractSubstitution(deltaCThetaFEqualities.stream(), childVariables);
+        Substitution<ImmutableFunctionalTerm> thetaFBar = substitutionFactory.extractInverseSubstitution(deltaCThetaFEqualities.stream(), childVariables);
 
         Stream<ImmutableExpression> thetaFRemainingEqualities = iqTreeTools.getRemainingEqualities(deltaCThetaFEqualities, thetaFBar);
 

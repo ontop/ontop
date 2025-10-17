@@ -129,15 +129,7 @@ public class JsonSQLLens extends JsonLens {
                         e -> termFactory.getVariable(e.getKey().getName()),
                         Map.Entry::getValue));
 
-        ConstructionSubstitutionNormalization normalization = substitutionNormalizer.normalizeSubstitution(
-                ascendingSubstitution,
-                ascendingSubstitution.getDomain());
-
-        IQTree updatedChild = normalization.applyDownRenamingSubstitution(initialChild);
-
-        IQTree iqTree = iqFactory.createUnaryIQTree(
-                normalization.createConstructionNode(),
-                updatedChild);
+        IQTree iqTree = substitutionNormalizer.createNormalizedConstructionTree(ascendingSubstitution, ascendingSubstitution.getDomain(), initialChild);
 
         NotYetTypedEqualityTransformer notYetTypedEqualityTransformer = coreSingletons.getNotYetTypedEqualityTransformer();
         IQTree transformedTree = notYetTypedEqualityTransformer.transform(iqTree);

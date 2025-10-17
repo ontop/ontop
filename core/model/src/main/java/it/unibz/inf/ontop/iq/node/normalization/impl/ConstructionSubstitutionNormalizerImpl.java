@@ -1,7 +1,6 @@
 package it.unibz.inf.ontop.iq.node.normalization.impl;
 
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
@@ -36,6 +35,12 @@ public class ConstructionSubstitutionNormalizerImpl implements ConstructionSubst
     /**
      * Prevents creating construction nodes out of ascending substitutions
      *
+     * Splits the ascendingSubstitution into the renaming part of the form "p -> x" and
+     * the proper CONSTRUCT node substitutions of the form "p -> f(y)" or "p -> a".
+     * Note, however, that "p -> x, q -> x" would still retain one of the two components
+     * transformed into "p -> q" or "q -> p", respectively, while the other component
+     * is moved to the renaming part.
+     *
      * Here, variable nullability is not considered due to the complexity induced by the descending substitution
      *
      */
@@ -43,7 +48,7 @@ public class ConstructionSubstitutionNormalizerImpl implements ConstructionSubst
     public ConstructionSubstitutionNormalization normalizeSubstitution(Substitution<?> ascendingSubstitution, ImmutableSet<Variable> projectedVariables) {
 
         Substitution<?> reducedAscendingSubstitution = ascendingSubstitution.restrictDomainTo(projectedVariables);
-        InjectiveSubstitution<Variable> downRenamingSubstitution = substitutionFactory.extractSubstitution(
+        InjectiveSubstitution<Variable> downRenamingSubstitution = substitutionFactory.extractInverseSubstitution(
                         reducedAscendingSubstitution.stream(),
                         projectedVariables)
                 .injective();
@@ -52,6 +57,22 @@ public class ConstructionSubstitutionNormalizerImpl implements ConstructionSubst
                 .transform(ImmutableTerm::simplify);
 
         return new ConstructionSubstitutionNormalizationImpl(newAscendingSubstitution, projectedVariables, downRenamingSubstitution);
+    }
+
+    @Override
+    public IQTree createNormalizedConstructionTree(Substitution<? extends ImmutableTerm> substitution, ImmutableSet<Variable> projectedVariables, IQTree child) {
+        var normalization = normalizeSubstitution(substitution, projectedVariables);
+        return iqTreeTools.unaryIQTreeBuilder()
+                .append(normalization.createConstructionNode())
+                .build(normalization.applyDownRenamingSubstitution(child));
+    }
+
+    @Override
+    public IQTree createNormalizedOptionalConstructionTree(Substitution<? extends ImmutableTerm> substitution, ImmutableSet<Variable> projectedVariables, IQTree child) {
+        var normalization = normalizeSubstitution(substitution, projectedVariables);
+        return iqTreeTools.unaryIQTreeBuilder(projectedVariables)
+                .append(normalization.createOptionalConstructionNode())
+                .build(normalization.applyDownRenamingSubstitution(child));
     }
 
 

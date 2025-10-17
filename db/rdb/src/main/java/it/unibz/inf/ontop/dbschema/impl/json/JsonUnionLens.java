@@ -233,19 +233,13 @@ public class JsonUnionLens extends JsonLens {
 
     private IQTree addConstantColumn(Variable variable, String value, IQTree child, CoreSingletons coreSingletons) {
         SubstitutionFactory substitutionFactory = coreSingletons.getSubstitutionFactory();
-        IntermediateQueryFactory iqFactory = coreSingletons.getIQFactory();
         ConstructionSubstitutionNormalizer substitutionNormalizer = coreSingletons.getConstructionSubstitutionNormalizer();
         TermFactory termFactory = coreSingletons.getTermFactory();
 
-        DBConstant provenanceValue = termFactory.getDBStringConstant(value);
-        Substitution<ImmutableTerm> substitution = substitutionFactory.getSubstitution(variable, provenanceValue);
-        ImmutableSet<Variable> allProjectedVariables = Sets.union(child.getKnownVariables(), ImmutableSet.of(variable)).immutableCopy();
+        Substitution<ImmutableTerm> substitution = substitutionFactory.getSubstitution(variable, termFactory.getDBStringConstant(value));
+        ImmutableSet<Variable> allProjectedVariables = Sets.union(child.getKnownVariables(), substitution.getDomain()).immutableCopy();
 
-        ConstructionSubstitutionNormalizer.ConstructionSubstitutionNormalization normalization =
-                substitutionNormalizer.normalizeSubstitution(substitution, allProjectedVariables);
-
-        ConstructionNode constructionNode = normalization.createConstructionNode();
-        return iqFactory.createUnaryIQTree(constructionNode, child);
+        return substitutionNormalizer.createNormalizedConstructionTree(substitution, allProjectedVariables, child);
     }
 
     private AtomPredicate createTemporaryPredicate(RelationID relationId, int arity, CoreSingletons coreSingletons) {

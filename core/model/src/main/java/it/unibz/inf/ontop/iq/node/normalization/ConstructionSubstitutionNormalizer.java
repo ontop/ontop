@@ -17,6 +17,9 @@ public interface ConstructionSubstitutionNormalizer {
             Substitution<? extends ImmutableTerm> ascendingSubstitution,
             ImmutableSet<Variable> projectedVariables);
 
+    IQTree createNormalizedConstructionTree(Substitution<? extends ImmutableTerm> substitution, ImmutableSet<Variable> projectedVariables, IQTree child);
+
+    IQTree createNormalizedOptionalConstructionTree(Substitution<? extends ImmutableTerm> substitution, ImmutableSet<Variable> projectedVariables, IQTree child);
 
     interface ConstructionSubstitutionNormalization {
 

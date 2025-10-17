@@ -189,7 +189,7 @@ public class SubstitutionFactoryImpl implements SubstitutionFactory {
     }
 
     @Override
-    public <T extends ImmutableTerm> Substitution<T> extractSubstitution(Stream<? extends Map.Entry<T, ? extends ImmutableTerm>> stream, ImmutableSet<Variable> priorityVariables) {
+    public <T extends ImmutableTerm> Substitution<T> extractInverseSubstitution(Stream<? extends Map.Entry<T, ? extends ImmutableTerm>> stream, ImmutableSet<Variable> priorityVariables) {
         return createSubstitution(AbstractUnifierBuilder.extractSubstitutionMap(stream, priorityVariables));
     }
 

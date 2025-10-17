@@ -78,7 +78,19 @@ public interface SubstitutionFactory {
 
     default Optional<Substitution<ImmutableTerm>> unify(ImmutableTerm t1, ImmutableTerm t2) { return onImmutableTerms().unify(t1, t2); }
 
-    <T extends ImmutableTerm> Substitution<T> extractSubstitution(Stream<? extends Map.Entry<T, ? extends ImmutableTerm>> stream, ImmutableSet<Variable> priorityVariables);
+    /**
+     * The variables (but not the priority variables) of the "range" become the domain of the substitution.
+     *
+     * So, when the "domain" of the stream (T) is a subset of priority variables,
+     * then the substitution is injective var2var.
+     *
+     * @param stream
+     * @param priorityVariables
+     * @return
+     * @param <T>
+     */
+
+    <T extends ImmutableTerm> Substitution<T> extractInverseSubstitution(Stream<? extends Map.Entry<T, ? extends ImmutableTerm>> stream, ImmutableSet<Variable> priorityVariables);
 
 
     SubstitutionOperations<NonFunctionalTerm> onNonFunctionalTerms();
