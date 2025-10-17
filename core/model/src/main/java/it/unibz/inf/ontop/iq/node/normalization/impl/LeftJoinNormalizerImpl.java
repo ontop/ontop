@@ -406,7 +406,7 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
                     public Optional<State<UnaryOperatorNode, LeftJoinSubTree>> transformDistinct(UnaryIQTree tree, DistinctNode distinctNode, IQTree rightGrandGrandChild) {
                         if (subTree.leftChild().isDistinct()) {
 
-                            IQTree newRightChild = rightProvenanceNormalizer.createProvenanceInConstructionNode(provenanceVariable, rightGrandGrandChild, rightGrandChild.getVariables()).getRightTree();
+                            IQTree newRightChild = rightProvenanceNormalizer.createProvenanceInConstructionNode(provenanceVariable, rightGrandGrandChild, rightGrandChild.getVariables()).getTree();
 
                             return Optional.of(state.lift(
                                             optionalProjectingAwayParent,
@@ -421,7 +421,7 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
                     public Optional<State<UnaryOperatorNode, LeftJoinSubTree>> transformFilter(UnaryIQTree tree, FilterNode filterNode, IQTree rightGrandGrandChild) {
                         ImmutableExpression filterCondition = filterNode.getFilterCondition();
 
-                        IQTree newRightChild = rightProvenanceNormalizer.createProvenanceInConstructionNode(provenanceVariable, rightGrandGrandChild, Sets.union(rightChildRequiredVariables, filterCondition.getVariables()).immutableCopy()).getRightTree();
+                        IQTree newRightChild = rightProvenanceNormalizer.createProvenanceInConstructionNode(provenanceVariable, rightGrandGrandChild, Sets.union(rightChildRequiredVariables, filterCondition.getVariables()).immutableCopy()).getTree();
 
                         ImmutableExpression newLJCondition = iqTreeTools.getConjunction(subTree.ljCondition(), filterCondition);
                         return Optional.of(state.lift(
@@ -435,7 +435,7 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
                         if (joinCondition.isPresent()) {
                             NaryIQTree newRightGrandChild = iqTreeTools.createInnerJoinTree(grandGrandChildren);
 
-                            IQTree newRightChild = rightProvenanceNormalizer.createProvenanceInConstructionNode(provenanceVariable, newRightGrandChild, Sets.union(rightChildRequiredVariables, joinCondition.get().getVariables()).immutableCopy()).getRightTree();
+                            IQTree newRightChild = rightProvenanceNormalizer.createProvenanceInConstructionNode(provenanceVariable, newRightGrandChild, Sets.union(rightChildRequiredVariables, joinCondition.get().getVariables()).immutableCopy()).getTree();
 
                             ImmutableExpression newLJCondition = iqTreeTools.getConjunction(subTree.ljCondition(), joinCondition.get());
                             return Optional.of(state.lift(
@@ -556,9 +556,9 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
                 this.leftVariables = leftVariables;
                 this.rightSpecificSubstitution = selectedSubstitution.removeFromDomain(leftVariables);
                 if (rightSpecificSubstitution.rangeAnyMatch(term -> !isNullWhenRightIsRejected(term) && getProvenanceVariableProposal(term).isEmpty())) {
-                    this.rightProvenance = Optional.of(rightProvenanceNormalizer.normalizeRightProvenance(
-                            rightTree, leftVariables, rightRequiredVariables, variableGenerator));
-                    this.rightTree = rightProvenance.get().getRightTree();
+                    this.rightProvenance = Optional.of(rightProvenanceNormalizer.normalizeRightProvenance(rightTree, leftVariables, rightRequiredVariables, variableGenerator,
+                            rightTree.getVariableNullability()));
+                    this.rightTree = rightProvenance.get().getTree();
                 }
                 else {
                     this.rightProvenance = Optional.empty();
@@ -574,7 +574,7 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
                 this.leftVariables = leftVariables;
                 this.rightSpecificSubstitution = selectedSubstitution.removeFromDomain(leftVariables);
                 this.rightProvenance = Optional.of(rightProvenanceNormalizer.createProvenanceInConstructionNode(provenanceVariable, tree, rightRequiredVariables));
-                this.rightTree = rightProvenance.get().getRightTree();
+                this.rightTree = rightProvenance.get().getTree();
             }
 
             IQTree getRightTree() {

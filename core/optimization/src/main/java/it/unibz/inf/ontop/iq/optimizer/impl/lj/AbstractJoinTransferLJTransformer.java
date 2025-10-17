@@ -261,16 +261,16 @@ public abstract class AbstractJoinTransferLJTransformer extends AbstractLJTransf
         IQTree simplifiedRightChild = replaceSelectedNodesAndRename(selectedNodes, transformedRightChild,
                 renamingSubstitution);
 
-        RightProvenanceNormalizer.RightProvenance rightProvenance = rightProvenanceNormalizer.normalizeRightProvenance(
-                simplifiedRightChild, newLeftChild.getVariables(), newLeftJoinCondition, variableGenerator);
+        ImmutableSet<Variable> leftVariables = newLeftChild.getVariables();
+
+        RightProvenanceNormalizer.RightProvenance rightProvenance = rightProvenanceNormalizer.normalizeRightProvenance(simplifiedRightChild, leftVariables, simplifiedRightChild.getVariables(), variableGenerator,
+                rightProvenanceNormalizer.getRightNullability(simplifiedRightChild, newLeftJoinCondition));
 
         BinaryNonCommutativeIQTree newLeftJoinTree = iqTreeTools.createLeftJoinTree(
                 newLeftJoinCondition,
-                newLeftChild, rightProvenance.getRightTree());
+                newLeftChild, rightProvenance.getTree());
 
-        Variable provenanceVariable = rightProvenance.getProvenanceVariable();
-
-        ImmutableExpression condition = termFactory.getDBIsNotNull(provenanceVariable);
+        ImmutableExpression condition = rightProvenance.getProvenanceExpression();
 
         Substitution<ImmutableTerm> substitution = renamingSubstitution.builder()
                 .restrictDomainTo(projectedVariables)

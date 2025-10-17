@@ -44,29 +44,31 @@ public class LeftJoinTools {
     public IQ constructMinusIQ(IQTree tree, IQTree otherTree, Predicate<Variable> isPossiblyNullable) {
         VariableGenerator variableGenerator = coreUtilsFactory.createVariableGenerator(
                 Sets.union(otherTree.getKnownVariables(), tree.getKnownVariables()).immutableCopy());
-        RightProvenanceNormalizer.RightProvenance rightProvenance = rightProvenanceNormalizer.normalizeRightProvenance(
-                otherTree, tree.getVariables(), Optional.empty(), variableGenerator);
+        ImmutableSet<Variable> leftVariables = tree.getVariables();
+
+        RightProvenanceNormalizer.RightProvenance rightProvenance = rightProvenanceNormalizer.normalizeRightProvenance(otherTree, leftVariables, otherTree.getVariables(), variableGenerator,
+                rightProvenanceNormalizer.getRightNullability(otherTree, Optional.empty()));
 
         Optional<ImmutableExpression> nonNullabilityCondition = termFactory.getConjunction(
                 tree.getVariables().stream()
                         .filter(v -> !isPossiblyNullable.test(v))
                         .map(termFactory::getDBIsNotNull));
 
-        ImmutableExpression isNullCondition = termFactory.getDBIsNull(rightProvenance.getProvenanceVariable());
-        ImmutableExpression filterCondition = iqTreeTools.getConjunction(nonNullabilityCondition, isNullCondition);
+        Variable provenanceVariable = rightProvenance.getProvenanceVariable();
+        ImmutableExpression filterCondition = iqTreeTools.getConjunction(nonNullabilityCondition, termFactory.getDBIsNull(provenanceVariable));
 
         IQTree minusTree = iqTreeTools.unaryIQTreeBuilder()
-                .append(iqFactory.createConstructionNode(ImmutableSet.of(rightProvenance.getProvenanceVariable())))
+                .append(iqFactory.createConstructionNode(ImmutableSet.of(provenanceVariable)))
                 .append(iqFactory.createFilterNode(filterCondition))
                 .build(iqTreeTools.createLeftJoinTree(
                         Optional.empty(),
                         tree,
-                        rightProvenance.getRightTree()));
+                        rightProvenance.getTree()));
 
         // Hack
         DistinctVariableOnlyDataAtom minusFakeProjectionAtom = atomFactory.getDistinctVariableOnlyDataAtom(
                 atomFactory.getRDFAnswerPredicate(1),
-                ImmutableList.of(rightProvenance.getProvenanceVariable()));
+                ImmutableList.of(provenanceVariable));
 
         return iqFactory.createIQ(minusFakeProjectionAtom, minusTree);
     }

@@ -51,30 +51,19 @@ public class RightProvenanceNormalizer {
         this.iqTreeTools = coreSingletons.getIQTreeTools();
     }
 
-    public RightProvenance normalizeRightProvenance(IQTree rightTree, ImmutableSet<Variable> leftVariables,
-                                                    Optional<ImmutableExpression> leftJoinExpression,
-                                                    VariableGenerator variableGenerator) {
+    public VariableNullability getRightNullability(IQTree rightTree,
+                                                   Optional<ImmutableExpression> leftJoinExpression) {
         ImmutableSet<Variable> rightVariables = rightTree.getVariables();
 
         var optionalFilter = iqTreeTools.createOptionalFilterNode(leftJoinExpression.flatMap(e -> termFactory.getConjunction(
                 e.flattenAND().filter(e1 -> rightVariables.containsAll(e1.getVariables())))));
-        VariableNullability rightNullability = iqTreeTools.unaryIQTreeBuilder()
+        return iqTreeTools.unaryIQTreeBuilder()
                 .append(optionalFilter)
                 .build(rightTree)
                 .getVariableNullability();
-
-        return normalizeRightProvenance(rightTree, leftVariables, rightTree.getVariables(), variableGenerator,
-                rightNullability);
     }
 
     public RightProvenance normalizeRightProvenance(IQTree rightTree, ImmutableSet<Variable> leftVariables,
-                                                    ImmutableSet<Variable> rightRequiredVariables,
-                                                    VariableGenerator variableGenerator) {
-        return normalizeRightProvenance(rightTree, leftVariables, rightRequiredVariables, variableGenerator,
-                rightTree.getVariableNullability());
-    }
-
-    private RightProvenance normalizeRightProvenance(IQTree rightTree, ImmutableSet<Variable> leftVariables,
                                                     ImmutableSet<Variable> rightRequiredVariables,
                                                     VariableGenerator variableGenerator,
                                                     VariableNullability rightNullability) {
@@ -106,22 +95,26 @@ public class RightProvenanceNormalizer {
      * - provenance variable: right-specific, not nullable on the right
      * - right tree: may have been updated so as to provide the provenance variable
      */
-    public static class RightProvenance {
+    public class RightProvenance {
 
-        private final Variable variable;
-        private final IQTree rightTree;
+        private final Variable provenanceVariable;
+        private final IQTree tree;
 
-        protected RightProvenance(Variable provenanceVariable, IQTree rightTree) {
-            this.variable = provenanceVariable;
-            this.rightTree = rightTree;
+        protected RightProvenance(Variable provenanceVariable, IQTree tree) {
+            this.provenanceVariable = provenanceVariable;
+            this.tree = tree;
         }
 
         public Variable getProvenanceVariable() {
-            return variable;
+            return provenanceVariable;
         }
 
-        public IQTree getRightTree() {
-            return rightTree;
+        public ImmutableExpression getProvenanceExpression() {
+            return termFactory.getDBIsNotNull(provenanceVariable);
+        }
+
+        public IQTree getTree() {
+            return tree;
         }
     }
 
