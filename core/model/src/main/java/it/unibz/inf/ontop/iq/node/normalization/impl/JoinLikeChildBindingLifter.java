@@ -39,18 +39,17 @@ public class JoinLikeChildBindingLifter {
      * For children of a commutative join or for the left child of a LJ
      */
     public BindingLift liftRegularChildBinding(ConstructionNode selectedChildConstructionNode,
-                                         int selectedChildPosition,
-                                         ImmutableList<IQTree> children,
-                                         ImmutableSet<Variable> nonLiftableVariables,
-                                         Optional<ImmutableExpression> initialJoiningCondition,
-                                         VariableGenerator variableGenerator,
-                                         VariableNullability variableNullability) throws DownPropagation.InconsistentDownPropagationException {
+                                               int selectedChildPosition,
+                                               ImmutableList<IQTree> children,
+                                               ImmutableSet<Variable> nonLiftableVariables,
+                                               @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
+                                               Optional<ImmutableExpression> initialJoiningCondition,
+                                               VariableGenerator variableGenerator,
+                                               VariableNullability variableNullability) throws DownPropagation.InconsistentDownPropagationException {
 
         Substitution<ImmutableTerm> substitution = selectedChildConstructionNode.getSubstitution();
 
         Substitution<VariableOrGroundTerm> downPropagableFragment = substitution.restrictRangeTo(VariableOrGroundTerm.class);
-
-        Substitution<ImmutableFunctionalTerm> nonDownPropagableFragment = substitution.restrictRangeTo(ImmutableFunctionalTerm.class);
 
         ImmutableSet<Variable> otherChildrenVariables = IntStream.range(0, children.size())
                 .filter(i -> i != selectedChildPosition)
@@ -59,14 +58,17 @@ public class JoinLikeChildBindingLifter {
                 .flatMap(Collection::stream)
                 .collect(ImmutableCollectors.toSet());
 
-        InjectiveSubstitution<Variable> freshRenaming = Sets.intersection(nonDownPropagableFragment.getDomain(), otherChildrenVariables).stream()
+        Substitution<ImmutableTerm> nonDownPropagableFragment = substitution
+                .removeFromDomain(downPropagableFragment.getDomain())
+                .restrictDomainTo(otherChildrenVariables);
+
+        InjectiveSubstitution<Variable> freshRenaming = nonDownPropagableFragment.getDomain().stream()
                 .collect(substitutionFactory.toFreshRenamingSubstitution(variableGenerator));
 
-        Stream<ImmutableExpression> equalities = freshRenaming.builder()
-                .toStream((v, t) -> termFactory.getStrictEquality(substitution.apply(v), t));
+        Stream<ImmutableExpression> equalities = freshRenaming.builder().toStream(termFactory::getStrictEquality);
 
         ConditionSimplifier.ExpressionAndSubstitution simplification = conditionSimplifier.simplifyCondition(
-                termFactory.getConjunction(initialJoiningCondition.map(substitution::apply), equalities),
+                termFactory.getConjunction(initialJoiningCondition, equalities).map(substitution::apply),
                 nonLiftableVariables,
                 children,
                 variableNullability);
@@ -75,13 +77,13 @@ public class JoinLikeChildBindingLifter {
 
         // NB: this substitution is said to be "naive" as further restrictions may be applied
         // to the effective ascending substitution (e.g., for the LJ, in the case of the renaming of right-specific vars)
-        Substitution<ImmutableTerm> naiveAscendingSubstitution =
-                simplification.getSubstitution().compose(substitution);
+        Substitution<ImmutableTerm> naiveAscendingSubstitution = substitutionFactory.onImmutableTerms().compose(
+                simplification.getSubstitution(),
+                substitution);
 
-        Substitution<VariableOrGroundTerm> descendingSubstitution =
-                substitutionFactory.onVariableOrGroundTerms().compose(
-                        simplification.getSubstitution(),
-                        substitutionFactory.union(freshRenaming, downPropagableFragment.removeFromDomain(freshRenaming.getDomain())));
+        Substitution<VariableOrGroundTerm> descendingSubstitution = substitutionFactory.onVariableOrGroundTerms().compose(
+                simplification.getSubstitution(),
+                substitutionFactory.union(downPropagableFragment, freshRenaming));
 
         return new BindingLift(newCondition, naiveAscendingSubstitution, descendingSubstitution);
     }

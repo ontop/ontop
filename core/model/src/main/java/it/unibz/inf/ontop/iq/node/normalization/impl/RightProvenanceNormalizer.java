@@ -78,26 +78,19 @@ public class RightProvenanceNormalizer {
                                                     ImmutableSet<Variable> rightRequiredVariables,
                                                     VariableGenerator variableGenerator,
                                                     VariableNullability rightNullability) {
-        ImmutableSet<Variable> rightVariables = rightTree.getVariables();
 
-        Optional<Variable> nonNullableRightVariable = rightVariables.stream()
+        Optional<Variable> nonNullableRightVariable = rightTree.getVariables().stream()
                 .filter(v -> !leftVariables.contains(v))
                 .filter(v -> !rightNullability.isPossiblyNullable(v))
                 .findFirst();
 
         return nonNullableRightVariable
                 .map(variable -> new RightProvenance(variable, rightTree))
-                .orElseGet(() -> createProvenanceInConstructionNode(rightTree, rightRequiredVariables, variableGenerator));
-
+                .orElseGet(() -> createProvenanceInConstructionNode(variableGenerator.generateNewVariable(PROV), rightTree, rightRequiredVariables));
     }
 
-    private RightProvenance createProvenanceInConstructionNode(IQTree rightTree,
-                                                               ImmutableSet<Variable> rightRequiredVariables,
-                                                               VariableGenerator variableGenerator) {
-        /*
-         * Otherwise, creates a fresh variable and its construction node
-         */
-        Variable provenanceVariable = variableGenerator.generateNewVariable(PROV);
+    public RightProvenance createProvenanceInConstructionNode(Variable provenanceVariable, IQTree rightTree,
+                                                               ImmutableSet<Variable> rightRequiredVariables) {
 
         ConstructionNode newRightConstructionNode = iqTreeTools.createExtendingConstructionNode(
                 rightRequiredVariables,
