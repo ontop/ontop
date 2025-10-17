@@ -51,12 +51,13 @@ public class RightProvenanceNormalizer {
         this.iqTreeTools = coreSingletons.getIQTreeTools();
     }
 
-    public VariableNullability getRightNullability(IQTree rightTree,
+    private VariableNullability getRightNullability(IQTree rightTree,
                                                    Optional<ImmutableExpression> leftJoinExpression) {
         ImmutableSet<Variable> rightVariables = rightTree.getVariables();
 
         var optionalFilter = iqTreeTools.createOptionalFilterNode(leftJoinExpression.flatMap(e -> termFactory.getConjunction(
                 e.flattenAND().filter(e1 -> rightVariables.containsAll(e1.getVariables())))));
+        
         return iqTreeTools.unaryIQTreeBuilder()
                 .append(optionalFilter)
                 .build(rightTree)
@@ -64,15 +65,16 @@ public class RightProvenanceNormalizer {
     }
 
     public RightProvenance normalizeRightProvenance(IQTree rightTree, ImmutableSet<Variable> leftVariables,
-                                                    ImmutableSet<Variable> rightRequiredVariables,
                                                     VariableGenerator variableGenerator,
-                                                    VariableNullability rightNullability) {
+                                                    Optional<ImmutableExpression> leftJoinExpression) {
+
+        var rightNullability = getRightNullability(rightTree, leftJoinExpression);
 
         Optional<Variable> nonNullableRightVariable = getNonNullableRightVariable(rightTree, leftVariables, rightNullability);
 
         return nonNullableRightVariable
                 .map(variable -> new RightProvenance(variable, rightTree))
-                .orElseGet(() -> createProvenanceInConstructionNode(variableGenerator.generateNewVariable(PROV), rightTree, rightRequiredVariables));
+                .orElseGet(() -> createProvenanceInConstructionNode(variableGenerator.generateNewVariable(PROV), rightTree, rightTree.getVariables()));
     }
 
     public Optional<Variable> getNonNullableRightVariable(IQTree rightTree, ImmutableSet<Variable> leftVariables, VariableNullability rightNullability) {

@@ -160,8 +160,7 @@ public class MergeLJOptimizer extends AbstractDelegatingIQTreeVariableGeneratorT
                 else {
                     ImmutableSet<Variable> leftVariables = leftLJ.getTree().getVariables();
 
-                    var localRightProvenance = rightProvenanceNormalizer.normalizeRightProvenance(mergedLocalRightBeforeRenaming, leftVariables, mergedLocalRightBeforeRenaming.getVariables(), variableGenerator,
-                            rightProvenanceNormalizer.getRightNullability(mergedLocalRightBeforeRenaming, Optional.empty()));
+                    var localRightProvenance = rightProvenanceNormalizer.normalizeRightProvenance(mergedLocalRightBeforeRenaming, leftVariables, variableGenerator, Optional.empty());
 
                     newLocalRightTreeBeforeRenaming = localRightProvenance.getTree();
                 }

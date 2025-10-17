@@ -46,8 +46,7 @@ public class LeftJoinTools {
                 Sets.union(otherTree.getKnownVariables(), tree.getKnownVariables()).immutableCopy());
         ImmutableSet<Variable> leftVariables = tree.getVariables();
 
-        RightProvenanceNormalizer.RightProvenance rightProvenance = rightProvenanceNormalizer.normalizeRightProvenance(otherTree, leftVariables, otherTree.getVariables(), variableGenerator,
-                rightProvenanceNormalizer.getRightNullability(otherTree, Optional.empty()));
+        RightProvenanceNormalizer.RightProvenance rightProvenance = rightProvenanceNormalizer.normalizeRightProvenance(otherTree, leftVariables, variableGenerator, Optional.empty());
 
         Optional<ImmutableExpression> nonNullabilityCondition = termFactory.getConjunction(
                 tree.getVariables().stream()

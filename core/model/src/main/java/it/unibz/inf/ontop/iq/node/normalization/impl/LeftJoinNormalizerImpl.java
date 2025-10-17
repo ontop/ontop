@@ -228,7 +228,7 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
                         ImmutableSet<Variable> leftVariables = projectedVariables(subTree.leftChild(), leftGrandChild).immutableCopy();
 
                         Substitution<ImmutableTerm> naiveAscendingSubstitution = bindingLift.getAscendingSubstitution();
-                        LiftableRightSubtree rightLiftableSubtree = getLiftableRightSubtree(rightSubTree, naiveAscendingSubstitution, leftVariables);
+                        LiftableRightSubtree rightLiftableSubtree = getLiftableRightSubtree(Optional.empty(), rightSubTree, naiveAscendingSubstitution, leftVariables);
 
                         Substitution<ImmutableTerm> ascendingSubstitution =
                                 substitutionFactory.union(
@@ -341,7 +341,7 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
                                 .restrictDomainTo(leftVariables)
                                 .toStream(termFactory::getStrictEquality));
 
-                LiftableRightSubtree liftableRightSubtree = getLiftableRightSubtree(provenanceVariable, rightGrandChild, selectedSubstitution, leftVariables, rightChildRequiredVariables);
+                LiftableRightSubtree liftableRightSubtree = getLiftableRightSubtree(provenanceVariable, rightGrandChild, selectedSubstitution, leftVariables);
 
                 // Tree where a fresh non-nullable variable may have been introduced for the provenance
                 return Optional.of(state.lift(
@@ -463,7 +463,7 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
 
                 IQTree updatedRightChild = dpR.propagate(subTree.rightChild());
                 var liftableRightSubtree = getLiftableRightSubtree(
-                        updatedRightChild, dpR.getDescendingSubstitution(), subTree.leftChild().getVariables());
+                        Optional.empty(), updatedRightChild, dpR.getDescendingSubstitution(), subTree.leftChild().getVariables());
 
                 return state.lift(
                         createConstructionNode(subTree, liftableRightSubtree.getLiftableSubstitution()),
@@ -524,118 +524,105 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
             return state;
         }
 
-
-        private LiftableRightSubtree getLiftableRightSubtree(IQTree rightTree, Substitution<? extends ImmutableTerm> selectedSubstitution, ImmutableSet<Variable> leftVariables) {
-            return getLiftableRightSubtree(rightTree, selectedSubstitution, leftVariables, rightTree.getVariables());
-        }
-
-        private LiftableRightSubtree getLiftableRightSubtree(IQTree rightTree,
-                                                             Substitution<? extends ImmutableTerm> selectedSubstitution,
-                                                             ImmutableSet<Variable> leftVariables,
-                                                             ImmutableSet<Variable> rightRequiredVariables) {
-
-            var rightSpecificSubstitution = selectedSubstitution.removeFromDomain(leftVariables);
-            if (rightSpecificSubstitution.rangeAnyMatch(term ->
-                    !isNullWhenRightIsRejected(term, leftVariables)
-                            && getProvenanceVariableProposal(term, leftVariables).isEmpty())) {
-                var nonNullableRightVariable = rightProvenanceNormalizer.getNonNullableRightVariable(rightTree, leftVariables, rightTree.getVariableNullability());
-                if (nonNullableRightVariable.isPresent()) {
-                    // re-use one of the variables
-                    return new LiftableRightSubtree(rightTree, leftVariables, nonNullableRightVariable, rightSpecificSubstitution);
-                }
-                else {
-                    // invent provenance variable
-                    var provenanceVariable = variableGenerator.generateNewVariable(RightProvenanceNormalizer.PROV);
-                    var tree = rightProvenanceNormalizer.createProvenanceInConstructionNode(provenanceVariable, rightTree, rightRequiredVariables).getTree();
-                    return new LiftableRightSubtree(tree, leftVariables, Optional.of(provenanceVariable), rightSpecificSubstitution);
-                }
-            }
-            else { // provenance variable not needed
-                return new LiftableRightSubtree(rightTree, leftVariables, Optional.empty(), rightSpecificSubstitution);
-            }
-        }
-
+        @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
         private LiftableRightSubtree getLiftableRightSubtree(Optional<Variable> optionalProvenanceVariable,
                                                              IQTree rightTree,
                                                              Substitution<? extends ImmutableTerm> selectedSubstitution,
-                                                             ImmutableSet<Variable> leftVariables,
-                                                             ImmutableSet<Variable> rightRequiredVariables) {
+                                                             ImmutableSet<Variable> leftVariables) {
 
+            var liftableSubstitutionBuilder = new LiftableSubstitutionBuilder(leftVariables, selectedSubstitution);
             if (optionalProvenanceVariable.isPresent()) {
                 var provenanceVariable = optionalProvenanceVariable.get();
-                var rightSpecificSubstitution = selectedSubstitution.removeFromDomain(leftVariables);
-                var tree = rightProvenanceNormalizer.createProvenanceInConstructionNode(provenanceVariable, rightTree, rightRequiredVariables).getTree();
-                return new LiftableRightSubtree(tree, leftVariables, Optional.of(provenanceVariable), rightSpecificSubstitution);
+                var tree = rightProvenanceNormalizer.createProvenanceInConstructionNode(provenanceVariable, rightTree, rightTree.getVariables()).getTree();
+                return new LiftableRightSubtree(tree, liftableSubstitutionBuilder.build(Optional.of(provenanceVariable)));
             }
-            return getLiftableRightSubtree(rightTree, selectedSubstitution, leftVariables, rightRequiredVariables);
+
+            if (!liftableSubstitutionBuilder.requiresProvenanceVariable()) {
+                return new LiftableRightSubtree(rightTree, liftableSubstitutionBuilder.build(Optional.empty()));
+            }
+
+            var nonNullableRightVariable = rightProvenanceNormalizer.getNonNullableRightVariable(rightTree, leftVariables, rightTree.getVariableNullability());
+            if (nonNullableRightVariable.isPresent()) {
+                return new LiftableRightSubtree(rightTree, liftableSubstitutionBuilder.build(nonNullableRightVariable));
+            }
+
+            var provenanceVariable = variableGenerator.generateNewVariable(RightProvenanceNormalizer.PROV);
+            var tree = rightProvenanceNormalizer.createProvenanceInConstructionNode(provenanceVariable, rightTree, rightTree.getVariables()).getTree();
+            return new LiftableRightSubtree(tree, liftableSubstitutionBuilder.build(Optional.of(provenanceVariable)));
         }
 
-        /**
-         * Return true when the term is guaranteed to be NULL when the right is rejected
-         */
-        private boolean isNullWhenRightIsRejected(ImmutableTerm immutableTerm, ImmutableSet<Variable> leftVariables) {
-            Substitution<ImmutableTerm> nullSubstitution =
-                    Sets.difference(immutableTerm.getVariableStream().collect(ImmutableCollectors.toSet()), leftVariables).stream()
-                            .collect(substitutionFactory.toSubstitution(v -> termFactory.getNullConstant()));
+        private class LiftableSubstitutionBuilder {
+            private final ImmutableSet<Variable> leftVariables;
+            private final Substitution<? extends ImmutableTerm> rightSpecificSubstitution;
 
-            return nullSubstitution.applyToTerm(immutableTerm)
-                    .simplify()
-                    .isNull();
-        }
+            LiftableSubstitutionBuilder(ImmutableSet<Variable> leftVariables, Substitution<? extends ImmutableTerm> selectedSubstitution) {
+                this.leftVariables = leftVariables;
+                this.rightSpecificSubstitution = selectedSubstitution.removeFromDomain(leftVariables);
+            }
 
-        private Optional<Variable> getProvenanceVariableProposal(ImmutableTerm term, ImmutableSet<Variable> leftVariables) {
-            return Optional.of(term)
-                    .filter(t -> t instanceof ImmutableFunctionalTerm)
-                    .map(t -> (ImmutableFunctionalTerm) t)
-                    .flatMap(f -> f.proposeProvenanceVariables()
-                            .filter(v -> !leftVariables.contains(v))
-                            .findAny());
-        }
-
-
-        @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
-        private class LiftableRightSubtree {
-            private final IQTree rightTree;
-            private final Substitution<ImmutableTerm> liftableSubstitution;
-
-            private LiftableRightSubtree(IQTree rightTree, ImmutableSet<Variable> leftVariables, Optional<Variable> optionalProvenanceVariable, Substitution<? extends ImmutableTerm> rightSpecificSubstitution) {
-                this.rightTree = rightTree;
-                this.liftableSubstitution = rightSpecificSubstitution
-                        .transform(t -> transformRightSubstitutionValue(t, optionalProvenanceVariable, leftVariables));
+            boolean requiresProvenanceVariable() {
+                return rightSpecificSubstitution.rangeAnyMatch(term ->
+                                !isNullWhenRightIsRejected(term)
+                                && getProvenanceVariableProposal(term).isEmpty());
             }
 
             /**
-             * When at least one value does not depend on a right-specific variable
-             * (i.e. is a ground term or only depends on left variables)
-             * <p>
-             * A fresh non-nullable variable may have been introduced for the provenance inside a sparse data node
-             * of the returned right tree
+             * Return true when the term is guaranteed to be NULL when the right is rejected
              */
+            private boolean isNullWhenRightIsRejected(ImmutableTerm immutableTerm) {
+                Substitution<ImmutableTerm> nullSubstitution =
+                        Sets.difference(immutableTerm.getVariableStream().collect(ImmutableCollectors.toSet()), leftVariables).stream()
+                                .collect(substitutionFactory.toSubstitution(v -> termFactory.getNullConstant()));
 
-            IQTree getRightTree() {
-                return rightTree;
+                return nullSubstitution.applyToTerm(immutableTerm)
+                        .simplify()
+                        .isNull();
             }
 
-            /**
-             * TODO: explain
-             * <p>
-             * Right provenance variable: always there if needed
-             * (when some definitions do not depend on a right-specific variable)
-             */
-            Substitution<ImmutableTerm> getLiftableSubstitution() {
-                return liftableSubstitution;
+            private Optional<Variable> getProvenanceVariableProposal(ImmutableTerm term) {
+                return Optional.of(term)
+                        .filter(t -> t instanceof ImmutableFunctionalTerm)
+                        .map(t -> (ImmutableFunctionalTerm) t)
+                        .flatMap(f -> f.proposeProvenanceVariables()
+                                .filter(v -> !leftVariables.contains(v))
+                                .findAny());
             }
 
-            private ImmutableTerm transformRightSubstitutionValue(ImmutableTerm term, Optional<Variable> optionalProvenanceVariable, ImmutableSet<Variable> leftVariables) {
-                if (isNullWhenRightIsRejected(term, leftVariables))
+            @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
+            Substitution<ImmutableTerm> build(Optional<Variable> optionalProvenanceVariable) {
+                return rightSpecificSubstitution
+                        .transform(t -> transformRightSubstitutionValue(t, optionalProvenanceVariable));
+            }
+
+            @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
+            private ImmutableTerm transformRightSubstitutionValue(ImmutableTerm term, Optional<Variable> optionalProvenanceVariable) {
+                if (isNullWhenRightIsRejected(term))
                     return term;
 
-                Variable provenanceVariable = getProvenanceVariableProposal(term, leftVariables)
+                Variable provenanceVariable = getProvenanceVariableProposal(term)
                         .or(() -> optionalProvenanceVariable)
                         .orElseThrow(() -> new MinorOntopInternalBugException("A default provenance variable was needed"));
 
                 return termFactory.getIfElseNull(termFactory.getDBIsNotNull(provenanceVariable), term);
             }
+        }
+    }
+
+    private static class LiftableRightSubtree {
+        private final IQTree rightTree;
+        private final Substitution<ImmutableTerm> liftableSubstitution;
+
+        private LiftableRightSubtree(IQTree rightTree, Substitution<ImmutableTerm>  liftableSubstitution) {
+            this.rightTree = rightTree;
+            this.liftableSubstitution = liftableSubstitution;
+        }
+
+        IQTree getRightTree() {
+            return rightTree;
+        }
+
+        Substitution<ImmutableTerm> getLiftableSubstitution() {
+            return liftableSubstitution;
         }
     }
 }

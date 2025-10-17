@@ -263,8 +263,7 @@ public abstract class AbstractJoinTransferLJTransformer extends AbstractLJTransf
 
         ImmutableSet<Variable> leftVariables = newLeftChild.getVariables();
 
-        RightProvenanceNormalizer.RightProvenance rightProvenance = rightProvenanceNormalizer.normalizeRightProvenance(simplifiedRightChild, leftVariables, simplifiedRightChild.getVariables(), variableGenerator,
-                rightProvenanceNormalizer.getRightNullability(simplifiedRightChild, newLeftJoinCondition));
+        RightProvenanceNormalizer.RightProvenance rightProvenance = rightProvenanceNormalizer.normalizeRightProvenance(simplifiedRightChild, leftVariables, variableGenerator, newLeftJoinCondition);
 
         BinaryNonCommutativeIQTree newLeftJoinTree = iqTreeTools.createLeftJoinTree(
                 newLeftJoinCondition,
