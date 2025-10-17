@@ -32,18 +32,6 @@ public class ConstructionSubstitutionNormalizerImpl implements ConstructionSubst
         this.iqFactory = iqFactory;
     }
 
-    /**
-     * Prevents creating construction nodes out of ascending substitutions
-     *
-     * Splits the ascendingSubstitution into the renaming part of the form "p -> x" and
-     * the proper CONSTRUCT node substitutions of the form "p -> f(y)" or "p -> a".
-     * Note, however, that "p -> x, q -> x" would still retain one of the two components
-     * transformed into "p -> q" or "q -> p", respectively, while the other component
-     * is moved to the renaming part.
-     *
-     * Here, variable nullability is not considered due to the complexity induced by the descending substitution
-     *
-     */
     @Override
     public ConstructionSubstitutionNormalization normalizeSubstitution(Substitution<?> ascendingSubstitution, ImmutableSet<Variable> projectedVariables) {
 
@@ -62,19 +50,10 @@ public class ConstructionSubstitutionNormalizerImpl implements ConstructionSubst
     @Override
     public IQTree createNormalizedConstructionTree(Substitution<? extends ImmutableTerm> substitution, ImmutableSet<Variable> projectedVariables, IQTree child) {
         var normalization = normalizeSubstitution(substitution, projectedVariables);
-        return iqTreeTools.unaryIQTreeBuilder()
-                .append(normalization.createConstructionNode())
-                .build(normalization.applyDownRenamingSubstitution(child));
-    }
-
-    @Override
-    public IQTree createNormalizedOptionalConstructionTree(Substitution<? extends ImmutableTerm> substitution, ImmutableSet<Variable> projectedVariables, IQTree child) {
-        var normalization = normalizeSubstitution(substitution, projectedVariables);
         return iqTreeTools.unaryIQTreeBuilder(projectedVariables)
                 .append(normalization.createOptionalConstructionNode())
                 .build(normalization.applyDownRenamingSubstitution(child));
     }
-
 
     private class ConstructionSubstitutionNormalizationImpl implements ConstructionSubstitutionNormalization {
 

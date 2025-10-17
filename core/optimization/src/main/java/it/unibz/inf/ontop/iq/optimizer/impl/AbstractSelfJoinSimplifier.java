@@ -122,7 +122,7 @@ public abstract class AbstractSelfJoinSimplifier<C extends FunctionalDependency>
             IQTree newTree = iqTreeTools.createOptionalInnerJoinTree(newExpressionWithUnifier, newChildrenPropagated)
                     .orElseThrow(() -> new MinorOntopInternalBugException("Should have been detected before"));
 
-            return Optional.of(substitutionNormalizer.createNormalizedOptionalConstructionTree(unifier, tree.getVariables(), newTree));
+            return Optional.of(substitutionNormalizer.createNormalizedConstructionTree(unifier, tree.getVariables(), newTree));
         }
         catch (DownPropagation.InconsistentDownPropagationException e) {
             throw new MinorOntopInternalBugException("cannot happen:", e);
