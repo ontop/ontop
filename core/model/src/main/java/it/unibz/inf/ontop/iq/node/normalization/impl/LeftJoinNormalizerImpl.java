@@ -70,8 +70,8 @@ public class LeftJoinNormalizerImpl implements LeftJoinNormalizer {
     }
 
     /**
-     * A sequence of ConstructionNode and DistinctNode,
-     * followed by a LeftJoinNode with two children trees
+     * A state is a sequence of ConstructionNode and DistinctNode,
+     * followed by a LeftJoinSubTree (a LeftJoinNode with two children trees)
      */
 
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")

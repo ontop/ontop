@@ -302,7 +302,6 @@ public class ExtensionalDataNodeImpl extends LeafIQTreeImpl implements Extension
         IQ renamedDefinition = iqTreeTools.getFreshInstance(definition, variableGenerator);
 
         ImmutableList<Variable> sourceAtomArguments = renamedDefinition.getProjectionAtom().getArguments();
-
         Substitution<VariableOrGroundTerm> descendingSubstitution = dataNode.getArgumentMap().entrySet().stream()
                 .collect(substitutionFactory.toSubstitutionSkippingIdentityEntries(
                         e -> sourceAtomArguments.get(e.getKey()),
