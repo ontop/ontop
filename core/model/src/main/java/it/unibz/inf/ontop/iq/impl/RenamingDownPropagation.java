@@ -34,7 +34,7 @@ public class RenamingDownPropagation extends AbstractDownPropagation implements 
     }
 
     @Override
-    protected DownPropagation withConstraint(Optional<ImmutableExpression> optionalConstraint, ImmutableSet<Variable> variables) {
+    protected DownPropagation withReducedScope(ImmutableSet<Variable> variables) {
         var reducedSubstitution = reduceDescendingSubstitution(substitution, variables);
         var optionalNormalizedConstraint = normalizeConstraint(optionalConstraint, () -> variables, termFactory);
         if (!reducedSubstitution.isEmpty()) {
@@ -54,11 +54,6 @@ public class RenamingDownPropagation extends AbstractDownPropagation implements 
     @Override
     protected DownPropagation updateConstraint(Optional<ImmutableExpression> constraint) {
         return new RenamingDownPropagation(substitution, constraint, variables, variableGenerator, termFactory);
-    }
-
-    @Override
-    public DownPropagation applySubstitutionToConstraint(Substitution<? extends ImmutableTerm> substitution, Supplier<VariableNullability> variableNullabilitySupplier) throws InconsistentDownPropagationException {
-        throw new UnsupportedOperationException("RenamingDownPropagation does not support applySubstitutionToConstraint");
     }
 
     @Override

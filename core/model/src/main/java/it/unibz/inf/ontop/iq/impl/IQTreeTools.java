@@ -7,6 +7,7 @@ import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.node.normalization.ConditionSimplifier;
+import it.unibz.inf.ontop.iq.node.normalization.impl.ConditionSimplifierImpl;
 import it.unibz.inf.ontop.iq.request.FunctionalDependencies;
 import it.unibz.inf.ontop.iq.transform.QueryRenamer;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
@@ -426,5 +427,32 @@ public class IQTreeTools {
                 .map(e -> Maps.immutableEntry(e.getValue(), e.getKey()))
                 .filter(e -> sub.stream().noneMatch(e::equals))
                 .map(e -> termFactory.getStrictEquality(sub.applyToTerm(e.getKey()), e.getValue()));
+    }
+
+    public IQTree createFilterTreeForBlockedSubstitution(Substitution<? extends ImmutableTerm> blockedSubstitution, IQTree tree, ImmutableSet<Variable> projectedVariables, VariableGenerator variableGenerator) {
+        if (blockedSubstitution.isEmpty())
+            return tree;
+
+        // Blocked entries -> reconverted into a filter
+        ImmutableExpression condition = termFactory.getConjunction(
+                blockedSubstitution.builder().toStream(termFactory::getStrictEquality).collect(ImmutableCollectors.toList()));
+
+        InjectiveSubstitution<Variable> renaming = condition.getVariableStream()
+                .collect(substitutionFactory.toFreshRenamingSubstitution(variableGenerator));
+
+        IQTree filterTree = applyDownPropagation(renaming,
+                iqFactory.createUnaryIQTree(iqFactory.createFilterNode(condition), tree));
+
+        return iqFactory.createUnaryIQTree(
+                iqFactory.createConstructionNode(projectedVariables),
+                filterTree);
+    }
+
+    public Optional<ImmutableExpression> applySubstitutionToConstraint(DownPropagation dp, Substitution<? extends ImmutableTerm> substitution, Supplier<VariableNullability> variableNullabilitySupplier) throws DownPropagation.InconsistentDownPropagationException {
+        Optional<ImmutableExpression> optionalSubstitutedConstraint = dp.getConstraint().map(substitution::apply);
+
+        return optionalSubstitutedConstraint.isPresent()
+                ? ConditionSimplifierImpl.evaluateCondition(optionalSubstitutedConstraint.get(), dp.extendVariableNullability(variableNullabilitySupplier.get()))
+                : optionalSubstitutedConstraint;
     }
 }

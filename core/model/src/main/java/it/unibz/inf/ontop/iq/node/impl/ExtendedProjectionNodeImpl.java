@@ -8,7 +8,6 @@ import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.ExtendedProjectionNode;
 import it.unibz.inf.ontop.iq.node.FilterNode;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
-import it.unibz.inf.ontop.iq.node.normalization.impl.ConditionSimplifierImpl;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
@@ -42,10 +41,9 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
     @Override
     public IQTree propagateDownConstraint(DownPropagation dp, IQTree child) {
         try {
-            IQTree newChild = dp
-                    .applySubstitutionToConstraint(getSubstitution(), child::getVariableNullability)
-                    .extendToChildVariables(child.getVariables())
-                    .propagate(child);
+            var newConstraint = iqTreeTools.applySubstitutionToConstraint(dp, getSubstitution(), child::getVariableNullability);
+            var newDp = iqTreeTools.createDownPropagation(newConstraint, child.getVariables(), dp.getVariableGenerator());
+            IQTree newChild = newDp.propagate(child);
             return iqFactory.createUnaryIQTree(this, newChild);
         }
         catch (DownPropagation.InconsistentDownPropagationException e) {
@@ -60,7 +58,11 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
         try {
             PropagationResults tauPropagationResults = propagateTau(tau, child.getVariables());
 
-            IQTree newChild = tauPropagationResults.getChildDownPropagation(child).propagate(child);
+            Optional<ImmutableExpression> newConstraint = iqTreeTools.applySubstitutionToConstraint(tau, tauPropagationResults.getSubstitution(), child::getVariableNullability);
+
+            var newDp = iqTreeTools.createDownPropagation(tauPropagationResults.getDescendingSubstitution(), newConstraint, child.getVariables(), tau.getVariableGenerator());
+
+            IQTree newChild = newDp.propagate(child);
 
             Optional<? extends ExtendedProjectionNode> projectionNode = ctr.create(
                     tau.computeProjectedVariables(),
@@ -142,7 +144,7 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
                         matchingEqualities(tauF, thetaBar),
                         matchingEqualities(tauF, newDeltaC))));
 
-        return new PropagationResults(tau,
+        return new PropagationResults(
                 thetaBar.removeFromDomain(tauF.getDomain()),
                 delta,
                 newF);
@@ -174,16 +176,13 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
     @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
     protected class PropagationResults {
 
-        private final DownPropagation dp;
         private final Substitution<VariableOrGroundTerm> delta;
         private final Optional<FilterNode> filter;
         private final Substitution<ImmutableTerm> theta;
 
-        PropagationResults(DownPropagation dp,
-                           Substitution<ImmutableTerm> theta,
+        PropagationResults(Substitution<ImmutableTerm> theta,
                            Substitution<VariableOrGroundTerm> delta,
                            Optional<ImmutableExpression> filter) {
-            this.dp = dp;
             this.theta = theta;
             this.delta = delta;
             this.filter = iqTreeTools.createOptionalFilterNode(filter);
@@ -197,19 +196,9 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
             return theta;
         }
 
-        /**
-         *
-         * TODO: better handle the constraint
-         */
-        public DownPropagation getChildDownPropagation(IQTree child) throws DownPropagation.InconsistentDownPropagationException {
-
-            Optional<ImmutableExpression> optionalSubstitutedConstraint = dp.getConstraint().map(theta::apply);
-
-            Optional<ImmutableExpression> newConstraint = optionalSubstitutedConstraint.isPresent()
-                    ? ConditionSimplifierImpl.evaluateCondition(optionalSubstitutedConstraint.get(), dp.extendVariableNullability(child.getVariableNullability()))
-                    : optionalSubstitutedConstraint;
-
-            return iqTreeTools.createDownPropagation(delta, newConstraint, child.getVariables(), dp.getVariableGenerator());
+        Substitution<VariableOrGroundTerm> getDescendingSubstitution() {
+            return delta;
         }
+
     }
 }

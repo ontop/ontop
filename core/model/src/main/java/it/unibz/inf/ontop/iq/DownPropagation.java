@@ -45,8 +45,6 @@ public interface DownPropagation {
 
     DownPropagation filterConstraint(Predicate<ImmutableExpression> filter);
 
-    DownPropagation applySubstitutionToConstraint(Substitution<? extends ImmutableTerm> substitution, Supplier<VariableNullability> variableNullabilitySupplier) throws InconsistentDownPropagationException;
-
     DownPropagation extendToChildVariables(ImmutableSet<Variable> childVariables);
 
     DownPropagation restrictScope(ImmutableSet<Variable> variables);

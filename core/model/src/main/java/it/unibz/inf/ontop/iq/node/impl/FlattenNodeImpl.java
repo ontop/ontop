@@ -162,21 +162,7 @@ public class FlattenNodeImpl extends CompositeQueryNodeImpl implements FlattenNo
         Substitution<GroundTerm> blockedSubstitution = locallyDefinedVariablesSubstitution
                 .restrictRangeTo(GroundTerm.class);
 
-        if (blockedSubstitution.isEmpty())
-            return newTree;
-
-        ImmutableExpression condition = termFactory.getConjunction(
-                blockedSubstitution.builder().toStream(termFactory::getStrictEquality).collect(ImmutableCollectors.toList()));
-
-        InjectiveSubstitution<Variable> renaming = condition.getVariableStream()
-                .collect(substitutionFactory.toFreshRenamingSubstitution(dp.getVariableGenerator()));
-
-        IQTree newFlattenTree = iqTreeTools.applyDownPropagation(renaming,
-                iqFactory.createUnaryIQTree(iqFactory.createFilterNode(condition), newTree));
-
-        return iqTreeTools.unaryIQTreeBuilder()
-                .append(iqFactory.createConstructionNode(dp.computeProjectedVariables()))
-                .build(newFlattenTree);
+        return iqTreeTools.createFilterTreeForBlockedSubstitution(blockedSubstitution, newTree, dp.computeProjectedVariables(), dp.getVariableGenerator());
     }
 
     private DownPropagation getChildDownPropagation(DownPropagation dp, IQTree child) {

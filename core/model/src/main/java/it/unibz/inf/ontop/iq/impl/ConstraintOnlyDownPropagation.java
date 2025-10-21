@@ -39,7 +39,7 @@ public class ConstraintOnlyDownPropagation extends AbstractDownPropagation imple
     }
 
     @Override
-    protected DownPropagation withConstraint(Optional<ImmutableExpression> optionalConstraint,  ImmutableSet<Variable> variables) {
+    protected DownPropagation withReducedScope(ImmutableSet<Variable> variables) {
         return new ConstraintOnlyDownPropagation(
                 normalizeConstraint(optionalConstraint, () -> variables, termFactory),
                 variables, variableGenerator, termFactory);
@@ -53,23 +53,8 @@ public class ConstraintOnlyDownPropagation extends AbstractDownPropagation imple
     }
 
     @Override
-    public DownPropagation updateConstraint(Optional<ImmutableExpression> constraint) {
+    protected DownPropagation updateConstraint(Optional<ImmutableExpression> constraint) {
         return new ConstraintOnlyDownPropagation(constraint, variables, variableGenerator, termFactory);
-    }
-
-    @Override
-    public DownPropagation applySubstitutionToConstraint(Substitution<? extends ImmutableTerm> substitution, Supplier<VariableNullability> variableNullabilitySupplier) throws InconsistentDownPropagationException {
-        Optional<ImmutableExpression> optionalSubstitutedConstraint = optionalConstraint.map(substitution::apply);
-
-        Optional<ImmutableExpression> newConstraint = optionalSubstitutedConstraint.isPresent() && !optionalSubstitutedConstraint.equals(optionalConstraint)
-                ? ConditionSimplifierImpl.evaluateCondition(optionalSubstitutedConstraint.get(), extendVariableNullability(variableNullabilitySupplier.get()))
-                : optionalSubstitutedConstraint;
-
-        return new ConstraintOnlyDownPropagation(
-                newConstraint,
-                Sets.union(Sets.difference(variables, substitution.getDomain()), substitution.getRangeVariables()).immutableCopy(),
-                variableGenerator,
-                termFactory);
     }
 
     @Override

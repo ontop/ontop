@@ -33,7 +33,7 @@ public class FullDownPropagation extends AbstractDownPropagation implements Down
     }
 
     @Override
-    protected DownPropagation withConstraint(Optional<ImmutableExpression> optionalConstraint,  ImmutableSet<Variable> variables) {
+    protected DownPropagation withReducedScope(ImmutableSet<Variable> variables) {
         var reducedSubstitution = reduceDescendingSubstitution(substitution, variables);
         var optionalNormalizedConstraint = normalizeConstraint(optionalConstraint, () -> variables, termFactory);
         if (!reducedSubstitution.isEmpty()) {
@@ -53,11 +53,6 @@ public class FullDownPropagation extends AbstractDownPropagation implements Down
     @Override
     protected DownPropagation updateConstraint(Optional<ImmutableExpression> constraint) {
         return new FullDownPropagation(substitution, constraint, variables, variableGenerator, termFactory);
-    }
-
-    @Override
-    public DownPropagation applySubstitutionToConstraint(Substitution<? extends ImmutableTerm> substitution, Supplier<VariableNullability> variableNullabilitySupplier) throws InconsistentDownPropagationException {
-        throw new UnsupportedOperationException("FullDownPropagation does not support applySubstitutionToConstraint");
     }
 
     @Override

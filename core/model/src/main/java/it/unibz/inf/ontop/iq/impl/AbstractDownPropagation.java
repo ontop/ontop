@@ -57,7 +57,7 @@ public abstract class AbstractDownPropagation implements DownPropagation {
         return tree;
     }
 
-    protected abstract DownPropagation withConstraint(Optional<ImmutableExpression> constraint, ImmutableSet<Variable> variables);
+    protected abstract DownPropagation withReducedScope(ImmutableSet<Variable> variables);
 
     protected final Optional<ImmutableExpression> getFilteredConstraint(Predicate<ImmutableExpression> filter) {
         return optionalConstraint.flatMap(
@@ -72,7 +72,7 @@ public abstract class AbstractDownPropagation implements DownPropagation {
         if (variables.size() == newVariables.size())
             return this;
 
-        return withConstraint(optionalConstraint, newVariables);
+        return withReducedScope(newVariables);
     }
 
     /**
@@ -93,7 +93,7 @@ public abstract class AbstractDownPropagation implements DownPropagation {
 
     @Override
     public final DownPropagation withNoConstraint() {
-        return updateConstraint( Optional.empty());
+        return updateConstraint(Optional.empty());
     }
 
     @Override
@@ -115,7 +115,6 @@ public abstract class AbstractDownPropagation implements DownPropagation {
         }
         return Optional.empty();
     }
-
 }
 
 

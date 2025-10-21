@@ -84,22 +84,7 @@ public class AggregationNodeImpl extends ExtendedProjectionNodeImpl implements A
         var newDp = iqTreeTools.removeFromDomain(dp, blockedSubstitution.getDomain());
         IQTree newSubTree = applyDescendingSubstitution(newDp, child, this::createAggregationNode);
 
-        if (blockedSubstitution.isEmpty())
-            return newSubTree;
-
-        // Blocked entries -> reconverted into a filter
-        ImmutableExpression condition = termFactory.getConjunction(
-                blockedSubstitution.builder().toStream(termFactory::getStrictEquality).collect(ImmutableCollectors.toList()));
-
-        InjectiveSubstitution<Variable> renaming = condition.getVariableStream()
-                .collect(substitutionFactory.toFreshRenamingSubstitution(dp.getVariableGenerator()));
-
-        IQTree filterTree = iqTreeTools.applyDownPropagation(renaming,
-                iqFactory.createUnaryIQTree(iqFactory.createFilterNode(condition), newSubTree));
-
-        return iqFactory.createUnaryIQTree(
-                iqFactory.createConstructionNode(dp.computeProjectedVariables()),
-                filterTree);
+        return iqTreeTools.createFilterTreeForBlockedSubstitution(blockedSubstitution, newSubTree, dp.computeProjectedVariables(), dp.getVariableGenerator());
     }
 
     private Optional<AggregationNode> createAggregationNode(ImmutableSet<Variable> variables, Substitution<ImmutableTerm> substitution, IQTree newChild) {
