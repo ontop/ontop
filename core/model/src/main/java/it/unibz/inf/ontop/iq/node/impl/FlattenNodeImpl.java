@@ -152,15 +152,14 @@ public class FlattenNodeImpl extends CompositeQueryNodeImpl implements FlattenNo
         IQTree newChild = getChildDownPropagation(dp, child)
                 .propagate(child);
 
+        var locallyDefinedVariablesSubstitution = dp.getDescendingSubstitution().restrictDomainTo(getLocallyDefinedVariables());
+
         UnaryIQTree newTree = iqFactory.createUnaryIQTree(
                 applyDescendingSubstitution(
-                        dp.getDescendingSubstitution()
-                                .restrictDomainTo(getLocallyDefinedVariables())
-                                .restrictRangeTo(Variable.class)),
+                        locallyDefinedVariablesSubstitution.restrictRangeTo(Variable.class)),
                 newChild);
 
-        Substitution<GroundTerm> blockedSubstitution = dp.getDescendingSubstitution()
-                .restrictDomainTo(getLocallyDefinedVariables())
+        Substitution<GroundTerm> blockedSubstitution = locallyDefinedVariablesSubstitution
                 .restrictRangeTo(GroundTerm.class);
 
         if (blockedSubstitution.isEmpty())

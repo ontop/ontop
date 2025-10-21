@@ -102,10 +102,10 @@ public class AggregationNodeImpl extends ExtendedProjectionNodeImpl implements A
                 filterTree);
     }
 
-    private Optional<AggregationNode> createAggregationNode(PropagationResults r, IQTree newChild) {
+    private Optional<AggregationNode> createAggregationNode(ImmutableSet<Variable> variables, Substitution<ImmutableTerm> substitution, IQTree newChild) {
         return Optional.of(iqFactory.createAggregationNode(
-                Sets.difference(r.getVariables(), r.getSubstitution().getDomain()).immutableCopy(),
-                r.getSubstitution().transform(t -> (ImmutableFunctionalTerm)t)));
+                Sets.difference(variables, substitution.getDomain()).immutableCopy(),
+                substitution.transform(t -> (ImmutableFunctionalTerm)t)));
     }
 
     private Set<Variable> extractBlockedDomainVars(Variable rangeVariable, ImmutableSet<Variable> domainVariables,

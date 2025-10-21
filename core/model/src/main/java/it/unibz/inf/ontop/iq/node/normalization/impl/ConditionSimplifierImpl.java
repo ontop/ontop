@@ -133,7 +133,6 @@ public class ConditionSimplifierImpl implements ConditionSimplifier {
         return new ExpressionAndSubstitutionImpl(newExpression, ascendingSubstitution);
     }
 
-    // TODO: also consider the constraint for simplifying the condition
     @Override
     public DownPropagation getCombinedDownPropagation(DownPropagation dp, ExpressionAndSubstitution simplification, VariableNullability variableNullability) throws DownPropagation.InconsistentDownPropagationException {
         var newConstraint = dp.getConstraint().isPresent()
@@ -143,8 +142,8 @@ public class ConditionSimplifierImpl implements ConditionSimplifier {
                 : simplification.getOptionalExpression();
 
         var downSubstitution = substitutionFactory.onVariableOrGroundTerms().compose(
-                dp.getDescendingSubstitution(),
-                simplification.getSubstitution());
+                simplification.getSubstitution(),
+                dp.getDescendingSubstitution());
 
         return iqTreeTools.createDownPropagation(downSubstitution, newConstraint, dp.getVariables(), dp.getVariableGenerator());
     }

@@ -8,6 +8,7 @@ import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.ExtendedProjectionNode;
 import it.unibz.inf.ontop.iq.node.FilterNode;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
+import it.unibz.inf.ontop.iq.node.normalization.impl.ConditionSimplifierImpl;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
@@ -59,10 +60,11 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
         try {
             PropagationResults tauPropagationResults = propagateTau(tau, child.getVariables());
 
-            IQTree newChild = tauPropagationResults.propagateToChild(child);
+            IQTree newChild = tauPropagationResults.getChildDownPropagation(child).propagate(child);
 
             Optional<? extends ExtendedProjectionNode> projectionNode = ctr.create(
-                    tauPropagationResults,
+                    tau.computeProjectedVariables(),
+                    tauPropagationResults.getSubstitution(),
                     newChild);
 
             return iqTreeTools.unaryIQTreeBuilder()
@@ -165,7 +167,7 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
     @FunctionalInterface
     protected interface ExtendedProjectionNodeConstructor {
         Optional<? extends ExtendedProjectionNode> create(
-                PropagationResults propagationResults, IQTree newChild);
+                ImmutableSet<Variable> variables, Substitution<ImmutableTerm> substitution, IQTree newChild);
     }
 
 
@@ -191,10 +193,6 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
             return filter;
         }
 
-        ImmutableSet<Variable> getVariables() {
-            return dp.computeProjectedVariables();
-        }
-
         Substitution<ImmutableTerm> getSubstitution() {
             return theta;
         }
@@ -202,16 +200,16 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
         /**
          *
          * TODO: better handle the constraint
-         *
-         * Returns the new child
          */
-        public IQTree propagateToChild(IQTree child) throws DownPropagation.InconsistentDownPropagationException {
+        public DownPropagation getChildDownPropagation(IQTree child) throws DownPropagation.InconsistentDownPropagationException {
 
-            DownPropagation dpC = iqTreeTools.createDownPropagation(dp.getConstraint(), dp.getVariables(), dp.getVariableGenerator());
-            DownPropagation dpCC = dpC.applySubstitutionToConstraint(theta, child::getVariableNullability);
+            Optional<ImmutableExpression> optionalSubstitutedConstraint = dp.getConstraint().map(theta::apply);
 
-            DownPropagation dpN = iqTreeTools.createDownPropagation(delta, dpCC.getConstraint(), child.getVariables(), dp.getVariableGenerator());
-            return dpN.propagate(child);
+            Optional<ImmutableExpression> newConstraint = optionalSubstitutedConstraint.isPresent()
+                    ? ConditionSimplifierImpl.evaluateCondition(optionalSubstitutedConstraint.get(), dp.extendVariableNullability(child.getVariableNullability()))
+                    : optionalSubstitutedConstraint;
+
+            return iqTreeTools.createDownPropagation(delta, newConstraint, child.getVariables(), dp.getVariableGenerator());
         }
     }
 }

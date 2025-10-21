@@ -513,6 +513,6 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
         return applyDescendingSubstitution(
                 dp,
                 child,
-                (r, c) -> iqTreeTools.createOptionalConstructionNode(r.getVariables(), r.getSubstitution(), c));
+                iqTreeTools::createOptionalConstructionNode);
     }
 }
