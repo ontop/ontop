@@ -79,6 +79,11 @@ public class ConstructionSubstitutionNormalizerImpl implements ConstructionSubst
         }
 
         @Override
+        public InjectiveSubstitution<Variable> getDownRenamingSubstitution() {
+            return downRenamingSubstitution;
+        }
+
+        @Override
         public ConstructionNode createConstructionNode() {
             return iqFactory.createConstructionNode(projectedVariables, normalizedSubstitution);
         }

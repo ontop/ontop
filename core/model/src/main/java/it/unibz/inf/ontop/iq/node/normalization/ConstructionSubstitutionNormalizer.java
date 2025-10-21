@@ -6,6 +6,7 @@ import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.substitution.InjectiveSubstitution;
 import it.unibz.inf.ontop.substitution.Substitution;
 
 import java.util.Optional;
@@ -39,6 +40,8 @@ public interface ConstructionSubstitutionNormalizer {
         IQTree applyDownRenamingSubstitution(IQTree tree);
 
         ImmutableExpression applyDownRenamingSubstitution(ImmutableExpression expression);
+
+        InjectiveSubstitution<Variable> getDownRenamingSubstitution();
 
         /**
          * Can be called only for non-empty normalized substitution

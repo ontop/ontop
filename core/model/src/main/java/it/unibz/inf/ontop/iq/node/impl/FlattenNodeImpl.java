@@ -5,7 +5,6 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
-import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.IQTreeCache;
@@ -141,9 +140,7 @@ public class FlattenNodeImpl extends CompositeQueryNodeImpl implements FlattenNo
 
     @Override
     public IQTree propagateDownConstraint(DownPropagation dp, IQTree child) {
-        IQTree newChild = dp
-                .restrictScope(Sets.difference(child.getVariables(), getLocallyRequiredVariables()).immutableCopy())
-                .extendToChildVariables(child.getVariables())
+        IQTree newChild = getChildDownPropagation(dp, child)
                 .propagate(child);
 
         return iqFactory.createUnaryIQTree(this, newChild);
@@ -151,25 +148,23 @@ public class FlattenNodeImpl extends CompositeQueryNodeImpl implements FlattenNo
 
     @Override
     public IQTree applyDescendingSubstitution(DownPropagation dp, IQTree child) {
+
+        IQTree newChild = getChildDownPropagation(dp, child)
+                .propagate(child);
+
+        UnaryIQTree newTree = iqFactory.createUnaryIQTree(
+                applyDescendingSubstitution(
+                        dp.getDescendingSubstitution()
+                                .restrictDomainTo(getLocallyDefinedVariables())
+                                .restrictRangeTo(Variable.class)),
+                newChild);
+
         Substitution<GroundTerm> blockedSubstitution = dp.getDescendingSubstitution()
-                .restrictRangeTo(GroundTerm.class)
-                .restrictDomainTo(getLocallyDefinedVariables());
-
-        DownPropagation newDp = iqTreeTools.removeFromDomain(dp, blockedSubstitution.getDomain());
-
-        DownPropagation childDp;
-        try {
-            childDp = iqTreeTools.createDownPropagation(newDp.getDescendingSubstitution(), newDp.getConstraint(), child.getVariables(), newDp.getVariableGenerator());
-        }
-        catch (DownPropagation.InconsistentDownPropagationException e) {
-            throw new MinorOntopInternalBugException("cannot happen");
-        }
-        UnaryIQTree flattenTree = iqFactory.createUnaryIQTree(
-                applyDescendingSubstitution(newDp.getDescendingSubstitution()),
-                childDp.propagate(child));
+                .restrictDomainTo(getLocallyDefinedVariables())
+                .restrictRangeTo(GroundTerm.class);
 
         if (blockedSubstitution.isEmpty())
-            return flattenTree;
+            return newTree;
 
         ImmutableExpression condition = termFactory.getConjunction(
                 blockedSubstitution.builder().toStream(termFactory::getStrictEquality).collect(ImmutableCollectors.toList()));
@@ -178,26 +173,25 @@ public class FlattenNodeImpl extends CompositeQueryNodeImpl implements FlattenNo
                 .collect(substitutionFactory.toFreshRenamingSubstitution(dp.getVariableGenerator()));
 
         IQTree newFlattenTree = iqTreeTools.applyDownPropagation(renaming,
-                iqFactory.createUnaryIQTree(iqFactory.createFilterNode(condition), flattenTree));
+                iqFactory.createUnaryIQTree(iqFactory.createFilterNode(condition), newTree));
 
         return iqTreeTools.unaryIQTreeBuilder()
                 .append(iqFactory.createConstructionNode(dp.computeProjectedVariables()))
                 .build(newFlattenTree);
     }
 
-    private Variable applySubstitution(Substitution<? extends VariableOrGroundTerm> sub, Variable var) {
-        VariableOrGroundTerm newVar = substitutionFactory.onVariableOrGroundTerms().apply(sub, var);
-        if (!(newVar instanceof Variable))
-            throw new InvalidIntermediateQueryException("This substitution application should yield a variable");
-
-        return (Variable) newVar;
+    private DownPropagation getChildDownPropagation(DownPropagation dp, IQTree child) {
+        return dp
+                .restrictScope(Sets.difference(child.getVariables(), getLocallyRequiredVariables()).immutableCopy())
+                .extendToChildVariables(child.getVariables());
     }
 
-    private FlattenNode applyDescendingSubstitution(Substitution<? extends VariableOrGroundTerm> sub) {
+    private FlattenNode applyDescendingSubstitution(Substitution<Variable> sub) {
+        var onVariables = substitutionFactory.onVariables();
         return iqFactory.createFlattenNode(
-                applySubstitution(sub, outputVariable),
-                applySubstitution(sub, flattenedVariable),
-                indexVariable.map(index -> applySubstitution(sub, index)),
+                onVariables.apply(sub, outputVariable),
+                flattenedVariable, // a local variable (so, no substitution applied)
+                indexVariable.map(index -> onVariables.apply(sub, index)),
                 flattenedType);
     }
 

@@ -16,6 +16,7 @@ import it.unibz.inf.ontop.iq.node.normalization.ConditionSimplifier;
 import it.unibz.inf.ontop.iq.node.normalization.InnerJoinNormalizer;
 import it.unibz.inf.ontop.iq.visit.impl.AbstractIQTreeGenericVisitingTransformer;
 import it.unibz.inf.ontop.model.term.*;
+import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
@@ -42,13 +43,14 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
     private final TermFactory termFactory;
     private final JoinOrFilterVariableNullabilityTools variableNullabilityTools;
     private final IQTreeTools iqTreeTools;
+    private final SubstitutionFactory substitutionFactory;
 
     @Inject
     private InnerJoinNormalizerImpl(JoinLikeChildBindingLifter bindingLifter, IntermediateQueryFactory iqFactory,
                                     ConstructionSubstitutionNormalizer substitutionNormalizer,
                                     ConditionSimplifier conditionSimplifier, TermFactory termFactory,
                                     JoinOrFilterVariableNullabilityTools variableNullabilityTools,
-                                    IQTreeTools iqTreeTools) {
+                                    IQTreeTools iqTreeTools, SubstitutionFactory substitutionFactory) {
         this.bindingLifter = bindingLifter;
         this.iqFactory = iqFactory;
         this.substitutionNormalizer = substitutionNormalizer;
@@ -56,6 +58,7 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
         this.termFactory = termFactory;
         this.variableNullabilityTools = variableNullabilityTools;
         this.iqTreeTools = iqTreeTools;
+        this.substitutionFactory = substitutionFactory;
     }
 
     @Override
@@ -205,19 +208,18 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
                 ConstructionSubstitutionNormalization normalization = substitutionNormalizer
                         .normalizeSubstitution(bindingLift.getAscendingSubstitution(), subTree.projectedVariables());
 
-                Optional<ImmutableExpression> newCondition = bindingLift.getCondition()
-                        .map(normalization::applyDownRenamingSubstitution);
+                var newCondition = bindingLift.getCondition()
+                        .map(normalization.getDownRenamingSubstitution()::apply);
 
                 DownPropagation dp = iqTreeTools.createDownPropagation(
-                        bindingLift.getDescendingSubstitution(),
+                        substitutionFactory.onVariableOrGroundTerms().compose(
+                                normalization.getDownRenamingSubstitution(),
+                                bindingLift.getDescendingSubstitution()),
                         newCondition,
                         NaryIQTreeTools.projectedVariables(provisionalNewChildren),
                         variableGenerator);
 
-                ImmutableList<IQTree> newChildren = provisionalNewChildren.stream()
-                        .map(dp::propagateWithRestrictedScope)
-                        .map(normalization::applyDownRenamingSubstitution)
-                        .collect(ImmutableCollectors.toList());
+                ImmutableList<IQTree> newChildren = NaryIQTreeTools.transformChildren(provisionalNewChildren, dp::propagateWithRestrictedScope);
 
                 Optional<ConstructionNode> newParent = normalization.createOptionalConstructionNode();
 

@@ -32,7 +32,7 @@ public interface DownPropagation {
     Substitution<? extends VariableOrGroundTerm> getDescendingSubstitution();
 
     default Optional<ImmutableExpression> applyDescendingSubstitution(Optional<ImmutableExpression> optionalExpression) {
-        return optionalExpression.map(e -> getDescendingSubstitution().apply(e));
+        return optionalExpression.map(getDescendingSubstitution()::apply);
     }
 
     Optional<ImmutableExpression> getConstraint();
