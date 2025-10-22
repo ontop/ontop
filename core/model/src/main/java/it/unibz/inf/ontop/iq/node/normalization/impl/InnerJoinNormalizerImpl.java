@@ -208,14 +208,12 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
                 ConstructionSubstitutionNormalization normalization = substitutionNormalizer
                         .normalizeSubstitution(bindingLift.getAscendingSubstitution(), subTree.projectedVariables());
 
-                var newCondition = bindingLift.getCondition()
-                        .map(normalization.getDownRenamingSubstitution()::apply);
-
                 DownPropagation dp = iqTreeTools.createDownPropagation(
                         substitutionFactory.onVariableOrGroundTerms().compose(
                                 normalization.getDownRenamingSubstitution(),
                                 bindingLift.getDescendingSubstitution()),
-                        newCondition,
+                        bindingLift.getCondition()
+                                .map(normalization.getDownRenamingSubstitution()::apply),
                         NaryIQTreeTools.projectedVariables(provisionalNewChildren),
                         variableGenerator);
 
@@ -223,7 +221,7 @@ public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {
 
                 Optional<ConstructionNode> newParent = normalization.createOptionalConstructionNode();
 
-                return Optional.of(state.lift(newParent, new InnerJoinSubTree(newCondition, newChildren)));
+                return Optional.of(state.lift(newParent, new InnerJoinSubTree(dp.getConstraint(), newChildren)));
             }
             catch (DownPropagation.InconsistentDownPropagationException e) {
                 return Optional.of(declareAsEmpty());
