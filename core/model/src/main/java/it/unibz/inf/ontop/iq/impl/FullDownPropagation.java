@@ -1,17 +1,14 @@
 package it.unibz.inf.ontop.iq.impl;
 
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Sets;
 import it.unibz.inf.ontop.iq.DownPropagation;
 import it.unibz.inf.ontop.iq.IQTree;
-import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.Optional;
-import java.util.function.BiFunction;
-import java.util.function.Predicate;
-import java.util.function.Supplier;
 
 public class FullDownPropagation extends AbstractDownPropagation implements DownPropagation {
     private final Substitution<? extends VariableOrGroundTerm> substitution;
@@ -23,8 +20,8 @@ public class FullDownPropagation extends AbstractDownPropagation implements Down
     }
 
     @Override
-    public ImmutableSet<Variable> computeProjectedVariables() {
-        return DownPropagation.computeProjectedVariables(substitution, variables);
+    public ImmutableSet<Variable> getResultingProjectedVariables() {
+        return DownPropagation.getProjectedVariablesAfterDescendingSubstitution(substitution, variables);
     }
 
     @Override
@@ -56,10 +53,7 @@ public class FullDownPropagation extends AbstractDownPropagation implements Down
     }
 
     @Override
-    public DownPropagation extendToChildVariables(ImmutableSet<Variable> childVariables) {
-        if (!childVariables.containsAll(variables))
-            throw new IllegalArgumentException("Child variables must contain all of the variables in the same constraint");
-
-        return new FullDownPropagation(substitution, optionalConstraint, childVariables, variableGenerator, termFactory);
+    public DownPropagation extendToVariables(ImmutableSet<Variable> additionalVariables) {
+        return new FullDownPropagation(substitution, optionalConstraint, Sets.union(variables, additionalVariables).immutableCopy(), variableGenerator, termFactory);
     }
 }

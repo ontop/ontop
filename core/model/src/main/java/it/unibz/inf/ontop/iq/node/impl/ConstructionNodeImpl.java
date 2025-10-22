@@ -516,12 +516,12 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
             IQTree newChild = result.getDownPropagation().propagate(child);
 
             return iqTreeTools.unaryIQTreeBuilder()
-                    .append(iqTreeTools.createOptionalConstructionNode(dp.computeProjectedVariables(), result.getSubstitution(), newChild))
+                    .append(iqTreeTools.createOptionalConstructionNode(dp.getResultingProjectedVariables(), result.getSubstitution(), newChild))
                     .append(iqTreeTools.createOptionalFilterNode(result.getOptionalFilter()))
                     .build(newChild);
         }
         catch (DownPropagation.InconsistentDownPropagationException e) {
-            return iqTreeTools.createEmptyNode(dp);
+            return iqFactory.createEmptyNode(dp.getResultingProjectedVariables());
         }
     }
 }

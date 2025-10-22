@@ -74,11 +74,6 @@ public class ConstructionSubstitutionNormalizerImpl implements ConstructionSubst
         }
 
         @Override
-        public ImmutableExpression applyDownRenamingSubstitution(ImmutableExpression expression) {
-            return downRenamingSubstitution.apply(expression);
-        }
-
-        @Override
         public InjectiveSubstitution<Variable> getDownRenamingSubstitution() {
             return downRenamingSubstitution;
         }

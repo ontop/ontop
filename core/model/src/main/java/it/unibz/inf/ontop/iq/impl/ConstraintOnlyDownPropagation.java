@@ -29,7 +29,7 @@ public class ConstraintOnlyDownPropagation extends AbstractDownPropagation imple
     }
 
     @Override
-    public ImmutableSet<Variable> computeProjectedVariables() {
+    public ImmutableSet<Variable> getResultingProjectedVariables() {
         return variables;
     }
 
@@ -58,10 +58,7 @@ public class ConstraintOnlyDownPropagation extends AbstractDownPropagation imple
     }
 
     @Override
-    public DownPropagation extendToChildVariables(ImmutableSet<Variable> childVariables) {
-        if (!childVariables.containsAll(variables))
-            throw new IllegalArgumentException("Child variables must contain all of the variables in the same constraint");
-
-        return new ConstraintOnlyDownPropagation(optionalConstraint, childVariables, variableGenerator, termFactory);
+    public DownPropagation extendToVariables(ImmutableSet<Variable> additionalVariables) {
+        return new ConstraintOnlyDownPropagation(optionalConstraint, Sets.union(variables, additionalVariables).immutableCopy(), variableGenerator, termFactory);
     }
 }

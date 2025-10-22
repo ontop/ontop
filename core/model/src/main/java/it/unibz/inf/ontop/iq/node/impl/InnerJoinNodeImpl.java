@@ -12,7 +12,6 @@ import it.unibz.inf.ontop.iq.impl.NaryIQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.node.normalization.ConditionSimplifier;
 import it.unibz.inf.ontop.iq.node.normalization.InnerJoinNormalizer;
-import it.unibz.inf.ontop.iq.node.normalization.impl.ConditionSimplifierImpl;
 import it.unibz.inf.ontop.iq.request.FunctionalDependencies;
 import it.unibz.inf.ontop.iq.request.VariableNonRequirement;
 import it.unibz.inf.ontop.model.term.*;
@@ -132,7 +131,7 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
     @Override
     public IQTree applyDescendingSubstitution(DownPropagation dp, ImmutableList<IQTree> children) {
         VariableNullability simplifiedChildFutureVariableNullability = variableNullabilityTools.getSimplifiedVariableNullability(
-                dp.computeProjectedVariables());
+                dp.getResultingProjectedVariables());
         return propagateDown(dp, children, simplifiedChildFutureVariableNullability);
     }
 
@@ -153,13 +152,13 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
             var extendedDownConstraint = conditionSimplifier.getCombinedDownPropagation(dp, simplification, variableNullability);
 
             return iqTreeTools.unaryIQTreeBuilder()
-                    .append(iqTreeTools.createOptionalConstructionNode(dp::computeProjectedVariables, simplification.getSubstitution()))
+                    .append(iqTreeTools.createOptionalConstructionNode(dp::getResultingProjectedVariables, simplification.getSubstitution()))
                     .build(iqTreeTools.createInnerJoinTree(
                             simplification.getOptionalExpression(),
                             NaryIQTreeTools.transformChildren(children, extendedDownConstraint::propagateWithRestrictedScope)));
         }
         catch (DownPropagation.InconsistentDownPropagationException e) {
-            return iqTreeTools.createEmptyNode(dp);
+            return iqFactory.createEmptyNode(dp.getResultingProjectedVariables());
         }
     }
 

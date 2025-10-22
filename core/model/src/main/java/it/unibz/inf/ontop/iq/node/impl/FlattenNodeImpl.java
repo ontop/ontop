@@ -140,8 +140,9 @@ public class FlattenNodeImpl extends CompositeQueryNodeImpl implements FlattenNo
 
     @Override
     public IQTree propagateDownConstraint(DownPropagation dp, IQTree child) {
-        IQTree newChild = getChildDownPropagation(dp, child)
-                .propagate(child);
+        IQTree newChild = dp
+                .extendToVariables(getLocallyRequiredVariables())
+                .propagateWithRestrictedScope(child);
 
         return iqFactory.createUnaryIQTree(this, newChild);
     }
@@ -149,8 +150,9 @@ public class FlattenNodeImpl extends CompositeQueryNodeImpl implements FlattenNo
     @Override
     public IQTree applyDescendingSubstitution(DownPropagation dp, IQTree child) {
 
-        IQTree newChild = getChildDownPropagation(dp, child)
-                .propagate(child);
+        IQTree newChild = dp
+                .extendToVariables(getLocallyRequiredVariables())
+                .propagateWithRestrictedScope(child);
 
         var locallyDefinedVariablesSubstitution = dp.getDescendingSubstitution().restrictDomainTo(getLocallyDefinedVariables());
 
@@ -162,13 +164,7 @@ public class FlattenNodeImpl extends CompositeQueryNodeImpl implements FlattenNo
         Substitution<GroundTerm> blockedSubstitution = locallyDefinedVariablesSubstitution
                 .restrictRangeTo(GroundTerm.class);
 
-        return iqTreeTools.createFilterTreeForBlockedSubstitution(blockedSubstitution, newTree, dp.computeProjectedVariables(), dp.getVariableGenerator());
-    }
-
-    private DownPropagation getChildDownPropagation(DownPropagation dp, IQTree child) {
-        return dp
-                .restrictScope(Sets.difference(child.getVariables(), getLocallyRequiredVariables()).immutableCopy())
-                .extendToChildVariables(child.getVariables());
+        return iqTreeTools.createFilterTreeForBlockedSubstitution(blockedSubstitution, newTree, dp.getResultingProjectedVariables(), dp.getVariableGenerator());
     }
 
     private FlattenNode applyDescendingSubstitution(Substitution<Variable> sub) {

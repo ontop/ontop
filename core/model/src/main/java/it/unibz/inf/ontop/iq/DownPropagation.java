@@ -4,16 +4,13 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
-import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
 import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.Optional;
-import java.util.function.BiFunction;
 import java.util.function.Predicate;
-import java.util.function.Supplier;
 
 @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 public interface DownPropagation {
@@ -22,7 +19,7 @@ public interface DownPropagation {
 
     VariableGenerator getVariableGenerator();
 
-    ImmutableSet<Variable> computeProjectedVariables();
+    ImmutableSet<Variable> getResultingProjectedVariables();
 
     /**
      * can be empty
@@ -43,15 +40,11 @@ public interface DownPropagation {
 
     DownPropagation withNoConstraint();
 
-    DownPropagation filterConstraint(Predicate<ImmutableExpression> filter);
+    DownPropagation withRestrictedConstraint(Predicate<ImmutableExpression> filter);
 
-    DownPropagation extendToChildVariables(ImmutableSet<Variable> childVariables);
+    DownPropagation extendToVariables(ImmutableSet<Variable> childVariables);
 
-    DownPropagation restrictScope(ImmutableSet<Variable> variables);
-
-    default IQTree propagateWithRestrictedScope(IQTree tree) {
-        return restrictScope(tree.getVariables()).propagate(tree);
-    }
+    IQTree propagateWithRestrictedScope(IQTree tree);
 
     /**
      * Thrown when a "null" variable is propagated down or when the constraint is inconsistent
@@ -59,7 +52,7 @@ public interface DownPropagation {
     class InconsistentDownPropagationException extends Exception {
     }
 
-    static ImmutableSet<Variable> computeProjectedVariables(Substitution<? extends VariableOrGroundTerm> substitution, ImmutableSet<Variable> projectedVariables) {
+    static ImmutableSet<Variable> getProjectedVariablesAfterDescendingSubstitution(Substitution<? extends VariableOrGroundTerm> substitution, ImmutableSet<Variable> projectedVariables) {
         ImmutableSet<Variable> newVariables = substitution.restrictDomainTo(projectedVariables).getRangeVariables();
         return Sets.union(newVariables, Sets.difference(projectedVariables, substitution.getDomain())).immutableCopy();
     }

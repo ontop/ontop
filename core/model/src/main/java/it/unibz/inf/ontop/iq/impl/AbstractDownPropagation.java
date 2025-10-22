@@ -65,14 +65,14 @@ public abstract class AbstractDownPropagation implements DownPropagation {
     }
 
     @Override
-    public DownPropagation restrictScope(ImmutableSet<Variable> newVariables) {
+    public IQTree propagateWithRestrictedScope(IQTree tree) {
+        ImmutableSet<Variable> newVariables = tree.getVariables();
         if (!variables.containsAll(newVariables))
             throw new IllegalArgumentException("Variables " + newVariables + " are not included in " + this.variables);
 
-        if (variables.size() == newVariables.size())
-            return this;
-
-        return withReducedScope(newVariables);
+        return variables.size() == newVariables.size()
+                ? propagate(tree)
+                : withReducedScope(newVariables).propagate(tree);
     }
 
     /**
@@ -97,7 +97,7 @@ public abstract class AbstractDownPropagation implements DownPropagation {
     }
 
     @Override
-    public final DownPropagation filterConstraint(Predicate<ImmutableExpression> filter) {
+    public final DownPropagation withRestrictedConstraint(Predicate<ImmutableExpression> filter) {
         return updateConstraint(getFilteredConstraint(filter));
     }
 

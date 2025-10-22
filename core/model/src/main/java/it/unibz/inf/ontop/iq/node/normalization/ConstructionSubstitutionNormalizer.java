@@ -39,8 +39,6 @@ public interface ConstructionSubstitutionNormalizer {
 
         IQTree applyDownRenamingSubstitution(IQTree tree);
 
-        ImmutableExpression applyDownRenamingSubstitution(ImmutableExpression expression);
-
         InjectiveSubstitution<Variable> getDownRenamingSubstitution();
 
         /**

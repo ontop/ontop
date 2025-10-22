@@ -1,18 +1,15 @@
 package it.unibz.inf.ontop.iq.impl;
 
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Sets;
 import it.unibz.inf.ontop.iq.DownPropagation;
 import it.unibz.inf.ontop.iq.IQTree;
-import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.InjectiveSubstitution;
 import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.Optional;
-import java.util.function.BiFunction;
-import java.util.function.Predicate;
-import java.util.function.Supplier;
 
 public class RenamingDownPropagation extends AbstractDownPropagation implements DownPropagation {
     private final InjectiveSubstitution<Variable> substitution;
@@ -24,8 +21,8 @@ public class RenamingDownPropagation extends AbstractDownPropagation implements 
     }
 
     @Override
-    public ImmutableSet<Variable> computeProjectedVariables() {
-        return DownPropagation.computeProjectedVariables(substitution, variables);
+    public ImmutableSet<Variable> getResultingProjectedVariables() {
+        return DownPropagation.getProjectedVariablesAfterDescendingSubstitution(substitution, variables);
     }
 
     @Override
@@ -47,7 +44,7 @@ public class RenamingDownPropagation extends AbstractDownPropagation implements 
     public IQTree propagate(IQTree tree) {
         IQTree renamedTree = checkScope(tree).applyFreshRenaming(substitution);
         return optionalConstraint.isPresent()
-                ? renamedTree.propagateDownConstraint(new ConstraintOnlyDownPropagation(optionalConstraint, computeProjectedVariables(), variableGenerator, termFactory))
+                ? renamedTree.propagateDownConstraint(new ConstraintOnlyDownPropagation(optionalConstraint, getResultingProjectedVariables(), variableGenerator, termFactory))
                 : renamedTree;
     }
 
@@ -57,11 +54,8 @@ public class RenamingDownPropagation extends AbstractDownPropagation implements 
     }
 
     @Override
-    public DownPropagation extendToChildVariables(ImmutableSet<Variable> childVariables) {
-        if (!childVariables.containsAll(variables))
-            throw new IllegalArgumentException("Child variables must contain all of the variables in the same constraint");
-
-        return new RenamingDownPropagation(substitution, optionalConstraint, childVariables, variableGenerator, termFactory);
+    public DownPropagation extendToVariables(ImmutableSet<Variable> additionalVariables) {
+        return new RenamingDownPropagation(substitution, optionalConstraint, Sets.union(variables, additionalVariables).immutableCopy(), variableGenerator, termFactory);
     }
 
 }

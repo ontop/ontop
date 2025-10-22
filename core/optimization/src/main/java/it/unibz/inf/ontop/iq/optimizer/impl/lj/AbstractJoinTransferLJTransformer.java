@@ -24,7 +24,6 @@ import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -251,7 +250,7 @@ public abstract class AbstractJoinTransferLJTransformer extends AbstractLJTransf
         InjectiveSubstitution<Variable> renamingSubstitution = substitutionFactory.extractInverseSubstitution(list.stream(), leftChild.getVariables())
                 .injective();
 
-        ImmutableSet<ImmutableExpression> equalities = iqTreeTools.getRemainingEqualities(list, renamingSubstitution)
+        ImmutableSet<ImmutableExpression> equalities = iqTreeTools.getRemainingEqualitiesInverse(list, renamingSubstitution)
                 .collect(ImmutableCollectors.toSet());
 
         Optional<ImmutableExpression> newLeftJoinCondition = termFactory.getConjunction(

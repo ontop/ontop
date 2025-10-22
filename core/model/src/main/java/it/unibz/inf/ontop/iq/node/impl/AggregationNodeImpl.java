@@ -90,7 +90,7 @@ public class AggregationNodeImpl extends ExtendedProjectionNodeImpl implements A
 
             Substitution<ImmutableTerm> newSubstitution = result.getSubstitution();
             AggregationNode projectionNode = iqFactory.createAggregationNode(
-                    Sets.difference(dp.computeProjectedVariables(), newSubstitution.getDomain()).immutableCopy(),
+                    Sets.difference(dp.getResultingProjectedVariables(), newSubstitution.getDomain()).immutableCopy(),
                     newSubstitution.transform(t -> (ImmutableFunctionalTerm) t));
 
             IQTree newSubTree = iqTreeTools.unaryIQTreeBuilder()
@@ -98,10 +98,10 @@ public class AggregationNodeImpl extends ExtendedProjectionNodeImpl implements A
                     .append(iqTreeTools.createOptionalFilterNode(result.getOptionalFilter()))
                     .build(newChild);
 
-            return iqTreeTools.createFilterTreeForBlockedSubstitution(blockedSubstitution, newSubTree, dp.computeProjectedVariables(), dp.getVariableGenerator());
+            return iqTreeTools.createFilterTreeForBlockedSubstitution(blockedSubstitution, newSubTree, dp.getResultingProjectedVariables(), dp.getVariableGenerator());
         }
         catch (DownPropagation.InconsistentDownPropagationException e) {
-            return iqTreeTools.createEmptyNode(dp);
+            return iqFactory.createEmptyNode(dp.getResultingProjectedVariables());
         }
     }
 

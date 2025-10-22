@@ -11,7 +11,6 @@ import it.unibz.inf.ontop.iq.DownPropagation;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.impl.NaryIQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
-import it.unibz.inf.ontop.iq.node.normalization.impl.ConditionSimplifierImpl;
 import it.unibz.inf.ontop.iq.request.FunctionalDependencies;
 import it.unibz.inf.ontop.iq.request.VariableNonRequirement;
 import it.unibz.inf.ontop.iq.node.normalization.ConditionSimplifier;
@@ -93,7 +92,7 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
     @Override
     public IQTree applyDescendingSubstitution(DownPropagation dp, IQTree child) {
         VariableNullability simplifiedFutureChildVariableNullability =
-                coreUtilsFactory.createSimplifiedVariableNullability(dp.computeProjectedVariables().stream());
+                coreUtilsFactory.createSimplifiedVariableNullability(dp.getResultingProjectedVariables().stream());
         return propagateDown(dp, child, simplifiedFutureChildVariableNullability);
     }
 
@@ -108,12 +107,12 @@ public class FilterNodeImpl extends JoinOrFilterNodeImpl implements FilterNode {
             var extendedDownConstraint = conditionSimplifier.getCombinedDownPropagation(dp, simplification, variableNullability);
 
             return iqTreeTools.unaryIQTreeBuilder()
-                    .append(iqTreeTools.createOptionalConstructionNode(dp::computeProjectedVariables, simplification.getSubstitution()))
+                    .append(iqTreeTools.createOptionalConstructionNode(dp::getResultingProjectedVariables, simplification.getSubstitution()))
                     .append(iqTreeTools.createOptionalFilterNode(simplification.getOptionalExpression()))
                     .build(extendedDownConstraint.propagate(child));
         }
         catch (DownPropagation.InconsistentDownPropagationException e) {
-            return iqTreeTools.createEmptyNode(dp);
+            return iqFactory.createEmptyNode(dp.getResultingProjectedVariables());
         }
     }
 

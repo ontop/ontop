@@ -47,7 +47,7 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
             return iqFactory.createUnaryIQTree(this, newChild);
         }
         catch (DownPropagation.InconsistentDownPropagationException e) {
-            return iqTreeTools.createEmptyNode(dp);
+            return iqFactory.createEmptyNode(dp.getResultingProjectedVariables());
         }
     }
 
@@ -61,7 +61,7 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
         // tauC applied to thetaC: dealing with variables and constants
 
         Substitution<NonFunctionalTerm> tauC = descendingSubstitution.restrictRangeTo(NonFunctionalTerm.class);
-        ImmutableSet<Variable> projectedVariablesAfterTauC = DownPropagation.computeProjectedVariables(tauC, projectedVariables);
+        ImmutableSet<Variable> projectedVariablesAfterTauC = DownPropagation.getProjectedVariablesAfterDescendingSubstitution(tauC, projectedVariables);
 
         Substitution<NonFunctionalTerm> thetaC = substitution.restrictRangeTo(NonFunctionalTerm.class);
 
@@ -112,8 +112,8 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
 
         Optional<ImmutableExpression> newF = termFactory.getConjunction(Stream.concat(
                 Stream.concat(
-                        iqTreeTools.getRemainingEqualities(deltaCThetaFEqualities, thetaFBar),
-                        iqTreeTools.getRemainingEqualities(gamma, newDeltaC)),
+                        iqTreeTools.getRemainingEqualitiesInverse(deltaCThetaFEqualities, thetaFBar),
+                        iqTreeTools.getRemainingEqualitiesSimple(gamma, newDeltaC)),
                 Stream.concat(
                         matchingEqualities(tauF, thetaBar),
                         matchingEqualities(tauF, newDeltaC))));

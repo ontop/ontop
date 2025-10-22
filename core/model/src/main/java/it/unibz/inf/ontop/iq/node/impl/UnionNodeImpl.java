@@ -439,7 +439,7 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
 
     @Override
     public UnionNode applyFreshRenaming(InjectiveSubstitution<Variable> renamingSubstitution) {
-        return iqFactory.createUnionNode(DownPropagation.computeProjectedVariables(renamingSubstitution, projectedVariables));
+        return iqFactory.createUnionNode(DownPropagation.getProjectedVariablesAfterDescendingSubstitution(renamingSubstitution, projectedVariables));
     }
 
     @Override
@@ -460,11 +460,11 @@ public class UnionNodeImpl extends CompositeQueryNodeImpl implements UnionNode {
 
         switch (updatedChildren.size()) {
             case 0:
-                return iqFactory.createEmptyNode(dp.computeProjectedVariables());
+                return iqFactory.createEmptyNode(dp.getResultingProjectedVariables());
             case 1:
                 return updatedChildren.get(0);
             default:
-                return iqTreeTools.createUnionTree(dp.computeProjectedVariables(), updatedChildren);
+                return iqTreeTools.createUnionTree(dp.getResultingProjectedVariables(), updatedChildren);
         }
     }
 }

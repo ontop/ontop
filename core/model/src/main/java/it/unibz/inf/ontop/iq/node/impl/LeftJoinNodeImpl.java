@@ -10,7 +10,6 @@ import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.impl.NaryIQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.node.normalization.LeftJoinNormalizer;
-import it.unibz.inf.ontop.iq.node.normalization.impl.ConditionSimplifierImpl;
 import it.unibz.inf.ontop.iq.node.normalization.impl.ExpressionAndSubstitutionImpl;
 import it.unibz.inf.ontop.iq.node.normalization.ConditionSimplifier;
 import it.unibz.inf.ontop.iq.request.FunctionalDependencies;
@@ -215,14 +214,14 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
             IQTree updatedRightChild = dpResult.propagateWithRestrictedScope(rightChild);
 
             if (updatedRightChild.isDeclaredAsEmpty())
-                return buildPaddedLeftChild(updatedLeftChild, dp.computeProjectedVariables());
+                return buildPaddedLeftChild(updatedLeftChild, dp.getResultingProjectedVariables());
 
             return iqTreeTools.createLeftJoinTree(
                     simplification.getOptionalExpression(),
                     updatedLeftChild, updatedRightChild);
         }
         catch (DownPropagation.InconsistentDownPropagationException e) {
-            return buildPaddedLeftChild(updatedLeftChild, dp.computeProjectedVariables());
+            return buildPaddedLeftChild(updatedLeftChild, dp.getResultingProjectedVariables());
         }
     }
 

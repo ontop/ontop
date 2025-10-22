@@ -81,9 +81,6 @@ public class NaryIQTreeImpl extends AbstractCompositeIQTree<NaryOperatorNode> im
 
     @Override
     public IQTree applyDescendingSubstitution(DownPropagation dp) {
-        if (!dp.getVariables().equals(getVariables()))
-            throw new IllegalStateException("VARIABLE SET MISMATCH: " + dp.getVariables() + " v " + getVariables());
-
         return getRootNode().applyDescendingSubstitution(dp, getChildren());
     }
 

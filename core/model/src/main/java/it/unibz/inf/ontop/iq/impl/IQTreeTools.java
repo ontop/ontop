@@ -53,10 +53,6 @@ public class IQTreeTools {
     }
 
 
-    public EmptyNode createEmptyNode(DownPropagation ds) {
-        return iqFactory.createEmptyNode(ds.computeProjectedVariables());
-    }
-
     public EmptyNode createEmptyNode(ImmutableSet<Variable> projectedVariables) {
         return iqFactory.createEmptyNode(projectedVariables);
     }
@@ -422,18 +418,18 @@ public class IQTreeTools {
         return queryRenamer.applyInDepthRenaming(renamingSubstitution, iq);
     }
 
-    public <T extends ImmutableTerm> Stream<ImmutableExpression> getRemainingEqualities(ImmutableList<? extends Map.Entry<T, ? extends ImmutableTerm>> equalities, Substitution<T> sub) {
+    public <T extends ImmutableTerm> Stream<ImmutableExpression> getRemainingEqualitiesInverse(ImmutableList<? extends Map.Entry<T, ? extends ImmutableTerm>> equalities, Substitution<T> sub) {
         return equalities.stream()
                 .map(e -> Maps.immutableEntry(e.getValue(), e.getKey())) // swapped!
                 .filter(e -> sub.stream().noneMatch(e::equals))
                 .map(e -> termFactory.getStrictEquality(sub.applyToTerm(e.getKey()), e.getValue()));
     }
 
-    public <T extends ImmutableTerm> Stream<ImmutableExpression> getRemainingEqualities(Substitution<? extends ImmutableTerm> equalities, Substitution<T> sub) {
+    public <T extends ImmutableTerm> Stream<ImmutableExpression> getRemainingEqualitiesSimple(Substitution<? extends ImmutableTerm> equalities, Substitution<T> sub) {
         return equalities.stream()
                 .map(e -> Maps.immutableEntry(e.getKey(), e.getValue()))
                 .filter(e -> sub.stream().noneMatch(e::equals))
-                .map(e -> termFactory.getStrictEquality(sub.applyToTerm(e.getKey()), e.getValue()));
+                .map(e -> termFactory.getStrictEquality(e.getKey(), e.getValue())); // no sub!
     }
 
     public IQTree createFilterTreeForBlockedSubstitution(Substitution<? extends ImmutableTerm> blockedSubstitution, IQTree tree, ImmutableSet<Variable> projectedVariables, VariableGenerator variableGenerator) {
