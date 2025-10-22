@@ -82,15 +82,27 @@ public class AggregationNodeImpl extends ExtendedProjectionNodeImpl implements A
                 substitutionFactory.union(blockedGroundTermSubstitution, blockedVariableSubstitution);
 
         var newDp = iqTreeTools.removeFromDomain(dp, blockedSubstitution.getDomain());
-        IQTree newSubTree = applyDescendingSubstitution(newDp, child, this::createAggregationNode);
 
-        return iqTreeTools.createFilterTreeForBlockedSubstitution(blockedSubstitution, newSubTree, dp.computeProjectedVariables(), dp.getVariableGenerator());
-    }
+        try {
+            PropagationResults result = propagateTau(newDp, child.getVariables(), child::getVariableNullability);
 
-    private Optional<AggregationNode> createAggregationNode(ImmutableSet<Variable> variables, Substitution<ImmutableTerm> substitution, IQTree newChild) {
-        return Optional.of(iqFactory.createAggregationNode(
-                Sets.difference(variables, substitution.getDomain()).immutableCopy(),
-                substitution.transform(t -> (ImmutableFunctionalTerm)t)));
+            IQTree newChild = result.getDownPropagation().propagate(child);
+
+            Substitution<ImmutableTerm> newSubstitution = result.getSubstitution();
+            AggregationNode projectionNode = iqFactory.createAggregationNode(
+                    Sets.difference(dp.computeProjectedVariables(), newSubstitution.getDomain()).immutableCopy(),
+                    newSubstitution.transform(t -> (ImmutableFunctionalTerm) t));
+
+            IQTree newSubTree = iqTreeTools.unaryIQTreeBuilder()
+                    .append(projectionNode)
+                    .append(iqTreeTools.createOptionalFilterNode(result.getOptionalFilter()))
+                    .build(newChild);
+
+            return iqTreeTools.createFilterTreeForBlockedSubstitution(blockedSubstitution, newSubTree, dp.computeProjectedVariables(), dp.getVariableGenerator());
+        }
+        catch (DownPropagation.InconsistentDownPropagationException e) {
+            return iqTreeTools.createEmptyNode(dp);
+        }
     }
 
     private Set<Variable> extractBlockedDomainVars(Variable rangeVariable, ImmutableSet<Variable> domainVariables,

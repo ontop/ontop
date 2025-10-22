@@ -424,7 +424,14 @@ public class IQTreeTools {
 
     public <T extends ImmutableTerm> Stream<ImmutableExpression> getRemainingEqualities(ImmutableList<? extends Map.Entry<T, ? extends ImmutableTerm>> equalities, Substitution<T> sub) {
         return equalities.stream()
-                .map(e -> Maps.immutableEntry(e.getValue(), e.getKey()))
+                .map(e -> Maps.immutableEntry(e.getValue(), e.getKey())) // swapped!
+                .filter(e -> sub.stream().noneMatch(e::equals))
+                .map(e -> termFactory.getStrictEquality(sub.applyToTerm(e.getKey()), e.getValue()));
+    }
+
+    public <T extends ImmutableTerm> Stream<ImmutableExpression> getRemainingEqualities(Substitution<? extends ImmutableTerm> equalities, Substitution<T> sub) {
+        return equalities.stream()
+                .map(e -> Maps.immutableEntry(e.getKey(), e.getValue()))
                 .filter(e -> sub.stream().noneMatch(e::equals))
                 .map(e -> termFactory.getStrictEquality(sub.applyToTerm(e.getKey()), e.getValue()));
     }

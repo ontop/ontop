@@ -4,7 +4,6 @@ package it.unibz.inf.ontop.iq.node.impl;
 import com.google.common.collect.*;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
-import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.OntopModelSettings;
 import it.unibz.inf.ontop.iq.*;
@@ -510,9 +509,19 @@ public class ConstructionNodeImpl extends ExtendedProjectionNodeImpl implements 
 
     @Override
     public IQTree applyDescendingSubstitution(DownPropagation dp, IQTree child) {
-        return applyDescendingSubstitution(
-                dp,
-                child,
-                iqTreeTools::createOptionalConstructionNode);
+
+        try {
+            PropagationResults result = propagateTau(dp, child.getVariables(), child::getVariableNullability);
+
+            IQTree newChild = result.getDownPropagation().propagate(child);
+
+            return iqTreeTools.unaryIQTreeBuilder()
+                    .append(iqTreeTools.createOptionalConstructionNode(dp.computeProjectedVariables(), result.getSubstitution(), newChild))
+                    .append(iqTreeTools.createOptionalFilterNode(result.getOptionalFilter()))
+                    .build(newChild);
+        }
+        catch (DownPropagation.InconsistentDownPropagationException e) {
+            return iqTreeTools.createEmptyNode(dp);
+        }
     }
 }
