@@ -175,7 +175,7 @@ public class FlattenNodeImpl extends CompositeQueryNodeImpl implements FlattenNo
         var onVariables = substitutionFactory.onVariables();
         return iqFactory.createFlattenNode(
                 onVariables.apply(sub, outputVariable),
-                flattenedVariable, // a local variable (so, no substitution applied)
+                onVariables.apply(sub, flattenedVariable), // this is used by "deep renaming" only
                 indexVariable.map(index -> onVariables.apply(sub, index)),
                 flattenedType);
     }

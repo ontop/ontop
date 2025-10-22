@@ -166,6 +166,5 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
         DownPropagation getDownPropagation() {
             return dp;
         }
-
     }
 }
