@@ -19,7 +19,6 @@ import it.unibz.inf.ontop.injection.OntopSystemSQLSettings;
 import it.unibz.inf.ontop.answering.reformulation.QueryReformulator;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
-import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.exception.EmptyQueryException;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.NativeNode;
@@ -247,9 +246,9 @@ public class SQLQuestStatement extends QuestStatement {
         if (tree.isDeclaredAsEmpty()) {
             throw new EmptyQueryException();
         }
-        return Optional.of(tree)
-                .filter(t -> t instanceof UnaryIQTree)
-                .map(t -> ((UnaryIQTree)t).getChild().getRootNode())
+        return Optional.of(UnaryIQTreeDecomposition.of(tree, ConstructionNode.class))
+                .filter(UnaryIQTreeDecomposition::isPresent)
+                .map(UnaryIQTreeDecomposition::getChild)
                 .filter(n -> n instanceof NativeNode)
                 .map(n -> (NativeNode) n)
                 .orElseThrow(() -> new MinorOntopInternalBugException("The query does not have the expected structure " +
@@ -257,20 +256,8 @@ public class SQLQuestStatement extends QuestStatement {
     }
 
     private String extractSQLQuery(IQ executableQuery) throws EmptyQueryException, OntopInternalBugException {
-        IQTree tree = executableQuery.getTree();
-        if  (tree.isDeclaredAsEmpty())
-            throw new EmptyQueryException();
-
-        String queryString = Optional.of(tree)
-                .filter(t -> t instanceof UnaryIQTree)
-                .map(t -> ((UnaryIQTree)t).getChild().getRootNode())
-                .filter(n -> n instanceof NativeNode)
-                .map(n -> (NativeNode) n)
-                .map(NativeNode::getNativeQueryString)
-                .orElseThrow(() -> new MinorOntopInternalBugException("The query does not have the expected structure " +
-                        "of an executable query\n" + executableQuery));
-
-        if (queryString.equals(""))
+        String queryString = extractNativeNode(executableQuery).getNativeQueryString();
+        if (queryString.isEmpty())
             throw new EmptyQueryException();
 
         return queryString;
