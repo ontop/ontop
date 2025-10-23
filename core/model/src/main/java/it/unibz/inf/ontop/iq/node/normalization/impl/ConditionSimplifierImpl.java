@@ -55,7 +55,19 @@ public class ConditionSimplifierImpl implements ConditionSimplifier {
     }
 
     @Override
-    public ExpressionAndSubstitution simplifyCondition(Optional<ImmutableExpression> optionalExpression, Function<ImmutableExpression, VariableNullability> variableNullabilitySupplier, Extractor extractor) throws DownPropagation.InconsistentDownPropagationException {
+    public ExpressionAndSubstitution simplifyConditionForLeftJoin(Optional<ImmutableExpression> nonOptimizedExpression, Function<ImmutableExpression, VariableNullability> variableNullability, ImmutableSet<Variable> leftVariables, ImmutableSet<Variable> rightVariables) throws DownPropagation.InconsistentDownPropagationException {
+        return simplifyCondition(
+                nonOptimizedExpression,
+                variableNullability,
+                e -> convertIntoExpressionAndSubstitutionForLeftJoin(e, leftVariables, rightVariables));
+    }
+
+    private interface Extractor {
+        ExpressionAndSubstitution extract(ImmutableExpression expression) throws DownPropagation.InconsistentDownPropagationException;
+    }
+
+    @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
+    private ExpressionAndSubstitution simplifyCondition(Optional<ImmutableExpression> optionalExpression, Function<ImmutableExpression, VariableNullability> variableNullabilitySupplier, Extractor extractor) throws DownPropagation.InconsistentDownPropagationException {
         if (optionalExpression.isPresent()) {
             var expression = optionalExpression.get();
             var variableNullability = variableNullabilitySupplier.apply(expression);
@@ -193,5 +205,69 @@ public class ConditionSimplifierImpl implements ConditionSimplifier {
                         Map.Entry::getKey,
                         // Picks one of the ground functional terms
                         e -> e.getValue().iterator().next()));
+    }
+
+
+    /**
+     * TODO: explain
+     *
+     */
+    private ExpressionAndSubstitution convertIntoExpressionAndSubstitutionForLeftJoin(ImmutableExpression expression,
+                                                                           ImmutableSet<Variable> leftVariables,
+                                                                           ImmutableSet<Variable> rightVariables) {
+
+        Set<Variable> rightSpecificVariables = Sets.difference(rightVariables, leftVariables);
+
+        ImmutableSet<ImmutableExpression> expressions = expression.flattenAND()
+                .collect(ImmutableCollectors.toSet());
+        ImmutableSet<ImmutableExpression> downSubstitutionExpressions = expressions.stream()
+                .filter(e -> e.getFunctionSymbol() instanceof DBStrictEqFunctionSymbol)
+                // TODO: refactor it for dealing with n-ary EQs
+                .filter(e -> e.getTerms().stream().allMatch(t -> t instanceof NonFunctionalTerm)
+                        && e.getTerms().stream().anyMatch(rightVariables::contains))
+                .collect(ImmutableCollectors.toSet());
+
+        Substitution<VariableOrGroundTerm> downSubstitution = downSubstitutionExpressions.stream()
+                .map(ImmutableFunctionalTerm::getTerms)
+                .map(args -> (args.get(0) instanceof Variable) ? args : args.reverse())
+                // Rename right-specific variables if possible
+                .map(args -> ((args.get(0) instanceof Variable) && rightSpecificVariables.contains(args.get(1)))
+                        ? args.reverse() : args)
+                .collect(substitutionFactory.toSubstitution(
+                        args -> (Variable) args.get(0),
+                        args -> (VariableOrGroundTerm) args.get(1)));
+
+        Optional<ImmutableExpression> newExpression = Optional.of(expressions.stream()
+                        .filter(e -> !downSubstitutionExpressions.contains(e)
+                                || e.getTerms().stream().anyMatch(rightSpecificVariables::contains))
+                        .collect(ImmutableCollectors.toList()))
+                .filter(l -> !l.isEmpty())
+                .map(termFactory::getConjunction)
+                .map(downSubstitution::apply);
+
+        return new ExpressionAndSubstitutionImpl(newExpression, downSubstitution);
+    }
+
+    private static class ExpressionAndSubstitutionImpl implements ExpressionAndSubstitution {
+        @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
+        private final Optional<ImmutableExpression> optionalExpression;
+        private final Substitution<VariableOrGroundTerm> substitution;
+
+        @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
+        public ExpressionAndSubstitutionImpl(Optional<ImmutableExpression> optionalExpression,
+                                             Substitution<VariableOrGroundTerm> substitution) {
+            this.optionalExpression = optionalExpression;
+            this.substitution = substitution;
+        }
+
+        @Override
+        public Substitution<VariableOrGroundTerm> getSubstitution() {
+            return substitution;
+        }
+
+        @Override
+        public Optional<ImmutableExpression> getOptionalExpression() {
+            return optionalExpression;
+        }
     }
 }

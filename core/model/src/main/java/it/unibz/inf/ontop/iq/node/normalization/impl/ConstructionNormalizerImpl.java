@@ -66,7 +66,7 @@ public class ConstructionNormalizerImpl implements ConstructionNormalizer {
                         shrunkChildConstruction.getChild());
                 var substitutionNormalization = substitutionNormalizer.normalizeSubstitution(substitution, projectedVariables);
                 ConstructionNode newConstructionNode = substitutionNormalization.createConstructionNode();
-                IQTree updatedChild = substitutionNormalization.applyDownRenamingSubstitution(shrunkChildConstruction.getChild());
+                IQTree updatedChild = iqTreeTools.applyDownPropagation(substitutionNormalization.getDownRenamingSubstitution(), shrunkChildConstruction.getChild());
 
                 IQTree newGrandChild = normalizeSubTreeRecursively(
                         removeNonRequiredVariables(newConstructionNode, updatedChild));
@@ -85,7 +85,7 @@ public class ConstructionNormalizerImpl implements ConstructionNormalizer {
             Substitution<ImmutableTerm> substitution = simplifySubstitution(constructionNode.getSubstitution(), shrunkChild);
             var substitutionNormalization = substitutionNormalizer.normalizeSubstitution(substitution, projectedVariables);
             Optional<ConstructionNode> optionalTopConstructionNode = substitutionNormalization.createOptionalConstructionNode();
-            IQTree updatedChild = substitutionNormalization.applyDownRenamingSubstitution(shrunkChild);
+            IQTree updatedChild = iqTreeTools.applyDownPropagation(substitutionNormalization.getDownRenamingSubstitution(), shrunkChild);
 
             if (optionalTopConstructionNode.isPresent()) {
                 IQTree newChild = normalizeSubTreeRecursively(

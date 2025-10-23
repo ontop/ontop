@@ -23,9 +23,10 @@ public interface ConditionSimplifier {
                                                 VariableNullability variableNullability)
                     throws DownPropagation.InconsistentDownPropagationException;
 
-    ExpressionAndSubstitution simplifyCondition(Optional<ImmutableExpression> nonOptimizedExpression,
+    ExpressionAndSubstitution simplifyConditionForLeftJoin(Optional<ImmutableExpression> nonOptimizedExpression,
                                                 Function<ImmutableExpression, VariableNullability> variableNullability,
-                                                Extractor extractor) throws DownPropagation.InconsistentDownPropagationException;
+                                                ImmutableSet<Variable> leftVariables, ImmutableSet<Variable> rightVariables)
+            throws DownPropagation.InconsistentDownPropagationException;
 
     DownPropagation getCombinedDownPropagation(DownPropagation dp, ExpressionAndSubstitution simplification, VariableNullability variableNullability) throws DownPropagation.InconsistentDownPropagationException;
 
@@ -34,7 +35,4 @@ public interface ConditionSimplifier {
         Optional<ImmutableExpression> getOptionalExpression();
     }
 
-    interface Extractor {
-        ExpressionAndSubstitution extract(ImmutableExpression expression) throws DownPropagation.InconsistentDownPropagationException;
-    }
 }

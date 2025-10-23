@@ -10,14 +10,12 @@ import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.impl.NaryIQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.node.normalization.LeftJoinNormalizer;
-import it.unibz.inf.ontop.iq.node.normalization.impl.ExpressionAndSubstitutionImpl;
 import it.unibz.inf.ontop.iq.node.normalization.ConditionSimplifier;
 import it.unibz.inf.ontop.iq.request.FunctionalDependencies;
 import it.unibz.inf.ontop.iq.request.VariableNonRequirement;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
-import it.unibz.inf.ontop.model.term.functionsymbol.db.DBStrictEqFunctionSymbol;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.InjectiveSubstitution;
@@ -205,10 +203,10 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
         try {
             // TODO: also consider the constraint for simplifying the condition
             DownPropagation dpNoConstraint = dp.withNoConstraint();
-            ExpressionAndSubstitution simplification = conditionSimplifier.simplifyCondition(
+            ExpressionAndSubstitution simplification = conditionSimplifier.simplifyConditionForLeftJoin(
                     dpNoConstraint.applyDescendingSubstitution(getOptionalFilterCondition()),
                     coreUtilsFactory::createSimplifiedVariableNullability,
-                    e -> convertIntoExpressionAndSubstitution(e, leftChild.getVariables(), rightChild.getVariables()));
+                    leftChild.getVariables(), rightChild.getVariables());
 
             DownPropagation dpResult = conditionSimplifier.getCombinedDownPropagation(dpNoConstraint, simplification, null);
             IQTree updatedRightChild = dpResult.propagateWithRestrictedScope(rightChild);
@@ -357,45 +355,6 @@ public class LeftJoinNodeImpl extends JoinLikeNodeImpl implements LeftJoinNode {
         return IQTreeTools.computeStrictDependentsFromFunctionalDependencies(tree);
     }
 
-    /**
-     * TODO: explain
-     *
-     */
-    private ExpressionAndSubstitution convertIntoExpressionAndSubstitution(ImmutableExpression expression,
-                                                                           ImmutableSet<Variable> leftVariables,
-                                                                           ImmutableSet<Variable> rightVariables) {
-
-        Set<Variable> rightSpecificVariables = Sets.difference(rightVariables, leftVariables);
-
-        ImmutableSet<ImmutableExpression> expressions = expression.flattenAND()
-                .collect(ImmutableCollectors.toSet());
-        ImmutableSet<ImmutableExpression> downSubstitutionExpressions = expressions.stream()
-                .filter(e -> e.getFunctionSymbol() instanceof DBStrictEqFunctionSymbol)
-                // TODO: refactor it for dealing with n-ary EQs
-                .filter(e -> e.getTerms().stream().allMatch(t -> t instanceof NonFunctionalTerm)
-                        && e.getTerms().stream().anyMatch(rightVariables::contains))
-                .collect(ImmutableCollectors.toSet());
-
-        Substitution<VariableOrGroundTerm> downSubstitution = downSubstitutionExpressions.stream()
-                        .map(ImmutableFunctionalTerm::getTerms)
-                        .map(args -> (args.get(0) instanceof Variable) ? args : args.reverse())
-                        // Rename right-specific variables if possible
-                        .map(args -> ((args.get(0) instanceof Variable) && rightSpecificVariables.contains(args.get(1)))
-                                ? args.reverse() : args)
-                        .collect(substitutionFactory.toSubstitution(
-                                args -> (Variable) args.get(0),
-                                args -> (VariableOrGroundTerm) args.get(1)));
-
-        Optional<ImmutableExpression> newExpression = Optional.of(expressions.stream()
-                        .filter(e -> !downSubstitutionExpressions.contains(e)
-                                || e.getTerms().stream().anyMatch(rightSpecificVariables::contains))
-                        .collect(ImmutableCollectors.toList()))
-                .filter(l -> !l.isEmpty())
-                .map(termFactory::getConjunction)
-                .map(downSubstitution::apply);
-
-        return new ExpressionAndSubstitutionImpl(newExpression, downSubstitution);
-    }
 
     private boolean isRejectingRightSpecificNulls(Optional<ImmutableExpression> optionalConstraint, IQTree leftChild, IQTree rightChild) {
         if (optionalConstraint.isEmpty())

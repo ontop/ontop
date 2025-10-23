@@ -52,7 +52,7 @@ public class ConstructionSubstitutionNormalizerImpl implements ConstructionSubst
         var normalization = normalizeSubstitution(substitution, projectedVariables);
         return iqTreeTools.unaryIQTreeBuilder(projectedVariables)
                 .append(normalization.createOptionalConstructionNode())
-                .build(normalization.applyDownRenamingSubstitution(child));
+                .build(iqTreeTools.applyDownPropagation(normalization.getDownRenamingSubstitution(), child));
     }
 
     private class ConstructionSubstitutionNormalizationImpl implements ConstructionSubstitutionNormalization {
@@ -66,11 +66,6 @@ public class ConstructionSubstitutionNormalizerImpl implements ConstructionSubst
             this.normalizedSubstitution = normalizedSubstitution;
             this.projectedVariables = projectedVariables;
             this.downRenamingSubstitution = downRenamingSubstitution;
-        }
-
-        @Override
-        public IQTree applyDownRenamingSubstitution(IQTree tree) {
-            return iqTreeTools.applyDownPropagation(downRenamingSubstitution, tree);
         }
 
         @Override
