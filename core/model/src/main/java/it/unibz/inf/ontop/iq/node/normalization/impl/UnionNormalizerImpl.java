@@ -24,10 +24,11 @@ import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
-import java.util.Map;
 import java.util.Optional;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
+
+import static it.unibz.inf.ontop.iq.impl.UnaryIQTreeTools.UnaryIQTreeDecomposition;
 
 @Singleton
 public class UnionNormalizerImpl implements UnionNormalizer {
@@ -71,7 +72,7 @@ public class UnionNormalizerImpl implements UnionNormalizer {
     }
 
     private IQTree tryToMergeSomeChildrenInAValuesNode(IQTree tree, VariableGenerator variableGenerator, IQTreeCache treeCache) {
-        var construction = IQTreeTools.UnaryIQTreeDecomposition.of(tree, ConstructionNode.class);
+        var construction = UnaryIQTreeDecomposition.of(tree, ConstructionNode.class);
         if (construction.isPresent()) {
             IQTree newSubTree = tryToMergeSomeChildrenInAValuesNode(construction.getChild(), variableGenerator, treeCache, false);
             return (construction.getChild() == newSubTree)
@@ -136,7 +137,7 @@ public class UnionNormalizerImpl implements UnionNormalizer {
         if ((tree instanceof ValuesNode) || (tree instanceof TrueNode))
             return true;
 
-        var construction = IQTreeTools.UnaryIQTreeDecomposition.of(tree, ConstructionNode.class);
+        var construction = UnaryIQTreeDecomposition.of(tree, ConstructionNode.class);
         if (construction.isPresent()) {
             IQTree child = construction.getChild();
             return ((child instanceof ValuesNode) || (child instanceof TrueNode))
@@ -162,7 +163,7 @@ public class UnionNormalizerImpl implements UnionNormalizer {
         if (tree instanceof TrueNode) // This can be allowed only if UNION has no variables!
             return Stream.of(ImmutableMap.of());
 
-        var construction = IQTreeTools.UnaryIQTreeDecomposition.of(tree, ConstructionNode.class);
+        var construction = UnaryIQTreeDecomposition.of(tree, ConstructionNode.class);
         if (construction.isPresent()) {
             Substitution<ImmutableTerm> substitution = construction.getNode().getSubstitution();
             IQTree child = construction.getChild();
@@ -199,7 +200,7 @@ public class UnionNormalizerImpl implements UnionNormalizer {
         /*
          * Cannot lift anything if some children do not have a construction node
          */
-        ImmutableList<IQTreeTools.UnaryIQTreeDecomposition<ConstructionNode>> liftedChildrenDecompositions = IQTreeTools.UnaryIQTreeDecomposition.of(liftedChildren, ConstructionNode.class);
+        ImmutableList<UnaryIQTreeDecomposition<ConstructionNode>> liftedChildrenDecompositions = UnaryIQTreeDecomposition.of(liftedChildren, ConstructionNode.class);
 
         if (liftedChildrenDecompositions.stream()
                 .anyMatch(c -> !c.isPresent()))
@@ -207,7 +208,7 @@ public class UnionNormalizerImpl implements UnionNormalizer {
             return iqFactory.createNaryIQTree(unionNode, flattenChildren(liftedChildren), treeCache.declareAsNormalizedForOptimizationWithEffect());
 
         ImmutableList<Substitution<ImmutableTerm>> tmpNormalizedChildSubstitutions = liftedChildrenDecompositions.stream()
-                .map(IQTreeTools.UnaryIQTreeDecomposition::getNode)
+                .map(UnaryIQTreeDecomposition::getNode)
                 .map(ConstructionNode::getSubstitution)
                 .map(s -> s.transform(this::normalizeNullAndRDFConstants))
                 .collect(ImmutableCollectors.toList());

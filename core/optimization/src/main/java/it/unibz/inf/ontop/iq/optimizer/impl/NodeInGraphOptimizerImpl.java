@@ -21,8 +21,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 
-import static it.unibz.inf.ontop.iq.impl.IQTreeTools.UnaryIQTreeDecomposition;
-
+import static it.unibz.inf.ontop.iq.impl.UnaryIQTreeTools.UnaryIQTreeDecomposition;
 
 /**
  * Tries to eliminate nodeInGraph atoms where:

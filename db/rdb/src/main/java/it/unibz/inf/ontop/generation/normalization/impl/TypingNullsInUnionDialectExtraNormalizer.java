@@ -18,8 +18,7 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Collection;
 
-import static it.unibz.inf.ontop.iq.impl.IQTreeTools.UnaryIQTreeDecomposition;
-
+import static it.unibz.inf.ontop.iq.impl.UnaryIQTreeTools.UnaryIQTreeDecomposition;
 
 public class TypingNullsInUnionDialectExtraNormalizer extends DefaultDelegatingIQTreeVariableGeneratorTransformer implements DialectExtraNormalizer {
 

@@ -31,8 +31,7 @@ import org.apache.commons.rdf.api.RDF;
 
 import java.sql.*;
 
-import static it.unibz.inf.ontop.iq.impl.IQTreeTools.UnaryIQTreeDecomposition;
-
+import static it.unibz.inf.ontop.iq.impl.UnaryIQTreeTools.UnaryIQTreeDecomposition;
 
 /**
  * SQL-specific implementation of OBDAStatement.

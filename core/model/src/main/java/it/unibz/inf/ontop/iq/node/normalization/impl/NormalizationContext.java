@@ -13,7 +13,7 @@ import it.unibz.inf.ontop.utils.VariableGenerator;
 import java.util.Optional;
 import java.util.function.Function;
 
-import static it.unibz.inf.ontop.iq.impl.IQTreeTools.UnaryOperatorSequence;
+import static it.unibz.inf.ontop.iq.impl.UnaryIQTreeTools.UnaryOperatorSequence;
 
 public class NormalizationContext {
     protected final VariableGenerator variableGenerator;

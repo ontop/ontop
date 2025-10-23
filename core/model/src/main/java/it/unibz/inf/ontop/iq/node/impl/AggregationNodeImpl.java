@@ -81,7 +81,7 @@ public class AggregationNodeImpl extends ExtendedProjectionNodeImpl implements A
         Substitution<? extends VariableOrGroundTerm> blockedSubstitution =
                 substitutionFactory.union(blockedGroundTermSubstitution, blockedVariableSubstitution);
 
-        var newDp = iqTreeTools.removeFromDomain(dp, blockedSubstitution.getDomain());
+        var newDp = dp.withRestrictedSubstitution(blockedSubstitution.getDomain());
 
         try {
             PropagationResults result = propagateTau(newDp, child.getVariables(), child::getVariableNullability);

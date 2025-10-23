@@ -7,6 +7,7 @@ import it.unibz.inf.ontop.iq.DownPropagation;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.ExtendedProjectionNode;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
+import it.unibz.inf.ontop.iq.node.normalization.impl.ConditionSimplifierImpl;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
@@ -41,7 +42,7 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
     @Override
     public IQTree propagateDownConstraint(DownPropagation dp, IQTree child) {
         try {
-            var newConstraint = iqTreeTools.applySubstitutionToConstraint(dp, getSubstitution(), child::getVariableNullability);
+            var newConstraint = applySubstitutionToConstraint(dp, getSubstitution(), child::getVariableNullability);
             var newDp = iqTreeTools.createDownPropagation(newConstraint, child.getVariables(), dp.getVariableGenerator());
             IQTree newChild = newDp.propagate(child);
             return iqFactory.createUnaryIQTree(this, newChild);
@@ -107,7 +108,7 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
 
         var resultingSubstitution = thetaBar.removeFromDomain(tauF.getDomain());
 
-        Optional<ImmutableExpression> newConstraint = iqTreeTools.applySubstitutionToConstraint(tau, resultingSubstitution, variableNullabilitySupplier);
+        Optional<ImmutableExpression> newConstraint = applySubstitutionToConstraint(tau, resultingSubstitution, variableNullabilitySupplier);
         var newDp = iqTreeTools.createDownPropagation(delta, newConstraint, childVariables, tau.getVariableGenerator());
 
         Optional<ImmutableExpression> newF = termFactory.getConjunction(Stream.concat(
@@ -127,6 +128,14 @@ public abstract class ExtendedProjectionNodeImpl extends CompositeQueryNodeImpl 
     private Stream<ImmutableExpression> matchingEqualities(Substitution<?> sub1, Substitution<?> sub2) {
         return Sets.intersection(sub1.getDomain(), sub2.getDomain()).stream()
                 .map(v -> termFactory.getStrictEquality(sub1.apply(v), sub2.apply(v)));
+    }
+
+    private Optional<ImmutableExpression> applySubstitutionToConstraint(DownPropagation dp, Substitution<? extends ImmutableTerm> substitution, Supplier<VariableNullability> variableNullabilitySupplier) throws DownPropagation.InconsistentDownPropagationException {
+        Optional<ImmutableExpression> optionalSubstitutedConstraint = dp.getConstraint().map(substitution::apply);
+
+        return optionalSubstitutedConstraint.isPresent()
+                ? ConditionSimplifierImpl.evaluateCondition(optionalSubstitutedConstraint.get(), dp.extendVariableNullability(variableNullabilitySupplier.get()))
+                : optionalSubstitutedConstraint;
     }
 
     @Override

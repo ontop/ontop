@@ -20,7 +20,7 @@ import org.apache.commons.rdf.api.IRI;
 
 import java.util.Optional;
 
-import static it.unibz.inf.ontop.iq.impl.IQTreeTools.UnaryIQTreeDecomposition;
+import static it.unibz.inf.ontop.iq.impl.UnaryIQTreeTools.UnaryIQTreeDecomposition;
 
 /**
  * Assumes that the top-level node is a ConstructionNode.

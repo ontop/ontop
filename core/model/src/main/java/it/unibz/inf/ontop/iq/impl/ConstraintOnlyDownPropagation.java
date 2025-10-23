@@ -5,18 +5,11 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import it.unibz.inf.ontop.iq.DownPropagation;
 import it.unibz.inf.ontop.iq.IQTree;
-import it.unibz.inf.ontop.iq.node.VariableNullability;
-import it.unibz.inf.ontop.iq.node.normalization.impl.ConditionSimplifierImpl;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.Substitution;
-import it.unibz.inf.ontop.substitution.SubstitutionFactory;
-import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.Optional;
-import java.util.function.BiFunction;
-import java.util.function.Predicate;
-import java.util.function.Supplier;
 
 public class ConstraintOnlyDownPropagation extends AbstractDownPropagation implements DownPropagation {
 
@@ -41,7 +34,7 @@ public class ConstraintOnlyDownPropagation extends AbstractDownPropagation imple
     @Override
     protected DownPropagation withReducedScope(ImmutableSet<Variable> variables) {
         return new ConstraintOnlyDownPropagation(
-                normalizeConstraint(optionalConstraint, () -> variables, termFactory),
+                normalizeConstraint(optionalConstraint, variables, emptySubstitution, termFactory),
                 variables, variableGenerator, termFactory);
     }
 

@@ -14,7 +14,7 @@ import it.unibz.inf.ontop.model.term.TermFactory;
 
 import java.util.stream.Stream;
 
-import static it.unibz.inf.ontop.iq.impl.IQTreeTools.UnaryIQTreeDecomposition;
+import static it.unibz.inf.ontop.iq.impl.UnaryIQTreeTools.UnaryIQTreeDecomposition;
 
 public class FilterLifterImpl implements FilterLifter {
 

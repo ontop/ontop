@@ -20,7 +20,7 @@ import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.stream.Stream;
 
-import static it.unibz.inf.ontop.iq.impl.IQTreeTools.UnaryIQTreeDecomposition;
+import static it.unibz.inf.ontop.iq.impl.UnaryIQTreeTools.UnaryIQTreeDecomposition;
 
 /**
  * Lifts unions above projections, until a fixed point is reached.

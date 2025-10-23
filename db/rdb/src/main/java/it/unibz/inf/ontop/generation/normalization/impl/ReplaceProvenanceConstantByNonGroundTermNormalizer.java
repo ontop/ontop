@@ -18,7 +18,7 @@ import it.unibz.inf.ontop.model.term.Variable;
 
 import java.util.Optional;
 
-import static it.unibz.inf.ontop.iq.impl.IQTreeTools.UnaryIQTreeDecomposition;
+import static it.unibz.inf.ontop.iq.impl.UnaryIQTreeTools.UnaryIQTreeDecomposition;
 
 /**
  * Prevents a bug observed with MySQL 5.7.15, where the provenance special constant was misused

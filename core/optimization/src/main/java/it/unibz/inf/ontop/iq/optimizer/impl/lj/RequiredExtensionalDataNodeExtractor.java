@@ -11,7 +11,7 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.util.stream.Stream;
 
-import static it.unibz.inf.ontop.iq.impl.IQTreeTools.UnaryIQTreeDecomposition;
+import static it.unibz.inf.ontop.iq.impl.UnaryIQTreeTools.UnaryIQTreeDecomposition;
 import static it.unibz.inf.ontop.iq.impl.BinaryNonCommutativeIQTreeTools.LeftJoinDecomposition;
 import static it.unibz.inf.ontop.iq.impl.NaryIQTreeTools.InnerJoinDecomposition;
 

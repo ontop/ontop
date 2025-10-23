@@ -15,8 +15,7 @@ import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import javax.inject.Inject;
 
-import static it.unibz.inf.ontop.iq.impl.IQTreeTools.UnaryIQTreeDecomposition;
-
+import static it.unibz.inf.ontop.iq.impl.UnaryIQTreeTools.UnaryIQTreeDecomposition;
 
 public class PreventDistinctOptimizerImpl extends AbstractIQOptimizer implements PreventDistinctOptimizer {
 

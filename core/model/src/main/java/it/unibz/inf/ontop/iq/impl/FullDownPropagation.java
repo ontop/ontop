@@ -32,13 +32,10 @@ public class FullDownPropagation extends AbstractDownPropagation implements Down
     @Override
     protected DownPropagation withReducedScope(ImmutableSet<Variable> variables) {
         var reducedSubstitution = reduceDescendingSubstitution(substitution, variables);
-        var optionalNormalizedConstraint = normalizeConstraint(optionalConstraint, () -> variables, termFactory);
-        if (!reducedSubstitution.isEmpty()) {
-            var optionalRenaming = transformIntoFreshRenaming(reducedSubstitution, variables);
-            return optionalRenaming.isPresent()
-                    ? new RenamingDownPropagation(optionalRenaming.get(), optionalNormalizedConstraint, variables, variableGenerator, termFactory)
-                    : new FullDownPropagation(reducedSubstitution, optionalNormalizedConstraint, variables, variableGenerator, termFactory);
-        }
+        var optionalNormalizedConstraint = normalizeConstraint(optionalConstraint, variables, substitution, termFactory);
+        if (!reducedSubstitution.isEmpty())
+            return createNonEmptySubstitutionDownPropagation(reducedSubstitution, optionalNormalizedConstraint, variables, variableGenerator, termFactory);
+
         return new ConstraintOnlyDownPropagation(optionalNormalizedConstraint, variables, variableGenerator, termFactory);
     }
 

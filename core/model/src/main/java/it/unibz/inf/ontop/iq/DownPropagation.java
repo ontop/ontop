@@ -42,6 +42,8 @@ public interface DownPropagation {
 
     DownPropagation withRestrictedConstraint(Predicate<ImmutableExpression> filter);
 
+    DownPropagation withRestrictedSubstitution(ImmutableSet<Variable> variablesToRemove);
+
     DownPropagation extendToVariables(ImmutableSet<Variable> childVariables);
 
     IQTree propagateWithRestrictedScope(IQTree tree);

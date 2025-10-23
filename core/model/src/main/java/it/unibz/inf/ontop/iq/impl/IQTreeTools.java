@@ -7,7 +7,6 @@ import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.node.normalization.ConditionSimplifier;
-import it.unibz.inf.ontop.iq.node.normalization.impl.ConditionSimplifierImpl;
 import it.unibz.inf.ontop.iq.request.FunctionalDependencies;
 import it.unibz.inf.ontop.iq.transform.QueryRenamer;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
@@ -125,7 +124,7 @@ public class IQTreeTools {
                         .append(createOptionalFilterNode(filter))
                         .build(list.get(0)));
             default:
-                return Optional.of(createInnerJoinTree(filter, (ImmutableList)list));
+                return Optional.of(createInnerJoinTree(filter, (ImmutableList<IQTree>)list));
         }
     }
 
@@ -147,59 +146,6 @@ public class IQTreeTools {
 
     public <T extends UnaryOperatorNode> UnaryIQTreeBuilder<T> unaryIQTreeBuilder(ImmutableSet<Variable> signature) {
         return new UnaryIQTreeBuilder<>(iqFactory, ImmutableList.of(), ImmutableMap.of(), Optional.of(signature));
-    }
-
-    public static class UnaryOperatorSequence<T extends UnaryOperatorNode> {
-        private final ImmutableList<T> list;
-        private UnaryOperatorSequence(ImmutableList<T> list) {
-            this.list = list;
-        }
-
-        public boolean isEmpty() {
-            return list.isEmpty();
-        }
-
-        public T getLast() {
-            return list.get(list.size() - 1);
-        }
-
-        public Stream<T> stream() {
-            return list.stream();
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (o instanceof UnaryOperatorSequence) {
-                UnaryOperatorSequence<?> other = (UnaryOperatorSequence<?>) o;
-                return list.equals(other.list);
-            }
-            return false;
-        }
-
-        public UnaryOperatorSequence<T> append(T node) {
-            return new UnaryOperatorSequence<>(
-                    Stream.concat(list.stream(), Stream.of(node))
-                            .collect(ImmutableList.toImmutableList()));
-        }
-
-        public UnaryOperatorSequence<T> append(Optional<? extends T> optionalNode) {
-            return optionalNode.map(this::append)
-                    .orElse(this);
-        }
-
-        public UnaryOperatorSequence<T> append(Stream<? extends T> stream) {
-            return new UnaryOperatorSequence<>(
-                    Stream.concat(list.stream(), stream)
-                            .collect(ImmutableList.toImmutableList()));
-        }
-
-        public static <T extends UnaryOperatorNode> UnaryOperatorSequence<T> of() {
-            return new UnaryOperatorSequence<>(ImmutableList.of());
-        }
-
-        public static <T extends UnaryOperatorNode> UnaryOperatorSequence<T> of(Stream<? extends T> stream) {
-            return new UnaryOperatorSequence<>(stream.collect(ImmutableList.toImmutableList()));
-        }
     }
 
     public ImmutableExpression getConjunction(ImmutableExpression expression1, ImmutableExpression expression2) {
@@ -252,76 +198,6 @@ public class IQTreeTools {
         }
     }
 
-    /**
-     * Decomposition of a UnaryIQTree into a possibly empty node, child, tree
-     * and non-empty tail: the tree is the node together with the child, while
-     * the tail is the remaining part of the UnaryIQTree.
-     * In other words, either the tail is the whole UnaryIQTree
-     * (and then isPresent returns false and getNode, getChild and getTree fail),
-     * or the tail is the child of the UnaryIQTree.
-     *
-     * @param <T>
-     */
-
-    public static class UnaryIQTreeDecomposition<T extends UnaryOperatorNode> extends IQTreeDecomposition<T, UnaryIQTree> {
-        private final IQTree tail;
-        private final IQTree child;
-
-        private UnaryIQTreeDecomposition(T node, UnaryIQTree tree) {
-            super(node, tree);
-            this.child = tree.getChild();
-            this.tail = child;
-        }
-
-        private UnaryIQTreeDecomposition(IQTree tree) {
-            super(null, null);
-            this.child = null;
-            this.tail = Objects.requireNonNull(tree);
-        }
-
-        @Nonnull
-        public IQTree getChild() {
-            return Objects.requireNonNull(child);
-        }
-
-        @Nonnull
-        public IQTree getTail() {
-            return tail;
-        }
-
-        public static <T extends UnaryOperatorNode> UnaryIQTreeDecomposition<T> of(IQTree tree, Class<T> nodeClass) {
-            return nodeClass.isInstance(tree.getRootNode())
-                    ? new UnaryIQTreeDecomposition<>(nodeClass.cast(tree.getRootNode()), ((UnaryIQTree)tree))
-                    : new UnaryIQTreeDecomposition<>(tree);
-        }
-
-        public static <T extends UnaryOperatorNode> UnaryIQTreeDecomposition<T> of(UnaryIQTreeDecomposition<?> parent, Class<T> nodeClass) {
-            IQTree tree = parent.getTail();
-            return nodeClass.isInstance(tree.getRootNode())
-                    ? new UnaryIQTreeDecomposition<>(nodeClass.cast(tree.getRootNode()), ((UnaryIQTree)tree))
-                    : new UnaryIQTreeDecomposition<>(tree);
-        }
-
-        public static <T extends UnaryOperatorNode> ImmutableList<UnaryIQTreeDecomposition<T>> of(ImmutableList<IQTree> list, Class<T> nodeClass) {
-            return list.stream()
-                    .map(c -> UnaryIQTreeDecomposition.of(c, nodeClass))
-                    .collect(ImmutableCollectors.toList());
-        }
-
-        public static <T extends UnaryOperatorNode> ImmutableList<IQTree> getTails(ImmutableList<UnaryIQTreeDecomposition<T>> list) {
-            return list.stream()
-                    .map(UnaryIQTreeDecomposition::getTail)
-                    .collect(ImmutableCollectors.toList());
-        }
-
-        public static <T extends UnaryOperatorNode> Stream<T> getNodeStream(ImmutableList<UnaryIQTreeDecomposition<T>> list) {
-            return list.stream()
-                    .map(UnaryIQTreeDecomposition::getOptionalNode)
-                    .flatMap(Optional::stream);
-        }
-
-    }
-
 
     public static <T extends QueryNode> boolean contains(IQTree tree, Class<T> nodeClass) {
         return nodeClass.isInstance(tree.getRootNode()) ||
@@ -334,59 +210,65 @@ public class IQTreeTools {
     }
 
     /**
-     * Excludes the variables that are not projected by the IQTree
+     * Creates a down propagation object, which consists of a descending substitution and a constraint.
      *
-     * If a "null" variable is propagated down, throws an UnsatisfiableDescendingSubstitutionException.
+     * The descending substitution is applied to a given IQTree:
+     * each free occurrence of a variable from the descending substitution's domain
+     * is replaced by the respective term in the IQTree.
+     * <p>
+     * The constraint is an expression (usually, a set of equalities)
+     * assumed to be applied (like a filter) after the descending substitution
+     * (the constraint thus can use the variables introduced by the descending substitution).
+     * <p>
+     * The constructed down propagation object contains a descending substitution and a constraint
+     * appropriately restricted:<ul>
+     *  <li>the domain of the descending substitution is restricted to the set of variables, and</li>
+     *  <li>all the components of the constraint that have no variable from the set of variables</li>
+     *  <emph>after</emph> the descending substitution is applied.</ul>
      *
+     * @param descendingSubstitution a given unrestricted descending substitution
+     * @param optionalConstraint an optional unrestricted constraint
+     * @param variables the set of variables projected by the IQTree, to which the down propagation will be applied
+     * @param variableGenerator a variable generator for the enclosing IQTree
+     * @return a down propagation object
+     *
+     * @throws DownPropagation.InconsistentDownPropagationException if a "null" variable is propagated down
      */
 
     public DownPropagation createDownPropagation(Substitution<? extends VariableOrGroundTerm> descendingSubstitution,
-                                                 Optional<ImmutableExpression> constraint,
-                                                 ImmutableSet<Variable> projectedVariables,
+                                                 Optional<ImmutableExpression> optionalConstraint,
+                                                 ImmutableSet<Variable> variables,
                                                  VariableGenerator variableGenerator) throws DownPropagation.InconsistentDownPropagationException {
-
-        var reducedSubstitution = AbstractDownPropagation.reduceDescendingSubstitution(descendingSubstitution, projectedVariables);
-
-        if (!reducedSubstitution.isEmpty()) {
-            if (reducedSubstitution.rangeAnyMatch(ImmutableTerm::isNull))
-                throw new DownPropagation.InconsistentDownPropagationException();
-
-            var optionalNormalizedConstraint = AbstractDownPropagation.normalizeConstraint(constraint, () -> getVariables(descendingSubstitution, projectedVariables), termFactory);
-            var optionalRenaming = AbstractDownPropagation.transformIntoFreshRenaming(reducedSubstitution, projectedVariables);
-            return optionalRenaming.isPresent()
-                    ? new RenamingDownPropagation(optionalRenaming.get(), optionalNormalizedConstraint, projectedVariables, variableGenerator, termFactory)
-                    : new FullDownPropagation(reducedSubstitution, optionalNormalizedConstraint, projectedVariables, variableGenerator, termFactory);
-        }
-
-        return createDownPropagation(constraint, getVariables(descendingSubstitution, projectedVariables), variableGenerator);
+        return AbstractDownPropagation.createDownPropagation(descendingSubstitution, optionalConstraint, variables, variableGenerator, termFactory);
     }
 
-    private static ImmutableSet<Variable> getVariables(Substitution<? extends VariableOrGroundTerm> descendingSubstitution, ImmutableSet<Variable> projectedVariables) {
-        return (ImmutableSet)descendingSubstitution.restrictRangeTo(Variable.class).apply(projectedVariables);
-    }
-
-    public DownPropagation createDownPropagation(Optional<ImmutableExpression> optionalConstraint, ImmutableSet<Variable> variables, VariableGenerator variableGenerator) {
-        var optionalNormalizedConstraint = AbstractDownPropagation.normalizeConstraint(optionalConstraint, () -> variables, termFactory);
-        return new ConstraintOnlyDownPropagation(optionalNormalizedConstraint, variables, variableGenerator, termFactory);
-    }
-
-    public DownPropagation removeFromDomain(DownPropagation dp, ImmutableSet<Variable> variables) {
-        if (dp.getDescendingSubstitution().isEmpty())
-            return dp;
-
-        var newDescendingSubstitution = dp.getDescendingSubstitution().removeFromDomain(variables);
-        var optionalRenaming = AbstractDownPropagation.transformIntoFreshRenaming(newDescendingSubstitution, dp.getVariables());
-        return optionalRenaming.isPresent()
-                ? new RenamingDownPropagation(optionalRenaming.get(), dp.getConstraint(), dp.getVariables(), dp.getVariableGenerator(), termFactory)
-                : new FullDownPropagation(newDescendingSubstitution, dp.getConstraint(), dp.getVariables(), dp.getVariableGenerator(), termFactory);
-    }
 
     /**
-     * Applies renaming to the projected variables in the tree.
+     * Creates a down propagation object, which consists of a constraint only
+     * (this is simply a faster version of {@link IQTreeTools#createDownPropagation(Substitution, Optional, ImmutableSet, VariableGenerator)}.
+     * <p>
+     * The constraint is an expression (usually, a set of equalities).
+     * <p>
+     * The constructed down propagation object contains a constraint appropriately restricted:<ul>
+     *  <li>all the components of the constraint that have no variable from the set of variables.</li></ul>
      *
-     * @param renaming
-     * @param tree
-     * @return
+     * @param optionalConstraint an optional unrestricted constraint
+     * @param variables the set of variables projected by the IQTree, to which the down propagation will be applied
+     * @param variableGenerator a variable generator for the enclosing IQTree
+     * @return a down propagation object
+     */
+
+    public DownPropagation createDownPropagation(Optional<ImmutableExpression> optionalConstraint, ImmutableSet<Variable> variables, VariableGenerator variableGenerator) {
+        return AbstractDownPropagation.createDownPropagation(optionalConstraint, variables, variableGenerator, termFactory);
+    }
+
+
+    /**
+     * Applies renaming to the projected variables in the IQTree.
+     *
+     * @param renaming an injective variable-to-variable substitution
+     * @param tree an IQTree
+     * @return resulting IQTree
      */
 
     public IQTree applyDownPropagation(InjectiveSubstitution<Variable> renaming, IQTree tree) {
@@ -449,13 +331,5 @@ public class IQTreeTools {
         return iqFactory.createUnaryIQTree(
                 iqFactory.createConstructionNode(projectedVariables),
                 filterTree);
-    }
-
-    public Optional<ImmutableExpression> applySubstitutionToConstraint(DownPropagation dp, Substitution<? extends ImmutableTerm> substitution, Supplier<VariableNullability> variableNullabilitySupplier) throws DownPropagation.InconsistentDownPropagationException {
-        Optional<ImmutableExpression> optionalSubstitutedConstraint = dp.getConstraint().map(substitution::apply);
-
-        return optionalSubstitutedConstraint.isPresent()
-                ? ConditionSimplifierImpl.evaluateCondition(optionalSubstitutedConstraint.get(), dp.extendVariableNullability(variableNullabilitySupplier.get()))
-                : optionalSubstitutedConstraint;
     }
 }

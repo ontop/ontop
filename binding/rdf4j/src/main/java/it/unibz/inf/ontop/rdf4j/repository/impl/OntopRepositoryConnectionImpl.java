@@ -39,8 +39,7 @@ import java.io.Reader;
 import java.net.URL;
 import java.util.*;
 
-import static it.unibz.inf.ontop.iq.impl.IQTreeTools.UnaryIQTreeDecomposition;
-
+import static it.unibz.inf.ontop.iq.impl.UnaryIQTreeTools.UnaryIQTreeDecomposition;
 
 public class OntopRepositoryConnectionImpl implements OntopRepositoryConnection {
 

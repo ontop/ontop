@@ -24,23 +24,20 @@ import java.util.Optional;
 import java.util.OptionalLong;
 import java.util.stream.IntStream;
 
-import static it.unibz.inf.ontop.iq.impl.IQTreeTools.UnaryIQTreeDecomposition;
+import static it.unibz.inf.ontop.iq.impl.UnaryIQTreeTools.UnaryIQTreeDecomposition;
 
 public class IQTree2SelectFromWhereConverterImpl implements IQTree2SelectFromWhereConverter {
 
     private final SQLAlgebraFactory sqlAlgebraFactory;
     private final SubstitutionFactory substitutionFactory;
-    private final IntermediateQueryFactory iqFactory;
     private final IQTreeTools iqTreeTools;
 
     @Inject
     private IQTree2SelectFromWhereConverterImpl(SQLAlgebraFactory sqlAlgebraFactory,
                                                 SubstitutionFactory substitutionFactory,
-                                                IntermediateQueryFactory iqFactory,
                                                 IQTreeTools iqTreeTools) {
         this.sqlAlgebraFactory = sqlAlgebraFactory;
         this.substitutionFactory = substitutionFactory;
-        this.iqFactory = iqFactory;
         this.iqTreeTools = iqTreeTools;
     }
 

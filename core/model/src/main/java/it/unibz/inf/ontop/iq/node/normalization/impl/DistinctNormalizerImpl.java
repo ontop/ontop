@@ -19,8 +19,7 @@ import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
-import static it.unibz.inf.ontop.iq.impl.IQTreeTools.UnaryIQTreeDecomposition;
-
+import static it.unibz.inf.ontop.iq.impl.UnaryIQTreeTools.UnaryIQTreeDecomposition;
 
 @Singleton
 public class DistinctNormalizerImpl implements DistinctNormalizer {
@@ -106,7 +105,7 @@ public class DistinctNormalizerImpl implements DistinctNormalizer {
 
             IQTree grandChildTree = state.getSubTree().getChild();
             // No need to have a DISTINCT as a grand child
-            IQTree newGrandChildTree = IQTreeTools.UnaryIQTreeDecomposition.of(grandChildTree, DistinctNode.class)
+            IQTree newGrandChildTree = UnaryIQTreeDecomposition.of(grandChildTree, DistinctNode.class)
                     .getTail();
 
             IQTreeCache childTreeCache = iqFactory.createIQTreeCache(newGrandChildTree == grandChildTree);

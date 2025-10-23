@@ -39,8 +39,7 @@ import org.slf4j.LoggerFactory;
 import java.util.Optional;
 import java.util.Set;
 
-import static it.unibz.inf.ontop.iq.impl.IQTreeTools.UnaryIQTreeDecomposition;
-
+import static it.unibz.inf.ontop.iq.impl.UnaryIQTreeTools.UnaryIQTreeDecomposition;
 
 /**
  * Transforms the SPARQL query into a native (e.g. SQL) query without post-processing.

@@ -28,7 +28,7 @@ import java.util.stream.Stream;
 
 import static it.unibz.inf.ontop.iq.impl.NaryIQTreeTools.replaceChild;
 import it.unibz.inf.ontop.iq.impl.BinaryNonCommutativeIQTreeTools.LeftJoinDecomposition;
-import it.unibz.inf.ontop.iq.impl.IQTreeTools.UnaryIQTreeDecomposition;
+import static it.unibz.inf.ontop.iq.impl.UnaryIQTreeTools.UnaryIQTreeDecomposition;
 
 
 public class InnerJoinNormalizerImpl implements InnerJoinNormalizer {

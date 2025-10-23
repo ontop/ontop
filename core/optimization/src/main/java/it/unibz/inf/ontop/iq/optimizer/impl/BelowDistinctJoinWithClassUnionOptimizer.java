@@ -3,7 +3,6 @@ package it.unibz.inf.ontop.iq.optimizer.impl;
 import com.google.common.collect.*;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.iq.IQTree;
-import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.impl.NaryIQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.transform.IQTreeTransformer;
@@ -17,6 +16,8 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import javax.inject.Inject;
 import java.util.Optional;
 import java.util.stream.Stream;
+
+import static it.unibz.inf.ontop.iq.impl.UnaryIQTreeTools.UnaryIQTreeDecomposition;
 
 public class BelowDistinctJoinWithClassUnionOptimizer extends AbstractDelegatingIQTreeVariableGeneratorTransformer implements IQTreeVariableGeneratorTransformer {
 
@@ -72,7 +73,7 @@ public class BelowDistinctJoinWithClassUnionOptimizer extends AbstractDelegating
              * Filters just make much the variables are non-null can be eliminating,
              * because we are interested in cases where we join over these variables
              */
-            var filter = IQTreeTools.UnaryIQTreeDecomposition.of(child, FilterNode.class);
+            var filter = UnaryIQTreeDecomposition.of(child, FilterNode.class);
             if (filter.isPresent()) {
                 VariableNullability variableNullability = coreSingletons.getCoreUtilsFactory()
                         .createEmptyVariableNullability(child.getVariables());

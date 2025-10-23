@@ -33,10 +33,10 @@ public class RenamingDownPropagation extends AbstractDownPropagation implements 
     @Override
     protected DownPropagation withReducedScope(ImmutableSet<Variable> variables) {
         var reducedSubstitution = reduceDescendingSubstitution(substitution, variables);
-        var optionalNormalizedConstraint = normalizeConstraint(optionalConstraint, () -> variables, termFactory);
-        if (!reducedSubstitution.isEmpty()) {
+        var optionalNormalizedConstraint = normalizeConstraint(optionalConstraint, variables, substitution, termFactory);
+        if (!reducedSubstitution.isEmpty())
             return new RenamingDownPropagation(reducedSubstitution.injective(), optionalNormalizedConstraint, variables, variableGenerator, termFactory);
-        }
+
         return new ConstraintOnlyDownPropagation(optionalNormalizedConstraint, variables, variableGenerator, termFactory);
     }
 
@@ -57,5 +57,4 @@ public class RenamingDownPropagation extends AbstractDownPropagation implements 
     public DownPropagation extendToVariables(ImmutableSet<Variable> additionalVariables) {
         return new RenamingDownPropagation(substitution, optionalConstraint, Sets.union(variables, additionalVariables).immutableCopy(), variableGenerator, termFactory);
     }
-
 }

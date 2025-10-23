@@ -18,7 +18,8 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.stream.Stream;
 
-import static it.unibz.inf.ontop.iq.impl.IQTreeTools.UnaryOperatorSequence;
+import static it.unibz.inf.ontop.iq.impl.UnaryIQTreeTools.UnaryOperatorSequence;
+import static it.unibz.inf.ontop.iq.impl.UnaryIQTreeTools.UnaryIQTreeDecomposition;
 
 public class BasicFlattenLifterImpl implements BasicFlattenLifter {
 
@@ -37,7 +38,7 @@ public class BasicFlattenLifterImpl implements BasicFlattenLifter {
     @Override
     public IQTree transform(IQTree tree) {
         // avoid lifting FLATTEN above the top-level CONSTRUCTION
-        var construction = IQTreeTools.UnaryIQTreeDecomposition.of(tree, ConstructionNode.class);
+        var construction = UnaryIQTreeDecomposition.of(tree, ConstructionNode.class);
         return iqTreeTools.unaryIQTreeBuilder()
                 .append(construction.getOptionalNode())
                 .build(transformer.transform(construction.getTail()));
@@ -55,7 +56,7 @@ public class BasicFlattenLifterImpl implements BasicFlattenLifter {
             IQTree updatedChild = transform(child);
 
             // just to avoid unnecessary splitting of the FILTER node
-            var flatten = IQTreeTools.UnaryIQTreeDecomposition.of(updatedChild, FlattenNode.class);
+            var flatten = UnaryIQTreeDecomposition.of(updatedChild, FlattenNode.class);
             if (!flatten.isPresent())
                 return iqFactory.createUnaryIQTree(rootNode, updatedChild);
 
@@ -176,7 +177,7 @@ public class BasicFlattenLifterImpl implements BasicFlattenLifter {
         UnaryIQTreeBuilder<FlattenNode> nonLiftable = iqTreeTools.unaryIQTreeBuilder();
         IQTree current = tree;
         while (true) {
-            var flatten = IQTreeTools.UnaryIQTreeDecomposition.of(current, FlattenNode.class);
+            var flatten = UnaryIQTreeDecomposition.of(current, FlattenNode.class);
             if (!flatten.isPresent())
                 return new LiftingState(lifted, nonLiftable.build(current));
 

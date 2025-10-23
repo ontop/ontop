@@ -21,8 +21,7 @@ import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.Optional;
 
-import static it.unibz.inf.ontop.iq.impl.IQTreeTools.UnaryIQTreeDecomposition;
-
+import static it.unibz.inf.ontop.iq.impl.UnaryIQTreeTools.UnaryIQTreeDecomposition;
 
 /*public*/ final class ProjectOrderByTermsTransformer extends DefaultRecursiveIQTreeVisitingTransformerWithVariableGenerator {
 

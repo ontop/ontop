@@ -20,9 +20,10 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.UnaryOperator;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
+
+import static it.unibz.inf.ontop.iq.impl.UnaryIQTreeTools.UnaryIQTreeDecomposition;
 
 public class NaryIQTreeTools {
 
@@ -88,7 +89,7 @@ public class NaryIQTreeTools {
                     : new UnionDecomposition();
         }
 
-        public static UnionDecomposition of(IQTreeTools.UnaryIQTreeDecomposition<?> parent) {
+        public static UnionDecomposition of(UnaryIQTreeDecomposition<?> parent) {
             IQTree tree = parent.getTail();
             return tree.getRootNode() instanceof UnionNode
                     ? new UnionDecomposition((UnionNode)tree.getRootNode(), ((NaryIQTree)tree))

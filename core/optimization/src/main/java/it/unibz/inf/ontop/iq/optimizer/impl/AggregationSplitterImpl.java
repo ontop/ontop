@@ -27,8 +27,8 @@ import java.util.*;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-import static it.unibz.inf.ontop.iq.impl.IQTreeTools.UnaryIQTreeDecomposition;
-import static it.unibz.inf.ontop.iq.impl.IQTreeTools.UnaryOperatorSequence;
+import static it.unibz.inf.ontop.iq.impl.UnaryIQTreeTools.UnaryIQTreeDecomposition;
+import static it.unibz.inf.ontop.iq.impl.UnaryIQTreeTools.UnaryOperatorSequence;
 
 
 public class AggregationSplitterImpl extends AbstractIQOptimizer implements AggregationSplitter {

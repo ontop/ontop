@@ -18,6 +18,8 @@ import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.Optional;
 
+import static it.unibz.inf.ontop.iq.impl.UnaryIQTreeTools.UnaryIQTreeDecomposition;
+
 @Singleton
 public class ConstructionNormalizerImpl implements ConstructionNormalizer {
     private final IntermediateQueryFactory iqFactory;
@@ -59,7 +61,7 @@ public class ConstructionNormalizerImpl implements ConstructionNormalizer {
                 return createEmptyNode();
             }
 
-            var shrunkChildConstruction = IQTreeTools.UnaryIQTreeDecomposition.of(shrunkChild, ConstructionNode.class);
+            var shrunkChildConstruction = UnaryIQTreeDecomposition.of(shrunkChild, ConstructionNode.class);
             if (shrunkChildConstruction.isPresent()) {
                 Substitution<ImmutableTerm> substitution = simplifySubstitution(
                         shrunkChildConstruction.getNode().getSubstitution().compose(constructionNode.getSubstitution()),

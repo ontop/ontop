@@ -16,6 +16,8 @@ import java.util.Optional;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
+import it.unibz.inf.ontop.iq.impl.UnaryIQTreeTools.UnaryOperatorSequence;
+
 public class UnaryIQTreeBuilder<T extends UnaryOperatorNode> {
     private final IntermediateQueryFactory iqFactory;
     private final ImmutableList<T> list;
@@ -72,7 +74,7 @@ public class UnaryIQTreeBuilder<T extends UnaryOperatorNode> {
                 signature);
     }
 
-    public UnaryIQTreeBuilder<T> append(IQTreeTools.UnaryOperatorSequence<? extends T> sequence) {
+    public UnaryIQTreeBuilder<T> append(UnaryOperatorSequence<? extends T> sequence) {
         return sequence.stream()
                 .reduce(this, UnaryIQTreeBuilder<T>::append,
                         ( c1, c2) -> { throw new MinorOntopInternalBugException("");});

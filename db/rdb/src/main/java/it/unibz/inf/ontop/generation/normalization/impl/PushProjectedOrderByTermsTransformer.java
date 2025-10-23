@@ -15,6 +15,8 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Optional;
 
+import static it.unibz.inf.ontop.iq.impl.UnaryIQTreeTools.UnaryIQTreeDecomposition;
+
 /*
 Used when an ORDER BY node accesses expressions that are defined in a CONSTRUCT above it. Some dialects (like GoogleSQL) do
 not support that, so instead we push the CONSTRUCT down into the ORDER BY so the ORDER BY can use the variables defined by
@@ -34,8 +36,8 @@ Generally, an `AlwaysProjectOrderByTerms` normalizer is expected to be run befor
 
     @Override
     public IQTree transformDistinct(UnaryIQTree tree, DistinctNode rootNode, IQTree child) {
-        var construction = IQTreeTools.UnaryIQTreeDecomposition.of(child, ConstructionNode.class);
-        var orderBy = IQTreeTools.UnaryIQTreeDecomposition.of(construction, OrderByNode.class);
+        var construction = UnaryIQTreeDecomposition.of(child, ConstructionNode.class);
+        var orderBy = UnaryIQTreeDecomposition.of(construction, OrderByNode.class);
 
         return transform(
                 Optional.of(rootNode),
@@ -50,7 +52,7 @@ Generally, an `AlwaysProjectOrderByTerms` normalizer is expected to be run befor
         if (onlyDistinct)
             return super.transformConstruction(tree, rootNode, child);
 
-        var orderBy = IQTreeTools.UnaryIQTreeDecomposition.of(child, OrderByNode.class);
+        var orderBy = UnaryIQTreeDecomposition.of(child, OrderByNode.class);
 
         return transform(
                 Optional.empty(),

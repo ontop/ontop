@@ -18,6 +18,8 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import java.util.Optional;
 import java.util.function.Function;
 
+import static it.unibz.inf.ontop.iq.impl.UnaryIQTreeTools.UnaryIQTreeDecomposition;
+
 /*public*/ abstract class AbstractTypingNullsTransformer extends DefaultRecursiveIQTreeVisitingTransformer {
 
     protected final IQTreeTools iqTreeTools;
@@ -46,7 +48,7 @@ import java.util.function.Function;
      * Replaces NULL bindings in top construction nodes if a type is defined
      */
     protected final IQTree updateSubTree(IQTree child, ImmutableMap<Variable, ImmutableFunctionalTerm> typedNullMap) {
-        var construction = IQTreeTools.UnaryIQTreeDecomposition.of(child, ConstructionNode.class);
+        var construction = UnaryIQTreeDecomposition.of(child, ConstructionNode.class);
         if (construction.isPresent()) {
             return iqFactory.createUnaryIQTree(
                     iqTreeTools.replaceSubstitution(construction.getNode(),

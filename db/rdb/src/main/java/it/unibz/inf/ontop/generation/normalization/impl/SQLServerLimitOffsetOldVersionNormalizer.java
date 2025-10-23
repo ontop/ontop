@@ -22,7 +22,7 @@ import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.stream.Stream;
 
-import static it.unibz.inf.ontop.iq.impl.IQTreeTools.UnaryIQTreeDecomposition;
+import static it.unibz.inf.ontop.iq.impl.UnaryIQTreeTools.UnaryIQTreeDecomposition;
 
 /**
  * SQL Server extra normalizer which can handle limit and offset for Microsoft SQL Server 2000 through 2008

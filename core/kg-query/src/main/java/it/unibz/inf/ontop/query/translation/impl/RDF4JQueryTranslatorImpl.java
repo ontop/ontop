@@ -42,8 +42,8 @@ import javax.annotation.Nullable;
 import java.util.*;
 import java.util.stream.Stream;
 
-
-import static it.unibz.inf.ontop.iq.impl.IQTreeTools.UnaryIQTreeDecomposition;
+import static it.unibz.inf.ontop.iq.impl.UnaryIQTreeTools.UnaryIQTreeDecomposition;
+import static it.unibz.inf.ontop.iq.impl.UnaryIQTreeTools.UnaryOperatorSequence;
 
 @Singleton
 public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
@@ -257,7 +257,7 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
     }
 
     private IQTree projectOutAllVars(IQTree tree) {
-        var modifierSequence = IQTreeTools.UnaryOperatorSequence.<QueryModifierNode>of();
+        var modifierSequence = UnaryOperatorSequence.<QueryModifierNode>of();
         Stream.iterate(UnaryIQTreeDecomposition.of(tree, QueryModifierNode.class),
                         IQTreeTools.IQTreeDecomposition::isPresent,
                         m -> UnaryIQTreeDecomposition.of(m, QueryModifierNode.class))

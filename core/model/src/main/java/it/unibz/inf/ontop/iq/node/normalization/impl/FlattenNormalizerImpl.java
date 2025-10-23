@@ -15,6 +15,7 @@ import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
+import static it.unibz.inf.ontop.iq.impl.UnaryIQTreeTools.UnaryIQTreeDecomposition;
 
 public class FlattenNormalizerImpl implements FlattenNormalizer {
 
@@ -42,7 +43,7 @@ public class FlattenNormalizerImpl implements FlattenNormalizer {
         IQTree normalize(FlattenNode flattenNode, IQTree child) {
             IQTree normalizedChild = normalizeSubTreeRecursively(child);
 
-            var construction = IQTreeTools.UnaryIQTreeDecomposition.of(normalizedChild, ConstructionNode.class);
+            var construction = UnaryIQTreeDecomposition.of(normalizedChild, ConstructionNode.class);
             if (construction.isPresent()) {
                 /*
                  * Let c be the root of the child tree before lift, of the form CONSTRUCT[V, S].

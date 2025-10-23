@@ -23,6 +23,8 @@ import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.OptionalLong;
 
+import static it.unibz.inf.ontop.iq.impl.UnaryIQTreeTools.UnaryIQTreeDecomposition;
+
 @Singleton
 public class SliceNormalizerImpl implements SliceNormalizer {
     private final IntermediateQueryFactory iqFactory;
@@ -80,12 +82,12 @@ public class SliceNormalizerImpl implements SliceNormalizer {
 
             var sliceNode = subTree.getOptionalNode().get();
 
-            var construction = IQTreeTools.UnaryIQTreeDecomposition.of(subTree.getChild(), ConstructionNode.class);
+            var construction = UnaryIQTreeDecomposition.of(subTree.getChild(), ConstructionNode.class);
             if (construction.isPresent()) {
                 return Optional.of(state.lift(construction.getNode(), subTree.replaceChild(construction.getChild())));
             }
 
-            var slice = IQTreeTools.UnaryIQTreeDecomposition.of(subTree.getChild(), SliceNode.class);
+            var slice = UnaryIQTreeDecomposition.of(subTree.getChild(), SliceNode.class);
             if (slice.isPresent())
                 return Optional.of(state.replace(UnarySubTree.of(mergeSliceNodes(sliceNode, slice.getNode()), slice.getChild())));
 
@@ -93,7 +95,7 @@ public class SliceNormalizerImpl implements SliceNormalizer {
                 return Optional.of(state.replace(UnarySubTree.finalSubTree(subTree.getChild())));
 
             if ((subTree.getChild() instanceof TrueNode)
-                    || IQTreeTools.UnaryIQTreeDecomposition.of(subTree.getChild(), AggregationNode.class)
+                    || UnaryIQTreeDecomposition.of(subTree.getChild(), AggregationNode.class)
                     .getOptionalNode()
                     .map(AggregationNode::getGroupingVariables)
                     .filter(ImmutableSet::isEmpty)
@@ -161,8 +163,8 @@ public class SliceNormalizerImpl implements SliceNormalizer {
             // TODO: consider a more general technique (distinct removal in sub-tree)
             if (innerJoin.isPresent() && limit <= 1) {
                 // Distinct-s can be eliminated
-                var newJoinChildren = IQTreeTools.UnaryIQTreeDecomposition.getTails
-                        (IQTreeTools.UnaryIQTreeDecomposition.of(innerJoin.getChildren(), DistinctNode.class));
+                var newJoinChildren = UnaryIQTreeDecomposition.getTails
+                        (UnaryIQTreeDecomposition.of(innerJoin.getChildren(), DistinctNode.class));
 
                 if (!innerJoin.getChildren().equals(newJoinChildren)) {
                     return Optional.of(state.replace(subTree.replaceChild(normalizeSubTreeRecursively(
@@ -170,7 +172,7 @@ public class SliceNormalizerImpl implements SliceNormalizer {
                 }
             }
 
-            var distinct = IQTreeTools.UnaryIQTreeDecomposition.of(subTree.getChild(), DistinctNode.class);
+            var distinct = UnaryIQTreeDecomposition.of(subTree.getChild(), DistinctNode.class);
             if (distinct.isPresent()) {
                 if (limit <= 1) // Distinct can be eliminated
                     return Optional.of(state.replace(subTree.replaceChild(distinct.getChild())));
@@ -306,7 +308,7 @@ public class SliceNormalizerImpl implements SliceNormalizer {
             if (tree instanceof ValuesNode)
                 return OptionalInt.of(((ValuesNode) tree).getValueMaps().size());
 
-            var construction = IQTreeTools.UnaryIQTreeDecomposition.of(tree, ConstructionNode.class);
+            var construction = UnaryIQTreeDecomposition.of(tree, ConstructionNode.class);
             if (construction.isPresent())
                 return getKnownCardinality(construction.getChild());
             // TODO: shall we consider other nodes, like union nodes?
