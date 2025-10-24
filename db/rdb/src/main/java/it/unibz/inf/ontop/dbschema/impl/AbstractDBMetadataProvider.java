@@ -183,13 +183,15 @@ public abstract class AbstractDBMetadataProvider implements DBMetadataProvider {
             }
             LOGGER.debug("[DB-METADATA] Column info extracted in {} ms/column", logOperation.getAverageDuration());
 
-            if (relations.size() == 1) {
-                Map.Entry<RelationID, RelationDefinition.AttributeListBuilder> r = relations.entrySet().iterator().next();
-                return new DatabaseTableDefinition(getAllIDs(r.getKey()), r.getValue());
+            switch (relations.size()) {
+                case 0:
+                    throw new RelationNotFoundInMetadataException(id, getRelationIDs());
+                case 1:
+                    Map.Entry<RelationID, RelationDefinition.AttributeListBuilder> r = relations.entrySet().iterator().next();
+                    return new DatabaseTableDefinition(getAllIDs(r.getKey()), r.getValue());
+                default:
+                    throw new MetadataExtractionException("Cannot resolve ambiguous relation id: " + id + ": " + relations.keySet());
             }
-            throw relations.isEmpty()
-                    ? new RelationNotFoundInMetadataException(id, getRelationIDs())
-                    : new MetadataExtractionException("Cannot resolve ambiguous relation id: " + id + ": " + relations.keySet());
         }
         catch (SQLException e) {
             throw new MetadataExtractionException(e);
@@ -571,7 +573,29 @@ public abstract class AbstractDBMetadataProvider implements DBMetadataProvider {
                 : extractBlackBoxViewWithoutConnectingToDB(query);
     }
 
-    protected RelationDefinition extractBlackBoxViewByConnectingToDB(String query) throws MetadataExtractionException {
+    protected final RelationDefinition extractBlackBoxViewByConnectingToDB(String query) throws MetadataExtractionException {
+        try {
+            RelationDefinition.AttributeListBuilder builder = retrieveAttributeListByConnectingToDB("(" + query + ")");
+            return new ParserViewDefinition(builder, query);
+        }
+        catch (SQLException e) {
+            throw new MetadataExtractionException("Cannot extract metadata for a black-box view. " + e.getMessage(), e);
+        }
+    }
+
+    protected final NamedRelationDefinition extractFileBasedTableByConnectingToDB(RelationID id) throws RelationNotFoundInMetadataException {
+        try {
+            LOGGER.debug("Connecting to DB to extract metadata for {}", id);
+            String query = id.getSQLRendering();
+            RelationDefinition.AttributeListBuilder builder = retrieveAttributeListByConnectingToDB(query);
+            return new DatabaseTableDefinition(ImmutableList.of(id), builder);
+        }
+        catch (SQLException e) {
+            throw new RelationNotFoundInMetadataException(id, ImmutableList.of());
+        }
+    }
+
+    protected final RelationDefinition.AttributeListBuilder retrieveAttributeListByConnectingToDB(String query) throws SQLException {
         try (Statement st = connection.createStatement();
              ResultSet resultSet = st.executeQuery(makeQueryMinimizeResultSet(query))) {
 
@@ -594,10 +618,7 @@ public abstract class AbstractDBMetadataProvider implements DBMetadataProvider {
 
                 builder.addAttribute(attributeId, termType, sqlTypeName, true);
             }
-            return new ParserViewDefinition(builder, query);
-
-        } catch (SQLException e) {
-            throw new MetadataExtractionException("Cannot extract metadata for a black-box view. " + e.getMessage(), e);
+            return builder;
         }
     }
 
@@ -605,10 +626,10 @@ public abstract class AbstractDBMetadataProvider implements DBMetadataProvider {
      * Can be overridden
      */
     protected String makeQueryMinimizeResultSet(String query) {
-        return String.format("SELECT * FROM (%s) subQ LIMIT 1", query);
+        return String.format("SELECT * FROM %s subQ LIMIT 1", query);
     }
 
-    protected RelationDefinition extractBlackBoxViewWithoutConnectingToDB(String query) throws InvalidQueryException {
+    protected final RelationDefinition extractBlackBoxViewWithoutConnectingToDB(String query) throws InvalidQueryException {
         ImmutableList<QuotedID> attributes;
         try {
             DefaultSelectQueryAttributeExtractor sqae = new DefaultSelectQueryAttributeExtractor(this, coreSingletons);
@@ -692,5 +713,4 @@ public abstract class AbstractDBMetadataProvider implements DBMetadataProvider {
             return (endTime - startTime)/ count;
         }
     }
-
 }
