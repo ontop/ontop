@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.dbschema.impl;
 import com.google.common.collect.ImmutableList;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
+import it.unibz.inf.ontop.dbschema.MetadataLookup;
 import it.unibz.inf.ontop.dbschema.NamedRelationDefinition;
 import it.unibz.inf.ontop.dbschema.QuotedID;
 import it.unibz.inf.ontop.dbschema.RelationID;
@@ -137,12 +138,15 @@ public class SparkSQLDBMetadataProvider extends AbstractDBMetadataProvider {
             return super.getRelation(id);
         }
         catch (RelationNotFoundInMetadataException e) {
-            try {
-                return extractFileBasedTableByConnectingToDB(id);
-            }
-            catch (RelationNotFoundInMetadataException e2) {
-                throw e;
-            }
+            return extractFileBasedTableByConnectingToDB(id);
         }
+    }
+
+    @Override
+    public void insertIntegrityConstraints(NamedRelationDefinition relation, MetadataLookup metadataLookup) throws MetadataExtractionException {
+        if (relation instanceof FileBasedNamedRelationDefinition)
+            return;
+
+        super.insertIntegrityConstraints(relation, metadataLookup);
     }
 }

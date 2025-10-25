@@ -583,15 +583,15 @@ public abstract class AbstractDBMetadataProvider implements DBMetadataProvider {
         }
     }
 
-    protected final NamedRelationDefinition extractFileBasedTableByConnectingToDB(RelationID id) throws RelationNotFoundInMetadataException {
+    protected final NamedRelationDefinition extractFileBasedTableByConnectingToDB(RelationID id) throws MetadataExtractionException {
         try {
             LOGGER.debug("Connecting to DB to extract metadata for {}", id);
             String query = id.getSQLRendering();
             RelationDefinition.AttributeListBuilder builder = retrieveAttributeListByConnectingToDB(query);
-            return new DatabaseTableDefinition(ImmutableList.of(id), builder);
+            return new FileBasedNamedRelationDefinition(ImmutableList.of(id), builder);
         }
         catch (SQLException e) {
-            throw new RelationNotFoundInMetadataException(id, ImmutableList.of());
+            throw new FileBasedRelationNotFoundInMetadataException(id, getRelationIDs());
         }
     }
 

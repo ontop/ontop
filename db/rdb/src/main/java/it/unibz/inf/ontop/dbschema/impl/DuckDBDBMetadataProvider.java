@@ -105,12 +105,7 @@ public class DuckDBDBMetadataProvider extends DefaultSchemaCatalogDBMetadataProv
             return super.getRelation(id);
         }
         catch (RelationNotFoundInMetadataException e) {
-            try {
-                return extractFileBasedTableByConnectingToDB(id);
-            }
-            catch (RelationNotFoundInMetadataException e2) {
-                throw e;
-            }
+            return extractFileBasedTableByConnectingToDB(id);
         }
     }
 }
