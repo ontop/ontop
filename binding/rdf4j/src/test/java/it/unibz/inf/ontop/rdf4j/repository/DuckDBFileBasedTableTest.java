@@ -38,6 +38,16 @@ public class DuckDBFileBasedTableTest {
         Assert.assertEquals(4, count);
     }
 
+    @Test
+    public void testDescription() {
+        String sparqlQuery = "PREFIX ex: <http://example.org/>" +
+                "SELECT ?description WHERE { " +
+                "   ?s a ex:Book ;" +
+                "       ex:description ?description }" ;
+        int count = runQueryAndCount(sparqlQuery, CONNECTION);
+        Assert.assertEquals(4, count);
+    }
+
     private static OntopRepositoryConnection initOBDA(String obdaRelativePath, String propertyFile) {
         OntopSQLOWLAPIConfiguration.Builder<?> builder = OntopSQLOWLAPIConfiguration.defaultBuilder()
                 .nativeOntopMappingFile(DuckDBCatalogTest.class.getResource(obdaRelativePath).getPath())
