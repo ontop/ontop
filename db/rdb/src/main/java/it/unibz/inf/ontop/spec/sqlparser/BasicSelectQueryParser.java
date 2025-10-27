@@ -13,6 +13,7 @@ import it.unibz.inf.ontop.spec.sqlparser.exception.InvalidSelectQueryRuntimeExce
 import it.unibz.inf.ontop.spec.sqlparser.exception.UnsupportedSelectQueryRuntimeException;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import net.sf.jsqlparser.expression.Alias;
+import net.sf.jsqlparser.expression.StringValue;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.select.*;
 
@@ -277,18 +278,8 @@ public abstract class BasicSelectQueryParser<T, O extends RAOperations<T>> {
             validateFromItem(table);
 
             RelationID id = JSqlParserTools.getRelationId(idfac, table);
-            try {
-                NamedRelationDefinition relation = metadata.getRelation(id);
-                T rae = create(relation);
-                result = (table.getAlias() == null)
-                        ? rae
-                        : alias(rae, table.getAlias());
-            }
-            catch (MetadataExtractionException e) {
-                throw new InvalidSelectQueryRuntimeException(e.getMessage(), id);
-            }
+            processRelation(id, table.getAlias());
         }
-
 
         @Override
         public void visit(SubSelect subSelect) {
@@ -331,7 +322,35 @@ public abstract class BasicSelectQueryParser<T, O extends RAOperations<T>> {
 
         @Override
         public void visit(TableFunction tableFunction) {
+            if (tableFunction.getPivot() != null || tableFunction.getUnPivot() != null)
+                throw new UnsupportedSelectQueryRuntimeException("PIVOT/UNPIVOT are not supported", tableFunction);
+
+            var function = tableFunction.getFunction();
+            if (function.getName().equals("read_csv_auto")) {
+                var parameters = function.getParameters();
+                if (parameters.getExpressions().size() == 1 && parameters.getExpressions().get(0) instanceof StringValue) {
+                    String idString = ((StringValue) parameters.getExpressions().get(0)).getValue();
+                    RelationID id = idfac.createRelationID(idString);
+                    processRelation(id, tableFunction.getAlias());
+                    return;
+                }
+            }
+
             throw new UnsupportedSelectQueryRuntimeException("TableFunction are not supported", tableFunction);
+        }
+
+        private void processRelation(RelationID id, Alias alias) {
+            try {
+                NamedRelationDefinition relation = metadata.getRelation(id);
+                T rae = create(relation);
+                result = (alias == null)
+                        ? rae
+                        : alias(rae, alias);
+                return;
+            }
+            catch (MetadataExtractionException e) {
+                throw new InvalidSelectQueryRuntimeException(e.getMessage(), id);
+            }
         }
 
         @Override
