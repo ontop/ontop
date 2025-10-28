@@ -12,8 +12,7 @@ import it.unibz.inf.ontop.spec.sqlparser.exception.IllegalJoinException;
 import it.unibz.inf.ontop.spec.sqlparser.exception.InvalidSelectQueryRuntimeException;
 import it.unibz.inf.ontop.spec.sqlparser.exception.UnsupportedSelectQueryRuntimeException;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
-import net.sf.jsqlparser.expression.Alias;
-import net.sf.jsqlparser.expression.StringValue;
+import net.sf.jsqlparser.expression.*;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.select.*;
 
@@ -278,7 +277,17 @@ public abstract class BasicSelectQueryParser<T, O extends RAOperations<T>> {
             validateFromItem(table);
 
             RelationID id = JSqlParserTools.getRelationId(idfac, table);
-            processRelation(id, table.getAlias());
+            Alias alias = table.getAlias();
+            try {
+                NamedRelationDefinition relation = metadata.getRelation(id);
+                T rae = create(relation);
+                result = (alias == null)
+                        ? rae
+                        : alias(rae, alias);
+            }
+            catch (MetadataExtractionException e) {
+                throw new InvalidSelectQueryRuntimeException(e.getMessage(), id);
+            }
         }
 
         @Override
@@ -326,31 +335,24 @@ public abstract class BasicSelectQueryParser<T, O extends RAOperations<T>> {
                 throw new UnsupportedSelectQueryRuntimeException("PIVOT/UNPIVOT are not supported", tableFunction);
 
             var function = tableFunction.getFunction();
-            if (function.getName().equals("read_csv_auto")) {
-                var parameters = function.getParameters();
-                if (parameters.getExpressions().size() == 1 && parameters.getExpressions().get(0) instanceof StringValue) {
-                    String idString = ((StringValue) parameters.getExpressions().get(0)).getValue();
-                    RelationID id = idfac.createRelationID(idString);
-                    processRelation(id, tableFunction.getAlias());
-                    return;
-                }
+            if (function.getParameters().getExpressions().stream().allMatch(this::isGroundTerm)) {
+                // TODO: handle black-box view creation
             }
 
             throw new UnsupportedSelectQueryRuntimeException("TableFunction are not supported", tableFunction);
         }
 
-        private void processRelation(RelationID id, Alias alias) {
-            try {
-                NamedRelationDefinition relation = metadata.getRelation(id);
-                T rae = create(relation);
-                result = (alias == null)
-                        ? rae
-                        : alias(rae, alias);
-                return;
+        private boolean isGroundTerm(Expression expression) {
+            if (expression instanceof StringValue
+                    || expression instanceof LongValue
+                    || expression instanceof DoubleValue)
+                return true;
+
+            if (expression instanceof net.sf.jsqlparser.expression.Function) {
+                var function = (net.sf.jsqlparser.expression.Function) expression;
+                return function.getParameters().getExpressions().stream().allMatch(this::isGroundTerm);
             }
-            catch (MetadataExtractionException e) {
-                throw new InvalidSelectQueryRuntimeException(e.getMessage(), id);
-            }
+            return false;
         }
 
         @Override

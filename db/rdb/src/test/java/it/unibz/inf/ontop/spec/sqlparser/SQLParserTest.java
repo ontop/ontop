@@ -10,6 +10,7 @@ import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.DBTypeFactory;
 import it.unibz.inf.ontop.spec.sqlparser.exception.UnsupportedSelectQueryException;
+import it.unibz.inf.ontop.spec.sqlparser.exception.UnsupportedSelectQueryRuntimeException;
 import net.sf.jsqlparser.JSQLParserException;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -1071,4 +1072,15 @@ public class SQLParserTest {
 		assertEquals(0, re.getFilterAtoms().size());
 		assertEquals(1, re.getAttributes().asMap().size());
 	}
+
+    @Test(expected = UnsupportedSelectQueryException.class)
+    public void test_table_function() throws Exception {
+        RAExpression re = parse("SELECT EMPNO, LASTNAME, FIRSTNAME FROM TABLE(DEPTEMPLOYEES('A00')) AS D");
+    }
+
+    @Test(expected = UnsupportedSelectQueryException.class)
+    public void test_table_function2() throws Exception {
+        RAExpression re = parse("select * from read_csv_auto(['/home/20251014-download-ontop-github.csv', '/home/20251015-download-ontop-github.csv'])");
+    }
+
 }
