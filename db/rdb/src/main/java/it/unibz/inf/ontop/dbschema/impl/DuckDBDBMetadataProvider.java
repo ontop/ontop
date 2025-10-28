@@ -2,7 +2,11 @@ package it.unibz.inf.ontop.dbschema.impl;
 
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
+import it.unibz.inf.ontop.dbschema.NamedRelationDefinition;
+import it.unibz.inf.ontop.dbschema.RelationDefinition;
+import it.unibz.inf.ontop.dbschema.RelationID;
 import it.unibz.inf.ontop.exception.MetadataExtractionException;
+import it.unibz.inf.ontop.exception.RelationNotFoundInMetadataException;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 
 import java.sql.*;
@@ -93,5 +97,15 @@ public class DuckDBDBMetadataProvider extends DefaultSchemaCatalogDBMetadataProv
     protected ResultSet getRelationIDsResultSet() throws SQLException {
         // In duckdb, the type "TABLE" is called "BASE TABLE" instead, so we have to change this method.
         return metadata.getTables(null, null, null, new String[] { "BASE TABLE", "VIEW" });
+    }
+
+    @Override
+    public NamedRelationDefinition getRelation(RelationID id) throws MetadataExtractionException {
+        try {
+            return super.getRelation(id);
+        }
+        catch (RelationNotFoundInMetadataException e) {
+            return extractFileBasedTableByConnectingToDB(id);
+        }
     }
 }

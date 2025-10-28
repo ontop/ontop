@@ -6,23 +6,24 @@ import it.unibz.inf.ontop.dbschema.RelationID;
 
 import java.util.stream.Collectors;
 
-public class DatabaseTableDefinition extends AbstractNamedRelationDefinition {
+public class FileBasedNamedRelationDefinition extends AbstractNamedRelationDefinition {
 
     /**
      *
      * @param allIds
      * @param builder
      */
-    public DatabaseTableDefinition(ImmutableList<RelationID> allIds, AttributeListBuilder builder) {
+    public FileBasedNamedRelationDefinition(ImmutableList<RelationID> allIds, AttributeListBuilder builder) {
         super(allIds, builder);
     }
 
     @Override
     public String toString() {
-        return "CREATE TABLE " + getID() + " (\n   " +
+        return "file " + getID() + " (\n   " +
                 getAttributes().stream()
                         .map(Attribute::toString)
                         .collect(Collectors.joining(",\n   ")) +
                 "\n)";
     }
 }
+
