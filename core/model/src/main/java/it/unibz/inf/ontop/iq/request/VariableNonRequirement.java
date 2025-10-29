@@ -7,28 +7,41 @@ import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.substitution.InjectiveSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 
-import java.util.function.BiFunction;
-import java.util.function.BiPredicate;
-
 public interface VariableNonRequirement {
 
     ImmutableSet<Variable> getNotRequiredVariables();
 
     /**
-     * Variables that must be removed for being able to remove the variable passed as parameter
+     * If {@code variable} is to be removed, then *all* the variables in the condition also need to be removed.
+     * The condition does not contain the {@code variable}.
+     *
+     * @param variable the variable
+     * @return the set of variables that need to be removed for the {@code variable} to be removed 
      */
     ImmutableSet<Variable> getCondition(Variable variable);
 
-    VariableNonRequirement filter(BiPredicate<Variable, ImmutableSet<Variable>> predicate);
+    VariableNonRequirement withRequiredVariables(ImmutableSet<Variable> requiredVariables);
+
+    VariableNonRequirement withExtendedCondition(ImmutableSet<Variable> variables, ImmutableSet<Variable> extendedCondition);
 
     VariableNonRequirement rename(InjectiveSubstitution<Variable> renamingSubstitution, SubstitutionFactory substitutionFactory);
+
+    /**
+     * Computes the maximal subset NR of non-required variables
+     * that meets (that is, contains) the condition for each element of NR.
+     *
+     * The non-required variables is a subset of {@code projectedVariables}
+     * that does not include any of {@code requiredVariables}.
+     *
+     * @param projectedVariables variables projected by an {@code IQTree}
+     * @param requiredVariables variables required by an {@code IQTree}
+     * @return NR
+     */
 
     ImmutableSet<Variable> computeVariablesToRemove(ImmutableSet<Variable> projectedVariables,
                                                     ImmutableSet<Variable> requiredVariables);
 
     boolean isEmpty();
-
-    VariableNonRequirement transformConditions(BiFunction<Variable, ImmutableSet<Variable>, ImmutableSet<Variable>> fct);
 
     static VariableNonRequirement of(ImmutableSet<Variable> variables) {
         return new VariableNonRequirementImpl(variables);

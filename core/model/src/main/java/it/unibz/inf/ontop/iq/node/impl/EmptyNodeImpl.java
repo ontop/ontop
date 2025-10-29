@@ -5,18 +5,16 @@ import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
+import it.unibz.inf.ontop.iq.DownPropagation;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.request.FunctionalDependencies;
 import it.unibz.inf.ontop.iq.request.VariableNonRequirement;
-import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
-import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.substitution.InjectiveSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.CoreUtilsFactory;
-import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.Objects;
 
@@ -25,24 +23,15 @@ public class EmptyNodeImpl extends LeafIQTreeImpl implements EmptyNode {
 
     private static final String PREFIX = "EMPTY ";
     private final ImmutableSet<Variable> projectedVariables;
-    private final CoreUtilsFactory coreUtilsFactory;
-    private final SubstitutionFactory substitutionFactory;
 
     @AssistedInject
     private EmptyNodeImpl(@Assisted ImmutableSet<Variable> projectedVariables,
                           IQTreeTools iqTreeTools,
                           IntermediateQueryFactory iqFactory, CoreUtilsFactory coreUtilsFactory, SubstitutionFactory substitutionFactory) {
-        super(iqTreeTools, iqFactory);
+        super(iqTreeTools, iqFactory, substitutionFactory, coreUtilsFactory);
         this.projectedVariables = projectedVariables;
-        this.coreUtilsFactory = coreUtilsFactory;
-        this.substitutionFactory = substitutionFactory;
     }
 
-
-    @Override
-    public ImmutableSet<Variable> getLocalVariables() {
-        return projectedVariables;
-    }
 
     @Override
     public String toString() {
@@ -50,28 +39,18 @@ public class EmptyNodeImpl extends LeafIQTreeImpl implements EmptyNode {
     }
 
     @Override
-    public ImmutableSet<Variable> getVariables() {
-        return projectedVariables;
-    }
-
-    @Override
-    public IQTree applyFreshRenaming(InjectiveSubstitution<Variable> freshRenamingSubstitution) {
-        ImmutableSet<Variable> newVariables = substitutionFactory.apply(freshRenamingSubstitution, projectedVariables);
-
-        return newVariables.equals(projectedVariables)
-                ? this
-                : iqFactory.createEmptyNode(newVariables);
-    }
-
-    @Override
-    public IQTree applyDescendingSubstitutionWithoutOptimizing(
-            Substitution<? extends VariableOrGroundTerm> descendingSubstitution, VariableGenerator variableGenerator) {
+    public EmptyNode applyFreshRenaming(InjectiveSubstitution<Variable> renamingSubstitution) {
         return iqFactory.createEmptyNode(
-                iqTreeTools.computeNewProjectedVariables(descendingSubstitution, projectedVariables));
+                DownPropagation.getProjectedVariablesAfterDescendingSubstitution(renamingSubstitution, projectedVariables));
     }
 
     @Override
-    public ImmutableSet<Variable> getKnownVariables() {
+    public IQTree applyDescendingSubstitution(DownPropagation dp) {
+        return iqFactory.createEmptyNode(dp.getResultingProjectedVariables());
+    }
+
+    @Override
+    public ImmutableSet<Variable> getVariables() {
         return projectedVariables;
     }
 
@@ -106,17 +85,7 @@ public class EmptyNodeImpl extends LeafIQTreeImpl implements EmptyNode {
 
     @Override
     public VariableNonRequirement getVariableNonRequirement() {
-        return VariableNonRequirement.of(getVariables());
-    }
-
-    @Override
-    public ImmutableSet<Variable> getLocallyRequiredVariables() {
-        return ImmutableSet.of();
-    }
-
-    @Override
-    public ImmutableSet<Variable> getLocallyDefinedVariables() {
-        return ImmutableSet.of();
+        return VariableNonRequirement.of(projectedVariables);
     }
 
     @Override

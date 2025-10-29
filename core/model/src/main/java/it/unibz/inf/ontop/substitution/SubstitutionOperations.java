@@ -30,8 +30,6 @@ public interface SubstitutionOperations<T extends ImmutableTerm> extends Substit
 
     UnifierBuilder<T> unifierBuilder();
 
-    UnifierBuilder<T> unifierBuilder(Substitution<T> substitution);
-
     Collector<Substitution<T>, ?, Optional<Substitution<T>>> toUnifier();
 
     default Optional<Substitution<T>> unify(T t1, T t2) { return unifierBuilder().unify(t1, t2).build(); }

@@ -17,11 +17,11 @@ import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
+import it.unibz.inf.ontop.iq.DownPropagation;
+import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
-import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.iq.request.FunctionalDependencies;
 import it.unibz.inf.ontop.iq.type.SingleTermTypeExtractor;
-import it.unibz.inf.ontop.iq.visit.impl.RelationExtractor;
 import it.unibz.inf.ontop.model.atom.impl.AtomPredicateImpl;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
@@ -165,7 +165,7 @@ public abstract class JsonLens extends JsonOpenObject {
         TermFactory termFactory = coreSingletons.getTermFactory();
         IntermediateQueryFactory iqFactory = coreSingletons.getIQFactory();
         SubstitutionFactory substitutionFactory = coreSingletons.getSubstitutionFactory();
-
+        IQTreeTools iqTreeTools = coreSingletons.getIQTreeTools();
 
         InjectiveSubstitution<Variable> renaming = iriSafeVariables.stream()
                 .collect(substitutionFactory.toFreshRenamingSubstitution(variableGenerator));
@@ -177,11 +177,9 @@ public abstract class JsonLens extends JsonOpenObject {
                 .collect(substitutionFactory.toSubstitution(
                         v -> termFactory.getImmutableFunctionalTerm(iriSafenessDeclarationFunctionSymbol, renaming.get(v))));
 
-        ConstructionNode newConstructionNode = iqFactory.createConstructionNode(initialProjectedVariables, substitution);
-
         return iqFactory.createUnaryIQTree(
-                newConstructionNode,
-                iqTreeBeforeIRISafeConstraints.applyFreshRenaming(renaming))
+                        iqFactory.createConstructionNode(initialProjectedVariables, substitution),
+                        iqTreeTools.applyDownPropagation(renaming, iqTreeBeforeIRISafeConstraints))
                 .normalizeForOptimization(variableGenerator);
     }
 
@@ -468,15 +466,5 @@ public abstract class JsonLens extends JsonOpenObject {
         public IRISafeConstraints(@JsonProperty("added") List<String> added) {
             this.added = added;
         }
-    }
-
-    protected static int extractMaxParentLevel(IQ iq) {
-        return iq.getTree().acceptVisitor(new RelationExtractor())
-                .map(ExtensionalDataNode::getRelationDefinition)
-                .filter(r -> r instanceof Lens)
-                .map(r -> (Lens)r)
-                .mapToInt(Lens::getLevel)
-                .max()
-                .orElse(0);
     }
 }

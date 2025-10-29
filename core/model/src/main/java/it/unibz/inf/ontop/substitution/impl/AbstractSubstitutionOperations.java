@@ -86,12 +86,7 @@ public abstract class AbstractSubstitutionOperations<T extends ImmutableTerm> ex
     }
 
     @Override
-    public AbstractUnifierBuilder<T> unifierBuilder() {
-        return unifierBuilder(emptySubstitution());
-    }
-
-    @Override // ensures that there is no cast in toUnifier()
-    public abstract AbstractUnifierBuilder<T> unifierBuilder(Substitution<T> substitution);
+    public abstract AbstractUnifierBuilder<T> unifierBuilder();
 
     @Override
     public Collector<Substitution<T>, ?, Optional<Substitution<T>>> toUnifier() {
@@ -151,7 +146,8 @@ public abstract class AbstractSubstitutionOperations<T extends ImmutableTerm> ex
                     .build();
 
             optional = optionalUpdatedSubstitution
-                    .flatMap(u -> unifierBuilder(unifier.getSubstitution())
+                    .flatMap(u -> unifierBuilder()
+                            .unify(unifier.getSubstitution())
                             .unify(u.stream(), keyMapper, Map.Entry::getValue)
                             .build()
                             .map(s -> new ArgumentMapUnifierImpl<>(

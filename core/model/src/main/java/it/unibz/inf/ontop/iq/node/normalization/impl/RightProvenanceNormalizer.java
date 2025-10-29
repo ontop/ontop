@@ -7,14 +7,17 @@ import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
+import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
-import it.unibz.inf.ontop.model.term.ImmutableExpression;
+import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.Optional;
+import java.util.Set;
+import java.util.function.Function;
 
 /**
  *
@@ -40,73 +43,42 @@ public class RightProvenanceNormalizer {
     private final IntermediateQueryFactory iqFactory;
     private final SubstitutionFactory substitutionFactory;
     private final TermFactory termFactory;
+    private final IQTreeTools iqTreeTools;
 
     @Inject
     protected RightProvenanceNormalizer(CoreSingletons coreSingletons) {
         this.iqFactory = coreSingletons.getIQFactory();
         this.substitutionFactory = coreSingletons.getSubstitutionFactory();
         this.termFactory = coreSingletons.getTermFactory();
+        this.iqTreeTools = coreSingletons.getIQTreeTools();
     }
 
     public RightProvenance normalizeRightProvenance(IQTree rightTree, ImmutableSet<Variable> leftVariables,
-                                                    Optional<ImmutableExpression> leftJoinExpression,
-                                                    VariableGenerator variableGenerator) {
-        ImmutableSet<Variable> rightVariables = rightTree.getVariables();
-
-        VariableNullability rightNullability = leftJoinExpression
-                .flatMap(e -> termFactory.getConjunction(
-                        e.flattenAND()
-                                .filter(e1 -> rightVariables.containsAll(e1.getVariables()))))
-                .<IQTree>map(e -> iqFactory.createUnaryIQTree(iqFactory.createFilterNode(e), rightTree))
-                .orElse(rightTree)
-                .getVariableNullability();
-
-        return normalizeRightProvenance(rightTree, leftVariables, rightTree.getVariables(), variableGenerator,
-                rightNullability);
-    }
-
-    public RightProvenance normalizeRightProvenance(IQTree rightTree, ImmutableSet<Variable> leftVariables,
-                                                    ImmutableSet<Variable> rightRequiredVariables,
-                                                    VariableGenerator variableGenerator) {
-        return normalizeRightProvenance(rightTree, leftVariables, rightRequiredVariables, variableGenerator,
-                rightTree.getVariableNullability());
-    }
-
-    private RightProvenance normalizeRightProvenance(IQTree rightTree, ImmutableSet<Variable> leftVariables,
-                                                    ImmutableSet<Variable> rightRequiredVariables,
                                                     VariableGenerator variableGenerator,
                                                     VariableNullability rightNullability) {
-        ImmutableSet<Variable> rightVariables = rightTree.getVariables();
 
-        Optional<Variable> nonNullableRightVariable = rightVariables.stream()
+        Optional<Variable> nonNullableRightVariable = rightTree.getVariables().stream()
                 .filter(v -> !leftVariables.contains(v))
                 .filter(v -> !rightNullability.isPossiblyNullable(v))
                 .findFirst();
 
-        return nonNullableRightVariable
-                .map(variable -> new RightProvenance(variable, rightTree))
-                .orElseGet(() -> createProvenanceInConstructionNode(rightTree, rightRequiredVariables, variableGenerator));
+        if (nonNullableRightVariable.isPresent())
+            return new RightProvenance(nonNullableRightVariable.get(), rightTree);
 
+        Variable provenanceVariable = variableGenerator.generateNewVariable(PROV);
+        return new RightProvenance(provenanceVariable, createProvenanceInConstructionNode(provenanceVariable, rightTree));
     }
 
-    private RightProvenance createProvenanceInConstructionNode(IQTree rightTree,
-                                                               ImmutableSet<Variable> rightRequiredVariables,
-                                                               VariableGenerator variableGenerator) {
-        /*
-         * Otherwise, creates a fresh variable and its construction node
-         */
-        Variable provenanceVariable = variableGenerator.generateNewVariable(PROV);
+    public UnaryIQTree createProvenanceInConstructionNode(Variable provenanceVariable, IQTree rightTree) {
+        return createProvenanceInConstructionNode(provenanceVariable, rightTree, rightTree.getVariables());
+    }
 
-        ImmutableSet<Variable> newRightProjectedVariables = Sets.union(ImmutableSet.of(provenanceVariable), rightRequiredVariables)
-                .immutableCopy();
+    public UnaryIQTree createProvenanceInConstructionNode(Variable provenanceVariable, IQTree rightTree, Set<Variable> rightRequiredVariables) {
+        ConstructionNode newRightConstructionNode = iqTreeTools.createExtendingConstructionNode(
+                rightRequiredVariables,
+                substitutionFactory.getSubstitution(provenanceVariable, termFactory.getProvenanceSpecialConstant()));
 
-        ConstructionNode newRightConstructionNode = iqFactory.createConstructionNode(
-                newRightProjectedVariables,
-                substitutionFactory.getSubstitution(provenanceVariable,
-                        termFactory.getProvenanceSpecialConstant()));
-
-        UnaryIQTree newRightTree = iqFactory.createUnaryIQTree(newRightConstructionNode, rightTree);
-        return new RightProvenance(provenanceVariable, newRightTree);
+        return iqFactory.createUnaryIQTree(newRightConstructionNode, rightTree);
     }
 
     /**
@@ -116,22 +88,20 @@ public class RightProvenanceNormalizer {
      * - right tree: may have been updated so as to provide the provenance variable
      */
     public static class RightProvenance {
+        private final Variable provenanceVariable;
+        private final IQTree tree;
 
-        private final Variable variable;
-        private final IQTree rightTree;
-
-        protected RightProvenance(Variable provenanceVariable, IQTree rightTree) {
-            this.variable = provenanceVariable;
-            this.rightTree = rightTree;
+        RightProvenance(Variable provenanceVariable, IQTree tree) {
+            this.provenanceVariable = provenanceVariable;
+            this.tree = tree;
         }
 
         public Variable getProvenanceVariable() {
-            return variable;
+            return provenanceVariable;
         }
 
-        public IQTree getRightTree() {
-            return rightTree;
+        public IQTree getTree() {
+            return tree;
         }
     }
-
 }

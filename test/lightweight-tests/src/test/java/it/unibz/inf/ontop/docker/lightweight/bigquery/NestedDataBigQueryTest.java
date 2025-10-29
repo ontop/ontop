@@ -27,14 +27,14 @@ public class NestedDataBigQueryTest extends AbstractNestedDataTest {
     }
 
     @Override
-    protected ImmutableMultiset getFlattenTimestampExpectedValues() {
+    protected ImmutableMultiset<String> getFlattenTimestampExpectedValues() {
         return ImmutableMultiset.of( "\"2023-01-01T18:00:00+00:00\"^^xsd:dateTime", "\"2023-01-15T18:00:00+00:00\"^^xsd:dateTime", "\"2023-01-29T12:00:00+00:00\"^^xsd:dateTime",
                 "\"2023-02-12T18:00:00+00:00\"^^xsd:dateTime", "\"2023-02-26T18:00:00+00:00\"^^xsd:dateTime",
                 "\"2023-03-12T18:00:00+00:00\"^^xsd:dateTime", "\"2023-03-26T18:00:00+00:00\"^^xsd:dateTime");
     }
 
     @Override
-    protected ImmutableMultiset getFlattenWithAggregateExpectedValues() {
+    protected ImmutableMultiset<String> getFlattenWithAggregateExpectedValues() {
         return ImmutableMultiset.of("\"Carl: 15000.0\"^^xsd:string", "\"Jim: 15666.666666666666\"^^xsd:string",
                 "\"Cynthia: 13000.0\"^^xsd:string", "\"Sam: 10000.0\"^^xsd:string",
                 "\"Bob: 17666.666666666668\"^^xsd:string");
@@ -42,7 +42,7 @@ public class NestedDataBigQueryTest extends AbstractNestedDataTest {
 
     //BigQuery starts counting at 0
     @Override
-    protected ImmutableMultiset getFlattenWithPositionExpectedValues() {
+    protected ImmutableMultiset<String> getFlattenWithPositionExpectedValues() {
         return ImmutableMultiset.of( "\"1\"^^xsd:integer", "\"1\"^^xsd:integer", "\"1\"^^xsd:integer",
                 "\"0\"^^xsd:integer", "\"0\"^^xsd:integer", "\"0\"^^xsd:integer", "\"2\"^^xsd:integer");
     }

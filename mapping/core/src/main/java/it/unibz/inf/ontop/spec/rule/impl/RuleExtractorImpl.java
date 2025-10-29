@@ -10,6 +10,7 @@ import it.unibz.inf.ontop.exception.OntopUnsupportedKGQueryException;
 import it.unibz.inf.ontop.exception.SparqlRuleException;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.node.IntensionalDataNode;
+import it.unibz.inf.ontop.iq.visit.impl.IntensionalDataNodeExtractor;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
@@ -32,14 +33,11 @@ public class RuleExtractorImpl implements RuleExtractor {
     private static final String RULES_KEY = "rules";
     private final KGQueryFactory kgQueryFactory;
     private final KGQueryTranslator kgQueryTranslator;
-    private final IntensionalNodeExtractor intensionalNodeExtractor;
 
     @Inject
-    protected RuleExtractorImpl(KGQueryFactory kgQueryFactory, KGQueryTranslator kgQueryTranslator,
-                                IntensionalNodeExtractor intensionalNodeExtractor) {
+    protected RuleExtractorImpl(KGQueryFactory kgQueryFactory, KGQueryTranslator kgQueryTranslator) {
         this.kgQueryFactory = kgQueryFactory;
         this.kgQueryTranslator = kgQueryTranslator;
-        this.intensionalNodeExtractor = intensionalNodeExtractor;
     }
 
     @Override
@@ -136,7 +134,8 @@ public class RuleExtractorImpl implements RuleExtractor {
             try {
                 IRI iri = new MappingAssertion(rule, null).getIndex().getIri();
                 multimapBuilder.put(iri, rule);
-            } catch (MappingAssertion.NoGroundPredicateOntopInternalBugException e) {
+            }
+            catch (MappingAssertion.NoGroundPredicateOntopInternalBugException e) {
                 throw new SparqlRuleException("Unsupported rule: must use a constant class or a constant non-rdf:type " +
                         "property in the INSERT clause.\n" + rule);
             }
@@ -145,7 +144,7 @@ public class RuleExtractorImpl implements RuleExtractor {
     }
 
     private ImmutableSet<IRI> extractDependencyPredicates(IQ rule) throws SparqlRuleException {
-        ImmutableList<DataAtom<AtomPredicate>> dependencyAtoms = rule.getTree().acceptVisitor(intensionalNodeExtractor)
+        ImmutableList<DataAtom<AtomPredicate>> dependencyAtoms = rule.getTree().acceptVisitor(new IntensionalDataNodeExtractor())
                 .map(IntensionalDataNode::getProjectionAtom)
                 .collect(ImmutableCollectors.toList());
 

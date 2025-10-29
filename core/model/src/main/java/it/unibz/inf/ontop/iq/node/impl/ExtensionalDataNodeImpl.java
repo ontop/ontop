@@ -4,10 +4,12 @@ import com.google.common.collect.*;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.dbschema.*;
+import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
-import it.unibz.inf.ontop.injection.QueryTransformerFactory;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
+import it.unibz.inf.ontop.iq.DownPropagation;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
+import it.unibz.inf.ontop.iq.impl.NaryIQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.*;
 import it.unibz.inf.ontop.iq.request.FunctionalDependencies;
@@ -61,10 +63,6 @@ public class ExtensionalDataNodeImpl extends LeafIQTreeImpl implements Extension
     @Nullable
     private Boolean isDistinct;
 
-    private final CoreUtilsFactory coreUtilsFactory;
-    private final SubstitutionFactory substitutionFactory;
-    private final QueryTransformerFactory queryTransformerFactory;
-
     /**
      * See {@link IntermediateQueryFactory#createExtensionalDataNode(RelationDefinition, ImmutableMap)}
      */
@@ -73,10 +71,8 @@ public class ExtensionalDataNodeImpl extends LeafIQTreeImpl implements Extension
     private ExtensionalDataNodeImpl(@Assisted RelationDefinition relationDefinition,
                                     @Assisted ImmutableMap<Integer, ? extends VariableOrGroundTerm> argumentMap,
                                     IQTreeTools iqTreeTools, IntermediateQueryFactory iqFactory,
-                                    CoreUtilsFactory coreUtilsFactory, SubstitutionFactory substitutionFactory,
-                                    QueryTransformerFactory queryTransformerFactory) {
-        this(relationDefinition, argumentMap, null, iqTreeTools, iqFactory, coreUtilsFactory, substitutionFactory,
-                queryTransformerFactory);
+                                    CoreUtilsFactory coreUtilsFactory, SubstitutionFactory substitutionFactory) {
+        this(relationDefinition, argumentMap, null, iqTreeTools, iqFactory, coreUtilsFactory, substitutionFactory);
     }
 
     /**
@@ -87,15 +83,11 @@ public class ExtensionalDataNodeImpl extends LeafIQTreeImpl implements Extension
                                     @Assisted ImmutableMap<Integer, ? extends VariableOrGroundTerm> argumentMap,
                                     @Assisted @Nullable VariableNullability variableNullability,
                                     IQTreeTools iqTreeTools, IntermediateQueryFactory iqFactory,
-                                    CoreUtilsFactory coreUtilsFactory, SubstitutionFactory substitutionFactory,
-                                    QueryTransformerFactory queryTransformerFactory) {
-        super(iqTreeTools, iqFactory);
-        this.coreUtilsFactory = coreUtilsFactory;
+                                    CoreUtilsFactory coreUtilsFactory, SubstitutionFactory substitutionFactory) {
+        super(iqTreeTools, iqFactory, substitutionFactory, coreUtilsFactory);
         this.relationDefinition = relationDefinition;
         this.argumentMap = argumentMap;
         this.variableNullability = variableNullability;
-        this.substitutionFactory = substitutionFactory;
-        this.queryTransformerFactory = queryTransformerFactory;
     }
 
 
@@ -111,34 +103,9 @@ public class ExtensionalDataNodeImpl extends LeafIQTreeImpl implements Extension
 
 
     @Override
-    public IQTree applyDescendingSubstitutionWithoutOptimizing(
-            Substitution<? extends VariableOrGroundTerm> descendingSubstitution, VariableGenerator variableGenerator) {
-        ImmutableMap<Integer, VariableOrGroundTerm> newArguments = substitutionFactory.onVariableOrGroundTerms().applyToTerms(descendingSubstitution, argumentMap);
+    public IQTree applyDescendingSubstitution(DownPropagation dp) {
+        ImmutableMap<Integer, VariableOrGroundTerm> newArguments = substitutionFactory.onVariableOrGroundTerms().applyToTerms(dp.getDescendingSubstitution(), argumentMap);
         return iqFactory.createExtensionalDataNode(relationDefinition, newArguments);
-    }
-
-    @Override
-    public synchronized boolean isDistinct() {
-        if (isDistinct == null)
-            isDistinct = relationDefinition.getUniqueConstraints().stream()
-                .map(UniqueConstraint::getDeterminants)
-                .anyMatch(this::areDeterminantsPresentAndNotNull);
-        return isDistinct;
-    }
-
-    private boolean areDeterminantsPresentAndNotNull(ImmutableSet<Attribute> determinants) {
-        ImmutableList<Optional<? extends VariableOrGroundTerm>> arguments = determinants.stream()
-                .map(this::getArgument)
-                .collect(ImmutableCollectors.toList());
-
-        VariableNullability variableNullability = getVariableNullability();
-
-        return arguments.stream().allMatch(Optional::isPresent)
-                && getVariableStreamFrom(arguments).noneMatch(variableNullability::isPossiblyNullable);
-    }
-
-    private Optional<? extends VariableOrGroundTerm> getArgument(Attribute a) {
-        return Optional.ofNullable(argumentMap.get(a.getIndex() - 1));
     }
 
     /**
@@ -146,35 +113,55 @@ public class ExtensionalDataNodeImpl extends LeafIQTreeImpl implements Extension
      * Useful the data node has a lot of columns.
      */
     @Override
-    public IQTree applyFreshRenaming(InjectiveSubstitution<Variable> freshRenamingSubstitution) {
-        ImmutableMap<Integer, VariableOrGroundTerm> newArgumentMap = substitutionFactory.onVariableOrGroundTerms().applyToTerms(freshRenamingSubstitution, argumentMap);
+    public ExtensionalDataNode applyFreshRenaming(InjectiveSubstitution<Variable> renamingSubstitution) {
+        ImmutableMap<Integer, VariableOrGroundTerm> newArgumentMap = substitutionFactory.onVariableOrGroundTerms().applyToTerms(renamingSubstitution, argumentMap);
         return (variableNullability == null)
                 ? iqFactory.createExtensionalDataNode(relationDefinition, newArgumentMap)
                 : iqFactory.createExtensionalDataNode(relationDefinition, newArgumentMap,
-                variableNullability.applyFreshRenaming(freshRenamingSubstitution));
+                variableNullability.applyFreshRenaming(renamingSubstitution));
+    }
+
+
+
+    @Override
+    public synchronized boolean isDistinct() {
+        return getCachedValue(() -> isDistinct, this::computeIsDistinct, v -> isDistinct = v);
+    }
+
+    private boolean computeIsDistinct() {
+        return relationDefinition.getUniqueConstraints().stream()
+                .map(UniqueConstraint::getDeterminants)
+                .anyMatch(this::areDeterminantsPresentAndNotNull);
+    }
+
+    private boolean areDeterminantsPresentAndNotNull(ImmutableSet<Attribute> determinants) {
+        VariableNullability variableNullability = getVariableNullability();
+
+        var arguments = getArguments(determinants);
+        return arguments.stream().allMatch(Optional::isPresent)
+                && getVariableSetFrom(arguments).stream().noneMatch(variableNullability::isPossiblyNullable);
     }
 
     @Override
     public synchronized VariableNullability getVariableNullability() {
-        if (variableNullability == null) {
+        return getCachedValue(() -> variableNullability, this::computeVariableNullability, v -> variableNullability = v);
+    }
 
-            ImmutableMultiset<? extends VariableOrGroundTerm> argMultiset = ImmutableMultiset.copyOf(argumentMap.values());
+    private VariableNullability computeVariableNullability() {
+        ImmutableSet<Variable> singleOccurrenceVariables = NaryIQTreeTools.singleOccurrenceVariables(
+                getVariableStreamFrom(argumentMap.values().stream()));
 
-            // NB: DB column indexes start at 1.
-            ImmutableSet<ImmutableSet<Variable>> nullableGroups = argumentMap.entrySet().stream()
-                    .filter(e -> e.getValue() instanceof Variable)
-                    .filter(e -> relationDefinition.getAttribute(e.getKey() + 1).isNullable())
-                    .map(Map.Entry::getValue)
-                    .map(a -> (Variable) a)
-                    // An implicit filter condition makes them non-nullable
-                    .filter(a -> argMultiset.count(a) < 2)
-                    .map(ImmutableSet::of)
-                    .collect(ImmutableCollectors.toSet());
+        ImmutableSet<ImmutableSet<Variable>> nullableGroups = getVariableStreamFrom(
+                argumentMap.entrySet().stream()
+                        // NB: DB column indexes start at 1.
+                        .filter(e -> relationDefinition.getAttribute(e.getKey() + 1).isNullable())
+                        .map(Map.Entry::getValue))
+                // An implicit filter condition makes a variable non-nullable
+                .filter(singleOccurrenceVariables::contains)
+                .map(ImmutableSet::of)
+                .collect(ImmutableCollectors.toSet());
 
-            variableNullability = coreUtilsFactory.createVariableNullability(nullableGroups, getVariables());
-        }
-
-        return variableNullability;
+        return coreUtilsFactory.createVariableNullability(nullableGroups, getVariables());
     }
 
     @Override
@@ -183,19 +170,18 @@ public class ExtensionalDataNodeImpl extends LeafIQTreeImpl implements Extension
 
     @Override
     public synchronized ImmutableSet<ImmutableSet<Variable>> inferUniqueConstraints() {
-        if (uniqueConstraints == null) {
-            uniqueConstraints = relationDefinition.getUniqueConstraints().stream()
-                    .map(this::convertUniqueConstraint)
-                    .flatMap(Optional::stream)
-                    .collect(ImmutableCollectors.toSet());
-        }
-        return uniqueConstraints;
+        return getCachedValue(() -> uniqueConstraints, this::computeUniqueConstraints, v -> uniqueConstraints = v);
+    }
+
+    private ImmutableSet<ImmutableSet<Variable>> computeUniqueConstraints() {
+        return relationDefinition.getUniqueConstraints().stream()
+                .map(this::convertUniqueConstraint)
+                .flatMap(Optional::stream)
+                .collect(ImmutableCollectors.toSet());
     }
 
     private Optional<ImmutableSet<Variable>> convertUniqueConstraint(UniqueConstraint uniqueConstraint) {
-        ImmutableList<Optional<? extends VariableOrGroundTerm>> arguments = uniqueConstraint.getDeterminants().stream()
-                .map(this::getArgument)
-                .collect(ImmutableCollectors.toList());
+        var arguments = getArguments(uniqueConstraint.getDeterminants());
 
         if (!arguments.stream().allMatch(Optional::isPresent))
             return Optional.empty();
@@ -213,13 +199,8 @@ public class ExtensionalDataNodeImpl extends LeafIQTreeImpl implements Extension
     }
 
     private Optional<Map.Entry<ImmutableSet<Variable>, ImmutableSet<Variable>>> convertFunctionalDependency(FunctionalDependency functionalDependency) {
-        ImmutableList<Optional<? extends VariableOrGroundTerm>> determinants = functionalDependency.getDeterminants().stream()
-                .map(this::getArgument)
-                .collect(ImmutableCollectors.toList());
-
-        ImmutableList<Optional<? extends VariableOrGroundTerm>> dependents = functionalDependency.getDependents().stream()
-                .map(this::getArgument)
-                .collect(ImmutableCollectors.toList());
+        var determinants = getArguments(functionalDependency.getDeterminants());
+        var dependents = getArguments(functionalDependency.getDependents());
 
         if (!determinants.stream().allMatch(Optional::isPresent) || dependents.stream().noneMatch(Optional::isPresent))
             return Optional.empty();
@@ -227,36 +208,39 @@ public class ExtensionalDataNodeImpl extends LeafIQTreeImpl implements Extension
         return Optional.of(Maps.immutableEntry(getVariableSetFrom(determinants), getVariableSetFrom(dependents)));
     }
 
-    private static ImmutableSet<Variable> getVariableSetFrom(ImmutableList<Optional<? extends VariableOrGroundTerm>> list) {
-        return getVariableStreamFrom(list).collect(ImmutableCollectors.toSet());
+
+    private ImmutableList<Optional<? extends VariableOrGroundTerm>> getArguments(ImmutableSet<Attribute> attributes) {
+        return attributes.stream()
+                .map(a -> Optional.ofNullable(argumentMap.get(a.getIndex() - 1)))
+                .collect(ImmutableCollectors.toList());
     }
 
-    private static Stream<Variable> getVariableStreamFrom(ImmutableList<Optional<? extends VariableOrGroundTerm>> list) {
-        return list.stream()
-                .flatMap(Optional::stream)
+    private static ImmutableSet<Variable> getVariableSetFrom(ImmutableList<Optional<? extends VariableOrGroundTerm>> list) {
+        return getVariableStreamFrom(list.stream().flatMap(Optional::stream))
+                .collect(ImmutableCollectors.toSet());
+    }
+
+    private static Stream<Variable> getVariableStreamFrom(Stream<? extends VariableOrGroundTerm> stream) {
+        return stream
                 .filter(t -> t instanceof Variable)
                 .map(v -> (Variable)v);
     }
 
+
     /**
-     * Only co-occuring variables are required.
+     * Only co-occurring variables are required.
      */
     @Override
     public synchronized VariableNonRequirement getVariableNonRequirement() {
-        if (variableNonRequirement == null) {
-            ImmutableMultiset<Variable> multiset = argumentMap.values().stream()
-                    .filter(t -> t instanceof Variable)
-                    .map(t -> (Variable)t)
-                    .collect(ImmutableCollectors.toMultiset());
-
-            variableNonRequirement = VariableNonRequirement.of(
-                    multiset.entrySet().stream()
-                            .filter(e -> e.getCount() == 1)
-                            .map(Multiset.Entry::getElement)
-                            .collect(ImmutableCollectors.toSet()));
-        }
-        return variableNonRequirement;
+        return getCachedValue(() -> variableNonRequirement, this::computeVariableNonRequirement, v -> variableNonRequirement = v);
     }
+
+    private VariableNonRequirement computeVariableNonRequirement() {
+        return VariableNonRequirement.of(
+                NaryIQTreeTools.singleOccurrenceVariables(
+                        getVariableStreamFrom(argumentMap.values().stream())));
+    }
+
 
     @Override
     public boolean equals(Object o) {
@@ -285,33 +269,12 @@ public class ExtensionalDataNodeImpl extends LeafIQTreeImpl implements Extension
 
     @Override
     public ImmutableSet<Variable> getVariables() {
-        return getLocalVariables();
+        return getCachedValue(() -> variables, this::computeVariables, v -> variables = v);
     }
 
-    @Override
-    public synchronized ImmutableSet<Variable> getLocalVariables() {
-        if (variables == null) {
-            variables = argumentMap.values().stream()
-                    .filter(t -> t instanceof Variable)
-                    .map(t -> (Variable)t)
-                    .collect(ImmutableCollectors.toSet());
-        }
-        return variables;
-    }
-
-    @Override
-    public ImmutableSet<Variable> getLocallyRequiredVariables() {
-        return ImmutableSet.of();
-    }
-
-    @Override
-    public ImmutableSet<Variable> getLocallyDefinedVariables() {
-        return getLocalVariables();
-    }
-
-    @Override
-    public ImmutableSet<Variable> getKnownVariables() {
-        return getLocalVariables();
+    private ImmutableSet<Variable> computeVariables() {
+        return getVariableStreamFrom(argumentMap.values().stream())
+                .collect(ImmutableCollectors.toSet());
     }
 
     @Override
@@ -325,7 +288,7 @@ public class ExtensionalDataNodeImpl extends LeafIQTreeImpl implements Extension
             IQ iq = ((Lens) relationDefinition).getIQ();
 
             IQTree renamedTree = merge(this, iq, coreUtilsFactory.createVariableGenerator(this.getKnownVariables()),
-                    substitutionFactory, queryTransformerFactory, iqFactory);
+                    substitutionFactory, iqFactory, iqTreeTools);
 
             return renamedTree.getPossibleVariableDefinitions();
         }
@@ -333,28 +296,26 @@ public class ExtensionalDataNodeImpl extends LeafIQTreeImpl implements Extension
     }
 
     public static IQTree merge(ExtensionalDataNode dataNode, IQ definition, VariableGenerator variableGenerator,
-                               SubstitutionFactory substitutionFactory, QueryTransformerFactory transformerFactory,
-                               IntermediateQueryFactory iqFactory) {
-        InjectiveSubstitution<Variable> renamingSubstitution = substitutionFactory.generateNotConflictingRenaming(
-                variableGenerator, definition.getTree().getKnownVariables());
+                               SubstitutionFactory substitutionFactory,
+                               IntermediateQueryFactory iqFactory, IQTreeTools iqTreeTools) {
 
-        IQ renamedDefinition = transformerFactory.createRenamer(renamingSubstitution).transform(definition);
+        IQ renamedDefinition = iqTreeTools.getFreshInstance(definition, variableGenerator);
 
-        ImmutableList<Variable> sourceAtomArguments = substitutionFactory.apply(
-                renamingSubstitution,
-                renamedDefinition.getProjectionAtom().getArguments());
-
+        ImmutableList<Variable> sourceAtomArguments = renamedDefinition.getProjectionAtom().getArguments();
         Substitution<VariableOrGroundTerm> descendingSubstitution = dataNode.getArgumentMap().entrySet().stream()
                 .collect(substitutionFactory.toSubstitutionSkippingIdentityEntries(
                         e -> sourceAtomArguments.get(e.getKey()),
                         Map.Entry::getValue));
 
-        IQTree substitutedDefinition = renamedDefinition.getTree()
-                .applyDescendingSubstitution(descendingSubstitution, Optional.empty(), variableGenerator);
-
-        return iqFactory.createUnaryIQTree(
-                        iqFactory.createConstructionNode(dataNode.getVariables()),
-                        substitutedDefinition)
-                .normalizeForOptimization(variableGenerator);
+        try {
+            DownPropagation dp = iqTreeTools.createDownPropagation(descendingSubstitution, Optional.empty(), renamedDefinition.getTree().getVariables(), variableGenerator);
+            return iqFactory.createUnaryIQTree(
+                            iqFactory.createConstructionNode(dataNode.getVariables()),
+                            dp.propagate(renamedDefinition.getTree()))
+                    .normalizeForOptimization(variableGenerator);
+        }
+        catch (DownPropagation.InconsistentDownPropagationException e) {
+            throw new MinorOntopInternalBugException("ExtensionalDataNode cannot contain NULLs", e);
+        }
     }
 }

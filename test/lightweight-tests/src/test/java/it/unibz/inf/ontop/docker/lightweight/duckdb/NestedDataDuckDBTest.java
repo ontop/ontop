@@ -27,7 +27,7 @@ public class NestedDataDuckDBTest extends AbstractNestedDataTest {
     }
 
     @Override
-    protected ImmutableMultiset getFlattenWithAggregateExpectedValues() {
+    protected ImmutableMultiset<String> getFlattenWithAggregateExpectedValues() {
         return ImmutableMultiset.of("\"Carl: 15000.0\"^^xsd:string", "\"Jim: 15666.666666666666\"^^xsd:string",
                 "\"Cynthia: 13000.0\"^^xsd:string", "\"Sam: 10000.0\"^^xsd:string",
                 "\"Bob: 17666.666666666668\"^^xsd:string");

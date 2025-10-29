@@ -2,36 +2,37 @@ package it.unibz.inf.ontop.iq.node.normalization;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
+import it.unibz.inf.ontop.iq.DownPropagation;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
-import it.unibz.inf.ontop.iq.node.impl.UnsatisfiableConditionException;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
 import it.unibz.inf.ontop.substitution.Substitution;
 
 import java.util.Optional;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
+@SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 public interface ConditionSimplifier {
 
-    ExpressionAndSubstitution simplifyCondition(ImmutableExpression expression, ImmutableList<IQTree> children,
+    ExpressionAndSubstitution simplifyCondition(Optional<ImmutableExpression> expression,
+                                                ImmutableSet<Variable> nonLiftableVariables,
+                                                ImmutableList<IQTree> children,
                                                 VariableNullability variableNullability)
-            throws UnsatisfiableConditionException;
+                    throws DownPropagation.InconsistentDownPropagationException;
 
-    ExpressionAndSubstitution simplifyCondition(Optional<ImmutableExpression> nonOptimizedExpression,
-                                                ImmutableSet<Variable> nonLiftableVariables, ImmutableList<IQTree> children,
-                                                VariableNullability variableNullability)
-                    throws UnsatisfiableConditionException;
+    ExpressionAndSubstitution simplifyConditionForLeftJoin(Optional<ImmutableExpression> nonOptimizedExpression,
+                                                Function<ImmutableExpression, VariableNullability> variableNullability,
+                                                ImmutableSet<Variable> leftVariables, ImmutableSet<Variable> rightVariables)
+            throws DownPropagation.InconsistentDownPropagationException;
 
-    Optional<ImmutableExpression> computeDownConstraint(Optional<ImmutableExpression> optionalConstraint,
-                                                        ExpressionAndSubstitution conditionSimplificationResults,
-                                                        VariableNullability childVariableNullability)
-                            throws UnsatisfiableConditionException;
-
+    DownPropagation getCombinedDownPropagation(DownPropagation dp, ExpressionAndSubstitution simplification, VariableNullability variableNullability) throws DownPropagation.InconsistentDownPropagationException;
 
     interface ExpressionAndSubstitution {
         Substitution<VariableOrGroundTerm> getSubstitution();
-
         Optional<ImmutableExpression> getOptionalExpression();
     }
+
 }

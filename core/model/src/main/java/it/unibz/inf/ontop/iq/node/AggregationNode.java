@@ -2,9 +2,11 @@ package it.unibz.inf.ontop.iq.node;
 
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.iq.IQTree;
-import it.unibz.inf.ontop.iq.visit.IQVisitor;
+import it.unibz.inf.ontop.iq.UnaryIQTree;
+import it.unibz.inf.ontop.iq.visit.IQTreeVisitor;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.substitution.InjectiveSubstitution;
 import it.unibz.inf.ontop.substitution.Substitution;
 
 
@@ -22,7 +24,10 @@ public interface AggregationNode extends ExtendedProjectionNode {
     ImmutableSet<Variable> getGroupingVariables();
 
     @Override
-    default <T> T acceptVisitor(IQTree tree, IQVisitor<T> visitor, IQTree child) {
+    AggregationNode applyFreshRenaming(InjectiveSubstitution<Variable> renamingSubstitution);
+
+    @Override
+    default <T> T acceptVisitor(UnaryIQTree tree, IQTreeVisitor<T> visitor, IQTree child) {
         return visitor.transformAggregation(tree, this, child);
     }
 

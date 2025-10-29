@@ -7,14 +7,9 @@ import it.unibz.inf.ontop.dbschema.FunctionalDependency;
 import it.unibz.inf.ontop.dbschema.RelationDefinition;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.CoreSingletons;
-import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
-import it.unibz.inf.ontop.iq.IQ;
-import it.unibz.inf.ontop.iq.IQTree;
-import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
-import it.unibz.inf.ontop.iq.node.InnerJoinNode;
-import it.unibz.inf.ontop.iq.optimizer.InnerJoinIQOptimizer;
-import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
+import it.unibz.inf.ontop.iq.transform.IQTreeVariableGeneratorTransformer;
+import it.unibz.inf.ontop.iq.transform.impl.DefaultDelegatingIQTreeVariableGeneratorTransformer;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
@@ -29,53 +24,20 @@ import java.util.stream.Stream;
 /**
  * TODO: explain
  */
-public class ArgumentTransferInnerJoinFDIQOptimizer implements InnerJoinIQOptimizer {
-
-    private final IntermediateQueryFactory iqFactory;
-    private final CoreSingletons coreSingletons;
-    private final SelfJoinFDSimplifier simplifier;
+public class ArgumentTransferInnerJoinFDIQOptimizer extends DefaultDelegatingIQTreeVariableGeneratorTransformer implements IQTreeVariableGeneratorTransformer {
 
     @Inject
-    protected ArgumentTransferInnerJoinFDIQOptimizer(CoreSingletons coreSingletons, IQTreeTools iqTreeTools) {
-        simplifier = new SelfJoinFDSimplifier(coreSingletons, iqTreeTools);
-        this.iqFactory = coreSingletons.getIQFactory();
-        this.coreSingletons = coreSingletons;
+    protected ArgumentTransferInnerJoinFDIQOptimizer(CoreSingletons coreSingletons) {
+        super(IQTreeVariableGeneratorTransformer.of(
+                vg -> new DefaultRecursiveIQTreeVisitingInnerJoinTransformer(
+                        coreSingletons.getIQFactory(),
+                        new SelfJoinFDSimplifier(coreSingletons, vg))));
     }
 
-    @Override
-    public IQ optimize(IQ query) {
+    private static class SelfJoinFDSimplifier extends AbstractSelfJoinSimplifier<FunctionalDependency> {
 
-        ArgumentTransferJoinTransformer transformer = new ArgumentTransferJoinTransformer(simplifier, coreSingletons, query.getVariableGenerator());
-        IQTree initialTree = query.getTree();
-        IQTree newTree = transformer.transform(initialTree);
-        return (newTree == initialTree)
-                ? query
-                : iqFactory.createIQ(query.getProjectionAtom(), newTree).normalizeForOptimization();
-    }
-
-    protected static class ArgumentTransferJoinTransformer extends DefaultRecursiveIQTreeVisitingTransformer {
-
-        private final SelfJoinFDSimplifier simplifier;
-        private final VariableGenerator variableGenerator;
-
-        protected ArgumentTransferJoinTransformer(SelfJoinFDSimplifier simplifier, CoreSingletons coreSingletons,
-                                                  VariableGenerator variableGenerator) {
-            super(coreSingletons);
-            this.simplifier = simplifier;
-            this.variableGenerator = variableGenerator;
-        }
-
-        @Override
-        public IQTree transformInnerJoin(IQTree tree, InnerJoinNode rootNode, ImmutableList<IQTree> children) {
-            return simplifier.transformInnerJoin(rootNode, children, tree.getVariables(), variableGenerator)
-                    .orElse(tree);
-        }
-    }
-
-    protected static class SelfJoinFDSimplifier extends AbstractSelfJoinSimplifier<FunctionalDependency> {
-
-        protected SelfJoinFDSimplifier(CoreSingletons coreSingletons, IQTreeTools iqTreeTools) {
-            super(coreSingletons, iqTreeTools);
+        SelfJoinFDSimplifier(CoreSingletons coreSingletons, VariableGenerator variableGenerator) {
+            super(coreSingletons, variableGenerator);
         }
 
         @Override
@@ -119,12 +81,12 @@ public class ArgumentTransferInnerJoinFDIQOptimizer implements InnerJoinIQOptimi
         }
 
         /**
-         * Selects as target the node with largest number of external arguments.
+         * Selects as target the node with the largest number of external arguments.
          *
          * Why? Partially arbitrary, but such a target is more likely that it cannot be eliminated by the optimization
          * based on the same terms.
          */
-        protected ExtensionalDataNode selectTargetDataNode(Collection<ExtensionalDataNode> dataNodes, FunctionalDependency constraint) {
+        private ExtensionalDataNode selectTargetDataNode(Collection<ExtensionalDataNode> dataNodes, FunctionalDependency constraint) {
             ImmutableSet<Attribute> dependentAttributes = constraint.getDependents();
             ImmutableSet<Attribute> determinantAttributes = constraint.getDeterminants();
 
@@ -188,5 +150,4 @@ public class ArgumentTransferInnerJoinFDIQOptimizer implements InnerJoinIQOptimi
                     .collect(ImmutableCollectors.toSet());
         }
     }
-
 }

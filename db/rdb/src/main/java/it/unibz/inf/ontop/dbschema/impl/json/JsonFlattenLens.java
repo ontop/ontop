@@ -16,6 +16,7 @@ import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
+import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.iq.node.FilterNode;
@@ -117,6 +118,7 @@ public class JsonFlattenLens extends JsonBasicOrJoinOrNestedLens {
         final TermFactory termFactory;
         final DBTypeFactory dbTypeFactory;
         final CoreSingletons coreSingletons;
+        final IQTreeTools iqTreeTools;
 
         ViewDefinitionCreator(DBParameters dbParameters) {
             this.dbParameters = dbParameters;
@@ -128,6 +130,7 @@ public class JsonFlattenLens extends JsonBasicOrJoinOrNestedLens {
             atomFactory = coreSingletons.getAtomFactory();
             termFactory = coreSingletons.getTermFactory();
             dbTypeFactory = dbParameters.getDBTypeFactory();
+            iqTreeTools = coreSingletons.getIQTreeTools();
         }
 
         RelationID getRelationID(List<String> components) {
@@ -156,42 +159,45 @@ public class JsonFlattenLens extends JsonBasicOrJoinOrNestedLens {
             Variable flattenOutputVariable = variableGenerator.generateNewVariable(normalizeAttributeName(columns.newColumn, quotedIDFactory));
 
             ImmutableSet<Variable> projectedVariables = computeRetainedVariables(parentVariableMap, indexVariable, flattenOutputVariable);
-
-            AtomPredicate tmpPredicate = createTemporaryPredicate(relationId, projectedVariables.size(), coreSingletons);
-
-            DistinctVariableOnlyDataAtom projectionAtom = atomFactory.getDistinctVariableOnlyDataAtom(tmpPredicate, ImmutableList.copyOf(projectedVariables));
-
             ConstructionNode constructionNode = iqFactory.createConstructionNode(projectedVariables);
 
-            FilterNode filterNode = iqFactory.createFilterNode(termFactory.getDBIsNotNull(flattenOutputVariable));
-
-            FlattenNode flattennode = iqFactory.createFlattenNode(flattenOutputVariable, flattenedDBType.getCategory() == DBTermType.Category.ARRAY ? flattenedVariable : flattenedIfArrayVariable, indexVariable, flattenedDBType);
+            FlattenNode flattennode = iqFactory.createFlattenNode(flattenOutputVariable,
+                    flattenedDBType.getCategory() == DBTermType.Category.ARRAY
+                            ? flattenedVariable
+                            : flattenedIfArrayVariable, indexVariable, flattenedDBType);
 
             ExtensionalDataNode dataNode = iqFactory.createExtensionalDataNode(parentDefinition, compose(parentAttributeMap, parentVariableMap));
 
+            IQTree treeBeforeSafenessInfo;
             if (flattenedDBType.getCategory() == DBTermType.Category.ARRAY) {
                 //If we use an array type, we do not need to add a filter to check if it really is an array.
-                IQTree treeBeforeSafenessInfo = iqFactory.createUnaryIQTree(constructionNode,
-                                iqFactory.createUnaryIQTree(flattennode, dataNode));
-
-                return iqFactory.createIQ(projectionAtom, addIRISafeConstraints(treeBeforeSafenessInfo, dbParameters));
+                treeBeforeSafenessInfo = iqTreeTools.unaryIQTreeBuilder()
+                        .append(constructionNode)
+                        .append(flattennode)
+                        .build(dataNode);
             }
             else {
+                FilterNode filterNode = iqFactory.createFilterNode(termFactory.getDBIsNotNull(flattenOutputVariable));
+
                 //If we use a json type or similar, we first need to check if the item is a valid array.
-                ConstructionNode checkArrayConstructionNode = iqFactory.createConstructionNode(
-                        Sets.union(dataNode.getVariables(), ImmutableSet.of(flattenedIfArrayVariable)).immutableCopy(),
-                        substitutionFactory.<ImmutableTerm>getSubstitution(
+                ConstructionNode checkArrayConstructionNode = iqTreeTools.createExtendingConstructionNode(
+                        dataNode.getVariables(),
+                        substitutionFactory.getSubstitution(
                                 flattenedIfArrayVariable,
                                 termFactory.getIfElseNull(termFactory.getDBIsArray(flattenedDBType, flattenedVariable), flattenedVariable)));
 
-
-                IQTree treeBeforeSafenessInfo = iqFactory.createUnaryIQTree(constructionNode,
-                        iqFactory.createUnaryIQTree(filterNode,
-                                iqFactory.createUnaryIQTree(flattennode,
-                                        iqFactory.createUnaryIQTree(checkArrayConstructionNode, dataNode))));
-
-                return iqFactory.createIQ(projectionAtom, addIRISafeConstraints(treeBeforeSafenessInfo, dbParameters));
+                treeBeforeSafenessInfo = iqTreeTools.unaryIQTreeBuilder()
+                        .append(constructionNode)
+                        .append(filterNode)
+                        .append(flattennode)
+                        .append(checkArrayConstructionNode)
+                        .build(dataNode);
             }
+
+            AtomPredicate tmpPredicate = createTemporaryPredicate(relationId, projectedVariables.size(), coreSingletons);
+            DistinctVariableOnlyDataAtom projectionAtom = atomFactory.getDistinctVariableOnlyDataAtom(tmpPredicate, ImmutableList.copyOf(projectedVariables));
+
+            return iqFactory.createIQ(projectionAtom, addIRISafeConstraints(treeBeforeSafenessInfo, dbParameters));
         }
 
         private ImmutableSet<Variable> computeRetainedVariables(ImmutableMap<String, Variable> parentVariableMap, Optional<Variable> positionVariable, Variable outputVariable) throws MetadataExtractionException {

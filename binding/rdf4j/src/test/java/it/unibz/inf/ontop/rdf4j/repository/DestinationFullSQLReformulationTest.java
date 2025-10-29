@@ -73,14 +73,16 @@ public class DestinationFullSQLReformulationTest extends AbstractRDF4JTest {
 
     /**
      * SPARQL query rejected because it is not strongly typed
+     * It was not normalized fully - 3 consecutive CONSTRUCT
      */
     @Test(expected = QueryEvaluationException.class)
     public void testSPO() {
-        runQueryAndCount(
+        int count = runQueryAndCount(
                 "SELECT * WHERE {\n" +
                         "  ?s ?p ?o \n" +
                         "}\n" +
-                        "LIMIT 10");
+                        "LIMIT 100000");
+        assertEquals(10, count);
     }
 
     @Test

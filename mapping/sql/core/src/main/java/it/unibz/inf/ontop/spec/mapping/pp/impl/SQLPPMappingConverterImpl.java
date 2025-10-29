@@ -11,7 +11,9 @@ import it.unibz.inf.ontop.exception.MetadataExtractionException;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.OntopOBDASettings;
+import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
+import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.spec.mapping.MappingAssertion;
 import it.unibz.inf.ontop.spec.mapping.TargetAtom;
@@ -38,6 +40,7 @@ public class SQLPPMappingConverterImpl implements SQLPPMappingConverter {
     private static final Logger LOGGER = LoggerFactory.getLogger(SQLPPMappingConverterImpl.class);
 
     private final IntermediateQueryFactory iqFactory;
+    private final IQTreeTools iqTreeTools;
     private final SubstitutionFactory substitutionFactory;
     private final SQLQueryParser sqlQueryParser;
 
@@ -46,6 +49,7 @@ public class SQLPPMappingConverterImpl implements SQLPPMappingConverter {
     @Inject
     private SQLPPMappingConverterImpl(CoreSingletons coreSingletons, SQLQueryParser sqlQueryParser) {
         this.iqFactory = coreSingletons.getIQFactory();
+        this.iqTreeTools = coreSingletons.getIQTreeTools();
         this.substitutionFactory = coreSingletons.getSubstitutionFactory();
         this.sqlQueryParser = sqlQueryParser;
 
@@ -141,14 +145,16 @@ public class SQLPPMappingConverterImpl implements SQLPPMappingConverter {
 
         Substitution<? extends ImmutableTerm> selectSubstitution = substitution.restrictRangeTo(NonVariableTerm.class);
 
-        IQTree selectTree = iqFactory.createUnaryIQTree(
-                iqFactory.createConstructionNode(spoSubstitution.getRangeVariables(), selectSubstitution),
-                tree);
+        IQ mapping = iqTreeTools.createMappingIQ(
+                target.getProjectionAtom(),
+                spoSubstitution,
+                iqFactory.createUnaryIQTree(
+                        iqFactory.createConstructionNode(
+                                spoSubstitution.getRangeVariables(),
+                                selectSubstitution),
+                        tree));
 
-        IQTree mappingTree = iqFactory.createUnaryIQTree(iqFactory.createConstructionNode(
-                target.getProjectionAtom().getVariables(), spoSubstitution), selectTree);
-
-        return new MappingAssertion(iqFactory.createIQ(target.getProjectionAtom(), mappingTree), provenance);
+        return new MappingAssertion(mapping, provenance);
     }
 
     public RAExpression getRAExpression(SQLPPTriplesMap mappingAssertion, MetadataLookup metadataLookup) throws InvalidMappingSourceQueriesException, MetadataExtractionException {

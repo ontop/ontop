@@ -29,7 +29,7 @@ public class NestedDataMySQLTest extends AbstractNestedDataTest {
     }
 
     @Override
-    protected ImmutableMultiset getFlattenWithAggregateExpectedValues() {
+    protected ImmutableMultiset<String> getFlattenWithAggregateExpectedValues() {
         return ImmutableMultiset.of("\"Carl: 15000.0000\"^^xsd:string", "\"Jim: 15666.6667\"^^xsd:string",
                 "\"Cynthia: 13000.0000\"^^xsd:string", "\"Sam: 10000.0000\"^^xsd:string",
                 "\"Bob: 17666.6667\"^^xsd:string");

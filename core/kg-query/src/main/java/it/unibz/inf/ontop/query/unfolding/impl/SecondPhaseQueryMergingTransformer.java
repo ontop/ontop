@@ -3,8 +3,8 @@ package it.unibz.inf.ontop.query.unfolding.impl;
 import com.google.common.collect.*;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.CoreSingletons;
-import it.unibz.inf.ontop.iq.IQ;
-import it.unibz.inf.ontop.iq.IQTree;
+import it.unibz.inf.ontop.iq.*;
+import it.unibz.inf.ontop.iq.impl.NaryIQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.tools.UnionBasedQueryMerger;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
@@ -44,7 +44,8 @@ public class SecondPhaseQueryMergingTransformer extends AbstractMultiPhaseQueryM
     private final CoreSingletons coreSingletons;
 
     protected SecondPhaseQueryMergingTransformer(ImmutableSet<? extends Substitution<? extends ImmutableTerm>> localVariableDefinitions,
-                                                 Mapping mapping, VariableGenerator variableGenerator, CoreSingletons coreSingletons) {
+                                                 Mapping mapping, VariableGenerator variableGenerator,
+                                                 CoreSingletons coreSingletons) {
         super(mapping, variableGenerator, coreSingletons);
         this.functionSymbolFactory = coreSingletons.getFunctionSymbolFactory();
         this.queryMerger = coreSingletons.getUnionBasedQueryMerger();
@@ -169,46 +170,34 @@ public class SecondPhaseQueryMergingTransformer extends AbstractMultiPhaseQueryM
     }
 
     @Override
-    public final IQTree transformUnion(IQTree tree, UnionNode rootNode, ImmutableList<IQTree> children) {
-        ImmutableList<IQTree> newChildren = children.stream()
-                .map(this::transformChildWithNewTransformer)
-                .collect(ImmutableCollectors.toList());
+    public final IQTree transformUnion(NaryIQTree tree, UnionNode rootNode, ImmutableList<IQTree> children) {
+        ImmutableList<IQTree> newChildren = NaryIQTreeTools.transformChildren(children,
+                this::transformChildWithNewTransformer);
 
-        return newChildren.equals(children) && rootNode.equals(tree.getRootNode())
-                ? tree
-                : iqFactory.createNaryIQTree(rootNode, newChildren);
+        return withTransformedChildren(tree, newChildren);
     }
 
     @Override
-    public final IQTree transformLeftJoin(IQTree tree, LeftJoinNode rootNode, IQTree leftChild, IQTree rightChild) {
-        IQTree newLeftChild = leftChild.acceptTransformer(this);
+    public final IQTree transformLeftJoin(BinaryNonCommutativeIQTree tree, LeftJoinNode rootNode, IQTree leftChild, IQTree rightChild) {
+        IQTree newLeftChild = transform(leftChild);
         IQTree newRightChild = transformChildWithNewTransformer(rightChild);
-        return newLeftChild.equals(leftChild) && newRightChild.equals(rightChild) && rootNode.equals(tree.getRootNode())
-                ? tree
-                : iqFactory.createBinaryNonCommutativeIQTree(rootNode, newLeftChild, newRightChild);
+        return withTransformedChildren(tree, newLeftChild, newRightChild);
     }
 
     @Override
-    public IQTree transformConstruction(IQTree tree, ConstructionNode rootNode, IQTree child) {
-        return transformUnaryTreeUsingLocalDefinitions(tree, rootNode, child);
+    public IQTree transformConstruction(UnaryIQTree tree, ConstructionNode rootNode, IQTree child) {
+        return withTransformedChild(tree, transformChildWithNewTransformer(child));
     }
 
-    public IQTree transformUnaryTreeUsingLocalDefinitions(IQTree tree, UnaryOperatorNode rootNode, IQTree child) {
-        IQTree newChild = transformChildWithNewTransformer(child);
-        return newChild.equals(child)
-                ? tree
-                : iqFactory.createUnaryIQTree(rootNode, newChild);
+    @Override
+    public IQTree transformAggregation(UnaryIQTree tree, AggregationNode rootNode, IQTree child) {
+        return withTransformedChild(tree, transformChildWithNewTransformer(child));
     }
 
     private IQTree transformChildWithNewTransformer(IQTree child) {
-        return child.acceptTransformer(
-                new SecondPhaseQueryMergingTransformer(child.getPossibleVariableDefinitions(),
-                        mapping, variableGenerator, constraintMap, coreSingletons));
-    }
-
-    @Override
-    public IQTree transformAggregation(IQTree tree, AggregationNode rootNode, IQTree child) {
-        return transformUnaryTreeUsingLocalDefinitions(tree, rootNode, child);
+        return child.acceptVisitor(new SecondPhaseQueryMergingTransformer(
+                child.getPossibleVariableDefinitions(),
+                mapping, variableGenerator, constraintMap, coreSingletons));
     }
 
     @Override
@@ -346,29 +335,24 @@ public class SecondPhaseQueryMergingTransformer extends AbstractMultiPhaseQueryM
 
     private IQ filterDefinitionWithPrefix(IQ definition, ObjectStringTemplateFunctionSymbol template,
                                                     Mapping.RDFAtomIndexPattern indexPattern) {
-        Variable var = definition.getProjectionAtom().getArguments().get(indexPattern.getPosition());
+        DistinctVariableOnlyDataAtom projectionAtom = definition.getProjectionAtom();
+        Variable indexVariable = projectionAtom.getArguments().get(indexPattern.getPosition());
 
         String templatePrefix = template.getTemplateComponents().get(0).getComponent();
-        return iqFactory.createIQ(definition.getProjectionAtom(),
-                        filteredTreeToPreventInsecureUnion(definition.getTree(), var, templatePrefix));
-    }
 
-    /**
-     * Filters using the prefix of the template
-     */
-    private IQTree filteredTreeToPreventInsecureUnion(IQTree currentIQTree, ImmutableTerm var, String prefix) {
         ImmutableFunctionalTerm sparqlSTRSTARTSFunctionWithParameters = termFactory.getImmutableFunctionalTerm(
                 functionSymbolFactory.getSPARQLFunctionSymbol(XPathFunction.STARTS_WITH.getIRIString(), 2)
                         .orElseThrow(() -> new MinorOntopInternalBugException("SPARQL STARTS_WITH function missing")),
-                termFactory.getImmutableFunctionalTerm(functionSymbolFactory.getBNodeTolerantSPARQLStrFunctionSymbol(), var),
+                termFactory.getImmutableFunctionalTerm(functionSymbolFactory.getBNodeTolerantSPARQLStrFunctionSymbol(), indexVariable),
                 termFactory.getRDFLiteralConstant(
-                        prefix,
-                        termFactory.getTypeFactory().getXsdStringDatatype()
-                )
-        );
-        ImmutableExpression filterCondition = termFactory.getRDF2DBBooleanFunctionalTerm(sparqlSTRSTARTSFunctionWithParameters);
-        FilterNode filterNode = iqFactory.createFilterNode(filterCondition);
-        return iqFactory.createUnaryIQTree(filterNode, currentIQTree);
+                        templatePrefix,
+                        termFactory.getTypeFactory().getXsdStringDatatype()));
+
+        IQTree tree = iqFactory.createUnaryIQTree(
+                iqFactory.createFilterNode(termFactory.getRDF2DBBooleanFunctionalTerm(sparqlSTRSTARTSFunctionWithParameters)),
+                definition.getTree());
+
+        return iqFactory.createIQ(projectionAtom, tree);
     }
 
     private IQ filterDefinitionWithConstant(IQ definition, ObjectConstant objectConstant,
@@ -376,10 +360,10 @@ public class SecondPhaseQueryMergingTransformer extends AbstractMultiPhaseQueryM
         DistinctVariableOnlyDataAtom projectionAtom = definition.getProjectionAtom();
         Variable indexVariable = projectionAtom.getArguments().get(indexPattern.getPosition());
 
-        ImmutableExpression filterCondition = termFactory.getStrictEquality(indexVariable, objectConstant);
         IQTree filteredTree = iqFactory.createUnaryIQTree(
-                iqFactory.createFilterNode(filterCondition),
+                iqFactory.createFilterNode(termFactory.getStrictEquality(indexVariable, objectConstant)),
                 definition.getTree());
+
         return iqFactory.createIQ(projectionAtom, filteredTree.normalizeForOptimization(variableGenerator));
     }
 

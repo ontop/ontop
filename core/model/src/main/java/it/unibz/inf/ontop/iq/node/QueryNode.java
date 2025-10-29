@@ -1,7 +1,9 @@
 package it.unibz.inf.ontop.iq.node;
 
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Sets;
 import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.substitution.InjectiveSubstitution;
 
 /**
  * Immutable.
@@ -17,7 +19,9 @@ public interface QueryNode {
      * returned by the QueryNode.
      *
      */
-    ImmutableSet<Variable> getLocalVariables();
+    default ImmutableSet<Variable> getLocalVariables() {
+        return Sets.union(getLocallyDefinedVariables(), getLocallyRequiredVariables()).immutableCopy();
+    }
 
 
     /**
@@ -40,5 +44,15 @@ public interface QueryNode {
      * Important to know for nodes with filtering conditions when normalizing, so to guarantee convergence.
      *
      */
-    boolean wouldKeepDescendingGroundTermInFilterAbove(Variable variable, boolean isConstant);
+    default boolean wouldKeepDescendingGroundTermInFilterAbove(Variable variable, boolean isConstant)  {
+        return false;
+    }
+
+    QueryNode applyFreshRenaming(InjectiveSubstitution<Variable> renamingSubstitution);
+
+        @Override
+    int hashCode();
+
+    @Override
+    boolean equals(Object obj);
 }

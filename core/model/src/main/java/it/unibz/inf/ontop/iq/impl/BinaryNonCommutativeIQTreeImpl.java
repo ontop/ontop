@@ -7,6 +7,7 @@ import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.OntopModelSettings;
 import it.unibz.inf.ontop.iq.BinaryNonCommutativeIQTree;
+import it.unibz.inf.ontop.iq.DownPropagation;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.IQTreeCache;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
@@ -19,8 +20,6 @@ import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.InjectiveSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.VariableGenerator;
-
-import java.util.Optional;
 
 
 public class BinaryNonCommutativeIQTreeImpl extends AbstractCompositeIQTree<BinaryNonCommutativeOperatorNode>
@@ -71,14 +70,6 @@ public class BinaryNonCommutativeIQTreeImpl extends AbstractCompositeIQTree<Bina
     }
 
     @Override
-    protected IQTree doApplyDescendingSubstitutionWithoutOptimizing(
-            Substitution<? extends VariableOrGroundTerm> descendingSubstitution,
-            VariableGenerator variableGenerator) {
-        return getRootNode().applyDescendingSubstitutionWithoutOptimizing(descendingSubstitution, getLeftChild(), getRightChild(), variableGenerator);
-    }
-
-
-    @Override
     protected IQTree doNormalizeForOptimization(VariableGenerator variableGenerator, IQTreeCache treeCache) {
         return getRootNode().normalizeForOptimization(getLeftChild(), getRightChild(), variableGenerator, treeCache);
     }
@@ -89,17 +80,26 @@ public class BinaryNonCommutativeIQTreeImpl extends AbstractCompositeIQTree<Bina
     }
 
     @Override
-    protected IQTree applyNonEmptyFreshRenaming(InjectiveSubstitution<Variable> renamingSubstitution) {
-        return getRootNode().applyFreshRenaming(renamingSubstitution, getLeftChild(), getRightChild(), getTreeCache());
+    public IQTree applyFreshRenaming(InjectiveSubstitution<Variable> renamingSubstitution) {
+        return iqFactory.createBinaryNonCommutativeIQTree(
+                getRootNode().applyFreshRenaming(renamingSubstitution),
+                iqTreeTools.applyDownPropagation(renamingSubstitution, getLeftChild()),
+                iqTreeTools.applyDownPropagation(renamingSubstitution, getRightChild()),
+                getTreeCache().applyFreshRenaming(renamingSubstitution));
     }
 
     @Override
-    protected IQTree applyRegularDescendingSubstitution(
-            Substitution<? extends VariableOrGroundTerm> descendingSubstitution,
-            Optional<ImmutableExpression> constraint, VariableGenerator variableGenerator) {
-        return getRootNode().applyDescendingSubstitution(descendingSubstitution, constraint, getLeftChild(), getRightChild(), variableGenerator);
+    public IQTree applyDescendingSubstitution(DownPropagation dp) {
+        return getRootNode().applyDescendingSubstitution(dp, getLeftChild(), getRightChild());
     }
 
+    @Override
+    public IQTree propagateDownConstraint(DownPropagation dp) {
+        IQTree newTree = getRootNode().propagateDownConstraint(dp, getLeftChild(), getRightChild());
+        return equals(newTree)
+                ? this
+                : newTree;
+    }
 
     @Override
     public boolean isConstructed(Variable variable) {
@@ -117,19 +117,8 @@ public class BinaryNonCommutativeIQTreeImpl extends AbstractCompositeIQTree<Bina
     }
 
     @Override
-    protected IQTree doPropagateDownConstraint(ImmutableExpression constraint, VariableGenerator variableGenerator) {
-        return getRootNode().propagateDownConstraint(constraint, getLeftChild(), getRightChild(), variableGenerator);
-    }
-
-    @Override
     protected IQTree doRemoveDistincts(IQTreeCache treeCache) {
         return getRootNode().removeDistincts(getLeftChild(), getRightChild(), treeCache);
-    }
-
-    @Override
-    protected IQTree createIQTree(ImmutableList<IQTree> newChildren) {
-        return iqFactory.createBinaryNonCommutativeIQTree(getRootNode(),
-                newChildren.get(0), newChildren.get(1));
     }
 
     @Override
@@ -154,7 +143,7 @@ public class BinaryNonCommutativeIQTreeImpl extends AbstractCompositeIQTree<Bina
 
     @Override
     protected VariableNonRequirement computeVariableNonRequirement() {
-        return getRootNode().computeNotInternallyRequiredVariables(getLeftChild(), getRightChild());
+        return getRootNode().computeVariableNonRequirement(getLeftChild(), getRightChild());
     }
 
     @Override

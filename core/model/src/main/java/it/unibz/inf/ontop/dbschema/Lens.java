@@ -1,6 +1,9 @@
 package it.unibz.inf.ontop.dbschema;
 
 import it.unibz.inf.ontop.iq.IQ;
+import it.unibz.inf.ontop.iq.IQTree;
+import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
+import it.unibz.inf.ontop.iq.visit.impl.ExtensionalDataNodeExtractor;
 
 import javax.annotation.Nonnull;
 
@@ -34,4 +37,13 @@ public interface Lens extends NamedRelationDefinition {
      */
     void freeze();
 
+    static int getMaxLevel(IQTree tree) {
+        return tree.acceptVisitor(new ExtensionalDataNodeExtractor())
+                .map(ExtensionalDataNode::getRelationDefinition)
+                .filter(r -> r instanceof Lens)
+                .map(r -> (Lens) r)
+                .mapToInt(Lens::getLevel)
+                .max()
+                .orElse(0);
+    }
 }

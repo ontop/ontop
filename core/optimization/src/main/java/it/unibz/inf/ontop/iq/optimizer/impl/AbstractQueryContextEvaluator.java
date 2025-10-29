@@ -6,14 +6,15 @@ import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.optimizer.QueryContextEvaluator;
-import it.unibz.inf.ontop.iq.type.impl.AbstractExpressionTransformer;
+import it.unibz.inf.ontop.iq.type.impl.AbstractTermTransformer;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.QueryContextSimplifiableFunctionSymbol;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.function.Predicate;
 
 public class AbstractQueryContextEvaluator implements QueryContextEvaluator {
@@ -29,45 +30,41 @@ public class AbstractQueryContextEvaluator implements QueryContextEvaluator {
 
     @Override
     public IQ optimize(IQ iq, @Nonnull QueryContext queryContext) {
-        if (queryContext == null)
-            throw new IllegalArgumentException("The query context must not be null");
+        Objects.requireNonNull(queryContext, "The query context must not be null");
 
-        var transformer = new QueryContextFunctionTransformer(queryContext, coreSingletons, functionSymbolPredicate);
+        var transformer = new TermTransformer(queryContext).treeTransformer();
 
         var initialTree = iq.getTree();
-        var newTree = initialTree.acceptTransformer(transformer);
+        var newTree = transformer.transform(initialTree);
         return newTree.equals(initialTree)
                 ? iq
                 : coreSingletons.getIQFactory().createIQ(iq.getProjectionAtom(), newTree);
     }
 
 
-    protected static class QueryContextFunctionTransformer extends AbstractExpressionTransformer {
+    private class TermTransformer extends AbstractTermTransformer {
 
         private final QueryContext queryContext;
-        private final Predicate<FunctionSymbol> functionSymbolPredicate;
 
-        protected QueryContextFunctionTransformer(QueryContext queryContext, CoreSingletons coreSingletons,
-                                                  Predicate<FunctionSymbol> functionSymbolPredicate) {
-            super(coreSingletons.getIQFactory(), coreSingletons.getUniqueTermTypeExtractor(), coreSingletons.getTermFactory());
+        TermTransformer(QueryContext queryContext) {
+            super(coreSingletons.getIQFactory(), coreSingletons.getTermFactory());
             this.queryContext = queryContext;
-            this.functionSymbolPredicate = functionSymbolPredicate;
         }
 
         @Override
-        protected boolean isFunctionSymbolToReplace(FunctionSymbol functionSymbol) {
-            return (functionSymbol instanceof QueryContextSimplifiableFunctionSymbol)
-                    && functionSymbolPredicate.test(functionSymbol);
-        }
+        protected Optional<ImmutableFunctionalTerm> replaceFunctionSymbol(FunctionSymbol functionSymbol,
+                                                                          ImmutableList<ImmutableTerm> newTerms, IQTree tree) {
 
-        @Override
-        protected ImmutableFunctionalTerm replaceFunctionSymbol(FunctionSymbol functionSymbol,
-                                                                ImmutableList<ImmutableTerm> newTerms, IQTree tree) {
-            ImmutableTerm newTerm = ((QueryContextSimplifiableFunctionSymbol) functionSymbol).simplifyWithContext(newTerms,
-                    queryContext, termFactory);
-            if (newTerm instanceof ImmutableFunctionalTerm)
-                return (ImmutableFunctionalTerm) newTerm;
-            return termFactory.getIdentityFunctionalTerm(newTerm);
+            if (functionSymbol instanceof QueryContextSimplifiableFunctionSymbol
+                    && functionSymbolPredicate.test(functionSymbol)) {
+
+                ImmutableTerm newTerm = ((QueryContextSimplifiableFunctionSymbol) functionSymbol).simplifyWithContext(newTerms,
+                        queryContext, termFactory);
+                if (newTerm instanceof ImmutableFunctionalTerm)
+                    return Optional.of((ImmutableFunctionalTerm) newTerm);
+                return Optional.of(termFactory.getIdentityFunctionalTerm(newTerm));
+            }
+            return Optional.empty();
         }
     }
 }

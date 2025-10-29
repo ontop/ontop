@@ -27,12 +27,10 @@ import it.unibz.inf.ontop.constraints.impl.ExtensionalDataNodeListContainmentChe
 import it.unibz.inf.ontop.evaluator.TermNullabilityEvaluator;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.CoreSingletons;
-import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQ;
-import it.unibz.inf.ontop.iq.UnaryIQTree;
+import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.tools.UnionBasedQueryMerger;
-import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
 import it.unibz.inf.ontop.model.term.IRIConstant;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
@@ -55,6 +53,8 @@ import java.util.function.Function;
 import java.util.stream.Collector;
 import java.util.stream.Stream;
 
+import static it.unibz.inf.ontop.iq.impl.UnaryIQTreeTools.UnaryIQTreeDecomposition;
+
 @Singleton
 public class TMappingSaturatorImpl implements MappingSaturator  {
 
@@ -65,8 +65,8 @@ public class TMappingSaturatorImpl implements MappingSaturator  {
     private final MappingCQCOptimizer mappingCqcOptimizer;
     private final UnionBasedQueryMerger queryMerger;
     private final CoreSingletons coreSingletons;
-    private final IntermediateQueryFactory iqFactory;
     private final SubstitutionFactory substitutionFactory;
+    private final IQTreeTools iqTreeTools;
     private final TermNullabilityEvaluator termNullabilityEvaluator;
 
     @Inject
@@ -81,7 +81,7 @@ public class TMappingSaturatorImpl implements MappingSaturator  {
         this.queryMerger = queryMerger;
         this.coreSingletons = coreSingletons;
         this.substitutionFactory = coreSingletons.getSubstitutionFactory();
-        this.iqFactory = coreSingletons.getIQFactory();
+        this.iqTreeTools = coreSingletons.getIQTreeTools();
         this.termNullabilityEvaluator = termNullabilityEvaluator;
     }
 
@@ -177,12 +177,14 @@ public class TMappingSaturatorImpl implements MappingSaturator  {
         private final MappingAssertionIndex fromIndex, toIndex;
         private final Function<ImmutableList<ImmutableTerm>, ImmutableList<ImmutableTerm>> termTransformer;
         private final boolean needOptimization;
+
         MappingAssertionConstructionNodeTransformer(MappingAssertionIndex fromIndex, MappingAssertionIndex toIndex, Function<ImmutableList<ImmutableTerm>, ImmutableList<ImmutableTerm>> termTransformer, boolean needOptimization) {
             this.fromIndex = fromIndex;
             this.toIndex = toIndex;
             this.termTransformer = termTransformer;
             this.needOptimization = needOptimization;
         }
+
         MappingAssertionIndex getFromIndex() { return fromIndex; }
         MappingAssertionIndex getToIndex() { return toIndex; }
 
@@ -190,14 +192,12 @@ public class TMappingSaturatorImpl implements MappingSaturator  {
 
         MappingAssertion updateConstructionNodeIri(MappingAssertion assertion) {
             IQ query = assertion.getQuery();
-            ConstructionNode constructionNode = (ConstructionNode) query.getTree().getRootNode();
-            DistinctVariableOnlyDataAtom projectionAtom = query.getProjectionAtom();
-            ImmutableList<Variable> variables = projectionAtom.getArguments();
+            var construction = UnaryIQTreeDecomposition.of(query.getTree(), ConstructionNode.class);
+            ConstructionNode constructionNode = construction.getNode();
+            ImmutableList<Variable> variables = query.getProjectionAtom().getArguments();
             ImmutableList<ImmutableTerm> args = constructionNode.getSubstitution().apply(variables);
             Substitution<ImmutableTerm> updatedSubstitution = substitutionFactory.getSubstitution(variables, termTransformer.apply(args));
-            ConstructionNode updatedConstructionNode = iqFactory.createConstructionNode(constructionNode.getVariables(), updatedSubstitution);
-            IQ updatedQuery = iqFactory.createIQ(projectionAtom,
-                    iqFactory.createUnaryIQTree(updatedConstructionNode, ((UnaryIQTree)query.getTree()).getChild()));
+            IQ updatedQuery = iqTreeTools.createMappingIQ(query.getProjectionAtom(), updatedSubstitution, construction.getChild());
             return assertion.copyOf(updatedQuery);
         }
 

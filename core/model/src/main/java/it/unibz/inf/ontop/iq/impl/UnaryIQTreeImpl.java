@@ -6,6 +6,7 @@ import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.OntopModelSettings;
+import it.unibz.inf.ontop.iq.DownPropagation;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.IQTreeCache;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
@@ -58,20 +59,24 @@ public class UnaryIQTreeImpl extends AbstractCompositeIQTree<UnaryOperatorNode> 
     }
 
     @Override
-    protected IQTree applyNonEmptyFreshRenaming(InjectiveSubstitution<Variable> renamingSubstitution) {
-        return getRootNode().applyFreshRenaming(renamingSubstitution, getChild(), getTreeCache());
+    public IQTree applyFreshRenaming(InjectiveSubstitution<Variable> renamingSubstitution) {
+        return iqFactory.createUnaryIQTree(
+                getRootNode().applyFreshRenaming(renamingSubstitution),
+                iqTreeTools.applyDownPropagation(renamingSubstitution, getChild()),
+                getTreeCache().applyFreshRenaming(renamingSubstitution));
     }
 
     @Override
-    protected IQTree applyRegularDescendingSubstitution(Substitution<? extends VariableOrGroundTerm> descendingSubstitution,
-                                                        Optional<ImmutableExpression> constraint, VariableGenerator variableGenerator) {
-        return getRootNode().applyDescendingSubstitution(descendingSubstitution, constraint, getChild(), variableGenerator);
+    public IQTree applyDescendingSubstitution(DownPropagation dp) {
+        return getRootNode().applyDescendingSubstitution(dp, getChild());
     }
 
     @Override
-    protected IQTree doApplyDescendingSubstitutionWithoutOptimizing(
-            Substitution<? extends VariableOrGroundTerm> descendingSubstitution, VariableGenerator variableGenerator) {
-        return getRootNode().applyDescendingSubstitutionWithoutOptimizing(descendingSubstitution, getChild(), variableGenerator);
+    public IQTree propagateDownConstraint(DownPropagation dp) {
+        IQTree newTree = getRootNode().propagateDownConstraint(dp, getChild());
+        return equals(newTree)
+                ? this
+                : newTree;
     }
 
     @Override
@@ -79,19 +84,10 @@ public class UnaryIQTreeImpl extends AbstractCompositeIQTree<UnaryOperatorNode> 
         return getVariables().contains(variable) && getRootNode().isConstructed(variable, getChild());
     }
 
+
     @Override
     protected boolean computeIsDistinct() {
         return getRootNode().isDistinct(this, getChild());
-    }
-
-    @Override
-    protected IQTree doPropagateDownConstraint(ImmutableExpression constraint, VariableGenerator variableGenerator) {
-        return getRootNode().propagateDownConstraint(constraint, getChild(), variableGenerator);
-    }
-
-    @Override
-    protected IQTree createIQTree(ImmutableList<IQTree> newChildren) {
-        return iqFactory.createUnaryIQTree(getRootNode(), newChildren.get(0));
     }
 
     @Override

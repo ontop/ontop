@@ -18,7 +18,6 @@ import it.unibz.inf.ontop.exception.OntopUnsupportedKGQueryException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
-import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.term.*;
@@ -41,6 +40,10 @@ import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
 import java.util.*;
+import java.util.stream.Stream;
+
+import static it.unibz.inf.ontop.iq.impl.UnaryIQTreeTools.UnaryIQTreeDecomposition;
+import static it.unibz.inf.ontop.iq.impl.UnaryIQTreeTools.UnaryOperatorSequence;
 
 @Singleton
 public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
@@ -64,7 +67,6 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
     public RDF4JQueryTranslatorImpl(CoreSingletons coreSingletons,
                                     RDF rdfFactory,
                                     InsertClauseNormalizer insertClauseNormalizer,
-                                    IQTreeTools iqTreeTools,
                                     OntopKGQuerySettings settings) {
         this.coreSingletons = coreSingletons;
         this.coreUtilsFactory = coreSingletons.getCoreUtilsFactory();
@@ -75,7 +77,7 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
         this.atomFactory = coreSingletons.getAtomFactory();
         this.rdfFactory = rdfFactory;
         this.insertClauseNormalizer = insertClauseNormalizer;
-        this.iqTreeTools = iqTreeTools;
+        this.iqTreeTools = coreSingletons.getIQTreeTools();
         if(settings.isCustomSPARQLFunctionRegistrationEnabled()) {
             CustomAggregateFunctionRegistry registry = CustomAggregateFunctionRegistry.getInstance();
             registry.add(new VarianceSampAggregateFactory());
@@ -188,11 +190,10 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
         ImmutableSet.Builder<IQ> iqsBuilder = ImmutableSet.builder();
         ImmutableSet<IntensionalDataNode> dataNodes = extractIntensionalDataNodesFromHead(insertTree);
 
-
         InsertClauseNormalizer.Result normalization = insertClauseNormalizer.normalize(dataNodes, whereTree);
-        IQTree normalizedSubTree = normalization.getConstructionNode()
-                .map(c -> (IQTree) iqFactory.createUnaryIQTree(c, whereTree))
-                .orElse(whereTree);
+        IQTree normalizedSubTree = iqTreeTools.unaryIQTreeBuilder()
+                .append(normalization.getConstructionNode())
+                .build(whereTree);
 
         // NB: when there is no default graph
         if (normalizedSubTree.isDeclaredAsEmpty())
@@ -256,15 +257,17 @@ public class RDF4JQueryTranslatorImpl implements RDF4JQueryTranslator {
     }
 
     private IQTree projectOutAllVars(IQTree tree) {
-        if (tree.getRootNode() instanceof QueryModifierNode) {
-            return iqFactory.createUnaryIQTree(
-                    (UnaryOperatorNode) tree.getRootNode(),
-                    projectOutAllVars(((UnaryIQTree) tree).getChild()));
-        }
+        var modifierSequence = UnaryOperatorSequence.<QueryModifierNode>of();
+        Stream.iterate(UnaryIQTreeDecomposition.of(tree, QueryModifierNode.class),
+                        IQTreeTools.IQTreeDecomposition::isPresent,
+                        m -> UnaryIQTreeDecomposition.of(m, QueryModifierNode.class))
+                .forEach(m ->
+                        modifierSequence.append(m.getNode()));
 
-        return iqFactory.createUnaryIQTree(
-                iqFactory.createConstructionNode(ImmutableSet.of()),
-                tree);
+        return iqTreeTools.unaryIQTreeBuilder()
+                .append(modifierSequence)
+                .append(iqFactory.createConstructionNode(ImmutableSet.of()))
+                .build(tree);
     }
 
     private RDF4JTupleExprTranslator getTranslator(ImmutableMap<Variable, GroundTerm> externalBindings, @Nullable Dataset dataset, boolean treatBNodeAsVariable) {

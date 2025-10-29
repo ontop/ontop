@@ -1,74 +1,63 @@
 package it.unibz.inf.ontop.generation.normalization.impl;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
+import it.unibz.inf.ontop.generation.normalization.DialectExtraNormalizer;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.iq.IQTree;
+import it.unibz.inf.ontop.iq.NaryIQTree;
+import it.unibz.inf.ontop.iq.impl.NaryIQTreeTools;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.UnionNode;
+import it.unibz.inf.ontop.iq.transform.impl.DefaultDelegatingIQTreeVariableGeneratorTransformer;
 import it.unibz.inf.ontop.iq.type.SingleTermTypeExtractor;
-import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.type.DBTermType;
-import it.unibz.inf.ontop.model.type.TermType;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Collection;
-import java.util.Map;
-import java.util.Optional;
 
-public class TypingNullsInUnionDialectExtraNormalizer extends AbstractTypingNullsDialectExtraNormalizer {
+import static it.unibz.inf.ontop.iq.impl.UnaryIQTreeTools.UnaryIQTreeDecomposition;
 
-    protected final SingleTermTypeExtractor uniqueTermTypeExtractor;
+public class TypingNullsInUnionDialectExtraNormalizer extends DefaultDelegatingIQTreeVariableGeneratorTransformer implements DialectExtraNormalizer {
 
     @Inject
-    protected TypingNullsInUnionDialectExtraNormalizer(CoreSingletons coreSingletons,
-                                                       SingleTermTypeExtractor uniqueTermTypeExtractor) {
-        super(coreSingletons);
-        this.uniqueTermTypeExtractor = uniqueTermTypeExtractor;
+    protected TypingNullsInUnionDialectExtraNormalizer(CoreSingletons coreSingletons, SingleTermTypeExtractor uniqueTermTypeExtractor) {
+        super(new Transformer(coreSingletons, uniqueTermTypeExtractor)::transform);
     }
 
-    @Override
-    public IQTree transformUnion(IQTree tree, UnionNode rootNode, ImmutableList<IQTree> children) {
-        ImmutableList<IQTree> updatedChildren = children.stream()
-                .map(this::transform)
-                .collect(ImmutableCollectors.toList());
+    private static class Transformer extends AbstractTypingNullsTransformer {
+        private final SingleTermTypeExtractor uniqueTermTypeExtractor;
 
-        ImmutableSet<Variable> nullVariables = updatedChildren.stream()
-                .map(IQTree::getRootNode)
-                .filter(c -> c instanceof ConstructionNode)
-                .map(c -> (ConstructionNode) c)
-                .map(this::extractNullVariables)
-                .flatMap(Collection::stream)
-                .collect(ImmutableCollectors.toSet());
+        Transformer(CoreSingletons coreSingletons,
+                    SingleTermTypeExtractor uniqueTermTypeExtractor) {
+            super(coreSingletons);
+            this.uniqueTermTypeExtractor = uniqueTermTypeExtractor;
+        }
 
-        if (nullVariables.isEmpty())
-            return updatedChildren.equals(children) ? tree : iqFactory.createNaryIQTree(rootNode, updatedChildren);
+        @Override
+        public IQTree transformUnion(NaryIQTree tree, UnionNode rootNode, ImmutableList<IQTree> children) {
+            ImmutableList<IQTree> updatedChildren = NaryIQTreeTools.transformChildren(children, this::transform);
 
-        ImmutableMap<Variable, ImmutableFunctionalTerm> typedNullMap = extractTypedNullMap(tree, nullVariables);
+            ImmutableSet<Variable> nullVariables = UnaryIQTreeDecomposition.getNodeStream(
+                            UnaryIQTreeDecomposition.of(updatedChildren, ConstructionNode.class))
+                    .map(this::extractNullVariables)
+                    .flatMap(Collection::stream)
+                    .collect(ImmutableCollectors.toSet());
 
-        ImmutableList<IQTree> newChildren = updatedChildren.stream()
-                .map(c -> updateSubQuery(c, typedNullMap))
-                .collect(ImmutableCollectors.toList());
+            if (nullVariables.isEmpty())
+                return withTransformedChildren(tree, updatedChildren);
 
-        return iqFactory.createNaryIQTree(rootNode, newChildren);
-    }
+            var typedNullMap = extractTypedNullMap(nullVariables,
+                    v -> uniqueTermTypeExtractor.extractSingleTermType(v, tree)
+                            .filter(t -> t instanceof DBTermType)
+                            .map(t -> (DBTermType) t));
 
-    private ImmutableMap<Variable, ImmutableFunctionalTerm> extractTypedNullMap(IQTree tree, ImmutableSet<Variable> nullVariables) {
-        ImmutableMap<Variable, Optional<TermType>> typeMap = nullVariables.stream()
-                .collect(ImmutableCollectors.toMap(
-                        v -> v,
-                        v -> uniqueTermTypeExtractor.extractSingleTermType(v, tree)));
+            ImmutableList<IQTree> newChildren = NaryIQTreeTools.transformChildren(updatedChildren,
+                    c -> updateSubTree(c, typedNullMap));
 
-        return typeMap.entrySet().stream()
-                .filter(e -> e.getValue().isPresent())
-                .filter(e -> e.getValue()
-                        .filter(t -> t instanceof DBTermType)
-                        .isPresent())
-                .collect(ImmutableCollectors.toMap(
-                        Map.Entry::getKey,
-                        e -> termFactory.getTypedNull((DBTermType) e.getValue().get())));
+            return iqFactory.createNaryIQTree(rootNode, newChildren);
+        }
     }
 }

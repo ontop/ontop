@@ -7,14 +7,11 @@ import it.unibz.inf.ontop.iq.node.QueryNode;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.iq.request.FunctionalDependencies;
 import it.unibz.inf.ontop.iq.request.VariableNonRequirement;
-import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
-import it.unibz.inf.ontop.iq.visit.IQVisitor;
+import it.unibz.inf.ontop.iq.visit.IQTreeVisitor;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.InjectiveSubstitution;
 import it.unibz.inf.ontop.utils.VariableGenerator;
-
-import java.util.Optional;
 
 
 public interface IQTree {
@@ -28,11 +25,7 @@ public interface IQTree {
      */
     ImmutableSet<Variable> getVariables();
 
-    <T> T acceptVisitor(IQVisitor<T> visitor);
-
-    default IQTree acceptTransformer(IQTreeVisitingTransformer transformer) {
-        return acceptVisitor(transformer);
-    }
+    <T> T acceptVisitor(IQTreeVisitor<T> visitor);
 
     IQTree normalizeForOptimization(VariableGenerator variableGenerator);
 
@@ -50,33 +43,30 @@ public interface IQTree {
     }
 
     /**
-     * Applies the descending substitution and performs SOME optimizations.
-     *
-     * Designed to be called DURING the "structural/semantic optimization" phase.
-     *
-     */
-    @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
-    IQTree applyDescendingSubstitution(
-            Substitution<? extends VariableOrGroundTerm> descendingSubstitution,
-            Optional<ImmutableExpression> constraint,
-            VariableGenerator variableGenerator);
-
-    /**
      * Particular type of descending substitution: only renaming some variables by external ones.
      *
      * Isolated from regular descending substitutions as it preserves the properties of the tree
      * (e.g. it remains normalized if it was already)
      *
      */
-    IQTree applyFreshRenaming(InjectiveSubstitution<Variable> freshRenamingSubstitution);
+    IQTree applyFreshRenaming(InjectiveSubstitution<Variable> renamingSubstitution);
 
     /**
-     * Applies the descending substitution WITHOUT applying any additional optimization.
+     * TODO: explain
      *
-     * Designed to be called AFTER the "structural/semantic optimization" phase.
+     * The constraint is used for pruning. It remains enforced by the parent tree.
+     *
      */
-    IQTree applyDescendingSubstitutionWithoutOptimizing(Substitution<? extends VariableOrGroundTerm> descendingSubstitution,
-                                                        VariableGenerator variableGenerator);
+    IQTree propagateDownConstraint(DownPropagation dp);
+
+    /**
+     * Applies the descending substitution and performs SOME optimizations.
+     *
+     * Designed to be called DURING the "structural/semantic optimization" phase.
+     *
+     */
+    IQTree applyDescendingSubstitution(DownPropagation dp);
+
 
     /**
      * Variables present in the tree
@@ -101,14 +91,6 @@ public interface IQTree {
 
     VariableNullability getVariableNullability();
 
-    /**
-     * TODO: explain
-     *
-     * The constraint is used for pruning. It remains enforced by
-     * a parent tree.
-     *
-     */
-    IQTree propagateDownConstraint(ImmutableExpression constraint, VariableGenerator variableGenerator);
 
     /**
      * TODO: find a better name
@@ -117,10 +99,6 @@ public interface IQTree {
 
     void validate() throws InvalidIntermediateQueryException;
 
-    /**
-     * If subTreeToReplace is not found, has no effect (besides creating a novel copy).
-     */
-    IQTree replaceSubTree(IQTree subTreeToReplace, IQTree newSubTree);
 
     /**
      * Returns a set of substitutions that define how the projected variables are constructed.

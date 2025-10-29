@@ -6,9 +6,13 @@ import it.unibz.inf.ontop.generation.normalization.DialectExtraNormalizer;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
+import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
+import it.unibz.inf.ontop.iq.transform.IQTreeVariableGeneratorTransformer;
+import it.unibz.inf.ontop.iq.transform.impl.AbstractDelegatingIQTreeVariableGeneratorTransformer;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
+import it.unibz.inf.ontop.iq.visit.impl.DefaultRecursiveIQTreeVisitingTransformerWithVariableGenerator;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.InequalityLabel;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbolFactory;
@@ -18,10 +22,12 @@ import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.stream.Stream;
 
+import static it.unibz.inf.ontop.iq.impl.UnaryIQTreeTools.UnaryIQTreeDecomposition;
+
 /**
  * SQL Server extra normalizer which can handle limit and offset for Microsoft SQL Server 2000 through 2008
  */
-public class SQLServerLimitOffsetOldVersionNormalizer implements DialectExtraNormalizer {
+public class SQLServerLimitOffsetOldVersionNormalizer extends AbstractDelegatingIQTreeVariableGeneratorTransformer implements DialectExtraNormalizer {
 
     private final IntermediateQueryFactory iqFactory;
     private final SubstitutionFactory substitutionFactory;
@@ -33,37 +39,34 @@ public class SQLServerLimitOffsetOldVersionNormalizer implements DialectExtraNor
     @Inject
     protected SQLServerLimitOffsetOldVersionNormalizer(DatabaseInfoSupplier databaseInfoSupplier,
                                                        DBFunctionSymbolFactory dbFunctionSymbolFactory,
-                                                       CoreSingletons coreSingletons,
-                                                       IQTreeTools iqTreeTools) {
+                                                       CoreSingletons coreSingletons) {
         this.substitutionFactory = coreSingletons.getSubstitutionFactory();
         this.termFactory = coreSingletons.getTermFactory();
         this.databaseInfoSupplier = databaseInfoSupplier;
         this.dbFunctionSymbolFactory = dbFunctionSymbolFactory;
-        this.iqTreeTools = iqTreeTools;
+        this.iqTreeTools = coreSingletons.getIQTreeTools();
         this.iqFactory = coreSingletons.getIQFactory();
     }
 
     @Override
-    public IQTree transform(IQTree tree, VariableGenerator variableGenerator) {
-        return tree.acceptTransformer(new Transformer(variableGenerator));
+    protected IQTreeVariableGeneratorTransformer getTransformer() {
+        return IQTreeVariableGeneratorTransformer.of(Transformer::new);
     }
 
-    private class Transformer extends DefaultRecursiveIQTreeVisitingTransformer {
-        private final VariableGenerator variableGenerator;
+    private class Transformer extends DefaultRecursiveIQTreeVisitingTransformerWithVariableGenerator {
 
         Transformer(VariableGenerator variableGenerator) {
-            super(SQLServerLimitOffsetOldVersionNormalizer.this.iqFactory);
-            this.variableGenerator = variableGenerator;
+            super(SQLServerLimitOffsetOldVersionNormalizer.this.iqFactory, variableGenerator);
         }
 
-        // Transformation necessary for versions 8,9,10 of SQL Server when a Slice Node is present
+        // Transformation necessary for versions 8,9,10 of SQL Server when a SliceNode is present
         @Override
-        public IQTree transformSlice(IQTree tree, SliceNode sliceNode, IQTree child) {
+        public IQTree transformSlice(UnaryIQTree tree, SliceNode sliceNode, IQTree child) {
 
             // If no SliceNode present, 2) not an older version of SQL Server pre-2012 3) no db info; use default transformation
             if (!databaseInfoSupplier.getDatabaseVersion().isPresent() ||
                     (Stream.of("8.", "9.", "10.").noneMatch(s -> databaseInfoSupplier.getDatabaseVersion().get().startsWith(s)))
-                    || !containsSliceNode(tree)) {
+                    || !IQTreeTools.contains(tree, SliceNode.class)) {
                 return super.transformSlice(tree, sliceNode, child);
             }
 
@@ -72,54 +75,39 @@ public class SQLServerLimitOffsetOldVersionNormalizer implements DialectExtraNor
 
             // CASE 1: No OrderBy, ORDER BY (SELECT NULL)
             // CASE 2: OrderBy present, ORDER BY (comparators)
-            ConstructionNode newConstruction = iqFactory.createConstructionNode(
-                    iqTreeTools.getChildrenVariables(child, freshVariable),
+            ConstructionNode newConstruction = iqTreeTools.createExtendingConstructionNode(
+                    child.getVariables(),
                     substitutionFactory.getSubstitution(freshVariable, getOrderBySubTerm(child)));
 
             ImmutableExpression expression = getNewFilterExpression(sliceNode, freshVariable);
             FilterNode newFilter = iqFactory.createFilterNode(expression);
 
+            // Patterns: SLICE [CONSTRUCT] [ORDER BY] -> SLICE [CONSTRUCT]
+            var construction = UnaryIQTreeDecomposition.of(child, ConstructionNode.class);
+            var orderBy = UnaryIQTreeDecomposition.of(construction, OrderByNode.class);
             // Drop ORDER BY node since it will now be part of the orderBy subTerm
-            IQTree newChild;
-            if (child.getRootNode() instanceof OrderByNode) {
-                newChild = child.getChildren().get(0);
-            } else if (!child.getChildren().isEmpty() && child.getChildren().get(0).getRootNode() instanceof OrderByNode) {
-                newChild = iqFactory.createUnaryIQTree((ConstructionNode) child.getRootNode(), child.getChildren().get(0).getChildren().get(0));
-            } else {
-                newChild = child;
-            }
-            IQTree normalizedChild = this.transform(newChild);
+            IQTree newChild = iqTreeTools.unaryIQTreeBuilder()
+                    .append(construction.getOptionalNode())
+                    .build(orderBy.getTail());
 
-            IQTree newTree = iqFactory.createUnaryIQTree(newFilter,
-                    iqFactory.createUnaryIQTree(newConstruction, normalizedChild));
+            IQTree newTree = iqTreeTools.unaryIQTreeBuilder()
+                    .append(newFilter)
+                    .append(newConstruction)
+                    .build(transform(newChild));
 
             // Additional CONSTRUCTION necessary when subtree leaf in NaryIQTree (e.g. sub-query)
             return iqFactory.createUnaryIQTree(
-                    iqFactory.createConstructionNode(newTree.getVariables()), newTree);
-        }
-
-        private boolean containsSliceNode(IQTree tree) {
-            if (tree.getChildren().isEmpty()) { return false; }
-
-            return tree.getRootNode() instanceof SliceNode ||
-                    tree.getChildren().stream().anyMatch(this::containsSliceNode);
+                    iqFactory.createConstructionNode(newTree.getVariables()),
+                    newTree);
         }
 
         private ImmutableFunctionalTerm getOrderBySubTerm(IQTree childTree) {
-            // Let SLICE be the rootNode
-            // Pattern 1: SLICE [ORDER BY]
-            if (childTree.getRootNode() instanceof OrderByNode) {
+            // Patterns: SLICE [CONSTRUCT] [ORDER BY]
+            var construction = UnaryIQTreeDecomposition.of(childTree, ConstructionNode.class);
+            var orderBy = UnaryIQTreeDecomposition.of(construction, OrderByNode.class);
+            if (orderBy.isPresent()) {
                 return termFactory.getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBRowNumberWithOrderBy(),
-                        ((OrderByNode) childTree.getRootNode())
-                                .getComparators().stream()
-                                .map(OrderByNode.OrderComparator::getTerm)
-                                .collect(ImmutableCollectors.toList()));
-            }
-            // Pattern 2: SLICE [CONSTRUCT] [ORDER BY]
-            if (!childTree.getChildren().isEmpty() &&
-                    childTree.getChildren().get(0).getRootNode() instanceof OrderByNode) {
-                return termFactory.getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBRowNumberWithOrderBy(),
-                        ((OrderByNode) childTree.getChildren().get(0).getRootNode())
+                        orderBy.getNode()
                                 .getComparators().stream()
                                 .map(OrderByNode.OrderComparator::getTerm)
                                 .collect(ImmutableCollectors.toList()));
@@ -138,7 +126,7 @@ public class SQLServerLimitOffsetOldVersionNormalizer implements DialectExtraNor
                         termFactory.getDBDefaultInequality(InequalityLabel.LTE,
                                 freshVariable,
                                 termFactory.getDBIntegerConstant((int) sliceNode.getOffset() +
-                                        sliceNode.getLimit().get().intValue())));
+                                        (int)sliceNode.getLimit().getAsLong())));
             }
             else if (!sliceNode.getLimit().isPresent()) {
                 // CASE 2: Only limit
@@ -150,7 +138,7 @@ public class SQLServerLimitOffsetOldVersionNormalizer implements DialectExtraNor
                 // CASE 3: Only offset
                 return termFactory.getDBDefaultInequality(InequalityLabel.LTE,
                         freshVariable,
-                        termFactory.getDBIntegerConstant(sliceNode.getLimit().get().intValue()));
+                        termFactory.getDBIntegerConstant((int)sliceNode.getLimit().getAsLong()));
             }
         }
     }
