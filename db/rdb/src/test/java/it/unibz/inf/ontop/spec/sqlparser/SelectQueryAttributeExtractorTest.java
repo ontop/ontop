@@ -7,10 +7,11 @@ import it.unibz.inf.ontop.dbschema.impl.OfflineMetadataProviderBuilder;
 import it.unibz.inf.ontop.dbschema.impl.SQLServerQuotedIDFactory;
 import it.unibz.inf.ontop.exception.InvalidQueryException;
 import it.unibz.inf.ontop.spec.sqlparser.exception.UnsupportedSelectQueryException;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static it.unibz.inf.ontop.spec.sqlparser.SQLTestingTools.*;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class SelectQueryAttributeExtractorTest {
 
@@ -52,8 +53,7 @@ public class SelectQueryAttributeExtractorTest {
                 "     ALESFO001.PRECIOFINAL\n"+
                 "\t             \n"+
                 "FROM ALMAES001 "+
-                "LEFT JOIN ALESFO001 ON ALMAES001.IDART = ALESFO001.IDART"
-        );
+                "LEFT JOIN ALESFO001 ON ALMAES001.IDART = ALESFO001.IDART");
         assertEquals(ImmutableList.of(
                 idfac.createAttributeID("IDART"),
                 idfac.createAttributeID("UPC"),
@@ -81,8 +81,7 @@ public class SelectQueryAttributeExtractorTest {
                 "                FROM\n" +
                 "                    measurement m\n" +
                 "                    LEFT JOIN concept unit_c ON unit_c.concept_id = m.unit_concept_id\n" +
-                "                    AND unit_c.concept_id != 0"
-        );
+                "                    AND unit_c.concept_id != 0");
         assertEquals(ImmutableList.of(
                 idfac.createAttributeID("measurement_id"),
                 idfac.createAttributeID("value"),
@@ -103,13 +102,12 @@ public class SelectQueryAttributeExtractorTest {
                 "union\n" +
                 "select abomSerialNumberMale as rotorID from AssemblyData\n" +
                 "union\n" +
-                "select abomSerialNumberFemale as rotorID from AssemblyData) as R"
-        );
+                "select abomSerialNumberFemale as rotorID from AssemblyData) as R");
         assertEquals(ImmutableList.of(
                 idfac.createAttributeID("rotorID")), res);
     }
 
-    @Test(expected = UnsupportedSelectQueryException.class) // issue 366
+    @Test // issue 366
     public void test_distinct_union() throws Exception {
         OfflineMetadataProviderBuilder builder = createMetadataProviderBuilder();
         builder.createDatabaseRelation("LinkData", "zpolrotorid", builder.getDBTypeFactory().getDBLargeIntegerType(), false);
@@ -119,13 +117,12 @@ public class SelectQueryAttributeExtractorTest {
         MetadataLookup metadataLookup = builder.build();
         QuotedIDFactory idfac = metadataLookup.getQuotedIDFactory();
         DefaultSelectQueryAttributeExtractor ae = new DefaultSelectQueryAttributeExtractor(metadataLookup, CORE_SINGLETONS);
-        RAExpressionAttributes r = ae.getRAExpressionAttributes(JSqlParserTools.parse("select \n distinct \n rotorID from\n" +
+        assertThrows(UnsupportedSelectQueryException.class, () -> ae.getRAExpressionAttributes(JSqlParserTools.parse(
+                "select \n distinct \n rotorID from\n" +
                 "(select zpolrotorid as rotorID from LinkData\n" +
                 "union\n" +
                 "select abomSerialNumberMale as rotorID from AssemblyData\n" +
                 "union\n" +
-                "select abomSerialNumberFemale as rotorID from AssemblyData) as R"));
+                "select abomSerialNumberFemale as rotorID from AssemblyData) as R")));
     }
-
-
 }

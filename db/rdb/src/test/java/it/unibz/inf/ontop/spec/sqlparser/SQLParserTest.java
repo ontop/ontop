@@ -10,20 +10,21 @@ import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.DBTypeFactory;
 import it.unibz.inf.ontop.spec.sqlparser.exception.UnsupportedSelectQueryException;
+import it.unibz.inf.ontop.spec.sqlparser.exception.UnsupportedSelectQueryRuntimeException;
 import net.sf.jsqlparser.JSQLParserException;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 
 import static it.unibz.inf.ontop.spec.sqlparser.SQLTestingTools.*;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class SQLParserTest {
 
 	private SelectQueryParser sqp;
 
-	@Before
+	@BeforeEach
 	public void beforeEachTest() {
 		OfflineMetadataProviderBuilder builder = createMetadataProviderBuilder();
 		QuotedIDFactory idfac = builder.getQuotedIDFactory();
@@ -195,9 +196,10 @@ public class SQLParserTest {
 		return rae;
 	}
 
-	@Test(expected = UnsupportedSelectQueryException.class) // due to WITH
+	@Test // due to WITH
 	public void test_0() throws Exception {
-		RAExpression re = parse("WITH  temp (n) AS (SELECT DISTINCT name FROM student) SELECT * FROM temp");
+        assertThrows(UnsupportedSelectQueryException.class, () ->
+		        parse("WITH  temp (n) AS (SELECT DISTINCT name FROM student) SELECT * FROM temp"));
 	}
 
 
@@ -233,21 +235,23 @@ public class SQLParserTest {
 		assertEquals(2, re.getAttributes().asMap().size());
 	}
 
-	@Test(expected = UnsupportedSelectQueryException.class) // due to DISTINCT
+	@Test // due to DISTINCT
 	public void test_1_3_1() throws Exception {
-		RAExpression re = parse("SELECT DISTINCT name FROM student");
+        assertThrows(UnsupportedSelectQueryException.class, () ->
+                parse("SELECT DISTINCT name FROM student"));
 	}
 
 	@Test
-	@Ignore // the SQL is not valid, yet JSQLParser accepts it in the form of SELECT name FROM student
+	@Disabled // the SQL is not valid, yet JSQLParser accepts it in the form of SELECT name FROM student
 	public void test_1_3_2() throws Exception {
 		RAExpression re = parse("SELECT ALL name FROM student");
 	}
 
-	@Test(expected = UnsupportedSelectQueryException.class)
+	@Test
 	// due to DISTINCT ON (PostgreSQL-specific) is not supported
 	public void test_1_3_3() throws Exception {
-		RAExpression re = parse("select DISTINCT ON (name,age,year) name,age FROM student");
+        assertThrows(UnsupportedSelectQueryException.class, () ->
+		        parse("select DISTINCT ON (name,age,year) name,age FROM student"));
 	}
 
 	@Test
@@ -340,12 +344,10 @@ public class SQLParserTest {
 		assertEquals(2, re.getAttributes().asMap().size());
 	}
 
-	@Test(expected = InvalidQueryException.class) // alias does not exist
+	@Test // alias does not exist
 	public void test_1_7_1() throws Exception {
-		RAExpression re = parse("SELECT alias.id, alias.name FROM student");
-		assertEquals(1, re.getDataAtoms().size());
-		assertEquals(0, re.getFilterAtoms().size());
-		assertEquals(2, re.getAttributes().asMap().size());
+        assertThrows(InvalidQueryException.class, () ->
+		        parse("SELECT alias.id, alias.name FROM student"));
 	}
 
 	@Test
@@ -476,77 +478,87 @@ public class SQLParserTest {
 		assertEquals(3, re.getAttributes().asMap().size());
 	}
 
-	@Test(expected = UnsupportedSelectQueryException.class) // aggregation is not supported
+	@Test // aggregation is not supported
 	public void max_test() throws Exception {
-		RAExpression re = parse("SELECT MAX(score) AS max_score FROM grade");
+        assertThrows(UnsupportedSelectQueryException.class, () ->
+		        parse("SELECT MAX(score) AS max_score FROM grade"));
 	}
 
-	@Test(expected = UnsupportedSelectQueryException.class) // aggregation is not supported
+	@Test // aggregation is not supported
 	public void min_test() throws Exception {
-		RAExpression re = parse("SELECT MIN(score) AS min_score FROM grade");
+        assertThrows(UnsupportedSelectQueryException.class, () ->
+		        parse("SELECT MIN(score) AS min_score FROM grade"));
 	}
 
-	@Test(expected = UnsupportedSelectQueryException.class) // aggregation is not supported
+	@Test // aggregation is not supported
 	public void avg_test() throws Exception {
-		RAExpression re = parse("SELECT AVG(score) AS avg_score FROM grade");
+        assertThrows(UnsupportedSelectQueryException.class, () ->
+		        parse("SELECT AVG(score) AS avg_score FROM grade"));
 	}
 
-	@Test(expected = UnsupportedSelectQueryException.class) // aggregation is not supported
+	@Test // aggregation is not supported
 	public void sum_test() throws Exception {
-		RAExpression re = parse("SELECT SUM(amount) AS total_amount FROM tax");
+        assertThrows(UnsupportedSelectQueryException.class, () ->
+		        parse("SELECT SUM(amount) AS total_amount FROM tax"));
 	}
 
-	@Test(expected = UnsupportedSelectQueryException.class) // aggregation is not supported
+	@Test // aggregation is not supported
 	public void count_star_test() throws Exception {
-		RAExpression re = parse("SELECT COUNT(*) AS student_count FROM student");
+        assertThrows(UnsupportedSelectQueryException.class, () ->
+		        parse("SELECT COUNT(*) AS student_count FROM student"));
 	}
 
-	@Test(expected = UnsupportedSelectQueryException.class) // aggregation is not supported
+	@Test // aggregation is not supported
 	public void count_test() throws Exception {
-		RAExpression re = parse("SELECT COUNT(id) AS student_count FROM student");
+        assertThrows(UnsupportedSelectQueryException.class, () ->
+		        parse("SELECT COUNT(id) AS student_count FROM student"));
 	}
 
-	// @Test(expected = UnsupportedSelectQueryException.class)
-	// SQL:1999 aggregation not supported by JSQLParser: it treats EVERY as a function name here
-	// see https://blog.jooq.org/2014/12/18/a-true-sql-gem-you-didnt-know-yet-the-every-aggregate-function/
+	@Test
+	@Disabled("SQL:1999 aggregation not supported by JSQLParser: it treats EVERY as a function name here" +
+            " see https://blog.jooq.org/2014/12/18/a-true-sql-gem-you-didnt-know-yet-the-every-aggregate-function/")
 	public void every_test() throws Exception {
 		RAExpression re = parse("SELECT EVERY(id < 10) AS student_id FROM student");
 	}
 
-	// @Test(expected = UnsupportedSelectQueryException.class)
-	// SQL:1999 aggregation not supported by JSQLParser: it treats ANY as a function name here
+	@Test
+	@Disabled("SQL:1999 aggregation not supported by JSQLParser: it treats ANY as a function name here")
 	public void any_test() throws Exception {
 		RAExpression re = parse("SELECT ANY(id < 10) AS student_id FROM student");
 	}
 
-	// @Test(expected = UnsupportedSelectQueryException.class)
-	// SQL:1999 aggregation not supported by JSQLParser: it treats SOME as a function name here
+	@Test
+	@Disabled("SQL:1999 aggregation not supported by JSQLParser: it treats SOME as a function name here")
 	public void some_test() throws Exception {
 		RAExpression re = parse("SELECT SOME(id < 10) AS student_id FROM student");
 	}
 
 
-	@Test(expected = UnsupportedSelectQueryException.class) // due to DISTINCT
+	@Test // due to DISTINCT
 	public void test_3_8_1() throws Exception {
-		RAExpression re = parse("SELECT DISTINCT maker FROM Product "
-				+ "WHERE type = 'PC' AND NOT model = ANY (SELECT model FROM PC)");
+        assertThrows(UnsupportedSelectQueryException.class, () ->
+		        parse("SELECT DISTINCT maker FROM Product "
+				+ "WHERE type = 'PC' AND NOT model = ANY (SELECT model FROM PC)"));
 	}
 
 
-	@Test(expected = UnsupportedSelectQueryException.class) // due to DISTINCT
+	@Test // due to DISTINCT
 	public void test_3_9_1() throws Exception {
-		RAExpression re = parse("SELECT DISTINCT maker FROM Product "
-				+ "WHERE type = 'PC' AND NOT model = SOME (SELECT model FROM PC)");
+        assertThrows(UnsupportedSelectQueryException.class, () ->
+		        parse("SELECT DISTINCT maker FROM Product "
+				+ "WHERE type = 'PC' AND NOT model = SOME (SELECT model FROM PC)"));
 	}
 
-	@Test(expected = UnsupportedSelectQueryException.class)
+	@Test
 	public void test_4_1() throws Exception {
-		RAExpression re = parse("SELECT nationality, COUNT(id) as num_nat FROM student GROUP BY nationality");
+        assertThrows(UnsupportedSelectQueryException.class, () ->
+		        parse("SELECT nationality, COUNT(id) as num_nat FROM student GROUP BY nationality"));
 	}
 
-	@Test(expected = UnsupportedSelectQueryException.class)
+	@Test
 	public void test_4_2() throws Exception {
-		RAExpression re = parse("SELECT nationality, COUNT(id) num_nat FROM student WHERE birth_year>2000 GROUP BY nationality");
+        assertThrows(UnsupportedSelectQueryException.class, () ->
+		        parse("SELECT nationality, COUNT(id) num_nat FROM student WHERE birth_year>2000 GROUP BY nationality"));
 	}
 
 	@Test
@@ -557,10 +569,11 @@ public class SQLParserTest {
 		assertEquals(2, re.getAttributes().asMap().size());
 	}
 
-	@Test(expected = UnsupportedSelectQueryException.class) // due to ALL
+	@Test // due to ALL
 	public void test_4_4() throws Exception {
-		RAExpression re = parse("SELECT des_date,des_amount,ord_amount FROM despatch WHERE des_amount > ALL("
-				+ "SELECT ord_amount FROM orders WHERE ord_amount=2000)");
+        assertThrows(UnsupportedSelectQueryException.class, () ->
+		        parse("SELECT des_date,des_amount,ord_amount FROM despatch WHERE des_amount > ALL("
+				+ "SELECT ord_amount FROM orders WHERE ord_amount=2000)"));
 	}
 
 	@Test
@@ -603,34 +616,40 @@ public class SQLParserTest {
 		assertEquals(4, re.getAttributes().asMap().size());
 	}
 
-	@Test(expected = UnsupportedSelectQueryException.class) // due to LEFT JOIN
+	@Test // due to LEFT JOIN
 	public void test_5_3() throws Exception {
-		RAExpression re = parse("SELECT t1.id, t1.name, t2.class_id, t2.grade FROM student t1 LEFT JOIN grade t2 ON t1.id=t2.st_id");
+        assertThrows(UnsupportedSelectQueryException.class, () ->
+		        parse("SELECT t1.id, t1.name, t2.class_id, t2.grade FROM student t1 LEFT JOIN grade t2 ON t1.id=t2.st_id"));
 	}
 
-	@Test(expected = UnsupportedSelectQueryException.class) // due to RIGHT JOIN
+	@Test // due to RIGHT JOIN
 	public void test_5_4() throws Exception {
-		RAExpression re = parse("SELECT t1.id, t1.name, t2.class_id, t2.grade FROM student t1 RIGHT JOIN grade t2 ON t1.id=t2.st_id");
+        assertThrows(UnsupportedSelectQueryException.class, () ->
+		        parse("SELECT t1.id, t1.name, t2.class_id, t2.grade FROM student t1 RIGHT JOIN grade t2 ON t1.id=t2.st_id"));
 	}
 
-	@Test(expected = UnsupportedSelectQueryException.class) // due to FULL JOIN
+	@Test // due to FULL JOIN
 	public void test_5_5() throws Exception {
-		RAExpression re = parse("SELECT id, name, class_id, grade FROM student t1 FULL JOIN grade t2 ON t1.id=t2.st_id");
+        assertThrows(UnsupportedSelectQueryException.class, () ->
+		        parse("SELECT id, name, class_id, grade FROM student t1 FULL JOIN grade t2 ON t1.id=t2.st_id"));
 	}
 
-	@Test(expected = UnsupportedSelectQueryException.class) // due to LEFT JOIN
+	@Test // due to LEFT JOIN
 	public void test_5_6() throws Exception {
-		RAExpression re = parse("SELECT id, name, class_id, grade FROM student t1 LEFT OUTER JOIN grade t2 ON t1.id=t2.st_id");
+        assertThrows(UnsupportedSelectQueryException.class, () ->
+		        parse("SELECT id, name, class_id, grade FROM student t1 LEFT OUTER JOIN grade t2 ON t1.id=t2.st_id"));
 	}
 
-	@Test(expected = UnsupportedSelectQueryException.class) // due to RIGHT JOIN
+	@Test // due to RIGHT JOIN
 	public void test_5_7() throws Exception {
-		RAExpression re = parse("SELECT id, name, class_id, grade FROM student t1 RIGHT OUTER JOIN grade t2 ON t1.id=t2.st_id");
+        assertThrows(UnsupportedSelectQueryException.class, () ->
+		        parse("SELECT id, name, class_id, grade FROM student t1 RIGHT OUTER JOIN grade t2 ON t1.id=t2.st_id"));
 	}
 
-	@Test(expected = UnsupportedSelectQueryException.class) // due to FULL JOIN
+	@Test // due to FULL JOIN
 	public void test_5_8() throws Exception {
-		RAExpression re = parse("SELECT id, name, class_id, grade FROM student t1 FULL OUTER JOIN grade t2 ON t1.id=t2.st_id");
+        assertThrows(UnsupportedSelectQueryException.class, () ->
+		        parse("SELECT id, name, class_id, grade FROM student t1 FULL OUTER JOIN grade t2 ON t1.id=t2.st_id"));
 	}
 
 	@Test
@@ -649,9 +668,8 @@ public class SQLParserTest {
 		assertEquals(3, re.getAttributes().asMap().size());
 	}
 
-	// TODO: check the intention
 	@Test
-	@Ignore
+	@Disabled("check the intention")
 	public void test_5_11() throws Exception {
 		RAExpression re = parse("SELECT id, name, score FROM student JOIN grade USING (id)");
 		assertEquals(2, re.getDataAtoms().size());
@@ -711,30 +729,35 @@ public class SQLParserTest {
 		assertFalse(re.getAttributes().asMap().keySet().iterator().next() instanceof Variable);
 	}
 
-	@Test(expected = UnsupportedSelectQueryException.class) // due to UNION ALL
+	@Test // due to UNION ALL
 	public void test_8_1() throws Exception {
-		RAExpression re = parse("SELECT name FROM student UNION ALL SELECT name FROM erasmus");
+        assertThrows(UnsupportedSelectQueryException.class, () ->
+		        parse("SELECT name FROM student UNION ALL SELECT name FROM erasmus"));
 	}
 
-	@Test(expected = UnsupportedSelectQueryException.class) // due to UNION ALL and UNION
+	@Test // due to UNION ALL and UNION
 	public void test_8_2() throws Exception {
-		RAExpression re = parse("SELECT name FROM student UNION ALL SELECT name FROM erasmus UNION SELECT DISTINCT payee FROM tax");
+        assertThrows(UnsupportedSelectQueryException.class, () ->
+		        parse("SELECT name FROM student UNION ALL SELECT name FROM erasmus UNION SELECT DISTINCT payee FROM tax"));
 	}
 
-	@Test(expected = UnsupportedSelectQueryException.class) // due to UNION ALL
+	@Test // due to UNION ALL
 	public void test_8_3() throws Exception {
-		RAExpression re = parse("SELECT name FROM student WHERE id = 20 UNION ALL SELECT name FROM erasmus WHERE id = 20");
+        assertThrows(UnsupportedSelectQueryException.class, () ->
+		        parse("SELECT name FROM student WHERE id = 20 UNION ALL SELECT name FROM erasmus WHERE id = 20"));
 	}
 
-	@Test(expected = UnsupportedSelectQueryException.class) // due to UNION
+	@Test // due to UNION
 	public void test_8_4() throws Exception {
-		RAExpression re = parse("SELECT name FROM student JOIN grade on student.id=grade.st_id AND grade.score>=25 UNION SELECT name FROM erasmus");
+        assertThrows(UnsupportedSelectQueryException.class, () ->
+		        parse("SELECT name FROM student JOIN grade on student.id=grade.st_id AND grade.score>=25 UNION SELECT name FROM erasmus"));
 	}
 
-	@Test(expected = UnsupportedSelectQueryException.class) // due to UNION ALL
+	@Test // due to UNION ALL
 	public void test_8_5() throws Exception {
-		RAExpression re = parse("SELECT id, name, course, score, semester FROM student t1 JOIN grade t2 ON t1.id=t2.st_id JOIN semester t3 ON t2.sm_id=t3.id "
-				+ "UNION ALL SELECT id, name, course, score, semester FROM erasmus t4 JOIN grade t2 ON t4.id=t2.st_id JOIN semester t3 ON t2.sm_id=t3.id");
+        assertThrows(UnsupportedSelectQueryException.class, () ->
+		        parse("SELECT id, name, course, score, semester FROM student t1 JOIN grade t2 ON t1.id=t2.st_id JOIN semester t3 ON t2.sm_id=t3.id "
+				+ "UNION ALL SELECT id, name, course, score, semester FROM erasmus t4 JOIN grade t2 ON t4.id=t2.st_id JOIN semester t3 ON t2.sm_id=t3.id"));
 	}
 
 	@Test
@@ -843,11 +866,12 @@ public class SQLParserTest {
 	}
 
 
-	@Test(expected = UnsupportedSelectQueryException.class) // due to DISTINCT
+	@Test // due to DISTINCT
 	public void testUnquoted0() throws Exception {
-		RAExpression re = parse("SELECT DISTINCT 3 AS \"v0QuestType\", NULL AS \"v0Lang\", CAST(\"QpeopleVIEW0\".\"nick2\" AS CHAR) AS \"v0\", 1 AS \"v1QuestType\", NULL AS \"v1Lang\", QpeopleVIEW0.id AS \"v1\""
+        assertThrows(UnsupportedSelectQueryException.class, () ->
+                parse("SELECT DISTINCT 3 AS \"v0QuestType\", NULL AS \"v0Lang\", CAST(\"QpeopleVIEW0\".\"nick2\" AS CHAR) AS \"v0\", 1 AS \"v1QuestType\", NULL AS \"v1Lang\", QpeopleVIEW0.id AS \"v1\""
 				+ "FROM people \"QpeopleVIEW0\" "
-				+ "WHERE \"QpeopleVIEW0\".\"id\" IS NOT NULL AND \"QpeopleVIEW0\".\"nick2\" IS NOT NULL");
+				+ "WHERE \"QpeopleVIEW0\".\"id\" IS NOT NULL AND \"QpeopleVIEW0\".\"nick2\" IS NOT NULL"));
 	}
 
 	@Test
@@ -857,12 +881,12 @@ public class SQLParserTest {
 				+ "WHERE \"QpeopleVIEW0\".\"id\" IS NOT NULL AND \"QpeopleVIEW0\".\"nick2\" IS NOT NULL");
 	}
 
-	@Test(expected = UnsupportedSelectQueryException.class) // due to DISTINCT
-	// Does not parse SELECT DISTINCT (on purpose)
+	@Test // due to DISTINCT
 	public void testUnquoted2() throws Exception {
-		RAExpression re = parse("SELECT DISTINCT 3 AS \"v0QuestType\", NULL AS \"v0Lang\", CAST(\"QpeopleVIEW0\".\"nick2\" AS CHAR) AS \"v0\", 1 AS \"v1QuestType\", NULL AS \"v1Lang\", QpeopleVIEW0.id AS \"v1\""
+        assertThrows(UnsupportedSelectQueryException.class, () ->
+                parse("SELECT DISTINCT 3 AS \"v0QuestType\", NULL AS \"v0Lang\", CAST(\"QpeopleVIEW0\".\"nick2\" AS CHAR) AS \"v0\", 1 AS \"v1QuestType\", NULL AS \"v1Lang\", QpeopleVIEW0.id AS \"v1\""
 				+ "FROM people \"QpeopleVIEW0\" "
-				+ "WHERE \"QpeopleVIEW0\".\"id\" IS NOT NULL AND \"QpeopleVIEW0\".\"nick2\" IS NOT NULL");
+				+ "WHERE \"QpeopleVIEW0\".\"id\" IS NOT NULL AND \"QpeopleVIEW0\".\"nick2\" IS NOT NULL"));
 	}
 
 	@Test
@@ -873,9 +897,10 @@ public class SQLParserTest {
 		assertEquals(1, re.getAttributes().asMap().size());
 	}
 
-	@Test(expected = UnsupportedSelectQueryException.class) // due to DISTINCT
+	@Test // due to DISTINCT
 	public void testCast2() throws Exception {
-		RAExpression re = parse("SELECT DISTINCT CAST(`view0`.`nick2` AS CHAR (8000) CHARACTER SET utf8) AS `v0` FROM people `view0` WHERE `view0`.`nick2` IS NOT NULL");
+        assertThrows(UnsupportedSelectQueryException.class, () ->
+		        parse("SELECT DISTINCT CAST(`view0`.`nick2` AS CHAR (8000) CHARACTER SET utf8) AS `v0` FROM people `view0` WHERE `view0`.`nick2` IS NOT NULL"));
 	}
 
 	/* Regex in MySQL, Oracle and Postgres*/
@@ -944,7 +969,7 @@ public class SQLParserTest {
 		assertEquals(1, re.getDataAtoms().size());
 		assertEquals(0, re.getFilterAtoms().size());
 		assertEquals(1, re.getAttributes().asMap().size());
-		assertTrue(re.getAttributes().asMap().values().iterator().next() instanceof ImmutableFunctionalTerm);
+        assertInstanceOf(ImmutableFunctionalTerm.class, re.getAttributes().asMap().values().iterator().next());
 	}
 
 	@Test
@@ -965,14 +990,15 @@ public class SQLParserTest {
 		assertFalse(re.getAttributes().asMap().keySet().iterator().next() instanceof Variable);
 	}
 
-	@Test(expected = UnsupportedSelectQueryException.class)
+	@Test
 	// due to CONVERT(varchar(50), ...), where varchar(50) is treated as a function call
 	public void test_2_p() throws Exception {
-		RAExpression re = parse("SELECT \"ID\" as \"KEYID\"\n" +
+        assertThrows(UnsupportedSelectQueryException.class, () ->
+		        parse("SELECT \"ID\" as \"KEYID\"\n" +
 				"      ,CONVERT(varchar(50), \"DATETIME\", 0) as \"DATETIMEH\"\n" +
 				"      ,\"SCALE\" as \"SCALE\"\n" +
 				"      ,\"INTERVAL\" as \"TEMPINTERVAL\"\n" +
-				"  FROM \"CIM\".\"dbo\".\"TEMPERATURE_DEVIATION\" where \"INTERVAL\" = '0-10'");
+				"  FROM \"CIM\".\"dbo\".\"TEMPERATURE_DEVIATION\" where \"INTERVAL\" = '0-10'"));
 	}
 
 	@Test
@@ -995,11 +1021,10 @@ public class SQLParserTest {
 		assertEquals(1, re.getAttributes().asMap().size());
 	}
 
-	@Test(expected = UnsupportedSelectQueryException.class) //due to IN with subselect
+	@Test //due to IN with subselect
 	public void test_IN() throws Exception {
-		RAExpression re = parse("SELECT * FROM oreda.pm_maint_items  WHERE (i_id,  pm_interval) IN (SELECT i_id, MAX(pm_interval) FROM oreda.pm_program GROUP BY i_id)");
-		assertEquals(7, re.getFilterAtoms().size());
-		assertEquals(1, re.getAttributes().asMap().size());
+        assertThrows(UnsupportedSelectQueryException.class, () ->
+		        parse("SELECT * FROM oreda.pm_maint_items  WHERE (i_id,  pm_interval) IN (SELECT i_id, MAX(pm_interval) FROM oreda.pm_program GROUP BY i_id)"));
 	}
 
     @Test
@@ -1034,9 +1059,10 @@ public class SQLParserTest {
 		assertEquals(2, re.getAttributes().asMap().size());
 	}
 
-	@Test(expected = UnsupportedSelectQueryException.class) // issue 184
+	@Test // issue 184
 	public void test_limit() throws Exception {
-		RAExpression re = parse("select STUDY_ID, patient_name(STUDY_ID) as label from demographics order by STUDY_ID limit 50");
+        assertThrows(UnsupportedSelectQueryException.class, () ->
+		        parse("select STUDY_ID, patient_name(STUDY_ID) as label from demographics order by STUDY_ID limit 50"));
 	}
 
 	@Test

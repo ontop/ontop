@@ -12,11 +12,11 @@ import it.unibz.inf.ontop.spec.sqlparser.exception.IllegalJoinException;
 import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import static it.unibz.inf.ontop.spec.sqlparser.SQLTestingTools.*;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Created by Roman Kontchakov on 01/11/2016.
@@ -34,7 +34,7 @@ public class RelationalExpressionTest {
     private NamedRelationDefinition TABLE_P, TABLE_Q, TABLE_R, TABLE_T;
     private RAExpression re1, re2;
 
-    @Before
+    @BeforeEach
     public void setupTest(){
         x = TERM_FACTORY.getVariable("x");
         y = TERM_FACTORY.getVariable("y");
@@ -66,39 +66,26 @@ public class RelationalExpressionTest {
 
         re1 = ops.create(TABLE_P, ImmutableList.of(x, y));
         re2 = ops.create(TABLE_T, ImmutableList.of(u, v));
-
-        System.out.println("****************************************************");
     }
 
     @Test
     public void cross_join_test() throws IllegalJoinException {
-        System.out.println(re1);
-        System.out.println(re2);
-
         RAExpression relationalExpression = ops.crossJoin(re1, re2);
-        System.out.println(relationalExpression);
 
         crossJoinAndJoinOnCommonAsserts(relationalExpression);
         assertTrue(relationalExpression.getFilterAtoms().isEmpty());
     }
 
-    @Test(expected = IllegalJoinException.class)
+    @Test
     public void cross_join_exception_test() throws IllegalJoinException {
         RAExpression re1_1 = ops.withAlias(re2, idFactory.createRelationID("P"));
 
-        System.out.println(re1);
-        System.out.println(re1_1);
-
-        ops.crossJoin(re1, re1_1);
+        assertThrows(IllegalJoinException.class, () -> ops.crossJoin(re1, re1_1));
     }
 
     @Test
     public void join_on_test() throws IllegalJoinException {
         ImmutableFunctionalTerm eq = TERM_FACTORY.getNotYetTypedEquality(x, u);
-
-        System.out.println(re1);
-        System.out.println(re2);
-        System.out.println(eq);
 
         EqualsTo onExpression = new EqualsTo();
         onExpression.setLeftExpression(new Column(new Table(TABLE_P.getID().getSQLRendering()), "A"));
@@ -108,58 +95,41 @@ public class RelationalExpressionTest {
                 attributes -> new ExpressionParser(idFactory, CORE_SINGLETONS)
                         .parseBooleanExpression(onExpression,  attributes));
 
-        System.out.println(relationalExpression);
-
         crossJoinAndJoinOnCommonAsserts(relationalExpression);
         assertEquals(ImmutableList.of(eq), relationalExpression.getFilterAtoms());
     }
 
-    @Test(expected = IllegalJoinException.class)
+    @Test
     public void join_on_exception_test() throws IllegalJoinException {
         RAExpression re1_1 = ops.withAlias(re2, idFactory.createRelationID("P"));
-
-        System.out.println(re1);
-        System.out.println(re1_1);
 
         EqualsTo onExpression = new EqualsTo();
         onExpression.setLeftExpression(new Column(new Table(TABLE_P.getID().getSQLRendering()), "A"));
         onExpression.setRightExpression(new Column(new Table(TABLE_Q.getID().getSQLRendering()), "A"));
 
-        ops.joinOn(re1, re1_1,
+        assertThrows(IllegalJoinException.class, () -> ops.joinOn(re1, re1_1,
                 attributes -> new ExpressionParser(idFactory, CORE_SINGLETONS)
-                        .parseBooleanExpression(onExpression, attributes));
+                        .parseBooleanExpression(onExpression, attributes)));
     }
 
     @Test
     public void natural_join_test() throws IllegalJoinException {
         ImmutableFunctionalTerm eq = TERM_FACTORY.getNotYetTypedEquality(x, u);
 
-        System.out.println(re1);
-        System.out.println(re2);
-        System.out.println(eq);
-
         RAExpression relationalExpression = ops.naturalJoin(re1, re2);
-        System.out.println(relationalExpression);
 
         naturalUsingCommonAsserts(relationalExpression);
     }
 
-    @Test(expected = IllegalJoinException.class)
+    @Test
     public void natural_join_exception_test() throws IllegalJoinException {
         RAExpression re1_1 = ops.withAlias(re2, idFactory.createRelationID("P"));
 
-        System.out.println(re1);
-        System.out.println(re1_1);
-
-        RAExpression relationalExpression = ops.naturalJoin(re1, re1_1);
-        System.out.println(relationalExpression);
+        assertThrows(IllegalJoinException.class, () -> ops.naturalJoin(re1, re1_1));
     }
 
-    @Test(expected = IllegalJoinException.class)
+    @Test
     public void natural_join_ambiguity_test() throws IllegalJoinException {
-        System.out.println(re1);
-        System.out.println(re2);
-
         EqualsTo onExpression = new EqualsTo();
         onExpression.setLeftExpression(new Column(new Table(TABLE_P.getID().getSQLRendering()), "A"));
         onExpression.setRightExpression(new Column(new Table(TABLE_Q.getID().getSQLRendering()), "A"));
@@ -171,53 +141,35 @@ public class RelationalExpressionTest {
         // This is used to simulate an ambiguity during the operation of natural join
         RAExpression re3 = ops.create(TABLE_R, ImmutableList.of(u, v));
 
-        System.out.println(re);
-        System.out.println(re3);
-
-        ops.naturalJoin(re, re3);
+        assertThrows(IllegalJoinException.class, () -> ops.naturalJoin(re, re3));
     }
 
     @Test
     public void join_using_test() throws IllegalJoinException {
-        System.out.println(re1);
-        System.out.println(re2);
-
         RAExpression relationalExpression =
                 ops.joinUsing(re1, re2, ImmutableSet.of(idFactory.createAttributeID("A")));
-
-        System.out.println(relationalExpression);
 
         naturalUsingCommonAsserts(relationalExpression);
     }
 
 
-    @Test(expected = IllegalJoinException.class)
+    @Test
     public void join_using_exception_test() throws IllegalJoinException {
         RAExpression re1_1 = ops.withAlias(re2, idFactory.createRelationID("P"));
 
-        System.out.println(re1);
-        System.out.println(re1_1);
-
-        RAExpression relationalExpression = ops.joinUsing(re1, re1_1,
-                ImmutableSet.of(idFactory.createAttributeID("A")));
-        System.out.println(relationalExpression);
+        assertThrows(IllegalJoinException.class, () -> ops.joinUsing(re1, re1_1,
+                ImmutableSet.of(idFactory.createAttributeID("A"))));
     }
 
-    @Test(expected = IllegalJoinException.class)
+    @Test
     public void join_using_no_commons_test() throws IllegalJoinException {
         RAExpression re2p = ops.create(TABLE_Q, ImmutableList.of(u, v));
 
-        System.out.println(re1);
-        System.out.println(re2p);
-
-        ops.joinUsing(re1, re2p, ImmutableSet.of(idFactory.createAttributeID("A")));
+        assertThrows(IllegalJoinException.class, () -> ops.joinUsing(re1, re2p, ImmutableSet.of(idFactory.createAttributeID("A"))));
     }
 
-    @Test(expected = IllegalJoinException.class)
+    @Test
     public void join_using_ambiguity_test() throws IllegalJoinException {
-        System.out.println(re1);
-        System.out.println(re2);
-
         EqualsTo onExpression = new EqualsTo();
         onExpression.setLeftExpression(new Column(new Table(TABLE_P.getID().getSQLRendering()), "A"));
         onExpression.setRightExpression(new Column(new Table(TABLE_Q.getID().getSQLRendering()), "A"));
@@ -229,10 +181,7 @@ public class RelationalExpressionTest {
         // This is used to simulate an ambiguity during the operation of natural join
         RAExpression re3 = ops.create(TABLE_R, ImmutableList.of(u, v));
 
-        System.out.println(relationalExpression);
-        System.out.println(re3);
-
-        ops.joinUsing(relationalExpression, re3, ImmutableSet.of(idFactory.createAttributeID("A")));
+        assertThrows(IllegalJoinException.class, () -> ops.joinUsing(relationalExpression, re3, ImmutableSet.of(idFactory.createAttributeID("A"))));
     }
 
 
@@ -240,9 +189,7 @@ public class RelationalExpressionTest {
     public void alias_test() {
         RelationID tableAlias = idFactory.createRelationID("S");
 
-        System.out.println(re1);
         RAExpression actual =  ops.withAlias(re1, tableAlias);
-        System.out.println(actual);
 
         ExtensionalDataNode f1 = re1.getDataAtoms().get(0);
         assertTrue(actual.getDataAtoms().contains(f1));
@@ -257,8 +204,6 @@ public class RelationalExpressionTest {
 
     @Test
     public void create_test() {
-        System.out.println(re1);
-
         assertEquals(ImmutableMap.of(
                 unqualified(TABLE_P,1), x,
                 unqualified(TABLE_P,2), y,

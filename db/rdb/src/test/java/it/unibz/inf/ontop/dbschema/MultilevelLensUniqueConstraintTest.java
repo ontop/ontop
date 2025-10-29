@@ -3,11 +3,11 @@ package it.unibz.inf.ontop.dbschema;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.stream.Collectors;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class MultilevelLensUniqueConstraintTest {
     private static final String LENS_FILE = "src/test/resources/multilevel-uc/multilevel-uc-lenses.json";
