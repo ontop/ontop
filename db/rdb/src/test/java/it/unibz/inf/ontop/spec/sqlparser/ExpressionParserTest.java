@@ -52,64 +52,64 @@ public class ExpressionParserTest {
     @Test
     public void null_test() throws JSQLParserException {
         ImmutableTerm translation = parseTerm("SELECT NULL AS A FROM DUMMY", ImmutableMap.of());
-        Assert.assertEquals(TERM_FACTORY.getNullConstant(), translation);
+        assertEquals(TERM_FACTORY.getNullConstant(), translation);
     }
 
     @Test
     public void double_test() throws JSQLParserException {
         ImmutableTerm translation = parseTerm("SELECT 1.0 AS A FROM DUMMY", ImmutableMap.of());
-        Assert.assertEquals(TERM_FACTORY.getDBConstant("1.0", DB_TYPE_FACTORY.getDBDoubleType()), translation);
+        assertEquals(TERM_FACTORY.getDBConstant("1.0", DB_TYPE_FACTORY.getDBDoubleType()), translation);
     }
 
     @Test
     public void hex_test() throws JSQLParserException {
         ImmutableTerm translation = parseTerm("SELECT 0xFF AS A FROM DUMMY", ImmutableMap.of());
-        Assert.assertEquals(TERM_FACTORY.getDBConstant("255", dbLongType), translation);
+        assertEquals(TERM_FACTORY.getDBConstant("255", dbLongType), translation);
     }
 
     @Test
     public void hex_quote_test() throws JSQLParserException {
         ImmutableTerm translation = parseTerm("SELECT x'FF' AS A FROM DUMMY", ImmutableMap.of());
-        Assert.assertEquals(TERM_FACTORY.getDBConstant("255", dbLongType), translation);
+        assertEquals(TERM_FACTORY.getDBConstant("255", dbLongType), translation);
     }
 
     @Test
     public void hex_quote2_test() throws JSQLParserException {
         ImmutableTerm translation = parseTerm("SELECT X'FF' AS A FROM DUMMY", ImmutableMap.of());
-        Assert.assertEquals(TERM_FACTORY.getDBConstant("255", dbLongType), translation);
+        assertEquals(TERM_FACTORY.getDBConstant("255", dbLongType), translation);
     }
 
     @Test
     public void long_test() throws JSQLParserException {
         ImmutableTerm translation = parseTerm("SELECT 1 AS A FROM DUMMY", ImmutableMap.of());
-        Assert.assertEquals(TERM_FACTORY.getDBConstant("1", dbLongType), translation);
+        assertEquals(TERM_FACTORY.getDBConstant("1", dbLongType), translation);
     }
 
     @Test
     public void string_test() throws JSQLParserException {
         ImmutableTerm translation = parseTerm("SELECT '1' AS A FROM DUMMY", ImmutableMap.of());
-        Assert.assertEquals(TERM_FACTORY.getDBStringConstant("1"), translation);
+        assertEquals(TERM_FACTORY.getDBStringConstant("1"), translation);
     }
 
     @Test
     public void date_test() throws JSQLParserException {
         //  ODBC escape sequence syntax
         ImmutableTerm translation = parseTerm("SELECT {d '2016-12-02'} AS A FROM DUMMY", ImmutableMap.of());
-        Assert.assertEquals(TERM_FACTORY.getDBConstant("2016-12-02", DB_TYPE_FACTORY.getDBDateType()), translation);
+        assertEquals(TERM_FACTORY.getDBConstant("2016-12-02", DB_TYPE_FACTORY.getDBDateType()), translation);
     }
 
     @Test
     public void time_test() throws JSQLParserException {
         //  ODBC escape sequence syntax
         ImmutableTerm translation = parseTerm("SELECT {t '15:57:02'} AS A FROM DUMMY", ImmutableMap.of());
-        Assert.assertEquals(TERM_FACTORY.getDBConstant("15:57:02", DB_TYPE_FACTORY.getDBTimeType()), translation);
+        assertEquals(TERM_FACTORY.getDBConstant("15:57:02", DB_TYPE_FACTORY.getDBTimeType()), translation);
     }
 
     @Test
     public void timestamp_test() throws JSQLParserException {
         //  ODBC escape sequence syntax
         ImmutableTerm translation = parseTerm("SELECT {ts '2016-12-02 15:57:02.03'} AS A FROM DUMMY", ImmutableMap.of());
-        Assert.assertEquals(TERM_FACTORY.getDBConstant("2016-12-02 15:57:02.03",
+        assertEquals(TERM_FACTORY.getDBConstant("2016-12-02 15:57:02.03",
                 DB_TYPE_FACTORY.getDBDateTimestampType()), translation);
     }
 
@@ -117,19 +117,19 @@ public class ExpressionParserTest {
     @Test
     public void date_literal_test() throws JSQLParserException {
         ImmutableTerm translation = parseTerm("SELECT DATE '1998-03-07' FROM DUMMY", ImmutableMap.of());
-        Assert.assertEquals(TERM_FACTORY.getDBConstant("1998-03-07", DB_TYPE_FACTORY.getDBDateType()), translation);
+        assertEquals(TERM_FACTORY.getDBConstant("1998-03-07", DB_TYPE_FACTORY.getDBDateType()), translation);
     }
 
     @Test
     public void time_literal_test() throws JSQLParserException {
         ImmutableTerm translation = parseTerm("SELECT TIME '15:57:02' FROM DUMMY", ImmutableMap.of());
-        Assert.assertEquals(TERM_FACTORY.getDBConstant("15:57:02", DB_TYPE_FACTORY.getDBTimeType()), translation);
+        assertEquals(TERM_FACTORY.getDBConstant("15:57:02", DB_TYPE_FACTORY.getDBTimeType()), translation);
     }
 
     @Test
     public void timestamp_literal_test() throws JSQLParserException {
         ImmutableTerm translation = parseTerm("SELECT TIMESTAMP '2016-12-02 15:57:02.03' FROM DUMMY", ImmutableMap.of());
-        Assert.assertEquals(TERM_FACTORY.getDBConstant("2016-12-02 15:57:02.03", DB_TYPE_FACTORY.getDBDateTimestampType()), translation);
+        assertEquals(TERM_FACTORY.getDBConstant("2016-12-02 15:57:02.03", DB_TYPE_FACTORY.getDBDateTimestampType()), translation);
     }
 
     @Test
@@ -138,7 +138,7 @@ public class ExpressionParserTest {
         ImmutableTerm translation = parseTerm("SELECT X + 1 AS A FROM DUMMY", ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
 
-        Assert.assertEquals(TERM_FACTORY.getImmutableFunctionalTerm(
+        assertEquals(TERM_FACTORY.getImmutableFunctionalTerm(
                 DB_FS_FACTORY.getUntypedDBMathBinaryOperator("+"),
                 v,
                 TERM_FACTORY.getDBConstant("1", dbLongType)), translation);
@@ -150,7 +150,7 @@ public class ExpressionParserTest {
         ImmutableTerm translation = parseTerm("SELECT X - 1 AS A FROM DUMMY", ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
 
-        Assert.assertEquals(TERM_FACTORY.getImmutableFunctionalTerm(
+        assertEquals(TERM_FACTORY.getImmutableFunctionalTerm(
                 DB_FS_FACTORY.getUntypedDBMathBinaryOperator("-"),
                 v,
                 TERM_FACTORY.getDBConstant("1", dbLongType)), translation);
@@ -162,7 +162,7 @@ public class ExpressionParserTest {
         ImmutableTerm translation = parseTerm("SELECT X * 2 AS A FROM DUMMY", ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
 
-        Assert.assertEquals(TERM_FACTORY.getImmutableFunctionalTerm(
+        assertEquals(TERM_FACTORY.getImmutableFunctionalTerm(
                 DB_FS_FACTORY.getUntypedDBMathBinaryOperator("*"),
                 v,
                 TERM_FACTORY.getDBConstant("2", dbLongType)), translation);
@@ -174,7 +174,7 @@ public class ExpressionParserTest {
         ImmutableTerm translation = parseTerm("SELECT X / 2 AS A FROM DUMMY", ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
 
-        Assert.assertEquals(TERM_FACTORY.getImmutableFunctionalTerm(
+        assertEquals(TERM_FACTORY.getImmutableFunctionalTerm(
                 DB_FS_FACTORY.getUntypedDBMathBinaryOperator("/"),
                 v,
                 TERM_FACTORY.getDBConstant("2", dbLongType)), translation);
@@ -186,7 +186,7 @@ public class ExpressionParserTest {
         ImmutableTerm translation = parseTerm("SELECT X % 2 AS A FROM DUMMY", ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
 
-        Assert.assertEquals(TERM_FACTORY.getImmutableFunctionalTerm(
+        assertEquals(TERM_FACTORY.getImmutableFunctionalTerm(
                 DB_FS_FACTORY.getUntypedDBMathBinaryOperator("%"),
                 v,
                 TERM_FACTORY.getDBConstant("2", dbLongType)), translation);
@@ -198,7 +198,7 @@ public class ExpressionParserTest {
         ImmutableTerm translation = parseTerm("SELECT X DIV 2 AS A FROM DUMMY", ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
 
-        Assert.assertEquals(TERM_FACTORY.getImmutableFunctionalTerm(
+        assertEquals(TERM_FACTORY.getImmutableFunctionalTerm(
                 DB_FS_FACTORY.getUntypedDBMathBinaryOperator("DIV"),
                 v,
                 TERM_FACTORY.getDBConstant("2", dbLongType)), translation);
@@ -211,7 +211,7 @@ public class ExpressionParserTest {
         ImmutableTerm translation = parseTerm("SELECT X || 'B' AS A FROM DUMMY", ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
 
-        Assert.assertEquals(TERM_FACTORY.getImmutableFunctionalTerm(
+        assertEquals(TERM_FACTORY.getImmutableFunctionalTerm(
                 DB_FS_FACTORY.getNullRejectingDBConcat(2),
                 v,
                 TERM_FACTORY.getDBStringConstant("B")), translation);
@@ -225,7 +225,7 @@ public class ExpressionParserTest {
 
         DBFunctionSymbol concat = DB_FS_FACTORY.getNullRejectingDBConcat(2);
 
-        Assert.assertEquals(TERM_FACTORY.getImmutableFunctionalTerm(
+        assertEquals(TERM_FACTORY.getImmutableFunctionalTerm(
                 concat,
                 TERM_FACTORY.getImmutableFunctionalTerm(
                         concat,
@@ -240,7 +240,7 @@ public class ExpressionParserTest {
         ImmutableTerm translation = parseTerm("SELECT CONCAT('A', X, 'B') FROM DUMMY", ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
 
-        Assert.assertEquals(TERM_FACTORY.getImmutableFunctionalTerm(
+        assertEquals(TERM_FACTORY.getImmutableFunctionalTerm(
                 DB_FS_FACTORY.getRegularDBFunctionSymbol("CONCAT", 3),
                 TERM_FACTORY.getDBStringConstant("A"),
                 v,
@@ -256,7 +256,7 @@ public class ExpressionParserTest {
         ImmutableList<ImmutableExpression> translation = parseBooleanExpression("SELECT X AS A FROM DUMMY WHERE X = 'B'", ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
 
-        Assert.assertEquals(TERM_FACTORY.getNotYetTypedEquality(
+        assertEquals(TERM_FACTORY.getNotYetTypedEquality(
                 v,
                 TERM_FACTORY.getDBStringConstant("B")), translation.get(0));
     }
@@ -267,7 +267,7 @@ public class ExpressionParserTest {
         ImmutableList<ImmutableExpression> translation = parseBooleanExpression("SELECT X AS A FROM DUMMY WHERE X <> 'B'", ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
 
-        Assert.assertEquals(TERM_FACTORY.getDBNot(TERM_FACTORY.getNotYetTypedEquality(
+        assertEquals(TERM_FACTORY.getDBNot(TERM_FACTORY.getNotYetTypedEquality(
                 v,
                 TERM_FACTORY.getDBStringConstant("B"))), translation.get(0));
     }
@@ -278,7 +278,7 @@ public class ExpressionParserTest {
         ImmutableList<ImmutableExpression> translation = parseBooleanExpression("SELECT X AS A FROM DUMMY WHERE X != 'B'", ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
 
-        Assert.assertEquals(TERM_FACTORY.getDBNot(TERM_FACTORY.getNotYetTypedEquality(
+        assertEquals(TERM_FACTORY.getDBNot(TERM_FACTORY.getNotYetTypedEquality(
                 v,
                 TERM_FACTORY.getDBStringConstant("B"))), translation.get(0));
     }
@@ -289,7 +289,7 @@ public class ExpressionParserTest {
         ImmutableList<ImmutableExpression> translation = parseBooleanExpression("SELECT X AS A FROM DUMMY WHERE X = 'Jane''s dogs'", ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
 
-        Assert.assertEquals(TERM_FACTORY.getNotYetTypedEquality(
+        assertEquals(TERM_FACTORY.getNotYetTypedEquality(
                 v,
                 TERM_FACTORY.getDBStringConstant("Jane's dogs")), translation.get(0));
     }
@@ -300,7 +300,7 @@ public class ExpressionParserTest {
         ImmutableList<ImmutableExpression> translation = parseBooleanExpression("SELECT X AS A FROM DUMMY WHERE X = 'Jane''''s dogs'", ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
 
-        Assert.assertEquals(TERM_FACTORY.getNotYetTypedEquality(
+        assertEquals(TERM_FACTORY.getNotYetTypedEquality(
                 v,
                 TERM_FACTORY.getDBStringConstant("Jane''s dogs")), translation.get(0));
     }
@@ -311,7 +311,7 @@ public class ExpressionParserTest {
         ImmutableList<ImmutableExpression> translation = parseBooleanExpression("SELECT X AS A FROM DUMMY WHERE X > 3", ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
 
-        Assert.assertEquals(TERM_FACTORY.getImmutableExpression(
+        assertEquals(TERM_FACTORY.getImmutableExpression(
                 DB_FS_FACTORY.getDBDefaultInequality(GT),
                 v,
                 TERM_FACTORY.getDBConstant("3", dbLongType)), translation.get(0));
@@ -323,7 +323,7 @@ public class ExpressionParserTest {
         ImmutableList<ImmutableExpression> translation = parseBooleanExpression("SELECT X AS A FROM DUMMY WHERE X >= 3", ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
 
-        Assert.assertEquals(TERM_FACTORY.getImmutableExpression(
+        assertEquals(TERM_FACTORY.getImmutableExpression(
                 DB_FS_FACTORY.getDBDefaultInequality(GTE),
                 v,
                 TERM_FACTORY.getDBConstant("3", dbLongType)), translation.get(0));
@@ -335,7 +335,7 @@ public class ExpressionParserTest {
         ImmutableList<ImmutableExpression> translation = parseBooleanExpression("SELECT X AS A FROM DUMMY WHERE X < 3", ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
 
-        Assert.assertEquals(TERM_FACTORY.getImmutableExpression(
+        assertEquals(TERM_FACTORY.getImmutableExpression(
                 DB_FS_FACTORY.getDBDefaultInequality(LT),
                 v,
                 TERM_FACTORY.getDBConstant("3", dbLongType)), translation.get(0));
@@ -347,7 +347,7 @@ public class ExpressionParserTest {
         ImmutableList<ImmutableExpression> translation = parseBooleanExpression("SELECT X AS A FROM DUMMY WHERE X <= 3", ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
 
-        Assert.assertEquals(TERM_FACTORY.getImmutableExpression(
+        assertEquals(TERM_FACTORY.getImmutableExpression(
                 DB_FS_FACTORY.getDBDefaultInequality(LTE),
                 v,
                 TERM_FACTORY.getDBConstant("3", dbLongType)), translation.get(0));
@@ -359,7 +359,7 @@ public class ExpressionParserTest {
         ImmutableList<ImmutableExpression> translation = parseBooleanExpression("SELECT X AS A FROM DUMMY WHERE NOT X = 'B'", ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
 
-        Assert.assertEquals(TERM_FACTORY.getImmutableExpression(NOT, TERM_FACTORY.getNotYetTypedEquality(
+        assertEquals(TERM_FACTORY.getImmutableExpression(NOT, TERM_FACTORY.getNotYetTypedEquality(
                 v,
                 TERM_FACTORY.getDBStringConstant("B"))), translation.get(0));
     }
@@ -370,7 +370,7 @@ public class ExpressionParserTest {
         ImmutableList<ImmutableExpression> translation = parseBooleanExpression("SELECT X AS A FROM DUMMY WHERE NOT X <> 'B'", ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
 
-        Assert.assertEquals(TERM_FACTORY.getNotYetTypedEquality(
+        assertEquals(TERM_FACTORY.getNotYetTypedEquality(
                 v,
                 TERM_FACTORY.getDBStringConstant("B")), translation.get(0));
     }
@@ -381,7 +381,7 @@ public class ExpressionParserTest {
         ImmutableList<ImmutableExpression> translation = parseBooleanExpression("SELECT X AS A FROM DUMMY WHERE NOT X != 'B'", ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
 
-        Assert.assertEquals(TERM_FACTORY.getNotYetTypedEquality(
+        assertEquals(TERM_FACTORY.getNotYetTypedEquality(
                 v,
                 TERM_FACTORY.getDBStringConstant("B")), translation.get(0));
     }
@@ -392,7 +392,7 @@ public class ExpressionParserTest {
         ImmutableList<ImmutableExpression> translation = parseBooleanExpression("SELECT X AS A FROM DUMMY WHERE NOT X > 3", ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
 
-        Assert.assertEquals(TERM_FACTORY.getImmutableExpression(NOT, TERM_FACTORY.getImmutableExpression(
+        assertEquals(TERM_FACTORY.getImmutableExpression(NOT, TERM_FACTORY.getImmutableExpression(
                 DB_FS_FACTORY.getDBDefaultInequality(GT),
                 v,
                 TERM_FACTORY.getDBConstant("3", dbLongType))), translation.get(0));
@@ -404,7 +404,7 @@ public class ExpressionParserTest {
         ImmutableList<ImmutableExpression> translation = parseBooleanExpression("SELECT X AS A FROM DUMMY WHERE NOT X >= 3", ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
 
-        Assert.assertEquals(TERM_FACTORY.getImmutableExpression(NOT, TERM_FACTORY.getImmutableExpression(
+        assertEquals(TERM_FACTORY.getImmutableExpression(NOT, TERM_FACTORY.getImmutableExpression(
                 DB_FS_FACTORY.getDBDefaultInequality(GTE),
                 v,
                 TERM_FACTORY.getDBConstant("3", dbLongType))), translation.get(0));
@@ -416,7 +416,7 @@ public class ExpressionParserTest {
         ImmutableList<ImmutableExpression> translation = parseBooleanExpression("SELECT X AS A FROM DUMMY WHERE NOT X < 3", ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
 
-        Assert.assertEquals(TERM_FACTORY.getImmutableExpression(NOT, TERM_FACTORY.getImmutableExpression(
+        assertEquals(TERM_FACTORY.getImmutableExpression(NOT, TERM_FACTORY.getImmutableExpression(
                 DB_FS_FACTORY.getDBDefaultInequality(LT),
                 v,
                 TERM_FACTORY.getDBConstant("3", dbLongType))), translation.get(0));
@@ -428,7 +428,7 @@ public class ExpressionParserTest {
         ImmutableList<ImmutableExpression> translation = parseBooleanExpression("SELECT X AS A FROM DUMMY WHERE NOT X <= 3", ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
 
-        Assert.assertEquals(TERM_FACTORY.getImmutableExpression(NOT, TERM_FACTORY.getImmutableExpression(
+        assertEquals(TERM_FACTORY.getImmutableExpression(NOT, TERM_FACTORY.getImmutableExpression(
                 DB_FS_FACTORY.getDBDefaultInequality(LTE),
                 v,
                 TERM_FACTORY.getDBConstant("3", dbLongType))), translation.get(0));
@@ -440,7 +440,7 @@ public class ExpressionParserTest {
         ImmutableList<ImmutableExpression> translation = parseBooleanExpression("SELECT X AS A FROM DUMMY WHERE 1 IS DISTINCT FROM 1", ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
 
-        Assert.assertEquals(TERM_FACTORY.getDBNot(
+        assertEquals(TERM_FACTORY.getDBNot(
                 TERM_FACTORY.getNotYetTypedEquality(TERM_FACTORY.getDBConstant("1", dbLongType),
                         TERM_FACTORY.getDBConstant("1", dbLongType))), translation.get(0).simplify());
     }
@@ -451,7 +451,7 @@ public class ExpressionParserTest {
         ImmutableList<ImmutableExpression> translation = parseBooleanExpression("SELECT X AS A FROM DUMMY WHERE 1 IS DISTINCT FROM NULL", ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
 
-        Assert.assertEquals(TERM_FACTORY.getDBBooleanConstant(true), translation.get(0).simplify());
+        assertEquals(TERM_FACTORY.getDBBooleanConstant(true), translation.get(0).simplify());
     }
 
     @Test
@@ -460,7 +460,7 @@ public class ExpressionParserTest {
         ImmutableList<ImmutableExpression> translation = parseBooleanExpression("SELECT X AS A FROM DUMMY WHERE NULL IS DISTINCT FROM 2", ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
 
-        Assert.assertEquals(TERM_FACTORY.getDBBooleanConstant(true), translation.get(0).simplify());
+        assertEquals(TERM_FACTORY.getDBBooleanConstant(true), translation.get(0).simplify());
     }
 
     @Test
@@ -469,7 +469,7 @@ public class ExpressionParserTest {
         ImmutableList<ImmutableExpression> translation = parseBooleanExpression("SELECT X AS A FROM DUMMY WHERE NULL IS DISTINCT FROM NULL", ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
 
-        Assert.assertEquals(TERM_FACTORY.getDBBooleanConstant(false), translation.get(0).simplify());
+        assertEquals(TERM_FACTORY.getDBBooleanConstant(false), translation.get(0).simplify());
     }
 
     @Test
@@ -478,11 +478,31 @@ public class ExpressionParserTest {
         ImmutableList<ImmutableExpression> translation = parseBooleanExpression("SELECT X AS A FROM DUMMY WHERE 1 IS NOT DISTINCT FROM 1", ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
 
-        Assert.assertEquals(
+        assertEquals(
                 TERM_FACTORY.getNotYetTypedEquality(
                         TERM_FACTORY.getDBConstant("1", dbLongType),
                         TERM_FACTORY.getDBConstant("1", dbLongType)),
                 translation.get(0).simplify());
+    }
+
+    @Ignore("DBFunctionSymbolFactory in H2 does not support this")
+    @Test
+    public void array_test() throws JSQLParserException {
+        Variable v = TERM_FACTORY.getVariable("x0");
+        ImmutableTerm translation = parseTerm("SELECT X[0] AS A FROM DUMMY", ImmutableMap.of(
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
+
+        assertEquals(TERM_FACTORY.getImmutableFunctionalTerm(
+                        DB_FS_FACTORY.getDBArrayAccess(), v,
+                        TERM_FACTORY.getDBConstant("1", dbLongType)),
+                translation);
+    }
+
+    @Test(expected = UnsupportedSelectQueryRuntimeException.class)
+    public void array_interval_test() throws JSQLParserException {
+        Variable v = TERM_FACTORY.getVariable("x0");
+        ImmutableTerm translation = parseTerm("SELECT X[2:4] AS A FROM DUMMY", ImmutableMap.of(
+                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
     }
 
     @Test
@@ -491,7 +511,7 @@ public class ExpressionParserTest {
         ImmutableList<ImmutableExpression> translation = parseBooleanExpression("SELECT X AS A FROM DUMMY WHERE X IN (1, 3)", ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
 
-        Assert.assertEquals(TERM_FACTORY.getImmutableExpression(DB_FS_FACTORY.getDBOr(2),
+        assertEquals(TERM_FACTORY.getImmutableExpression(DB_FS_FACTORY.getDBOr(2),
                 TERM_FACTORY.getNotYetTypedEquality(
                         v,
                         TERM_FACTORY.getDBConstant("1", dbLongType)),
@@ -506,7 +526,7 @@ public class ExpressionParserTest {
         ImmutableList<ImmutableExpression> translation = parseBooleanExpression("SELECT X AS A FROM DUMMY WHERE X IN (1)", ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
 
-        Assert.assertEquals(TERM_FACTORY.getNotYetTypedEquality(
+        assertEquals(TERM_FACTORY.getNotYetTypedEquality(
                         v,
                         TERM_FACTORY.getDBConstant("1", dbLongType)), translation.get(0));
     }
@@ -517,7 +537,7 @@ public class ExpressionParserTest {
         ImmutableList<ImmutableExpression> translation = parseBooleanExpression("SELECT X AS A FROM DUMMY WHERE X NOT IN (1, 3)", ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
 
-        Assert.assertEquals(TERM_FACTORY.getImmutableExpression(NOT,
+        assertEquals(TERM_FACTORY.getImmutableExpression(NOT,
                 TERM_FACTORY.getImmutableExpression(DB_FS_FACTORY.getDBOr(2),
                         TERM_FACTORY.getNotYetTypedEquality(
                                 v,
@@ -536,7 +556,7 @@ public class ExpressionParserTest {
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v1,
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("Y")), v2));
 
-        Assert.assertEquals(TERM_FACTORY.getImmutableExpression(DB_FS_FACTORY.getDBOr(2),
+        assertEquals(TERM_FACTORY.getImmutableExpression(DB_FS_FACTORY.getDBOr(2),
                 TERM_FACTORY.getConjunction(
                         TERM_FACTORY.getNotYetTypedEquality(
                                 v1,
@@ -564,7 +584,7 @@ public class ExpressionParserTest {
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v1,
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("Y")), v2));
 
-        Assert.assertEquals(ImmutableList.of(
+        assertEquals(ImmutableList.of(
                                 TERM_FACTORY.getNotYetTypedEquality(
                                         v1,
                                         TERM_FACTORY.getDBConstant("1", dbLongType)),
@@ -580,7 +600,7 @@ public class ExpressionParserTest {
         ImmutableList<ImmutableExpression> translation = parseBooleanExpression("SELECT X AS A FROM DUMMY WHERE X IS NULL", ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
 
-        Assert.assertEquals(TERM_FACTORY.getImmutableExpression(DB_FS_FACTORY.getDBIsNull(), v), translation.get(0));
+        assertEquals(TERM_FACTORY.getImmutableExpression(DB_FS_FACTORY.getDBIsNull(), v), translation.get(0));
     }
 
     @Test
@@ -589,7 +609,7 @@ public class ExpressionParserTest {
         ImmutableList<ImmutableExpression> translation = parseBooleanExpression("SELECT X AS A FROM DUMMY WHERE X IS NOT NULL", ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
 
-        Assert.assertEquals(TERM_FACTORY.getImmutableExpression(NOT,
+        assertEquals(TERM_FACTORY.getImmutableExpression(NOT,
                 TERM_FACTORY.getImmutableExpression(DB_FS_FACTORY.getDBIsNull(), v)), translation.get(0));
     }
 
@@ -616,7 +636,7 @@ public class ExpressionParserTest {
         ImmutableList<ImmutableExpression> translation = parseBooleanExpression("SELECT X AS A FROM DUMMY WHERE X NOT BETWEEN 1 AND 3", ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
 
-        Assert.assertEquals(TERM_FACTORY.getImmutableExpression(DB_FS_FACTORY.getDBOr(2),
+        assertEquals(TERM_FACTORY.getImmutableExpression(DB_FS_FACTORY.getDBOr(2),
                         TERM_FACTORY.getImmutableExpression(
                                 DB_FS_FACTORY.getDBDefaultInequality(LT),
                                 v,
@@ -633,7 +653,7 @@ public class ExpressionParserTest {
         ImmutableList<ImmutableExpression> translation = parseBooleanExpression("SELECT X AS A FROM DUMMY WHERE X LIKE '_A%'", ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
 
-        Assert.assertEquals(TERM_FACTORY.getImmutableExpression(DB_FS_FACTORY.getDBLike(),
+        assertEquals(TERM_FACTORY.getImmutableExpression(DB_FS_FACTORY.getDBLike(),
                 v,
                 TERM_FACTORY.getDBStringConstant("_A%")), translation.get(0));
     }
@@ -644,7 +664,7 @@ public class ExpressionParserTest {
         ImmutableList<ImmutableExpression> translation = parseBooleanExpression("SELECT X AS A FROM DUMMY WHERE X NOT LIKE '_A%'", ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
 
-        Assert.assertEquals(TERM_FACTORY.getImmutableExpression(NOT,
+        assertEquals(TERM_FACTORY.getImmutableExpression(NOT,
                 TERM_FACTORY.getImmutableExpression(DB_FS_FACTORY.getDBLike(),
                         v,
                         TERM_FACTORY.getDBStringConstant("_A%"))), translation.get(0));
@@ -656,7 +676,7 @@ public class ExpressionParserTest {
         ImmutableList<ImmutableExpression> translation = parseBooleanExpression("SELECT X AS A FROM DUMMY WHERE X ~ 'A.*B'", ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
 
-        Assert.assertEquals(TERM_FACTORY.getImmutableExpression(DB_FS_FACTORY.getDBRegexpMatches2(),
+        assertEquals(TERM_FACTORY.getImmutableExpression(DB_FS_FACTORY.getDBRegexpMatches2(),
                 v,
                 TERM_FACTORY.getDBStringConstant("A.*B")), translation.get(0));
     }
@@ -667,7 +687,7 @@ public class ExpressionParserTest {
         ImmutableList<ImmutableExpression> translation = parseBooleanExpression("SELECT X AS A FROM DUMMY WHERE X !~ 'A.*B'", ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
 
-        Assert.assertEquals(TERM_FACTORY.getImmutableExpression(NOT,
+        assertEquals(TERM_FACTORY.getImmutableExpression(NOT,
                 TERM_FACTORY.getImmutableExpression(DB_FS_FACTORY.getDBRegexpMatches2(),
                         v,
                         TERM_FACTORY.getDBStringConstant("A.*B"))), translation.get(0));
@@ -679,7 +699,7 @@ public class ExpressionParserTest {
         ImmutableList<ImmutableExpression> translation = parseBooleanExpression("SELECT X AS A FROM DUMMY WHERE X ~* 'A.*B'", ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
 
-        Assert.assertEquals(TERM_FACTORY.getImmutableExpression(DB_FS_FACTORY.getDBRegexpMatches3(),
+        assertEquals(TERM_FACTORY.getImmutableExpression(DB_FS_FACTORY.getDBRegexpMatches3(),
                 v,
                 TERM_FACTORY.getDBStringConstant("A.*B"),
                 TERM_FACTORY.getDBStringConstant("i")), translation.get(0));
@@ -691,7 +711,7 @@ public class ExpressionParserTest {
         ImmutableList<ImmutableExpression> translation = parseBooleanExpression("SELECT X AS A FROM DUMMY WHERE X !~* 'A.*B'", ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
 
-        Assert.assertEquals(TERM_FACTORY.getImmutableExpression(NOT,
+        assertEquals(TERM_FACTORY.getImmutableExpression(NOT,
                 TERM_FACTORY.getImmutableExpression(DB_FS_FACTORY.getDBRegexpMatches3(),
                         v,
                         TERM_FACTORY.getDBStringConstant("A.*B"),
@@ -704,7 +724,7 @@ public class ExpressionParserTest {
         ImmutableList<ImmutableExpression> translation = parseBooleanExpression("SELECT X AS A FROM DUMMY WHERE NOT X ~ 'A.*B'", ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
 
-        Assert.assertEquals(TERM_FACTORY.getImmutableExpression(NOT,
+        assertEquals(TERM_FACTORY.getImmutableExpression(NOT,
                 TERM_FACTORY.getImmutableExpression(DB_FS_FACTORY.getDBRegexpMatches2(),
                         v,
                         TERM_FACTORY.getDBStringConstant("A.*B"))), translation.get(0));
@@ -716,7 +736,7 @@ public class ExpressionParserTest {
         ImmutableList<ImmutableExpression> translation = parseBooleanExpression("SELECT X AS A FROM DUMMY WHERE NOT X !~ 'A.*B'", ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
 
-        Assert.assertEquals(TERM_FACTORY.getImmutableExpression(DB_FS_FACTORY.getDBRegexpMatches2(),
+        assertEquals(TERM_FACTORY.getImmutableExpression(DB_FS_FACTORY.getDBRegexpMatches2(),
                 v,
                 TERM_FACTORY.getDBStringConstant("A.*B")), translation.get(0));
     }
@@ -727,7 +747,7 @@ public class ExpressionParserTest {
         ImmutableList<ImmutableExpression> translation = parseBooleanExpression("SELECT X AS A FROM DUMMY WHERE NOT X ~* 'A.*B'", ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
 
-        Assert.assertEquals(TERM_FACTORY.getImmutableExpression(NOT,
+        assertEquals(TERM_FACTORY.getImmutableExpression(NOT,
                 TERM_FACTORY.getImmutableExpression(DB_FS_FACTORY.getDBRegexpMatches3(),
                         v,
                         TERM_FACTORY.getDBStringConstant("A.*B"),
@@ -740,7 +760,7 @@ public class ExpressionParserTest {
         ImmutableList<ImmutableExpression> translation = parseBooleanExpression("SELECT X AS A FROM DUMMY WHERE NOT X !~* 'A.*B'", ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
 
-        Assert.assertEquals(TERM_FACTORY.getImmutableExpression(DB_FS_FACTORY.getDBRegexpMatches3(),
+        assertEquals(TERM_FACTORY.getImmutableExpression(DB_FS_FACTORY.getDBRegexpMatches3(),
                 v,
                 TERM_FACTORY.getDBStringConstant("A.*B"),
                 TERM_FACTORY.getDBStringConstant("i")), translation.get(0));
@@ -753,7 +773,7 @@ public class ExpressionParserTest {
         ImmutableList<ImmutableExpression> translation = parseBooleanExpression("SELECT X AS A FROM DUMMY WHERE X REGEXP BINARY 'A.*B'", ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
 
-        Assert.assertEquals(TERM_FACTORY.getImmutableExpression(DB_FS_FACTORY.getDBRegexpMatches2(),
+        assertEquals(TERM_FACTORY.getImmutableExpression(DB_FS_FACTORY.getDBRegexpMatches2(),
                 v,
                 TERM_FACTORY.getDBStringConstant("A.*B")), translation.get(0));
     }
@@ -764,7 +784,7 @@ public class ExpressionParserTest {
         ImmutableList<ImmutableExpression> translation = parseBooleanExpression("SELECT X AS A FROM DUMMY WHERE X REGEXP 'A.*B'", ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
 
-        Assert.assertEquals(TERM_FACTORY.getImmutableExpression(DB_FS_FACTORY.getDBRegexpMatches3(),
+        assertEquals(TERM_FACTORY.getImmutableExpression(DB_FS_FACTORY.getDBRegexpMatches3(),
                 v,
                 TERM_FACTORY.getDBStringConstant("A.*B"),
                 TERM_FACTORY.getDBStringConstant("i")), translation.get(0));
@@ -776,7 +796,7 @@ public class ExpressionParserTest {
         ImmutableList<ImmutableExpression> translation = parseBooleanExpression("SELECT X AS A FROM DUMMY WHERE NOT X REGEXP BINARY 'A.*B'", ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
 
-        Assert.assertEquals(TERM_FACTORY.getImmutableExpression(NOT,
+        assertEquals(TERM_FACTORY.getImmutableExpression(NOT,
                 TERM_FACTORY.getImmutableExpression(DB_FS_FACTORY.getDBRegexpMatches2(),
                         v,
                         TERM_FACTORY.getDBStringConstant("A.*B"))), translation.get(0));
@@ -788,7 +808,7 @@ public class ExpressionParserTest {
         ImmutableList<ImmutableExpression> translation = parseBooleanExpression("SELECT X AS A FROM DUMMY WHERE  X NOT REGEXP BINARY 'A.*B'", ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
 
-        Assert.assertEquals(TERM_FACTORY.getImmutableExpression(NOT,
+        assertEquals(TERM_FACTORY.getImmutableExpression(NOT,
                 TERM_FACTORY.getImmutableExpression(DB_FS_FACTORY.getDBRegexpMatches2(),
                         v,
                         TERM_FACTORY.getDBStringConstant("A.*B"))), translation.get(0));
@@ -800,7 +820,7 @@ public class ExpressionParserTest {
         ImmutableList<ImmutableExpression> translation = parseBooleanExpression("SELECT X AS A FROM DUMMY WHERE NOT X REGEXP 'A.*B'", ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
 
-        Assert.assertEquals(TERM_FACTORY.getImmutableExpression(NOT,
+        assertEquals(TERM_FACTORY.getImmutableExpression(NOT,
                 TERM_FACTORY.getImmutableExpression(DB_FS_FACTORY.getDBRegexpMatches3(),
                         v,
                         TERM_FACTORY.getDBStringConstant("A.*B"),
@@ -813,7 +833,7 @@ public class ExpressionParserTest {
         ImmutableList<ImmutableExpression> translation = parseBooleanExpression("SELECT X AS A FROM DUMMY WHERE  X NOT REGEXP 'A.*B'", ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
 
-        Assert.assertEquals(TERM_FACTORY.getImmutableExpression(NOT,
+        assertEquals(TERM_FACTORY.getImmutableExpression(NOT,
                 TERM_FACTORY.getImmutableExpression(DB_FS_FACTORY.getDBRegexpMatches3(),
                         v,
                         TERM_FACTORY.getDBStringConstant("A.*B"),
@@ -878,7 +898,7 @@ public class ExpressionParserTest {
         ImmutableList<ImmutableExpression> translation = parseBooleanExpression("SELECT X AS A FROM DUMMY WHERE X < 1 OR X > 3", ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
 
-        Assert.assertEquals(TERM_FACTORY.getImmutableExpression(DB_FS_FACTORY.getDBOr(2),
+        assertEquals(TERM_FACTORY.getImmutableExpression(DB_FS_FACTORY.getDBOr(2),
                 TERM_FACTORY.getImmutableExpression(
                         DB_FS_FACTORY.getDBDefaultInequality(LT),
                         v,
@@ -895,7 +915,7 @@ public class ExpressionParserTest {
         ImmutableList<ImmutableExpression> translation = parseBooleanExpression("SELECT X AS A FROM DUMMY WHERE (X >= 1)", ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
 
-        Assert.assertEquals(TERM_FACTORY.getImmutableExpression(
+        assertEquals(TERM_FACTORY.getImmutableExpression(
                 DB_FS_FACTORY.getDBDefaultInequality(GTE),
                 v,
                 TERM_FACTORY.getDBConstant("1", dbLongType)), translation.get(0));
@@ -907,7 +927,7 @@ public class ExpressionParserTest {
         ImmutableList<ImmutableExpression> translation = parseBooleanExpression("SELECT X AS A FROM DUMMY WHERE NOT (X >= 1)", ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
 
-        Assert.assertEquals(TERM_FACTORY.getImmutableExpression(NOT,
+        assertEquals(TERM_FACTORY.getImmutableExpression(NOT,
                 TERM_FACTORY.getImmutableExpression(
                         DB_FS_FACTORY.getDBDefaultInequality(GTE),
                         v,
@@ -920,7 +940,7 @@ public class ExpressionParserTest {
         ImmutableList<ImmutableExpression> translation = parseBooleanExpression("SELECT X AS A FROM DUMMY WHERE ontop_contains_role('admin')", ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
 
-        Assert.assertEquals(TERM_FACTORY.getImmutableExpression(DB_FS_FACTORY.getOntopContainsRole(), TERM_FACTORY.getDBStringConstant("admin")), translation.get(0));
+        assertEquals(TERM_FACTORY.getImmutableExpression(DB_FS_FACTORY.getOntopContainsRole(), TERM_FACTORY.getDBStringConstant("admin")), translation.get(0));
     }
 
     @Test
@@ -929,7 +949,7 @@ public class ExpressionParserTest {
         ImmutableList<ImmutableExpression> translation = parseBooleanExpression("SELECT X AS A FROM DUMMY WHERE ontop_contains_group('admin')", ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
 
-        Assert.assertEquals(TERM_FACTORY.getImmutableExpression(DB_FS_FACTORY.getOntopContainsGroup(), TERM_FACTORY.getDBStringConstant("admin")), translation.get(0));
+        assertEquals(TERM_FACTORY.getImmutableExpression(DB_FS_FACTORY.getOntopContainsGroup(), TERM_FACTORY.getDBStringConstant("admin")), translation.get(0));
     }
 
     @Test
@@ -938,7 +958,7 @@ public class ExpressionParserTest {
         ImmutableList<ImmutableExpression> translation = parseBooleanExpression("SELECT X AS A FROM DUMMY WHERE ontop_contains_role_or_group('admin')", ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
 
-        Assert.assertEquals(TERM_FACTORY.getImmutableExpression(DB_FS_FACTORY.getOntopContainsRoleOrGroup(), TERM_FACTORY.getDBStringConstant("admin")), translation.get(0));
+        assertEquals(TERM_FACTORY.getImmutableExpression(DB_FS_FACTORY.getOntopContainsRoleOrGroup(), TERM_FACTORY.getDBStringConstant("admin")), translation.get(0));
     }
 
     @Test
@@ -947,7 +967,7 @@ public class ExpressionParserTest {
         ImmutableList<ImmutableExpression> translation = parseBooleanExpression("SELECT X AS A FROM DUMMY WHERE ontop_user() = 'roger'", ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
 
-        Assert.assertEquals(TERM_FACTORY.getNotYetTypedEquality(TERM_FACTORY.getImmutableFunctionalTerm(DB_FS_FACTORY.getOntopUser()), TERM_FACTORY.getDBStringConstant("roger")), translation.get(0));
+        assertEquals(TERM_FACTORY.getNotYetTypedEquality(TERM_FACTORY.getImmutableFunctionalTerm(DB_FS_FACTORY.getOntopUser()), TERM_FACTORY.getDBStringConstant("roger")), translation.get(0));
     }
 
     @Test
@@ -965,7 +985,7 @@ public class ExpressionParserTest {
         ImmutableTerm translation = parseTerm("SELECT -X  AS A FROM DUMMY", ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
 
-        Assert.assertEquals(TERM_FACTORY.getImmutableFunctionalTerm(
+        assertEquals(TERM_FACTORY.getImmutableFunctionalTerm(
                 DB_FS_FACTORY.getUntypedDBMathBinaryOperator(SPARQL.MULTIPLY),
                 TERM_FACTORY.getDBConstant("-1", DB_TYPE_FACTORY.getDBLargeIntegerType()),
                 v), translation);
@@ -977,7 +997,7 @@ public class ExpressionParserTest {
         ImmutableTerm translation = parseTerm("SELECT CASE A WHEN 1 THEN 3 ELSE 4 END FROM DUMMY;", ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("A")), v));
 
-        Assert.assertEquals(TERM_FACTORY.getIfThenElse(
+        assertEquals(TERM_FACTORY.getIfThenElse(
                 TERM_FACTORY.getNotYetTypedEquality(v, TERM_FACTORY.getDBConstant("1", DB_TYPE_FACTORY.getDBLargeIntegerType())),
                 TERM_FACTORY.getDBConstant("3", DB_TYPE_FACTORY.getDBLargeIntegerType()),
                 TERM_FACTORY.getDBConstant("4", DB_TYPE_FACTORY.getDBLargeIntegerType())),
@@ -990,7 +1010,7 @@ public class ExpressionParserTest {
         ImmutableTerm translation = parseTerm("SELECT CASE A WHEN 1 THEN 3 WHEN 2 THEN 4 ELSE 5 END FROM DUMMY;", ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("A")), v));
 
-        Assert.assertEquals(TERM_FACTORY.getDBCase(
+        assertEquals(TERM_FACTORY.getDBCase(
                 Stream.of(Maps.immutableEntry(TERM_FACTORY.getNotYetTypedEquality(v, TERM_FACTORY.getDBConstant("1", DB_TYPE_FACTORY.getDBLargeIntegerType())),
                 TERM_FACTORY.getDBConstant("3", DB_TYPE_FACTORY.getDBLargeIntegerType())),
                 Maps.immutableEntry(TERM_FACTORY.getNotYetTypedEquality(v, TERM_FACTORY.getDBConstant("2", DB_TYPE_FACTORY.getDBLargeIntegerType())),
@@ -1005,7 +1025,7 @@ public class ExpressionParserTest {
         ImmutableTerm translation = parseTerm("SELECT CASE WHEN A = 1 THEN 3 WHEN A = 2 THEN 4 ELSE 5 END FROM DUMMY;", ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("A")), v));
 
-        Assert.assertEquals(TERM_FACTORY.getDBCase(
+        assertEquals(TERM_FACTORY.getDBCase(
                 Stream.of(Maps.immutableEntry(TERM_FACTORY.getNotYetTypedEquality(v, TERM_FACTORY.getDBConstant("1", DB_TYPE_FACTORY.getDBLargeIntegerType())),
                         TERM_FACTORY.getDBConstant("3", DB_TYPE_FACTORY.getDBLargeIntegerType())),
                         Maps.immutableEntry(TERM_FACTORY.getNotYetTypedEquality(v, TERM_FACTORY.getDBConstant("2", DB_TYPE_FACTORY.getDBLargeIntegerType())),
@@ -1020,7 +1040,7 @@ public class ExpressionParserTest {
         ImmutableTerm translation = parseTerm("SELECT CASE A WHEN 1 THEN 3 WHEN 2 THEN 4 END FROM DUMMY;", ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("A")), v));
 
-        Assert.assertEquals(TERM_FACTORY.getDBCase(
+        assertEquals(TERM_FACTORY.getDBCase(
                 Stream.of(Maps.immutableEntry(TERM_FACTORY.getNotYetTypedEquality(v, TERM_FACTORY.getDBConstant("1", DB_TYPE_FACTORY.getDBLargeIntegerType())),
                         TERM_FACTORY.getDBConstant("3", DB_TYPE_FACTORY.getDBLargeIntegerType())),
                         Maps.immutableEntry(TERM_FACTORY.getNotYetTypedEquality(v, TERM_FACTORY.getDBConstant("2", DB_TYPE_FACTORY.getDBLargeIntegerType())),
@@ -1035,7 +1055,7 @@ public class ExpressionParserTest {
         ImmutableTerm translation = parseTerm("SELECT CASE A WHEN 1 THEN 3 WHEN 2 THEN 4 ELSE NULL END FROM DUMMY;", ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("A")), v));
 
-        Assert.assertEquals(TERM_FACTORY.getDBCase(
+        assertEquals(TERM_FACTORY.getDBCase(
                 Stream.of(Maps.immutableEntry(TERM_FACTORY.getNotYetTypedEquality(v, TERM_FACTORY.getDBConstant("1", DB_TYPE_FACTORY.getDBLargeIntegerType())),
                         TERM_FACTORY.getDBConstant("3", DB_TYPE_FACTORY.getDBLargeIntegerType())),
                         Maps.immutableEntry(TERM_FACTORY.getNotYetTypedEquality(v, TERM_FACTORY.getDBConstant("2", DB_TYPE_FACTORY.getDBLargeIntegerType())),
@@ -1050,7 +1070,7 @@ public class ExpressionParserTest {
         ImmutableTerm translation = parseTerm("SELECT CASE WHEN A = 1 THEN 3 WHEN A = 2 THEN 4 END FROM DUMMY;", ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("A")), v));
 
-        Assert.assertEquals(TERM_FACTORY.getDBCase(
+        assertEquals(TERM_FACTORY.getDBCase(
                 Stream.of(Maps.immutableEntry(TERM_FACTORY.getNotYetTypedEquality(v, TERM_FACTORY.getDBConstant("1", DB_TYPE_FACTORY.getDBLargeIntegerType())),
                         TERM_FACTORY.getDBConstant("3", DB_TYPE_FACTORY.getDBLargeIntegerType())),
                         Maps.immutableEntry(TERM_FACTORY.getNotYetTypedEquality(v, TERM_FACTORY.getDBConstant("2", DB_TYPE_FACTORY.getDBLargeIntegerType())),
@@ -1065,7 +1085,7 @@ public class ExpressionParserTest {
         ImmutableTerm translation = parseTerm("SELECT CASE WHEN A = 1 THEN 3 WHEN A = 2 THEN 4 ELSE NULL END FROM DUMMY", ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("A")), v));
 
-        Assert.assertEquals(TERM_FACTORY.getDBCase(
+        assertEquals(TERM_FACTORY.getDBCase(
                 Stream.of(Maps.immutableEntry(TERM_FACTORY.getNotYetTypedEquality(v, TERM_FACTORY.getDBConstant("1", DB_TYPE_FACTORY.getDBLargeIntegerType())),
                         TERM_FACTORY.getDBConstant("3", DB_TYPE_FACTORY.getDBLargeIntegerType())),
                         Maps.immutableEntry(TERM_FACTORY.getNotYetTypedEquality(v, TERM_FACTORY.getDBConstant("2", DB_TYPE_FACTORY.getDBLargeIntegerType())),
@@ -1080,7 +1100,7 @@ public class ExpressionParserTest {
         ImmutableList<ImmutableExpression> translation = parseBooleanExpression("SELECT X AS A FROM DUMMY WHERE X", ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
 
-        Assert.assertEquals(TERM_FACTORY.getImmutableExpression(
+        assertEquals(TERM_FACTORY.getImmutableExpression(
                 DB_FS_FACTORY.getIsTrue(),
                 v), translation.get(0));
     }
@@ -1091,7 +1111,7 @@ public class ExpressionParserTest {
         ImmutableList<ImmutableExpression> translation = parseBooleanExpression("SELECT X AS A FROM DUMMY WHERE NOT X", ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
 
-        Assert.assertEquals(TERM_FACTORY.getImmutableExpression(
+        assertEquals(TERM_FACTORY.getImmutableExpression(
                 DB_FS_FACTORY.getDBNot(),
                 TERM_FACTORY.getImmutableExpression(
                         DB_FS_FACTORY.getIsTrue(),
@@ -1168,7 +1188,7 @@ public class ExpressionParserTest {
         ImmutableTerm translation = parseTerm("SELECT EXTRACT(MONTH FROM X) AS C FROM DUMMY", ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
 
-        Assert.assertEquals(TERM_FACTORY.getImmutableFunctionalTerm(DB_FS_FACTORY.getExtractFunctionSymbol("MONTH"),
+        assertEquals(TERM_FACTORY.getImmutableFunctionalTerm(DB_FS_FACTORY.getExtractFunctionSymbol("MONTH"),
                 v), translation);
     }
 
@@ -1178,7 +1198,7 @@ public class ExpressionParserTest {
         ImmutableTerm translation = parseTerm("SELECT EXTRACT(MONTH FROM CURRENT_DATE) AS C FROM DUMMY", ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
 
-        Assert.assertEquals(TERM_FACTORY.getImmutableFunctionalTerm(DB_FS_FACTORY.getExtractFunctionSymbol("MONTH"),
+        assertEquals(TERM_FACTORY.getImmutableFunctionalTerm(DB_FS_FACTORY.getExtractFunctionSymbol("MONTH"),
                 TERM_FACTORY.getImmutableFunctionalTerm(DB_FS_FACTORY.getCurrentDateTimeSymbol("DATE"))), translation);
     }
 
@@ -1188,7 +1208,7 @@ public class ExpressionParserTest {
         ImmutableTerm translation = parseTerm("SELECT EXTRACT(MONTH FROM CURRENT_DATE()) AS C FROM DUMMY", ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
 
-        Assert.assertEquals(TERM_FACTORY.getImmutableFunctionalTerm(DB_FS_FACTORY.getExtractFunctionSymbol("MONTH"),
+        assertEquals(TERM_FACTORY.getImmutableFunctionalTerm(DB_FS_FACTORY.getExtractFunctionSymbol("MONTH"),
                 TERM_FACTORY.getImmutableFunctionalTerm(DB_FS_FACTORY.getCurrentDateTimeSymbol("DATE"))), translation);
     }
 
@@ -1198,7 +1218,7 @@ public class ExpressionParserTest {
         ImmutableTerm translation = parseTerm("SELECT EXTRACT(YEAR FROM DATE '1998-03-07') FROM DUMMY", ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
 
-        Assert.assertEquals(TERM_FACTORY.getImmutableFunctionalTerm(DB_FS_FACTORY.getExtractFunctionSymbol("YEAR"),
+        assertEquals(TERM_FACTORY.getImmutableFunctionalTerm(DB_FS_FACTORY.getExtractFunctionSymbol("YEAR"),
                 TERM_FACTORY.getDBConstant("1998-03-07", DB_TYPE_FACTORY.getDBDateType())),
                 translation);
     }
@@ -1292,7 +1312,7 @@ public class ExpressionParserTest {
         ImmutableList<ImmutableExpression> translation = parseBooleanExpression("SELECT * FROM P WHERE A = true", ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("A")), v));
 
-        Assert.assertEquals(TERM_FACTORY.getNotYetTypedEquality(
+        assertEquals(TERM_FACTORY.getNotYetTypedEquality(
                 v,
                 TERM_FACTORY.getDBBooleanConstant(true)), translation.get(0));
     }
@@ -1303,7 +1323,7 @@ public class ExpressionParserTest {
         ImmutableList<ImmutableExpression> translation = parseBooleanExpression("SELECT * FROM P WHERE A = false", ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("A")), v));
 
-        Assert.assertEquals(TERM_FACTORY.getNotYetTypedEquality(
+        assertEquals(TERM_FACTORY.getNotYetTypedEquality(
                 v,
                 TERM_FACTORY.getDBBooleanConstant(false)), translation.get(0));
     }
@@ -1314,7 +1334,7 @@ public class ExpressionParserTest {
         ImmutableList<ImmutableExpression> translation = parseBooleanExpression("SELECT X FROM DUMMY WHERE REGEXP_LIKE(X, '^Ste(v|ph)en$')", ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
 
-        Assert.assertEquals(TERM_FACTORY.getImmutableExpression(DB_FS_FACTORY.getDBRegexpMatches2(), v,
+        assertEquals(TERM_FACTORY.getImmutableExpression(DB_FS_FACTORY.getDBRegexpMatches2(), v,
                 TERM_FACTORY.getDBStringConstant("^Ste(v|ph)en$")), translation.get(0));
     }
 
@@ -1324,7 +1344,7 @@ public class ExpressionParserTest {
         ImmutableList<ImmutableExpression> translation = parseBooleanExpression("SELECT X FROM DUMMY WHERE REGEXP_LIKE(X, '^Ste(v|ph)en$', 'i')", ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
 
-        Assert.assertEquals(TERM_FACTORY.getImmutableExpression(DB_FS_FACTORY.getDBRegexpMatches3(), v,
+        assertEquals(TERM_FACTORY.getImmutableExpression(DB_FS_FACTORY.getDBRegexpMatches3(), v,
                 TERM_FACTORY.getDBStringConstant("^Ste(v|ph)en$"),
                 TERM_FACTORY.getDBStringConstant("i")), translation.get(0));
     }
@@ -1339,7 +1359,7 @@ public class ExpressionParserTest {
         ImmutableList<ImmutableExpression> translation = parseBooleanExpression("SELECT X FROM DUMMY WHERE REGEXP_LIKE(X, '^Ste(v|ph)en$', 'i', '')", ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
 
-        Assert.assertEquals(TERM_FACTORY.getImmutableFunctionalTerm(DB_FS_FACTORY.getDBRegexpReplace4(), v,
+        assertEquals(TERM_FACTORY.getImmutableFunctionalTerm(DB_FS_FACTORY.getDBRegexpReplace4(), v,
                 TERM_FACTORY.getDBStringConstant("^Ste(v|ph)en$"),
                 TERM_FACTORY.getDBStringConstant("i"),
                 TERM_FACTORY.getDBStringConstant("")), translation.get(0));
@@ -1351,7 +1371,7 @@ public class ExpressionParserTest {
         ImmutableTerm translation = parseTerm("SELECT REGEXP_REPLACE(X, '^Ste(v|ph)en$', '')  AS A FROM DUMMY", ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
 
-        Assert.assertEquals(TERM_FACTORY.getImmutableFunctionalTerm(DB_FS_FACTORY.getDBRegexpReplace3(), v,
+        assertEquals(TERM_FACTORY.getImmutableFunctionalTerm(DB_FS_FACTORY.getDBRegexpReplace3(), v,
                 TERM_FACTORY.getDBStringConstant("^Ste(v|ph)en$"),
                 TERM_FACTORY.getDBStringConstant("")), translation);
     }
@@ -1362,7 +1382,7 @@ public class ExpressionParserTest {
         ImmutableTerm translation = parseTerm("SELECT REGEXP_REPLACE(X, '^Ste(v|ph)en$', '', 'i')  AS A FROM DUMMY", ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
 
-        Assert.assertEquals(TERM_FACTORY.getImmutableFunctionalTerm(DB_FS_FACTORY.getDBRegexpReplace4(), v,
+        assertEquals(TERM_FACTORY.getImmutableFunctionalTerm(DB_FS_FACTORY.getDBRegexpReplace4(), v,
                 TERM_FACTORY.getDBStringConstant("^Ste(v|ph)en$"),
                 TERM_FACTORY.getDBStringConstant(""),
                 TERM_FACTORY.getDBStringConstant("i")), translation);
@@ -1374,7 +1394,7 @@ public class ExpressionParserTest {
         ImmutableTerm translation = parseTerm("SELECT REGEXP_REPLACE(X, '^Ste(v|ph)en$', '', 1, 0, 'i')  AS A FROM DUMMY", ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
 
-        Assert.assertEquals(TERM_FACTORY.getImmutableFunctionalTerm(DB_FS_FACTORY.getRegularDBFunctionSymbol("REGEXP_REPLACE", 6), v,
+        assertEquals(TERM_FACTORY.getImmutableFunctionalTerm(DB_FS_FACTORY.getRegularDBFunctionSymbol("REGEXP_REPLACE", 6), v,
                 TERM_FACTORY.getDBStringConstant("^Ste(v|ph)en$"),
                 TERM_FACTORY.getDBStringConstant(""),
                 TERM_FACTORY.getDBIntegerConstant(1),
@@ -1388,7 +1408,7 @@ public class ExpressionParserTest {
         ImmutableTerm translation = parseTerm("SELECT REGEXP_REPLACE(X, '^Ste(v|ph)en$', '', 2, 0, 'i')  AS A FROM DUMMY", ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
 
-        Assert.assertEquals(TERM_FACTORY.getImmutableFunctionalTerm(DB_FS_FACTORY.getRegularDBFunctionSymbol("REGEXP_REPLACE", 6), v,
+        assertEquals(TERM_FACTORY.getImmutableFunctionalTerm(DB_FS_FACTORY.getRegularDBFunctionSymbol("REGEXP_REPLACE", 6), v,
                 TERM_FACTORY.getDBStringConstant("^Ste(v|ph)en$"),
                 TERM_FACTORY.getDBStringConstant(""),
                 TERM_FACTORY.getDBIntegerConstant(2),
@@ -1402,7 +1422,7 @@ public class ExpressionParserTest {
         ImmutableTerm translation = parseTerm("SELECT REGEXP_REPLACE(X, '^Ste(v|ph)en$', '', 1, 0, 'i', '')  AS A FROM DUMMY", ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
 
-        Assert.assertEquals(TERM_FACTORY.getImmutableFunctionalTerm(DB_FS_FACTORY.getRegularDBFunctionSymbol("REGEXP_REPLACE", 7), v,
+        assertEquals(TERM_FACTORY.getImmutableFunctionalTerm(DB_FS_FACTORY.getRegularDBFunctionSymbol("REGEXP_REPLACE", 7), v,
                 TERM_FACTORY.getDBStringConstant("^Ste(v|ph)en$"),
                 TERM_FACTORY.getDBStringConstant(""),
                 TERM_FACTORY.getDBIntegerConstant(1),
@@ -1417,7 +1437,7 @@ public class ExpressionParserTest {
         ImmutableTerm translation = parseTerm("SELECT REPLACE(X,'J') AS A FROM DUMMY", ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
 
-        Assert.assertEquals(TERM_FACTORY.getImmutableFunctionalTerm(DB_FS_FACTORY.getRegularDBFunctionSymbol("REPLACE", 2), v,
+        assertEquals(TERM_FACTORY.getImmutableFunctionalTerm(DB_FS_FACTORY.getRegularDBFunctionSymbol("REPLACE", 2), v,
                 TERM_FACTORY.getDBStringConstant("J")), translation);
     }
 
@@ -1427,7 +1447,7 @@ public class ExpressionParserTest {
         ImmutableTerm translation = parseTerm("SELECT REPLACE(X, 'J', 'BL') AS A FROM DUMMY", ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
 
-        Assert.assertEquals(TERM_FACTORY.getImmutableFunctionalTerm(DB_FS_FACTORY.getRegularDBFunctionSymbol("REPLACE", 3), v,
+        assertEquals(TERM_FACTORY.getImmutableFunctionalTerm(DB_FS_FACTORY.getRegularDBFunctionSymbol("REPLACE", 3), v,
                 TERM_FACTORY.getDBStringConstant("J"),
                 TERM_FACTORY.getDBStringConstant("BL")), translation);
     }
@@ -1438,7 +1458,7 @@ public class ExpressionParserTest {
         ImmutableTerm translation = parseTerm("SELECT REPLACE(X, 'J', 'BL', 'i') AS A FROM DUMMY", ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
 
-        Assert.assertEquals(TERM_FACTORY.getImmutableFunctionalTerm(DB_FS_FACTORY.getRegularDBFunctionSymbol("REPLACE", 4), v,
+        assertEquals(TERM_FACTORY.getImmutableFunctionalTerm(DB_FS_FACTORY.getRegularDBFunctionSymbol("REPLACE", 4), v,
                 TERM_FACTORY.getDBStringConstant("J"),
                 TERM_FACTORY.getDBStringConstant("BL"),
                 TERM_FACTORY.getDBStringConstant("i")), translation);
@@ -1450,7 +1470,7 @@ public class ExpressionParserTest {
         ImmutableTerm translation = parseTerm("SELECT SUBSTR(X, 1) AS A FROM DUMMY", ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
 
-        Assert.assertEquals(TERM_FACTORY.getImmutableFunctionalTerm(DB_FS_FACTORY.getRegularDBFunctionSymbol("SUBSTR", 2), v,
+        assertEquals(TERM_FACTORY.getImmutableFunctionalTerm(DB_FS_FACTORY.getRegularDBFunctionSymbol("SUBSTR", 2), v,
                 TERM_FACTORY.getDBConstant("1", dbLongType)), translation);
     }
 
@@ -1460,7 +1480,7 @@ public class ExpressionParserTest {
         ImmutableTerm translation = parseTerm("SELECT SUBSTR(X, 1, 2) AS A FROM DUMMY", ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
 
-        Assert.assertEquals(TERM_FACTORY.getImmutableFunctionalTerm(DB_FS_FACTORY.getRegularDBFunctionSymbol("SUBSTR", 3), v,
+        assertEquals(TERM_FACTORY.getImmutableFunctionalTerm(DB_FS_FACTORY.getRegularDBFunctionSymbol("SUBSTR", 3), v,
                 TERM_FACTORY.getDBConstant("1", dbLongType),
                 TERM_FACTORY.getDBConstant("2", dbLongType)), translation);
     }
@@ -1471,7 +1491,7 @@ public class ExpressionParserTest {
         Variable v = TERM_FACTORY.getVariable("x0");
         ImmutableTerm translation = parseTerm("SELECT SUBSTRING(X FROM 1) AS A FROM DUMMY", ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
-        Assert.assertEquals(TERM_FACTORY.getImmutableFunctionalTerm(DB_FS_FACTORY.getDBSubString2(), v,
+        assertEquals(TERM_FACTORY.getImmutableFunctionalTerm(DB_FS_FACTORY.getDBSubString2(), v,
                 TERM_FACTORY.getDBConstant("1", dbLongType)), translation);
     }
 
@@ -1481,7 +1501,7 @@ public class ExpressionParserTest {
         Variable v = TERM_FACTORY.getVariable("x0");
         ImmutableTerm translation = parseTerm("SELECT SUBSTRING(X FROM 1 FOR 2) AS A FROM DUMMY", ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
-        Assert.assertEquals(TERM_FACTORY.getImmutableFunctionalTerm(DB_FS_FACTORY.getDBSubString3(), v,
+        assertEquals(TERM_FACTORY.getImmutableFunctionalTerm(DB_FS_FACTORY.getDBSubString3(), v,
                 TERM_FACTORY.getDBConstant("1", dbLongType),
                 TERM_FACTORY.getDBConstant("2", dbLongType)), translation);
     }
@@ -1492,7 +1512,7 @@ public class ExpressionParserTest {
         ImmutableTerm translation = parseTerm("SELECT SUBSTRING(X, 1) AS A FROM DUMMY", ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
 
-        Assert.assertEquals(TERM_FACTORY.getImmutableFunctionalTerm(DB_FS_FACTORY.getDBSubString2(), v,
+        assertEquals(TERM_FACTORY.getImmutableFunctionalTerm(DB_FS_FACTORY.getDBSubString2(), v,
                 TERM_FACTORY.getDBConstant("1", dbLongType)), translation);
     }
 
@@ -1502,7 +1522,7 @@ public class ExpressionParserTest {
         ImmutableTerm translation = parseTerm("SELECT SUBSTRING(X, 1, 2) AS A FROM DUMMY", ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
 
-        Assert.assertEquals(TERM_FACTORY.getImmutableFunctionalTerm(DB_FS_FACTORY.getDBSubString3(), v,
+        assertEquals(TERM_FACTORY.getImmutableFunctionalTerm(DB_FS_FACTORY.getDBSubString3(), v,
                 TERM_FACTORY.getDBConstant("1", dbLongType),
                 TERM_FACTORY.getDBConstant("2", dbLongType)), translation);
     }
@@ -1513,7 +1533,7 @@ public class ExpressionParserTest {
         ImmutableTerm translation = parseTerm("SELECT LCASE(X) AS A FROM DUMMY", ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
 
-        Assert.assertEquals(TERM_FACTORY.getImmutableFunctionalTerm(DB_FS_FACTORY.getDBLower(), v), translation);
+        assertEquals(TERM_FACTORY.getImmutableFunctionalTerm(DB_FS_FACTORY.getDBLower(), v), translation);
     }
 
     @Test
@@ -1522,7 +1542,7 @@ public class ExpressionParserTest {
         ImmutableTerm translation = parseTerm("SELECT LOWER(X) AS A FROM DUMMY", ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
 
-        Assert.assertEquals(TERM_FACTORY.getImmutableFunctionalTerm(DB_FS_FACTORY.getDBLower(), v), translation);
+        assertEquals(TERM_FACTORY.getImmutableFunctionalTerm(DB_FS_FACTORY.getDBLower(), v), translation);
     }
 
     @Test
@@ -1531,7 +1551,7 @@ public class ExpressionParserTest {
         ImmutableTerm translation = parseTerm("SELECT UCASE(X) AS A FROM DUMMY", ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
 
-        Assert.assertEquals(TERM_FACTORY.getImmutableFunctionalTerm(DB_FS_FACTORY.getDBUpper(), v), translation);
+        assertEquals(TERM_FACTORY.getImmutableFunctionalTerm(DB_FS_FACTORY.getDBUpper(), v), translation);
     }
 
     @Test
@@ -1540,7 +1560,7 @@ public class ExpressionParserTest {
         ImmutableTerm translation = parseTerm("SELECT UPPER(X) AS A FROM DUMMY", ImmutableMap.of(
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
 
-        Assert.assertEquals(TERM_FACTORY.getImmutableFunctionalTerm(DB_FS_FACTORY.getDBUpper(), v), translation);
+        assertEquals(TERM_FACTORY.getImmutableFunctionalTerm(DB_FS_FACTORY.getDBUpper(), v), translation);
     }
 
     @Test
@@ -1550,7 +1570,7 @@ public class ExpressionParserTest {
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
 
         DBFunctionSymbol lengthFunctionSymbol = DB_FS_FACTORY.getRegularDBFunctionSymbol("LENGTH", 1);
-        Assert.assertEquals(TERM_FACTORY.getImmutableFunctionalTerm(lengthFunctionSymbol, v), translation);
+        assertEquals(TERM_FACTORY.getImmutableFunctionalTerm(lengthFunctionSymbol, v), translation);
     }
 
     @Test
@@ -1560,7 +1580,7 @@ public class ExpressionParserTest {
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
 
         DBFunctionSymbol lenFunctionSymbol = DB_FS_FACTORY.getRegularDBFunctionSymbol("LEN", 1);
-        Assert.assertEquals(TERM_FACTORY.getImmutableFunctionalTerm(lenFunctionSymbol, v), translation);
+        assertEquals(TERM_FACTORY.getImmutableFunctionalTerm(lenFunctionSymbol, v), translation);
     }
 
     @Test
@@ -1570,7 +1590,7 @@ public class ExpressionParserTest {
                 new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
 
         DBFunctionSymbol castFunctionSymbol = DB_FS_FACTORY.getDBCastFunctionSymbol(DB_TYPE_FACTORY.getDBTermType("VARCHAR(50)"));
-        Assert.assertEquals(TERM_FACTORY.getImmutableFunctionalTerm(castFunctionSymbol, v), translation);
+        assertEquals(TERM_FACTORY.getImmutableFunctionalTerm(castFunctionSymbol, v), translation);
     }
 
     private ImmutableTerm parseTerm(String sql, ImmutableMap<QualifiedAttributeID, ImmutableTerm> map) throws JSQLParserException {
