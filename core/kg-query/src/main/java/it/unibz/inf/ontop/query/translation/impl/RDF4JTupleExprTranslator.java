@@ -42,6 +42,8 @@ import java.util.*;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
+import static it.unibz.inf.ontop.query.translation.impl.RDF4JValueExprTranslator.ExistsMapAnnotatedObject;
+
 public class RDF4JTupleExprTranslator {
 
     private final ImmutableMap<Variable, GroundTerm> externalBindings;
@@ -172,10 +174,10 @@ public class RDF4JTupleExprTranslator {
         TranslationResult child = translate(group.getArg());
 
         // Assumption: every variable used in a definition is itself defined either in the subtree of in a previous ExtensionElem
-        ValueExpressionResult<ImmutableList<Substitution<ImmutableTerm>>> varDefsResult =
+        ExistsMapAnnotatedObject<ImmutableList<Substitution<ImmutableTerm>>> varDefsResult =
                 getGroupVarDefs(group.getGroupElements(), child.iqTree.getVariables());
 
-        ImmutableList<Substitution<ImmutableTerm>> mergedVarDefs = varDefsResult.getResult();
+        ImmutableList<Substitution<ImmutableTerm>> mergedVarDefs = varDefsResult.get();
         if (mergedVarDefs.size() > 1) {
             throw new Sparql2IqConversionException("Unexpected parsed SPARQL query: nested complex projections appear " +
                     "within an RDF4J Group node: " + group);
@@ -202,44 +204,44 @@ public class RDF4JTupleExprTranslator {
         return createTranslationResult(iqTree, nullableVariables);
     }
 
-    private ValueExpressionResult<ImmutableList<Substitution<ImmutableTerm>>> getGroupVarDefs(List<GroupElem> list,
+    private ExistsMapAnnotatedObject<ImmutableList<Substitution<ImmutableTerm>>> getGroupVarDefs(List<GroupElem> list,
                                                                        ImmutableSet<Variable> childVariables) throws OntopUnsupportedKGQueryException {
         List<VarDef> result = new ArrayList<>();
         Set<Variable> allowedVars = new HashSet<>(childVariables); // mutable: accumulator
         ImmutableMap.Builder<Variable, Exists> existsBuilder = ImmutableMap.builder();
 
         for (GroupElem elem : list) {
-            RDF4JValueExprTranslator.ExtendedTerm term = getValueTranslator(allowedVars).getTerm(elem.getOperator());
+            ExistsMapAnnotatedObject<ImmutableTerm> term = getValueTranslator(allowedVars).getTerm(elem.getOperator());
 
             Variable definedVar = termFactory.getVariable(elem.getName());
             allowedVars.add(definedVar);
 
-            result.add(new VarDef(definedVar, term.getTerm()));
+            result.add(new VarDef(definedVar, term.get()));
             existsBuilder.putAll(term.getExistsMap());
         }
-        return new ValueExpressionResult<>(mergeVarDefs(ImmutableList.copyOf(result)), existsBuilder.build());
+        return new ExistsMapAnnotatedObject<>(mergeVarDefs(ImmutableList.copyOf(result)), existsBuilder.build());
     }
 
     private TranslationResult translate(Order order) throws OntopInvalidKGQueryException, OntopUnsupportedKGQueryException {
         TranslationResult child = translate(order.getArg());
         RDF4JValueExprTranslator translator = getValueTranslator(child.iqTree.getVariables());
 
-        ImmutableMap<OrderElem, Optional<RDF4JValueExprTranslator.ExtendedTerm>> orderElements = order.getElements().stream()
+        ImmutableMap<OrderElem, Optional<RDF4JValueExprTranslator.ExistsMapAnnotatedObject<ImmutableTerm>>> orderElements = order.getElements().stream()
                 .collect(ImmutableCollectors.toMap(
                         o -> o,
                         o -> Optional.of(translator.getTerm(o.getExpr()))));
 
         ImmutableList<OrderByNode.OrderComparator> comparators = orderElements.entrySet().stream()
                 .map(e -> e.getValue()
-                        .filter(t -> t.getTerm() instanceof NonGroundTerm)
-                        .map(t -> (NonGroundTerm) t.getTerm())
+                        .filter(t -> t.get() instanceof NonGroundTerm)
+                        .map(t -> (NonGroundTerm) t.get())
                         .map(t -> iqFactory.createOrderComparator(t, e.getKey().isAscending())))
                 .flatMap(Optional::stream)
                 .collect(ImmutableCollectors.toList());
 
         var existsMaps = orderElements.values().stream()
                 .flatMap(Optional::stream)
-                .map(RDF4JValueExprTranslator.ExtendedTerm::getExistsMap)
+                .map(RDF4JValueExprTranslator.ExistsMapAnnotatedObject::getExistsMap)
                 .filter(map -> !map.isEmpty())
                 .collect(ImmutableCollectors.toList());
 
@@ -403,12 +405,12 @@ public class RDF4JTupleExprTranslator {
             Exists exists = (Exists) ((Not) condition).getArg();
             return translateNotExists(exists, child);
         }
-        ValueExpressionResult<ImmutableExpression> filterCondition = getFilterExpression(condition, child.iqTree.getVariables());
+        ExistsMapAnnotatedObject<ImmutableExpression> filterCondition = getFilterExpression(condition, child.iqTree.getVariables());
 
         IQTree childTree = getSubTree(filterCondition, child);
 
         return createTranslationResult(
-                iqFactory.createUnaryIQTree(iqFactory.createFilterNode(filterCondition.getResult()), childTree),
+                iqFactory.createUnaryIQTree(iqFactory.createFilterNode(filterCondition.get()), childTree),
                 child.nullableVariables);
     }
 
@@ -576,8 +578,8 @@ public class RDF4JTupleExprTranslator {
             Optional<ImmutableExpression> joinCondition;
             if (leftJoin.hasCondition()) {
                 Set<Variable> variables = Sets.union(leftTranslation.iqTree.getVariables(), rightTranslation.iqTree.getVariables());
-                ValueExpressionResult<ImmutableExpression> filterResult = getFilterExpression(leftJoin.getCondition(), variables);
-                ImmutableExpression filterExpression =  topSubstitution.apply(filterResult.getResult());
+                ExistsMapAnnotatedObject<ImmutableExpression> filterResult = getFilterExpression(leftJoin.getCondition(), variables);
+                ImmutableExpression filterExpression =  topSubstitution.apply(filterResult.get());
                 rightTree = getSubTree(filterResult, new TranslationResult(rightTree, rightTranslation.nullableVariables));
                 joinCondition = termFactory.getConjunction(Optional.of(filterExpression), coalescingStream);
             }
@@ -761,9 +763,9 @@ public class RDF4JTupleExprTranslator {
 
         // Assumption: every variable used in a definition is itself defined either in the subtree of in a previous ExtensionElem
         ImmutableSet<Variable> childVars = childTranslation.iqTree.getVariables();
-        ValueExpressionResult<ImmutableList<Substitution<ImmutableTerm>>> varDefsResult = getVarDefs(node.getElements(), childVars);
+        ExistsMapAnnotatedObject<ImmutableList<Substitution<ImmutableTerm>>> varDefsResult = getVarDefs(node.getElements(), childVars);
 
-        ImmutableList<Substitution<ImmutableTerm>> mergedVarDefs = varDefsResult.getResult();
+        ImmutableList<Substitution<ImmutableTerm>> mergedVarDefs = varDefsResult.get();
         if (mergedVarDefs.isEmpty()) {
             return childTranslation;
         }
@@ -791,13 +793,13 @@ public class RDF4JTupleExprTranslator {
         return result;
     }
 
-    private IQTree getSubTree(ValueExpressionResult<?> ver, TranslationResult result) throws OntopUnsupportedKGQueryException, OntopInvalidKGQueryException {
+    private IQTree getSubTree(ExistsMapAnnotatedObject<?> ver, TranslationResult result) throws OntopUnsupportedKGQueryException, OntopInvalidKGQueryException {
         return ver.getExistsMap().isEmpty()
                 ? result.iqTree
                 : translateExists(ver.getExistsMap(), result);
     }
 
-    private ValueExpressionResult<ImmutableList<Substitution<ImmutableTerm>>> getVarDefs(List<ExtensionElem> list,
+    private ExistsMapAnnotatedObject<ImmutableList<Substitution<ImmutableTerm>>> getVarDefs(List<ExtensionElem> list,
                                                                                          ImmutableSet<Variable> childVars) {
         List<VarDef> result = new ArrayList<>();
         Set<Variable> allowedVars = new HashSet<>(childVars); // mutable: accumulator
@@ -805,11 +807,11 @@ public class RDF4JTupleExprTranslator {
 
         for (ExtensionElem elem : list) {
             if (!(elem.getExpr() instanceof Var && elem.getName().equals(((Var) elem.getExpr()).getName()))) {
-                RDF4JValueExprTranslator.ExtendedTerm term = getValueTranslator(allowedVars).getTerm(elem.getExpr());
+                ExistsMapAnnotatedObject<ImmutableTerm> term = getValueTranslator(allowedVars).getTerm(elem.getExpr());
                 Variable definedVar = termFactory.getVariable(elem.getName());
                 allowedVars.add(definedVar);
 
-                result.add(new VarDef(definedVar, term.getTerm()));
+                result.add(new VarDef(definedVar, term.get()));
                 builder.putAll(term.getExistsMap());
             }
         }
@@ -818,7 +820,7 @@ public class RDF4JTupleExprTranslator {
                 .filter(vd -> !childVars.contains(vd.var))
                 .collect(ImmutableCollectors.toList());
 
-        return new ValueExpressionResult<>(mergeVarDefs(varDefs), builder.build());
+        return new ExistsMapAnnotatedObject<>(mergeVarDefs(varDefs), builder.build());
     }
 
     private ImmutableList<Substitution<ImmutableTerm>> mergeVarDefs(ImmutableList<VarDef> varDefs)  {
@@ -888,19 +890,19 @@ public class RDF4JTupleExprTranslator {
      * @param childVariables       the set of variables that can occur in the expression
      */
 
-    private ValueExpressionResult<ImmutableExpression> getFilterExpression(ValueExpr expr, Set<Variable> childVariables) {
-        RDF4JValueExprTranslator.ExtendedTerm extendedTerm = getValueTranslator(childVariables).getTerm(expr);
+    private ExistsMapAnnotatedObject<ImmutableExpression> getFilterExpression(ValueExpr expr, Set<Variable> childVariables) {
+        ExistsMapAnnotatedObject<ImmutableTerm> extendedTerm = getValueTranslator(childVariables).getTerm(expr);
 
-        ImmutableTerm xsdBooleanTerm = extendedTerm.getTerm().inferType()
+        ImmutableTerm xsdBooleanTerm = extendedTerm.get().inferType()
                 .flatMap(TermTypeInference::getTermType)
                 .filter(t -> t instanceof RDFDatatype)
                 .map(t -> (RDFDatatype)t)
                 .filter(t -> t.isA(XSD.BOOLEAN))
                 .isPresent()
-                    ? extendedTerm.getTerm()
-                    : termFactory.getSPARQLEffectiveBooleanValue(extendedTerm.getTerm());
+                    ? extendedTerm.get()
+                    : termFactory.getSPARQLEffectiveBooleanValue(extendedTerm.get());
 
-        return new ValueExpressionResult<>(termFactory.getRDF2DBBooleanFunctionalTerm(xsdBooleanTerm), extendedTerm.getExistsMap());
+        return ExistsMapAnnotatedObject.of(extendedTerm, t -> termFactory.getRDF2DBBooleanFunctionalTerm(xsdBooleanTerm));
     }
 
 
@@ -999,24 +1001,6 @@ public class RDF4JTupleExprTranslator {
 
         public boolean isExistsSubtreeSupported() {
             return isSupported;
-        }
-    }
-
-    protected static final class ValueExpressionResult<T> {
-        private final T result;
-        private final ImmutableMap<Variable, Exists> existsMap;
-
-        public ValueExpressionResult(T result, ImmutableMap<Variable, Exists> existsMap) {
-            this.result = result;
-            this.existsMap = existsMap;
-        }
-
-        public T getResult() {
-            return result;
-        }
-
-        public ImmutableMap<Variable, Exists> getExistsMap() {
-            return existsMap;
         }
     }
 }

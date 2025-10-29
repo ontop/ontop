@@ -21,8 +21,12 @@ import org.apache.commons.rdf.api.RDF;
 import org.eclipse.rdf4j.model.Value;
 import org.eclipse.rdf4j.query.algebra.*;
 
+import java.util.Collection;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.BinaryOperator;
+import java.util.function.Function;
+import java.util.function.UnaryOperator;
 
 public class RDF4JValueExprTranslator {
 
@@ -61,15 +65,15 @@ public class RDF4JValueExprTranslator {
      * @param expr           expression
      * @return term
      */
-    public ExtendedTerm getTerm(ValueExpr expr) {
+    public ExistsMapAnnotatedObject<ImmutableTerm> getTerm(ValueExpr expr) {
 
         if (expr instanceof Var) {
             VariableOrGroundTerm var = translateRDF4JVar((Var) expr, false);
-            return new ExtendedTerm(var);
+            return ExistsMapAnnotatedObject.of(var);
         }
         if (expr instanceof ValueConstant) {
             Value v = ((ValueConstant) expr).getValue();
-            return new ExtendedTerm(valueTranslator.getTermForLiteralOrIri(v));
+            return ExistsMapAnnotatedObject.of(valueTranslator.getTermForLiteralOrIri(v));
         }
         if (expr instanceof Bound) {
             // BOUND (Sec 17.4.1.1)
@@ -79,7 +83,7 @@ public class RDF4JValueExprTranslator {
             ImmutableTerm boundTerm = knownVariables.contains(var)
                     ? getFunctionalTerm(SPARQL.BOUND, var)
                     : termFactory.getRDFLiteralConstant("false", XSD.BOOLEAN);
-            return new ExtendedTerm(boundTerm);
+            return ExistsMapAnnotatedObject.of(boundTerm);
         }
         if (expr instanceof UnaryValueOperator) {
             return getTerm((UnaryValueOperator) expr);
@@ -90,65 +94,46 @@ public class RDF4JValueExprTranslator {
         if (expr instanceof FunctionCall) {
             FunctionCall f = (FunctionCall) expr;
 
-            ImmutableList<ExtendedTerm> extendedTerms = f.getArgs().stream()
+            ImmutableList<ExistsMapAnnotatedObject<ImmutableTerm>> extendedTerms = f.getArgs().stream()
                     .map(this::getTerm)
                     .collect(ImmutableCollectors.toList());
-
-            ImmutableList<ImmutableTerm> terms = extendedTerms.stream()
-                    .map(ExtendedTerm::getTerm)
-                    .collect(ImmutableCollectors.toList());
-
-            ImmutableMap<Variable, Exists> existsMap = extendedTerms.stream()
-                    .map(ExtendedTerm::getExistsMap)
-                    .flatMap(s -> s.entrySet().stream())
-                    .collect(ImmutableCollectors.toMap());
 
             String functionName = extractFunctionName(f.getURI());
 
             Optional<SPARQLFunctionSymbol> optionalFunctionSymbol = functionSymbolFactory.getSPARQLFunctionSymbol(
-                    functionName, terms.size());
+                    functionName, extendedTerms.size());
 
             if (optionalFunctionSymbol.isPresent()) {
-                return new ExtendedTerm(termFactory.getImmutableFunctionalTerm(optionalFunctionSymbol.get(), terms), existsMap);
+                return ExistsMapAnnotatedObject.of(extendedTerms, terms -> termFactory.getImmutableFunctionalTerm(optionalFunctionSymbol.get(), terms));
             }
         }
         if (expr instanceof NAryValueOperator) {
             return getTerm((NAryValueOperator) expr);
         }
         if (expr instanceof BNodeGenerator) {
-            Optional<ExtendedTerm> term = Optional.ofNullable(((BNodeGenerator) expr).getNodeIdExpr())
+            Optional<ExistsMapAnnotatedObject<ImmutableTerm>> term = Optional.ofNullable(((BNodeGenerator) expr).getNodeIdExpr())
                     .map(this::getTerm);
 
             return term
-                    .map(t -> new ExtendedTerm(getFunctionalTerm(SPARQL.BNODE, t.getTerm()), t.getExistsMap()))
-                    .orElseGet(() -> new ExtendedTerm(getFunctionalTerm(SPARQL.BNODE)));
+                    .<ExistsMapAnnotatedObject<ImmutableTerm>>map(et -> ExistsMapAnnotatedObject.of(et, t -> getFunctionalTerm(SPARQL.BNODE, t)))
+                    .orElseGet(() -> ExistsMapAnnotatedObject.of(getFunctionalTerm(SPARQL.BNODE)));
 
         }
         if (expr instanceof If) {
             If ifExpr = (If) expr;
 
-            ExtendedTerm condition = getTerm(ifExpr.getCondition());
-            ExtendedTerm thenTerm = getTerm(ifExpr.getResult());
-            ExtendedTerm elseTerm = getTerm(ifExpr.getAlternative());
+            ExistsMapAnnotatedObject<ImmutableTerm> condition = getTerm(ifExpr.getCondition());
+            ExistsMapAnnotatedObject<ImmutableTerm> thenTerm = getTerm(ifExpr.getResult());
+            ExistsMapAnnotatedObject<ImmutableTerm> elseTerm = getTerm(ifExpr.getAlternative());
 
-            ImmutableMap<Variable, Exists> existsMap = ImmutableMap.<Variable, Exists>builder()
-                    .putAll(condition.getExistsMap())
-                    .putAll(thenTerm.getExistsMap())
-                    .putAll(elseTerm.getExistsMap())
-                    .build();
-
-            return new ExtendedTerm(getFunctionalTerm(SPARQL.IF,
-                        convertToXsdBooleanTerm(condition.getTerm()),
-                        thenTerm.getTerm(),
-                        elseTerm.getTerm()),
-                    existsMap);
+            return ExistsMapAnnotatedObject.of(condition, thenTerm, elseTerm, (c, t, e) -> getFunctionalTerm(SPARQL.IF, convertToXsdBooleanTerm(c), t, e));
         }
         if (expr instanceof Exists) {
             Variable freshVariable = variableGenerator.generateNewVariable("prov");
             ImmutableFunctionalTerm boundTerm = getFunctionalTerm(SPARQL.BOUND,
                     termFactory.getRDFLiteralFunctionalTerm(freshVariable, XSD.STRING));
 
-            return new ExtendedTerm(boundTerm,
+            return new ExistsMapAnnotatedObject<>(boundTerm,
                     ImmutableMap.of(freshVariable, (Exists)expr));
         }
         // other subclasses
@@ -157,82 +142,78 @@ public class RDF4JValueExprTranslator {
         throw new RuntimeException(new OntopUnsupportedKGQueryException("The expression " + expr + " is not supported yet!"));
     }
 
-    private ExtendedTerm getTerm(UnaryValueOperator expr) {
+    private ExistsMapAnnotatedObject<ImmutableTerm> getTerm(UnaryValueOperator expr) {
 
         if (expr.getArg() == null) {
             if (expr instanceof Count)  // O-ary count
-                return new ExtendedTerm(getFunctionalTerm(SPARQL.COUNT));
+                return ExistsMapAnnotatedObject.of(getFunctionalTerm(SPARQL.COUNT));
 
             throw new RuntimeException(new OntopUnsupportedKGQueryException("The expression " + expr + " is not supported yet!"));
         }
 
-        ExtendedTerm extendedTerm = getTerm(expr.getArg());
+        ExistsMapAnnotatedObject<ImmutableTerm> extendedTerm = getTerm(expr.getArg());
 
         if (expr instanceof AbstractAggregateOperator) {
             AbstractAggregateOperator aggExpr = (AbstractAggregateOperator) expr;
             if (aggExpr instanceof Count) { //Unary count
-                return getAggregateExtendedTerm(SPARQL.COUNT, aggExpr.isDistinct(), extendedTerm);
+                return ExistsMapAnnotatedObject.of(extendedTerm, t -> getAggregateFunctionalTerm(SPARQL.COUNT, aggExpr.isDistinct(), t));
             }
             if (aggExpr instanceof Avg) {
-                return getAggregateExtendedTerm(SPARQL.AVG, aggExpr.isDistinct(), extendedTerm);
+                return ExistsMapAnnotatedObject.of(extendedTerm, t -> getAggregateFunctionalTerm(SPARQL.AVG, aggExpr.isDistinct(), t));
             }
             if (aggExpr instanceof Sum) {
-                return new ExtendedTerm(getAggregateFunctionalTerm(SPARQL.SUM, aggExpr.isDistinct(), extendedTerm.getTerm()), extendedTerm.getExistsMap());
+                return ExistsMapAnnotatedObject.of(extendedTerm, t -> getAggregateFunctionalTerm(SPARQL.SUM, aggExpr.isDistinct(), t));
             }
             if (aggExpr instanceof Min) {
-                return getFunctionalExtendedTerm(SPARQL.MIN, extendedTerm);
+                return ExistsMapAnnotatedObject.of(extendedTerm, t -> getFunctionalTerm(SPARQL.MIN, t));
             }
             if (aggExpr instanceof Max) {
-                return getFunctionalExtendedTerm(SPARQL.MAX, extendedTerm);
+                return ExistsMapAnnotatedObject.of(extendedTerm, t -> getFunctionalTerm(SPARQL.MAX, t));
             }
             if (aggExpr instanceof Sample) {
-                return getFunctionalExtendedTerm(SPARQL.SAMPLE, extendedTerm);
+                return ExistsMapAnnotatedObject.of(extendedTerm, t -> getFunctionalTerm(SPARQL.SAMPLE, t));
             }
             if (aggExpr instanceof GroupConcat) {
                 String separator = Optional.ofNullable(((GroupConcat) aggExpr).getSeparator())
                         .map(e -> ((ValueConstant) e).getValue().stringValue())
                         .orElse(" "); // Default separator
 
-                ImmutableFunctionalTerm aggTerm = termFactory.getImmutableFunctionalTerm(
-                        functionSymbolFactory.getSPARQLGroupConcatFunctionSymbol(separator, aggExpr.isDistinct()),
-                        extendedTerm.getTerm());
-                return new ExtendedTerm(aggTerm, extendedTerm.getExistsMap());
+                return ExistsMapAnnotatedObject.of(extendedTerm, t -> termFactory.getImmutableFunctionalTerm(
+                        functionSymbolFactory.getSPARQLGroupConcatFunctionSymbol(separator, aggExpr.isDistinct()), t));
             }
             if (aggExpr instanceof AggregateFunctionCall) {
                 AggregateFunctionCall call = (AggregateFunctionCall) aggExpr;
-                if(call.getIRI().startsWith(AGG.PREFIX)) {
-                    ImmutableFunctionalTerm aggTerm = getAggregateFunctionalTerm(call.getIRI(), aggExpr.isDistinct(), extendedTerm.getTerm());
-                    return new ExtendedTerm(aggTerm, extendedTerm.getExistsMap());
+                if (call.getIRI().startsWith(AGG.PREFIX)) {
+                    return ExistsMapAnnotatedObject.of(extendedTerm, t -> getAggregateFunctionalTerm(call.getIRI(), aggExpr.isDistinct(), t));
                 }
             }
             throw new RuntimeException("Unreachable: all subclasses covered");
         }
         if (expr instanceof Not) {
-            ImmutableFunctionalTerm notTerm = getFunctionalTerm(XPathFunction.NOT.getIRIString(), convertToXsdBooleanTerm(extendedTerm.getTerm()));
-            return new ExtendedTerm(notTerm, extendedTerm.getExistsMap());
+            return ExistsMapAnnotatedObject.of(extendedTerm, t -> getFunctionalTerm(XPathFunction.NOT.getIRIString(), convertToXsdBooleanTerm(t)));
         }
         if (expr instanceof IsNumeric) {
             // isNumeric (Sec 17.4.2.4) for checking whether the argument is a numeric value
-            return getFunctionalExtendedTerm(SPARQL.IS_NUMERIC, extendedTerm);
+            return ExistsMapAnnotatedObject.of(extendedTerm, t -> getFunctionalTerm(SPARQL.IS_NUMERIC, t));
         }
         if (expr instanceof IsLiteral) {
-            return getFunctionalExtendedTerm(SPARQL.IS_LITERAL, extendedTerm);
+            return ExistsMapAnnotatedObject.of(extendedTerm, t -> getFunctionalTerm(SPARQL.IS_LITERAL, t));
         }
         if (expr instanceof IsURI) {
-            return getFunctionalExtendedTerm(SPARQL.IS_IRI, extendedTerm);
+            return ExistsMapAnnotatedObject.of(extendedTerm, t -> getFunctionalTerm(SPARQL.IS_IRI, t));
         }
         if (expr instanceof Str) {
-            return getFunctionalExtendedTerm(SPARQL.STR, extendedTerm);
+            return ExistsMapAnnotatedObject.of(extendedTerm, t -> getFunctionalTerm(SPARQL.STR, t));
         }
         if (expr instanceof Datatype) {
-            return getFunctionalExtendedTerm(SPARQL.DATATYPE, extendedTerm);
+            return ExistsMapAnnotatedObject.of(extendedTerm, t -> getFunctionalTerm(SPARQL.DATATYPE, t));
         }
         if (expr instanceof IsBNode) {
-            return getFunctionalExtendedTerm(SPARQL.IS_BLANK, extendedTerm);
+            return ExistsMapAnnotatedObject.of(extendedTerm, t -> getFunctionalTerm(SPARQL.IS_BLANK, t));
         }
         if (expr instanceof Lang) {
             if (expr.getArg() instanceof Var) {
-                return getFunctionalExtendedTerm(SPARQL.LANG, extendedTerm);
+                return ExistsMapAnnotatedObject.of(extendedTerm, t -> getFunctionalTerm(SPARQL.LANG, t));
             }
             throw new RuntimeException(new OntopUnsupportedKGQueryException("A variable or a value is expected in " + expr));
         }
@@ -245,8 +226,7 @@ public class RDF4JValueExprTranslator {
                     .map(functionSymbolFactory::getIRIFunctionSymbol)
                     .orElseGet(functionSymbolFactory::getIRIFunctionSymbol);
 
-            ImmutableFunctionalTerm iriTerm = termFactory.getImmutableFunctionalTerm(functionSymbol, extendedTerm.getTerm());
-            return new ExtendedTerm(iriTerm, extendedTerm.getExistsMap());
+            return ExistsMapAnnotatedObject.of(extendedTerm, t -> termFactory.getImmutableFunctionalTerm(functionSymbol, t));
         }
         // subclasses missing:
         //  - IsResource
@@ -257,39 +237,21 @@ public class RDF4JValueExprTranslator {
         throw new RuntimeException(new OntopUnsupportedKGQueryException("The expression " + expr + " is not supported yet!"));
     }
 
-    private ExtendedTerm getAggregateExtendedTerm(String functionName, boolean isDistinct, ExtendedTerm extendedTerm) {
-        ImmutableFunctionalTerm aggTerm = getAggregateFunctionalTerm(functionName, isDistinct, extendedTerm.getTerm());
-        return new ExtendedTerm(aggTerm, extendedTerm.getExistsMap());
-    }
+    private ExistsMapAnnotatedObject<ImmutableTerm> getTerm(BinaryValueOperator expr) {
 
-    private ExtendedTerm getFunctionalExtendedTerm(String functionName, ExtendedTerm extendedTerm) {
-        return new ExtendedTerm(getFunctionalTerm(functionName, extendedTerm.getTerm()), extendedTerm.getExistsMap());
-    }
-
-    private ExtendedTerm getTerm(BinaryValueOperator expr) {
-
-        ExtendedTerm extendedTerm1 = getTerm(expr.getLeftArg());
-        ExtendedTerm extendedTerm2 = getTerm(expr.getRightArg());
-
-        ImmutableMap<Variable, Exists> existsMap = ImmutableMap.<Variable, Exists>builder()
-                .putAll(extendedTerm1.getExistsMap())
-                .putAll(extendedTerm2.getExistsMap())
-                .build();
-        ImmutableTerm term1 = extendedTerm1.getTerm();
-        ImmutableTerm term2 = extendedTerm2.getTerm();
+        ExistsMapAnnotatedObject<ImmutableTerm> extendedTerm1 = getTerm(expr.getLeftArg());
+        ExistsMapAnnotatedObject<ImmutableTerm> extendedTerm2 = getTerm(expr.getRightArg());
 
         if (expr instanceof And) {
-            ImmutableFunctionalTerm andTerm = getFunctionalTerm(SPARQL.LOGICAL_AND, convertToXsdBooleanTerm(term1), convertToXsdBooleanTerm(term2));
-            return new ExtendedTerm(andTerm, existsMap);
+            return ExistsMapAnnotatedObject.of(extendedTerm1, extendedTerm2, (t1, t2) -> getFunctionalTerm(SPARQL.LOGICAL_AND, convertToXsdBooleanTerm(t1), convertToXsdBooleanTerm(t2)));
         }
         if (expr instanceof Or) {
-            ImmutableFunctionalTerm orTerm = getFunctionalTerm(SPARQL.LOGICAL_OR, convertToXsdBooleanTerm(term1), convertToXsdBooleanTerm(term2));
-            return new ExtendedTerm(orTerm, existsMap);
+            return ExistsMapAnnotatedObject.of(extendedTerm1, extendedTerm2, (t1, t2) -> getFunctionalTerm(SPARQL.LOGICAL_OR, convertToXsdBooleanTerm(t1), convertToXsdBooleanTerm(t2)));
         }
         if (expr instanceof SameTerm) {
             // sameTerm (Sec 17.4.1.8)
             // Corresponds to the STRICT equality (same lexical value, same type)
-            return new ExtendedTerm(getFunctionalTerm(SPARQL.SAME_TERM, term1, term2), existsMap);
+            return ExistsMapAnnotatedObject.of(extendedTerm1, extendedTerm2, (t1, t2) -> getFunctionalTerm(SPARQL.SAME_TERM, t1, t2));
         }
         if (expr instanceof Regex) {
             // REGEX (Sec 17.4.3.14)
@@ -297,88 +259,58 @@ public class RDF4JValueExprTranslator {
             // xsd:boolean  REGEX (string literal text, simple literal pattern, simple literal flags)
             Regex reg = (Regex) expr;
             if (reg.getFlagsArg() != null) {
-                ExtendedTerm flagsTerm = getTerm(reg.getFlagsArg());
-                ImmutableMap<Variable, Exists> updatedExistsMap = ImmutableMap.<Variable, Exists>builder()
-                        .putAll(existsMap)
-                        .putAll(flagsTerm.getExistsMap())
-                        .build();
-                return new ExtendedTerm(getFunctionalTerm(SPARQL.REGEX, term1, term2, flagsTerm.getTerm()), updatedExistsMap);
+                ExistsMapAnnotatedObject<ImmutableTerm> flagsTerm = getTerm(reg.getFlagsArg());
+                return ExistsMapAnnotatedObject.of(extendedTerm1, extendedTerm2, flagsTerm, (t1, t2, f) -> getFunctionalTerm(SPARQL.REGEX, t1, t2, f));
             }
-            return new ExtendedTerm(getFunctionalTerm(SPARQL.REGEX, term1, term2), existsMap);
+            return ExistsMapAnnotatedObject.of(extendedTerm1, extendedTerm2, (t1, t2) -> getFunctionalTerm(SPARQL.REGEX, t1, t2));
         }
         if (expr instanceof Compare) {
-            switch (((Compare) expr).getOperator()) {
-                case EQ:
-                    return new ExtendedTerm(getFunctionalTerm(SPARQL.EQ, term1, term2), existsMap);
-                case LT:
-                    return new ExtendedTerm(getFunctionalTerm(SPARQL.LESS_THAN, term1, term2), existsMap);
-                case GT:
-                    return new ExtendedTerm(getFunctionalTerm(SPARQL.GREATER_THAN, term1, term2), existsMap);
-                case NE:
-                    return new ExtendedTerm(getFunctionalTerm(XPathFunction.NOT.getIRIString(),
-                            getFunctionalTerm(SPARQL.EQ, term1, term2)), existsMap);
-                case LE:
-                    return new ExtendedTerm(getFunctionalTerm(XPathFunction.NOT.getIRIString(),
-                            getFunctionalTerm(SPARQL.GREATER_THAN, term1, term2)), existsMap);
-                case GE:
-                    return new ExtendedTerm(getFunctionalTerm(XPathFunction.NOT.getIRIString(),
-                            getFunctionalTerm(SPARQL.LESS_THAN, term1, term2)), existsMap);
-                default:
-                    throw new RuntimeException(new OntopUnsupportedKGQueryException("Unsupported operator: " + expr));
-            }
+            return ExistsMapAnnotatedObject.of(extendedTerm1, extendedTerm2, Optional.ofNullable(CompareOperations.get(((Compare) expr).getOperator()))
+                    .orElseThrow(() -> new RuntimeException(new OntopUnsupportedKGQueryException("Unsupported operator: " + expr))));
         }
         if (expr instanceof MathExpr) {
-            return new ExtendedTerm(getFunctionalTerm(ArithmeticOperations.get(((MathExpr) expr).getOperator()),
-                    term1, term2), existsMap);
+            return ExistsMapAnnotatedObject.of(extendedTerm1, extendedTerm2, Optional.ofNullable(ArithmeticOperations.get(((MathExpr) expr).getOperator()))
+                    .orElseThrow(() -> new RuntimeException(new OntopUnsupportedKGQueryException("Unsupported operator: " + expr))));
         }
         /*
          * Restriction: the first argument must be LANG(...) and the second  a constant
          * (for guaranteeing that the langMatches logic is not delegated to the native query)
          */
         if (expr instanceof LangMatches) {
-            if (!(term1 instanceof ImmutableFunctionalTerm
-                    && ((ImmutableFunctionalTerm) term1).getFunctionSymbol() instanceof LangSPARQLFunctionSymbol)
-                    || !(term2 instanceof RDFConstant)) {
+            if (!(extendedTerm1.get() instanceof ImmutableFunctionalTerm
+                    && ((ImmutableFunctionalTerm) extendedTerm1.get()).getFunctionSymbol() instanceof LangSPARQLFunctionSymbol)
+                    || !(extendedTerm2.get() instanceof RDFConstant)) {
                 throw new RuntimeException(new OntopUnsupportedKGQueryException("The function langMatches is " +
                         "only supported with lang(..) function for the first argument and a constant for the second"));
             }
-
-            return new ExtendedTerm(getFunctionalTerm(SPARQL.LANG_MATCHES, term1, term2), existsMap);
+            return ExistsMapAnnotatedObject.of(extendedTerm1, extendedTerm2, (t1, t2) -> getFunctionalTerm(SPARQL.LANG_MATCHES, t1, t2));
         }
         throw new RuntimeException("Unreachable: all subclasses covered");
     }
 
-    private ExtendedTerm getTerm(NAryValueOperator expr) {
+    private ExistsMapAnnotatedObject<ImmutableTerm> getTerm(NAryValueOperator expr) {
 
-        ImmutableList<ExtendedTerm> extendedTerms = expr.getArguments().stream()
+        ImmutableList<ExistsMapAnnotatedObject<ImmutableTerm>> extendedTerms = expr.getArguments().stream()
                 .map(this::getTerm)
                 .collect(ImmutableCollectors.toList());
 
-        ImmutableList<ImmutableTerm> terms = extendedTerms.stream()
-                .map(ExtendedTerm::getTerm)
-                .collect(ImmutableCollectors.toList());
-
-        ImmutableMap<Variable, Exists> existsMap = extendedTerms.stream()
-                .map(ExtendedTerm::getExistsMap)
-                .flatMap(s -> s.entrySet().stream())
-                .collect(ImmutableCollectors.toMap());
-
         if (expr instanceof Coalesce) {
             SPARQLFunctionSymbol functionSymbol = functionSymbolFactory.getRequiredSPARQLFunctionSymbol(
-                    SPARQL.COALESCE, terms.size());
-            return new ExtendedTerm(termFactory.getImmutableFunctionalTerm(functionSymbol, terms), existsMap);
+                    SPARQL.COALESCE, extendedTerms.size());
+            return ExistsMapAnnotatedObject.of(extendedTerms, terms -> termFactory.getImmutableFunctionalTerm(functionSymbol, terms));
         }
         if (expr instanceof ListMemberOperator) {
-            if (terms.size() < 2)
+            if (extendedTerms.size() < 2)
                 throw new MinorOntopInternalBugException("Was not expecting a ListMemberOperator from RDF4J with less than 2 terms");
 
-            ImmutableTerm firstArgument = terms.get(0);
-            ImmutableTerm orTerm = terms.stream()
+            ImmutableTerm firstArgument = extendedTerms.get(0).get();
+            ImmutableTerm orTerm = extendedTerms.stream()
+                    .map(ExistsMapAnnotatedObject::get)
                     .skip(1)
                     .map(t -> getFunctionalTerm(SPARQL.EQ, firstArgument, t))
                     .reduce((e1, e2) -> getFunctionalTerm(SPARQL.LOGICAL_OR, e1, e2))
                     .orElseThrow(() -> new MinorOntopInternalBugException("Cannot happen because there are at least 2 terms"));
-            return new ExtendedTerm(orTerm, existsMap);
+            return ExistsMapAnnotatedObject.of(extendedTerms, terms -> orTerm);
         }
         throw new RuntimeException("Unreachable: all subclasses covered");
     }
@@ -420,14 +352,21 @@ public class RDF4JValueExprTranslator {
                     : termFactory.getSPARQLEffectiveBooleanValue(term);
     }
 
-    private static final ImmutableMap<MathExpr.MathOp, String> ArithmeticOperations =
-            ImmutableMap.<MathExpr.MathOp, String>builder()
-                    .put(MathExpr.MathOp.PLUS, SPARQL.ADD)
-                    .put(MathExpr.MathOp.MINUS, SPARQL.SUBTRACT)
-                    .put(MathExpr.MathOp.MULTIPLY, SPARQL.MULTIPLY)
-                    .put(MathExpr.MathOp.DIVIDE, SPARQL.DIVIDE)
-                    .build();
+    private final ImmutableMap<MathExpr.MathOp, BinaryOperator<ImmutableTerm>> ArithmeticOperations =
+            ImmutableMap.of(
+                    MathExpr.MathOp.PLUS, (t1, t2) -> getFunctionalTerm(SPARQL.ADD, t1, t2),
+                    MathExpr.MathOp.MINUS, (t1, t2) -> getFunctionalTerm(SPARQL.SUBTRACT, t1, t2),
+                    MathExpr.MathOp.MULTIPLY, (t1, t2) -> getFunctionalTerm(SPARQL.MULTIPLY, t1, t2),
+                    MathExpr.MathOp.DIVIDE, (t1, t2) -> getFunctionalTerm(SPARQL.DIVIDE, t1, t2));
 
+    private final ImmutableMap<Compare.CompareOp, BinaryOperator<ImmutableTerm>> CompareOperations =
+            ImmutableMap.of(
+                    Compare.CompareOp.EQ, (t1, t2) -> getFunctionalTerm(SPARQL.EQ, t1, t2),
+                    Compare.CompareOp.LT, (t1, t2) -> getFunctionalTerm(SPARQL.LESS_THAN, t1, t2),
+                    Compare.CompareOp.GT, (t1, t2) -> getFunctionalTerm(SPARQL.GREATER_THAN, t1, t2),
+                    Compare.CompareOp.NE, (t1, t2) -> getFunctionalTerm(XPathFunction.NOT.getIRIString(), getFunctionalTerm(SPARQL.EQ, t1, t2)),
+                    Compare.CompareOp.LE, (t1, t2) -> getFunctionalTerm(XPathFunction.NOT.getIRIString(), getFunctionalTerm(SPARQL.GREATER_THAN, t1, t2)),
+                    Compare.CompareOp.GE, (t1, t2) -> getFunctionalTerm(XPathFunction.NOT.getIRIString(), getFunctionalTerm(SPARQL.LESS_THAN, t1, t2)));
 
     /**
      * Changes some function names when RDF4J abuses the SPARQL standard (i.e. is too tightly-coupled)
@@ -477,16 +416,11 @@ public class RDF4JValueExprTranslator {
                         .orElseGet(termFactory::getNullConstant);
     }
 
-    public static class ExtendedTerm {
-        private final ImmutableTerm term;
+    public static class ExistsMapAnnotatedObject<T> {
+        private final T term;
         private final ImmutableMap<Variable, Exists> existsMap ;
 
-        public ExtendedTerm(ImmutableTerm term) {
-            this.existsMap = ImmutableMap.of();
-            this.term = term;
-        }
-
-        public ExtendedTerm(ImmutableTerm term, ImmutableMap<Variable, Exists> existsMap) {
+        public ExistsMapAnnotatedObject(T term, ImmutableMap<Variable, Exists> existsMap) {
             this.existsMap = existsMap;
             this.term = term;
         }
@@ -495,9 +429,41 @@ public class RDF4JValueExprTranslator {
             return ImmutableMap.copyOf(existsMap);
         }
 
-        public ImmutableTerm getTerm() {
+        public T get() {
             return term;
         }
 
+        public static <T> ExistsMapAnnotatedObject<T> of(T term) {
+            return new ExistsMapAnnotatedObject<>(term, ImmutableMap.of());
+        }
+
+        public static <T, R> ExistsMapAnnotatedObject<R> of(ExistsMapAnnotatedObject<T> term, Function<T, R> termCombiner) {
+            return new ExistsMapAnnotatedObject<>(termCombiner.apply(term.get()), term.getExistsMap());
+        }
+
+        public static <T> ExistsMapAnnotatedObject<T> of(ExistsMapAnnotatedObject<T> term1, ExistsMapAnnotatedObject<T> term2, BinaryOperator<T> termCombiner) {
+            ImmutableMap.Builder<Variable, Exists> builder = ImmutableMap.builder();
+            builder.putAll(term1.getExistsMap());
+            builder.putAll(term2.getExistsMap());
+            return new ExistsMapAnnotatedObject<>(termCombiner.apply(term1.get(), term2.get()), builder.build());
+        }
+
+        public interface TernaryTermCombiner<T> {
+            T  apply(T term1, T term2, T term3);
+        }
+
+        public static <T> ExistsMapAnnotatedObject<T> of(ExistsMapAnnotatedObject<T> term1, ExistsMapAnnotatedObject<T> term2, ExistsMapAnnotatedObject<T> term3, TernaryTermCombiner<T> termCombiner) {
+            ImmutableMap.Builder<Variable, Exists> builder = ImmutableMap.builder();
+            builder.putAll(term1.getExistsMap());
+            builder.putAll(term2.getExistsMap());
+            builder.putAll(term3.getExistsMap());
+            return new ExistsMapAnnotatedObject<>(termCombiner.apply(term1.get(), term2.get(), term3.get()), builder.build());
+        }
+
+        public static <T> ExistsMapAnnotatedObject<T> of(ImmutableList<ExistsMapAnnotatedObject<T>> terms, Function<ImmutableList<T>, T> termCombiner) {
+            return new ExistsMapAnnotatedObject<>(
+                    termCombiner.apply(terms.stream().map(ExistsMapAnnotatedObject::get).collect(ImmutableCollectors.toList())),
+                    terms.stream().map(ExistsMapAnnotatedObject::getExistsMap).map(ImmutableMap::entrySet).flatMap(Collection::stream).collect(ImmutableCollectors.toMap()));
+        }
     }
 }
