@@ -10,7 +10,6 @@ import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.DBTypeFactory;
 import it.unibz.inf.ontop.spec.sqlparser.exception.UnsupportedSelectQueryException;
-import it.unibz.inf.ontop.spec.sqlparser.exception.UnsupportedSelectQueryRuntimeException;
 import net.sf.jsqlparser.JSQLParserException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
@@ -196,10 +195,12 @@ public class SQLParserTest {
 		return rae;
 	}
 
-	@Test // due to WITH
+	@Test
 	public void test_0() throws Exception {
-        assertThrows(UnsupportedSelectQueryException.class, () ->
+        var ex = assertThrows(UnsupportedSelectQueryException.class, () ->
 		        parse("WITH  temp (n) AS (SELECT DISTINCT name FROM student) SELECT * FROM temp"));
+
+        assertEquals("WITH is not supported in SELECT statements [temp (n) AS (SELECT DISTINCT name FROM student)]", ex.getMessage());
 	}
 
 
@@ -235,23 +236,27 @@ public class SQLParserTest {
 		assertEquals(2, re.getAttributes().asMap().size());
 	}
 
-	@Test // due to DISTINCT
+	@Test
 	public void test_1_3_1() throws Exception {
-        assertThrows(UnsupportedSelectQueryException.class, () ->
+        var ex = assertThrows(UnsupportedSelectQueryException.class, () ->
                 parse("SELECT DISTINCT name FROM student"));
+
+        assertEquals("DISTINCT is not supported SELECT DISTINCT name FROM student", ex.getMessage());
 	}
 
 	@Test
-	@Disabled // the SQL is not valid, yet JSQLParser accepts it in the form of SELECT name FROM student
+	@Disabled("SQL is not valid, yet JSQLParser accepts it in the form of SELECT name FROM student")
 	public void test_1_3_2() throws Exception {
 		RAExpression re = parse("SELECT ALL name FROM student");
 	}
 
 	@Test
-	// due to DISTINCT ON (PostgreSQL-specific) is not supported
 	public void test_1_3_3() throws Exception {
-        assertThrows(UnsupportedSelectQueryException.class, () ->
+        var ex = assertThrows(UnsupportedSelectQueryException.class, () ->
 		        parse("select DISTINCT ON (name,age,year) name,age FROM student"));
+
+        // DISTINCT ON is PostgreSQL-specific
+        assertEquals("DISTINCT is not supported SELECT DISTINCT ON (name, age, year) name, age FROM student", ex.getMessage());
 	}
 
 	@Test
@@ -344,10 +349,12 @@ public class SQLParserTest {
 		assertEquals(2, re.getAttributes().asMap().size());
 	}
 
-	@Test // alias does not exist
+	@Test
 	public void test_1_7_1() throws Exception {
-        assertThrows(InvalidQueryException.class, () ->
+        var ex = assertThrows(InvalidQueryException.class, () ->
 		        parse("SELECT alias.id, alias.name FROM student"));
+
+        assertEquals("Unable to find attribute alias.id", ex.getMessage().substring(0, ex.getMessage().indexOf(" (")));
 	}
 
 	@Test
@@ -478,40 +485,52 @@ public class SQLParserTest {
 		assertEquals(3, re.getAttributes().asMap().size());
 	}
 
-	@Test // aggregation is not supported
+	@Test
 	public void max_test() throws Exception {
-        assertThrows(UnsupportedSelectQueryException.class, () ->
+        var ex = assertThrows(UnsupportedSelectQueryException.class, () ->
 		        parse("SELECT MAX(score) AS max_score FROM grade"));
+
+        assertEquals("Unsupported SQL function MAX(score)", ex.getMessage());
 	}
 
-	@Test // aggregation is not supported
+	@Test
 	public void min_test() throws Exception {
-        assertThrows(UnsupportedSelectQueryException.class, () ->
+        var ex = assertThrows(UnsupportedSelectQueryException.class, () ->
 		        parse("SELECT MIN(score) AS min_score FROM grade"));
+
+        assertEquals("Unsupported SQL function MIN(score)", ex.getMessage());
 	}
 
-	@Test // aggregation is not supported
+	@Test
 	public void avg_test() throws Exception {
-        assertThrows(UnsupportedSelectQueryException.class, () ->
+        var ex = assertThrows(UnsupportedSelectQueryException.class, () ->
 		        parse("SELECT AVG(score) AS avg_score FROM grade"));
+
+        assertEquals("Unsupported SQL function AVG(score)", ex.getMessage());
 	}
 
-	@Test // aggregation is not supported
+	@Test
 	public void sum_test() throws Exception {
-        assertThrows(UnsupportedSelectQueryException.class, () ->
+        var ex = assertThrows(UnsupportedSelectQueryException.class, () ->
 		        parse("SELECT SUM(amount) AS total_amount FROM tax"));
+
+        assertEquals("Unsupported SQL function SUM(amount)", ex.getMessage());
 	}
 
-	@Test // aggregation is not supported
+	@Test
 	public void count_star_test() throws Exception {
-        assertThrows(UnsupportedSelectQueryException.class, () ->
+        var ex = assertThrows(UnsupportedSelectQueryException.class, () ->
 		        parse("SELECT COUNT(*) AS student_count FROM student"));
+
+        assertEquals("Unsupported SQL function COUNT(*)", ex.getMessage());
 	}
 
-	@Test // aggregation is not supported
+	@Test
 	public void count_test() throws Exception {
-        assertThrows(UnsupportedSelectQueryException.class, () ->
+        var ex = assertThrows(UnsupportedSelectQueryException.class, () ->
 		        parse("SELECT COUNT(id) AS student_count FROM student"));
+
+        assertEquals("Unsupported SQL function COUNT(id)", ex.getMessage());
 	}
 
 	@Test
@@ -534,31 +553,39 @@ public class SQLParserTest {
 	}
 
 
-	@Test // due to DISTINCT
+	@Test
 	public void test_3_8_1() throws Exception {
-        assertThrows(UnsupportedSelectQueryException.class, () ->
+        var ex = assertThrows(UnsupportedSelectQueryException.class, () ->
 		        parse("SELECT DISTINCT maker FROM Product "
 				+ "WHERE type = 'PC' AND NOT model = ANY (SELECT model FROM PC)"));
+
+        assertEquals("DISTINCT is not supported SELECT DISTINCT maker FROM Product WHERE type = 'PC' AND NOT model = ANY (SELECT model FROM PC )", ex.getMessage());
 	}
 
 
-	@Test // due to DISTINCT
+	@Test
 	public void test_3_9_1() throws Exception {
-        assertThrows(UnsupportedSelectQueryException.class, () ->
+        var ex = assertThrows(UnsupportedSelectQueryException.class, () ->
 		        parse("SELECT DISTINCT maker FROM Product "
 				+ "WHERE type = 'PC' AND NOT model = SOME (SELECT model FROM PC)"));
+
+        assertEquals("DISTINCT is not supported SELECT DISTINCT maker FROM Product WHERE type = 'PC' AND NOT model = SOME (SELECT model FROM PC )", ex.getMessage());
 	}
 
 	@Test
 	public void test_4_1() throws Exception {
-        assertThrows(UnsupportedSelectQueryException.class, () ->
+        var ex = assertThrows(UnsupportedSelectQueryException.class, () ->
 		        parse("SELECT nationality, COUNT(id) as num_nat FROM student GROUP BY nationality"));
+
+        assertEquals("GROUP BY / HAVING are not supported SELECT nationality, COUNT(id) AS num_nat FROM student GROUP BY nationality", ex.getMessage());
 	}
 
 	@Test
 	public void test_4_2() throws Exception {
-        assertThrows(UnsupportedSelectQueryException.class, () ->
+        var ex = assertThrows(UnsupportedSelectQueryException.class, () ->
 		        parse("SELECT nationality, COUNT(id) num_nat FROM student WHERE birth_year>2000 GROUP BY nationality"));
+
+        assertEquals("GROUP BY / HAVING are not supported SELECT nationality, COUNT(id) num_nat FROM student WHERE birth_year > 2000 GROUP BY nationality", ex.getMessage());
 	}
 
 	@Test
@@ -569,11 +596,13 @@ public class SQLParserTest {
 		assertEquals(2, re.getAttributes().asMap().size());
 	}
 
-	@Test // due to ALL
+	@Test
 	public void test_4_4() throws Exception {
-        assertThrows(UnsupportedSelectQueryException.class, () ->
+        var ex = assertThrows(UnsupportedSelectQueryException.class, () ->
 		        parse("SELECT des_date,des_amount,ord_amount FROM despatch WHERE des_amount > ALL("
 				+ "SELECT ord_amount FROM orders WHERE ord_amount=2000)"));
+
+        assertEquals("ALL is not supported yet ALL (SELECT ord_amount FROM orders WHERE ord_amount = 2000 )", ex.getMessage());
 	}
 
 	@Test
@@ -616,40 +645,52 @@ public class SQLParserTest {
 		assertEquals(4, re.getAttributes().asMap().size());
 	}
 
-	@Test // due to LEFT JOIN
+	@Test
 	public void test_5_3() throws Exception {
-        assertThrows(UnsupportedSelectQueryException.class, () ->
+        var ex = assertThrows(UnsupportedSelectQueryException.class, () ->
 		        parse("SELECT t1.id, t1.name, t2.class_id, t2.grade FROM student t1 LEFT JOIN grade t2 ON t1.id=t2.st_id"));
-	}
 
-	@Test // due to RIGHT JOIN
+        assertEquals("LEFT/RIGHT/FULL OUTER JOINs are not supported LEFT JOIN grade t2 ON t1.id = t2.st_id", ex.getMessage());
+    }
+
+	@Test
 	public void test_5_4() throws Exception {
-        assertThrows(UnsupportedSelectQueryException.class, () ->
+        var ex = assertThrows(UnsupportedSelectQueryException.class, () ->
 		        parse("SELECT t1.id, t1.name, t2.class_id, t2.grade FROM student t1 RIGHT JOIN grade t2 ON t1.id=t2.st_id"));
+
+        assertEquals("LEFT/RIGHT/FULL OUTER JOINs are not supported RIGHT JOIN grade t2 ON t1.id = t2.st_id", ex.getMessage());
 	}
 
-	@Test // due to FULL JOIN
+	@Test
 	public void test_5_5() throws Exception {
-        assertThrows(UnsupportedSelectQueryException.class, () ->
+        var ex = assertThrows(UnsupportedSelectQueryException.class, () ->
 		        parse("SELECT id, name, class_id, grade FROM student t1 FULL JOIN grade t2 ON t1.id=t2.st_id"));
+
+        assertEquals("LEFT/RIGHT/FULL OUTER JOINs are not supported FULL JOIN grade t2 ON t1.id = t2.st_id", ex.getMessage());
 	}
 
-	@Test // due to LEFT JOIN
+	@Test
 	public void test_5_6() throws Exception {
-        assertThrows(UnsupportedSelectQueryException.class, () ->
+        var ex = assertThrows(UnsupportedSelectQueryException.class, () ->
 		        parse("SELECT id, name, class_id, grade FROM student t1 LEFT OUTER JOIN grade t2 ON t1.id=t2.st_id"));
+
+        assertEquals("LEFT/RIGHT/FULL OUTER JOINs are not supported LEFT OUTER JOIN grade t2 ON t1.id = t2.st_id", ex.getMessage());
 	}
 
-	@Test // due to RIGHT JOIN
+	@Test
 	public void test_5_7() throws Exception {
-        assertThrows(UnsupportedSelectQueryException.class, () ->
+        var ex = assertThrows(UnsupportedSelectQueryException.class, () ->
 		        parse("SELECT id, name, class_id, grade FROM student t1 RIGHT OUTER JOIN grade t2 ON t1.id=t2.st_id"));
+
+        assertEquals("LEFT/RIGHT/FULL OUTER JOINs are not supported RIGHT OUTER JOIN grade t2 ON t1.id = t2.st_id", ex.getMessage());
 	}
 
-	@Test // due to FULL JOIN
+	@Test
 	public void test_5_8() throws Exception {
-        assertThrows(UnsupportedSelectQueryException.class, () ->
+        var ex = assertThrows(UnsupportedSelectQueryException.class, () ->
 		        parse("SELECT id, name, class_id, grade FROM student t1 FULL OUTER JOIN grade t2 ON t1.id=t2.st_id"));
+
+        assertEquals("LEFT/RIGHT/FULL OUTER JOINs are not supported FULL OUTER JOIN grade t2 ON t1.id = t2.st_id", ex.getMessage());
 	}
 
 	@Test
@@ -729,35 +770,45 @@ public class SQLParserTest {
 		assertFalse(re.getAttributes().asMap().keySet().iterator().next() instanceof Variable);
 	}
 
-	@Test // due to UNION ALL
+	@Test
 	public void test_8_1() throws Exception {
-        assertThrows(UnsupportedSelectQueryException.class, () ->
+        var ex = assertThrows(UnsupportedSelectQueryException.class, () ->
 		        parse("SELECT name FROM student UNION ALL SELECT name FROM erasmus"));
+
+        assertEquals("Complex SELECT statements are not supported SELECT name FROM student UNION ALL SELECT name FROM erasmus", ex.getMessage());
 	}
 
-	@Test // due to UNION ALL and UNION
+	@Test
 	public void test_8_2() throws Exception {
-        assertThrows(UnsupportedSelectQueryException.class, () ->
+        var ex = assertThrows(UnsupportedSelectQueryException.class, () ->
 		        parse("SELECT name FROM student UNION ALL SELECT name FROM erasmus UNION SELECT DISTINCT payee FROM tax"));
+
+        assertEquals("Complex SELECT statements are not supported SELECT name FROM student UNION ALL SELECT name FROM erasmus UNION SELECT DISTINCT payee FROM tax", ex.getMessage());
 	}
 
-	@Test // due to UNION ALL
+	@Test
 	public void test_8_3() throws Exception {
-        assertThrows(UnsupportedSelectQueryException.class, () ->
+        var ex = assertThrows(UnsupportedSelectQueryException.class, () ->
 		        parse("SELECT name FROM student WHERE id = 20 UNION ALL SELECT name FROM erasmus WHERE id = 20"));
+
+        assertEquals("Complex SELECT statements are not supported SELECT name FROM student WHERE id = 20 UNION ALL SELECT name FROM erasmus WHERE id = 20", ex.getMessage());
 	}
 
-	@Test // due to UNION
+	@Test
 	public void test_8_4() throws Exception {
-        assertThrows(UnsupportedSelectQueryException.class, () ->
+        var ex = assertThrows(UnsupportedSelectQueryException.class, () ->
 		        parse("SELECT name FROM student JOIN grade on student.id=grade.st_id AND grade.score>=25 UNION SELECT name FROM erasmus"));
+
+        assertEquals("Complex SELECT statements are not supported SELECT name FROM student JOIN grade ON student.id = grade.st_id AND grade.score >= 25 UNION SELECT name FROM erasmus", ex.getMessage());
 	}
 
-	@Test // due to UNION ALL
+	@Test
 	public void test_8_5() throws Exception {
-        assertThrows(UnsupportedSelectQueryException.class, () ->
+        var ex = assertThrows(UnsupportedSelectQueryException.class, () ->
 		        parse("SELECT id, name, course, score, semester FROM student t1 JOIN grade t2 ON t1.id=t2.st_id JOIN semester t3 ON t2.sm_id=t3.id "
 				+ "UNION ALL SELECT id, name, course, score, semester FROM erasmus t4 JOIN grade t2 ON t4.id=t2.st_id JOIN semester t3 ON t2.sm_id=t3.id"));
+
+        assertEquals("Complex SELECT statements are not supported", ex.getMessage().substring(0, ex.getMessage().indexOf(" SELECT id")));
 	}
 
 	@Test
@@ -866,12 +917,14 @@ public class SQLParserTest {
 	}
 
 
-	@Test // due to DISTINCT
+	@Test
 	public void testUnquoted0() throws Exception {
-        assertThrows(UnsupportedSelectQueryException.class, () ->
+        var ex = assertThrows(UnsupportedSelectQueryException.class, () ->
                 parse("SELECT DISTINCT 3 AS \"v0QuestType\", NULL AS \"v0Lang\", CAST(\"QpeopleVIEW0\".\"nick2\" AS CHAR) AS \"v0\", 1 AS \"v1QuestType\", NULL AS \"v1Lang\", QpeopleVIEW0.id AS \"v1\""
 				+ "FROM people \"QpeopleVIEW0\" "
 				+ "WHERE \"QpeopleVIEW0\".\"id\" IS NOT NULL AND \"QpeopleVIEW0\".\"nick2\" IS NOT NULL"));
+
+        assertEquals("DISTINCT is not supported", ex.getMessage().substring(0, ex.getMessage().indexOf(" SELECT DISTINCT")));
 	}
 
 	@Test
@@ -881,12 +934,14 @@ public class SQLParserTest {
 				+ "WHERE \"QpeopleVIEW0\".\"id\" IS NOT NULL AND \"QpeopleVIEW0\".\"nick2\" IS NOT NULL");
 	}
 
-	@Test // due to DISTINCT
+	@Test
 	public void testUnquoted2() throws Exception {
-        assertThrows(UnsupportedSelectQueryException.class, () ->
+        var ex = assertThrows(UnsupportedSelectQueryException.class, () ->
                 parse("SELECT DISTINCT 3 AS \"v0QuestType\", NULL AS \"v0Lang\", CAST(\"QpeopleVIEW0\".\"nick2\" AS CHAR) AS \"v0\", 1 AS \"v1QuestType\", NULL AS \"v1Lang\", QpeopleVIEW0.id AS \"v1\""
 				+ "FROM people \"QpeopleVIEW0\" "
 				+ "WHERE \"QpeopleVIEW0\".\"id\" IS NOT NULL AND \"QpeopleVIEW0\".\"nick2\" IS NOT NULL"));
+
+        assertEquals("DISTINCT is not supported", ex.getMessage().substring(0, ex.getMessage().indexOf(" SELECT DISTINCT")));
 	}
 
 	@Test
@@ -897,10 +952,12 @@ public class SQLParserTest {
 		assertEquals(1, re.getAttributes().asMap().size());
 	}
 
-	@Test // due to DISTINCT
+	@Test
 	public void testCast2() throws Exception {
-        assertThrows(UnsupportedSelectQueryException.class, () ->
+        var ex = assertThrows(UnsupportedSelectQueryException.class, () ->
 		        parse("SELECT DISTINCT CAST(`view0`.`nick2` AS CHAR (8000) CHARACTER SET utf8) AS `v0` FROM people `view0` WHERE `view0`.`nick2` IS NOT NULL"));
+
+        assertEquals("DISTINCT is not supported", ex.getMessage().substring(0, ex.getMessage().indexOf(" SELECT DISTINCT")));
 	}
 
 	/* Regex in MySQL, Oracle and Postgres*/
@@ -991,14 +1048,15 @@ public class SQLParserTest {
 	}
 
 	@Test
-	// due to CONVERT(varchar(50), ...), where varchar(50) is treated as a function call
 	public void test_2_p() throws Exception {
-        assertThrows(UnsupportedSelectQueryException.class, () ->
+        var ex = assertThrows(UnsupportedSelectQueryException.class, () ->
 		        parse("SELECT \"ID\" as \"KEYID\"\n" +
 				"      ,CONVERT(varchar(50), \"DATETIME\", 0) as \"DATETIMEH\"\n" +
 				"      ,\"SCALE\" as \"SCALE\"\n" +
 				"      ,\"INTERVAL\" as \"TEMPINTERVAL\"\n" +
 				"  FROM \"CIM\".\"dbo\".\"TEMPERATURE_DEVIATION\" where \"INTERVAL\" = '0-10'"));
+
+        assertEquals("Unsupported SQL function CONVERT(varchar(50), \"DATETIME\", 0)", ex.getMessage());
 	}
 
 	@Test
@@ -1023,8 +1081,10 @@ public class SQLParserTest {
 
 	@Test //due to IN with subselect
 	public void test_IN() throws Exception {
-        assertThrows(UnsupportedSelectQueryException.class, () ->
+        var ex = assertThrows(UnsupportedSelectQueryException.class, () ->
 		        parse("SELECT * FROM oreda.pm_maint_items  WHERE (i_id,  pm_interval) IN (SELECT i_id, MAX(pm_interval) FROM oreda.pm_program GROUP BY i_id)"));
+
+        assertEquals("Expression on the right in IN is not supported (i_id, pm_interval) IN (SELECT i_id, MAX(pm_interval) FROM oreda.pm_program GROUP BY i_id)", ex.getMessage());
 	}
 
     @Test
@@ -1061,8 +1121,10 @@ public class SQLParserTest {
 
 	@Test // issue 184
 	public void test_limit() throws Exception {
-        assertThrows(UnsupportedSelectQueryException.class, () ->
+        var ex = assertThrows(UnsupportedSelectQueryException.class, () ->
 		        parse("select STUDY_ID, patient_name(STUDY_ID) as label from demographics order by STUDY_ID limit 50"));
+
+        assertEquals("ORDER BY is not supported SELECT STUDY_ID, patient_name(STUDY_ID) AS label FROM demographics ORDER BY STUDY_ID LIMIT 50", ex.getMessage());
 	}
 
 	@Test

@@ -117,12 +117,15 @@ public class SelectQueryAttributeExtractorTest {
         MetadataLookup metadataLookup = builder.build();
         QuotedIDFactory idfac = metadataLookup.getQuotedIDFactory();
         DefaultSelectQueryAttributeExtractor ae = new DefaultSelectQueryAttributeExtractor(metadataLookup, CORE_SINGLETONS);
-        assertThrows(UnsupportedSelectQueryException.class, () -> ae.getRAExpressionAttributes(JSqlParserTools.parse(
+        var ex = assertThrows(UnsupportedSelectQueryException.class, () -> ae.getRAExpressionAttributes(JSqlParserTools.parse(
                 "select \n distinct \n rotorID from\n" +
                 "(select zpolrotorid as rotorID from LinkData\n" +
                 "union\n" +
                 "select abomSerialNumberMale as rotorID from AssemblyData\n" +
                 "union\n" +
                 "select abomSerialNumberFemale as rotorID from AssemblyData) as R")));
+
+        assertEquals("Complex SELECT statements are not supported SELECT zpolrotorid AS rotorID FROM LinkData" +
+                " UNION SELECT abomSerialNumberMale AS rotorID FROM AssemblyData UNION SELECT abomSerialNumberFemale AS rotorID FROM AssemblyData", ex.getMessage());
     }
 }

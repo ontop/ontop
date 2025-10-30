@@ -18,11 +18,6 @@ import org.junit.jupiter.api.Test;
 import static it.unibz.inf.ontop.spec.sqlparser.SQLTestingTools.*;
 import static org.junit.jupiter.api.Assertions.*;
 
-/**
- * Created by Roman Kontchakov on 01/11/2016.
- *
- */
-
 // TODO: REFACTOR
 
 public class RelationalExpressionTest {
@@ -80,7 +75,8 @@ public class RelationalExpressionTest {
     public void cross_join_exception_test() throws IllegalJoinException {
         RAExpression re1_1 = ops.withAlias(re2, idFactory.createRelationID("P"));
 
-        assertThrows(IllegalJoinException.class, () -> ops.crossJoin(re1, re1_1));
+        var ex = assertThrows(IllegalJoinException.class, () -> ops.crossJoin(re1, re1_1));
+        assertEquals("Relation alias P occurs in both arguments of the JOIN", ex.getMessage());
     }
 
     @Test
@@ -107,9 +103,11 @@ public class RelationalExpressionTest {
         onExpression.setLeftExpression(new Column(new Table(TABLE_P.getID().getSQLRendering()), "A"));
         onExpression.setRightExpression(new Column(new Table(TABLE_Q.getID().getSQLRendering()), "A"));
 
-        assertThrows(IllegalJoinException.class, () -> ops.joinOn(re1, re1_1,
+        var ex = assertThrows(IllegalJoinException.class, () -> ops.joinOn(re1, re1_1,
                 attributes -> new ExpressionParser(idFactory, CORE_SINGLETONS)
                         .parseBooleanExpression(onExpression, attributes)));
+
+        assertEquals("Relation alias P occurs in both arguments of the JOIN", ex.getMessage());
     }
 
     @Test
@@ -125,7 +123,8 @@ public class RelationalExpressionTest {
     public void natural_join_exception_test() throws IllegalJoinException {
         RAExpression re1_1 = ops.withAlias(re2, idFactory.createRelationID("P"));
 
-        assertThrows(IllegalJoinException.class, () -> ops.naturalJoin(re1, re1_1));
+        var ex = assertThrows(IllegalJoinException.class, () -> ops.naturalJoin(re1, re1_1));
+        assertEquals("Relation alias P occurs in both arguments of the JOIN", ex.getMessage());
     }
 
     @Test
@@ -141,7 +140,8 @@ public class RelationalExpressionTest {
         // This is used to simulate an ambiguity during the operation of natural join
         RAExpression re3 = ops.create(TABLE_R, ImmutableList.of(u, v));
 
-        assertThrows(IllegalJoinException.class, () -> ops.naturalJoin(re, re3));
+        var ex = assertThrows(IllegalJoinException.class, () -> ops.naturalJoin(re, re3));
+        assertEquals("Attribute(s) [A] are ambiguous", ex.getMessage());
     }
 
     @Test
@@ -157,15 +157,18 @@ public class RelationalExpressionTest {
     public void join_using_exception_test() throws IllegalJoinException {
         RAExpression re1_1 = ops.withAlias(re2, idFactory.createRelationID("P"));
 
-        assertThrows(IllegalJoinException.class, () -> ops.joinUsing(re1, re1_1,
+        var ex = assertThrows(IllegalJoinException.class, () -> ops.joinUsing(re1, re1_1,
                 ImmutableSet.of(idFactory.createAttributeID("A"))));
+
+        assertEquals("Relation alias P occurs in both arguments of the JOIN", ex.getMessage());
     }
 
     @Test
     public void join_using_no_commons_test() throws IllegalJoinException {
         RAExpression re2p = ops.create(TABLE_Q, ImmutableList.of(u, v));
 
-        assertThrows(IllegalJoinException.class, () -> ops.joinUsing(re1, re2p, ImmutableSet.of(idFactory.createAttributeID("A"))));
+        var ex = assertThrows(IllegalJoinException.class, () -> ops.joinUsing(re1, re2p, ImmutableSet.of(idFactory.createAttributeID("A"))));
+        assertEquals("Attribute(s) [A] cannot be found", ex.getMessage());
     }
 
     @Test
@@ -181,7 +184,8 @@ public class RelationalExpressionTest {
         // This is used to simulate an ambiguity during the operation of natural join
         RAExpression re3 = ops.create(TABLE_R, ImmutableList.of(u, v));
 
-        assertThrows(IllegalJoinException.class, () -> ops.joinUsing(relationalExpression, re3, ImmutableSet.of(idFactory.createAttributeID("A"))));
+        var ex = assertThrows(IllegalJoinException.class, () -> ops.joinUsing(relationalExpression, re3, ImmutableSet.of(idFactory.createAttributeID("A"))));
+        assertEquals("Attribute(s) [A] are ambiguous", ex.getMessage());
     }
 
 

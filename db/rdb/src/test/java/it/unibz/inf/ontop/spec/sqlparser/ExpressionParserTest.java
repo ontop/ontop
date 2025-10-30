@@ -13,7 +13,6 @@ import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.DBTypeFactory;
 import it.unibz.inf.ontop.model.vocabulary.SPARQL;
 import it.unibz.inf.ontop.spec.sqlparser.exception.InvalidSelectQueryRuntimeException;
-import it.unibz.inf.ontop.spec.sqlparser.exception.UnsupportedSelectQueryException;
 import it.unibz.inf.ontop.spec.sqlparser.exception.UnsupportedSelectQueryRuntimeException;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
@@ -32,9 +31,6 @@ import static it.unibz.inf.ontop.spec.sqlparser.SQLTestingTools.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-/**
- * Created by Roman Kontchakov on 02/12/2016.
- */
 public class ExpressionParserTest {
 
     private static final DBBooleanFunctionSymbol NOT = DB_FS_FACTORY.getDBNot();
@@ -184,10 +180,11 @@ public class ExpressionParserTest {
     @Test
     public void modulo_test() throws JSQLParserException {
         Variable v = TERM_FACTORY.getVariable("x0");
-        assertThrows(UnsupportedOperationException.class, () ->
+        var ex = assertThrows(UnsupportedOperationException.class, () ->
                 parseTerm("SELECT X % 2 AS A FROM DUMMY", ImmutableMap.of(
                     new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v)));
 
+        assertEquals("The untyped math operator % is not supported", ex.getMessage());
     //    assertEquals(TERM_FACTORY.getImmutableFunctionalTerm(
     //            DB_FS_FACTORY.getUntypedDBMathBinaryOperator("%"),
     //            v,
@@ -197,10 +194,11 @@ public class ExpressionParserTest {
     @Test
     public void integer_div_test() throws JSQLParserException {
         Variable v = TERM_FACTORY.getVariable("x0");
-        assertThrows(UnsupportedOperationException.class, () ->
+        var ex = assertThrows(UnsupportedOperationException.class, () ->
                 parseTerm("SELECT X DIV 2 AS A FROM DUMMY", ImmutableMap.of(
                     new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v)));
 
+        assertEquals("The untyped math operator DIV is not supported", ex.getMessage());
 //        assertEquals(TERM_FACTORY.getImmutableFunctionalTerm(
 //                DB_FS_FACTORY.getUntypedDBMathBinaryOperator("DIV"),
 //                v,
@@ -504,9 +502,11 @@ public class ExpressionParserTest {
     @Test
     public void array_interval_test() throws JSQLParserException {
         Variable v = TERM_FACTORY.getVariable("x0");
-        assertThrows(UnsupportedSelectQueryRuntimeException.class, () ->
+        var ex = assertThrows(UnsupportedSelectQueryRuntimeException.class, () ->
                 parseTerm("SELECT X[2:4] AS A FROM DUMMY", ImmutableMap.of(
                         new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v)));
+
+        assertEquals("Array intervals are not supported", ex.getMessage());
     }
 
     @Test
@@ -1127,71 +1127,87 @@ public class ExpressionParserTest {
     @Test
     public void subSelect_Test() throws JSQLParserException {
         Variable v = TERM_FACTORY.getVariable("x0");
-        assertThrows(UnsupportedSelectQueryRuntimeException.class, () ->
+        var ex = assertThrows(UnsupportedSelectQueryRuntimeException.class, () ->
                 parseTerm("SELECT (SELECT A FROM Q WHERE A = P.B) AS C FROM P", ImmutableMap.of(
                     new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v)));
+
+        assertEquals("SubSelect is not supported yet", ex.getMessage());
     }
 
     @Test
     public void exists_test() throws JSQLParserException {
         Variable v = TERM_FACTORY.getVariable("x0");
-        assertThrows(UnsupportedSelectQueryRuntimeException.class, () ->
+        var ex = assertThrows(UnsupportedSelectQueryRuntimeException.class, () ->
                 parseBooleanExpression("SELECT * FROM P WHERE EXISTS (SELECT * FROM Q WHERE A = P.B);", ImmutableMap.of(
                         new QualifiedAttributeID(null, IDFAC.createAttributeID("A")), v)));
+
+        assertEquals("EXISTS is not supported yet", ex.getMessage());
     }
 
     @Test
     public void not_exists_test() throws JSQLParserException {
         Variable v = TERM_FACTORY.getVariable("x0");
-        assertThrows(UnsupportedSelectQueryRuntimeException.class, () ->
+        var ex = assertThrows(UnsupportedSelectQueryRuntimeException.class, () ->
                 parseBooleanExpression("SELECT * FROM P WHERE NOT EXISTS (SELECT * FROM Q WHERE A = P.B);", ImmutableMap.of(
                         new QualifiedAttributeID(null, IDFAC.createAttributeID("A")), v)));
+
+        assertEquals("EXISTS is not supported yet", ex.getMessage());
     }
 
     @Test
     public void all_comparison_test() throws JSQLParserException {
         Variable v = TERM_FACTORY.getVariable("x0");
-        assertThrows(UnsupportedSelectQueryRuntimeException.class, () ->
+        var ex = assertThrows(UnsupportedSelectQueryRuntimeException.class, () ->
                 parseBooleanExpression("SELECT * FROM P WHERE A > ALL (SELECT C FROM Q WHERE A = P.B);", ImmutableMap.of(
                         new QualifiedAttributeID(null, IDFAC.createAttributeID("A")), v)));
+
+        assertEquals("ALL is not supported yet", ex.getMessage());
     }
 
     @Test
     public void any_comparison_test() throws JSQLParserException {
         Variable v = TERM_FACTORY.getVariable("x0");
-        assertThrows(UnsupportedSelectQueryRuntimeException.class, () ->
+        var ex = assertThrows(UnsupportedSelectQueryRuntimeException.class, () ->
                 parseBooleanExpression("SELECT * FROM P WHERE A > ANY (SELECT C FROM Q WHERE A = P.B);", ImmutableMap.of(
                         new QualifiedAttributeID(null, IDFAC.createAttributeID("A")), v)));
+
+        assertEquals("ANY is not supported yet", ex.getMessage());
     }
 
     @Test
     public void bitwise_and_test() throws JSQLParserException {
         Variable v = TERM_FACTORY.getVariable("x0");
         Variable u = TERM_FACTORY.getVariable("y0");
-        assertThrows(UnsupportedSelectQueryRuntimeException.class, () ->
+        var ex = assertThrows(UnsupportedSelectQueryRuntimeException.class, () ->
                 parseTerm("SELECT X & Y AS A FROM DUMMY", ImmutableMap.of(
                     new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v,
                     new QualifiedAttributeID(null, IDFAC.createAttributeID("Y")), u)));
+
+        assertEquals("Bitwise AND is not supported", ex.getMessage());
     }
 
     @Test
     public void bitwise_or_test() throws JSQLParserException {
         Variable v = TERM_FACTORY.getVariable("x0");
         Variable u = TERM_FACTORY.getVariable("y0");
-        assertThrows(UnsupportedSelectQueryRuntimeException.class, () ->
+        var ex = assertThrows(UnsupportedSelectQueryRuntimeException.class, () ->
                 parseTerm("SELECT X | Y AS A FROM DUMMY", ImmutableMap.of(
                         new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v,
                         new QualifiedAttributeID(null, IDFAC.createAttributeID("Y")), u)));
+
+        assertEquals("Bitwise OR is not supported", ex.getMessage());
     }
 
     @Test
     public void bitwise_xor_test() throws JSQLParserException {
         Variable v = TERM_FACTORY.getVariable("x0");
         Variable u = TERM_FACTORY.getVariable("y0");
-        assertThrows(UnsupportedSelectQueryRuntimeException.class, () ->
+        var ex = assertThrows(UnsupportedSelectQueryRuntimeException.class, () ->
                 parseTerm("SELECT X ^ Y AS A FROM DUMMY", ImmutableMap.of(
                         new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v,
                         new QualifiedAttributeID(null, IDFAC.createAttributeID("Y")), u)));
+
+        assertEquals("Bitwise XOR is not supported", ex.getMessage());
     }
 
     @Test
@@ -1237,97 +1253,121 @@ public class ExpressionParserTest {
 
     @Test
     public void interval_test() throws JSQLParserException {
-        assertThrows(UnsupportedSelectQueryRuntimeException.class, () ->
+        var ex = assertThrows(UnsupportedSelectQueryRuntimeException.class, () ->
                 parseTerm("SELECT INTERVAL '31' DAY FROM DUMMY", ImmutableMap.of()));
+
+        assertEquals("Temporal INTERVALs are not supported", ex.getMessage());
     }
 
 
     @Test
     public void sum_test() throws JSQLParserException {
         Variable v = TERM_FACTORY.getVariable("x0");
-        assertThrows(UnsupportedSelectQueryRuntimeException.class, () ->
+        var ex = assertThrows(UnsupportedSelectQueryRuntimeException.class, () ->
                 parseTerm("SELECT SUM(X) AS C FROM DUMMY", ImmutableMap.of(
                         new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v)));
+
+        assertEquals("Unsupported SQL function", ex.getMessage());
     }
 
     @Test
     public void avg_test() throws JSQLParserException {
         Variable v = TERM_FACTORY.getVariable("x0");
-        assertThrows(UnsupportedSelectQueryRuntimeException.class, () ->
+        var ex = assertThrows(UnsupportedSelectQueryRuntimeException.class, () ->
                 parseTerm("SELECT AVG(X) AS C FROM DUMMY", ImmutableMap.of(
                         new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v)));
+
+        assertEquals("Unsupported SQL function", ex.getMessage());
     }
 
     @Test
     public void min_test() throws JSQLParserException {
         Variable v = TERM_FACTORY.getVariable("x0");
-        assertThrows(UnsupportedSelectQueryRuntimeException.class, () ->
+        var ex = assertThrows(UnsupportedSelectQueryRuntimeException.class, () ->
                 parseTerm("SELECT MIN(X) AS C FROM DUMMY", ImmutableMap.of(
                         new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v)));
+
+        assertEquals("Unsupported SQL function", ex.getMessage());
     }
 
     @Test
     public void max_test() throws JSQLParserException {
         Variable v = TERM_FACTORY.getVariable("x0");
-        assertThrows(UnsupportedSelectQueryRuntimeException.class, () ->
+        var ex = assertThrows(UnsupportedSelectQueryRuntimeException.class, () ->
                 parseTerm("SELECT MAX(X) AS C FROM DUMMY", ImmutableMap.of(
                         new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v)));
+
+        assertEquals("Unsupported SQL function", ex.getMessage());
     }
 
     @Test
     public void count_test() throws JSQLParserException {
         Variable v = TERM_FACTORY.getVariable("x0");
-        assertThrows(UnsupportedSelectQueryRuntimeException.class, () ->
+        var ex = assertThrows(UnsupportedSelectQueryRuntimeException.class, () ->
                 parseTerm("SELECT COUNT(X) AS C FROM DUMMY", ImmutableMap.of(
                         new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v)));
+
+        assertEquals("Unsupported SQL function", ex.getMessage());
     }
 
     @Test
     public void count_star_test() throws JSQLParserException {
         Variable v = TERM_FACTORY.getVariable("x0");
-        assertThrows(UnsupportedSelectQueryRuntimeException.class, () ->
+        var ex = assertThrows(UnsupportedSelectQueryRuntimeException.class, () ->
                 parseTerm("SELECT COUNT(*) AS C FROM DUMMY", ImmutableMap.of(
                         new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v)));
+
+        assertEquals("Unsupported SQL function", ex.getMessage());
     }
 
 
 
     @Test
     public void analytic_expression_test() throws JSQLParserException {
-        assertThrows(UnsupportedSelectQueryRuntimeException.class, () ->
+        var ex = assertThrows(UnsupportedSelectQueryRuntimeException.class, () ->
                 parseTerm("SELECT LAG(A) OVER () FROM P", ImmutableMap.of()));
+
+        assertEquals("Analytic expressions is not supported", ex.getMessage());
     }
 
     @Test
     public void json_expression_test() throws JSQLParserException {
-        assertThrows(UnsupportedSelectQueryRuntimeException.class, () ->
+        var ex = assertThrows(UnsupportedSelectQueryRuntimeException.class, () ->
                 parseTerm("SELECT A->'B' FROM DUMMY", ImmutableMap.of()));
+
+        assertEquals("JSON expressions are not supported", ex.getMessage());
     }
 
     @Test
     public void jdbc_parameter_test() throws JSQLParserException {
         Variable v = TERM_FACTORY.getVariable("x0");
-        assertThrows(InvalidSelectQueryRuntimeException.class, () ->
+        var ex = assertThrows(InvalidSelectQueryRuntimeException.class, () ->
                 parseBooleanExpression("SELECT A FROM P WHERE B = ?", ImmutableMap.of(
                         new QualifiedAttributeID(null, IDFAC.createAttributeID("B")), v)));
+
+        assertEquals("JDBC parameters are not allowed", ex.getMessage());
     }
 
     @Test
     public void jdbc_named_parameter_test() throws JSQLParserException {
         Variable v = TERM_FACTORY.getVariable("x0");
-        assertThrows(InvalidSelectQueryRuntimeException.class, () ->
+        var ex = assertThrows(InvalidSelectQueryRuntimeException.class, () ->
                 parseBooleanExpression("SELECT A FROM P WHERE B = :name", ImmutableMap.of(
                         new QualifiedAttributeID(null, IDFAC.createAttributeID("B")), v)));
+
+        assertEquals("JDBC named parameters are not allowed", ex.getMessage());
     }
 
     @Test
     public void oracle_outer_join_test() throws JSQLParserException {
         Variable v = TERM_FACTORY.getVariable("x0");
         Variable u = TERM_FACTORY.getVariable("y0");
-        assertThrows(UnsupportedSelectQueryRuntimeException.class, () ->
+        var ex = assertThrows(UnsupportedSelectQueryRuntimeException.class, () ->
                 parseBooleanExpression("SELECT * FROM P, Q WHERE P.A = Q.A(+)", ImmutableMap.of(
                         new QualifiedAttributeID(IDFAC.createRelationID("P"), IDFAC.createAttributeID("A")), v,
                         new QualifiedAttributeID(IDFAC.createRelationID( "Q"), IDFAC.createAttributeID("A")), u)));
+
+        assertEquals("Old Oracle OUTER JOIN syntax is not supported", ex.getMessage());
     }
 
     @Test
@@ -1622,17 +1662,13 @@ public class ExpressionParserTest {
         Statement statement = CCJSqlParserUtil.parse(sql);
         SelectItem si = ((PlainSelect) ((Select) statement).getSelectBody()).getSelectItems().get(0);
         net.sf.jsqlparser.expression.Expression exp = ((SelectExpressionItem) si).getExpression();
-        ImmutableTerm translation = parser.parseTerm(exp, new RAExpressionAttributes(map, null));
-        System.out.println(translation);
-        return translation;
+        return parser.parseTerm(exp, new RAExpressionAttributes(map, null));
     }
 
     private ImmutableList<ImmutableExpression> parseBooleanExpression(String sql, ImmutableMap<QualifiedAttributeID, ImmutableTerm> map) throws JSQLParserException {
         ExpressionParser parser = new ExpressionParser(IDFAC, CORE_SINGLETONS);
         Statement statement = CCJSqlParserUtil.parse(sql);
         net.sf.jsqlparser.expression.Expression exp = ((PlainSelect) ((Select) statement).getSelectBody()).getWhere();
-        ImmutableList<ImmutableExpression> translation = parser.parseBooleanExpression(exp, new RAExpressionAttributes(map, null));
-        System.out.println(translation);
-        return translation;
+        return parser.parseBooleanExpression(exp, new RAExpressionAttributes(map, null));
     }
 }
