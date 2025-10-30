@@ -15,6 +15,7 @@ import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.spec.sqlparser.exception.IllegalJoinException;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -32,29 +33,27 @@ public class RAExpressionOperations implements RAOperations<RAExpression> {
 
     @Override
     public RAExpression create() {
-        return new RAExpression(ImmutableList.of(), ImmutableList.of(), aops.create());
+        return new RAExpression(iqFactory.createTrueNode(), aops.create());
     }
 
     @Override
     public RAExpression create(NamedRelationDefinition relation, ImmutableList<Variable> variables) {
         return new RAExpression(
                 createExtensionalDataNodes(relation, variables),
-                ImmutableList.of(),
                 aops.create(relation, variables));
     }
 
     public RAExpression createWithoutName(RelationDefinition relation, ImmutableList<Variable> variables) {
         return new RAExpression(
                 createExtensionalDataNodes(relation, variables),
-                ImmutableList.of(),
                 aops.create(aops.getAttributesMap(relation, variables)));
     }
 
-    private ImmutableList<ExtensionalDataNode> createExtensionalDataNodes(RelationDefinition relation, ImmutableList<Variable> variables) {
+    private ExtensionalDataNode createExtensionalDataNodes(RelationDefinition relation, ImmutableList<Variable> variables) {
         ImmutableMap<Integer, Variable> terms = IntStream.range(0, variables.size()).boxed()
                 .collect(ImmutableCollectors.toMap(Function.identity(), variables::get));
 
-        return ImmutableList.of(iqFactory.createExtensionalDataNode(relation, terms));
+        return iqFactory.createExtensionalDataNode(relation, terms);
     }
 
 
@@ -67,8 +66,7 @@ public class RAExpressionOperations implements RAOperations<RAExpression> {
 
     @Override
     public RAExpression withAlias(RAExpression rae, RelationID aliasId) {
-        return new RAExpression(rae.getDataAtoms(), rae.getFilterAtoms(),
-                aops.withAlias(rae.getAttributes(), aliasId));
+        return new RAExpression(rae.getIQTree(), aops.withAlias(rae.getAttributes(), aliasId));
     }
 
     /**
@@ -110,15 +108,15 @@ public class RAExpressionOperations implements RAOperations<RAExpression> {
      * @param re1 a {@link RAExpressionAttributes}
      * @param re2 a {@link RAExpressionAttributes}
      * @param using a {@link ImmutableSet}<{@link QuotedID}>
-     * @return a {@Link ImmutableList}<{@link ImmutableExpression}>
+     * @return an optional <{@link ImmutableExpression}>
      */
-    private ImmutableList<ImmutableExpression> getJoinOnFilter(RAExpressionAttributes re1,
+    private Optional<ImmutableExpression> getJoinOnFilter(RAExpressionAttributes re1,
                                                                RAExpressionAttributes re2,
                                                                ImmutableSet<QuotedID> using) {
 
         return using.stream()
                 .map(id -> termFactory.getNotYetTypedEquality(re1.get(id), re2.get(id)))
-                .collect(ImmutableCollectors.toList());
+                .reduce(termFactory::getConjunction);
     }
 
 
@@ -133,7 +131,7 @@ public class RAExpressionOperations implements RAOperations<RAExpression> {
      */
 
     @Override
-    public RAExpression joinOn(RAExpression left, RAExpression right, Function<RAExpressionAttributes, ImmutableList<ImmutableExpression>> getAtomOnExpression) throws IllegalJoinException {
+    public RAExpression joinOn(RAExpression left, RAExpression right, Function<RAExpressionAttributes, Optional<ImmutableExpression>> getAtomOnExpression) throws IllegalJoinException {
         RAExpression rae = crossJoin(left, right);
         return filter(rae, getAtomOnExpression.apply(rae.getAttributes()));
     }
@@ -144,20 +142,18 @@ public class RAExpressionOperations implements RAOperations<RAExpression> {
     }
 
     @Override
-    public RAExpression filter(RAExpression rae, ImmutableList<ImmutableExpression> filter) {
-        return new RAExpression(rae.getDataAtoms(),
-                Stream.concat(rae.getFilterAtoms().stream(), filter.stream())
-                        .collect(ImmutableCollectors.toList()),
-                rae.getAttributes());
+    public RAExpression filter(RAExpression rae, Optional<ImmutableExpression> filter) {
+        return filter
+                .map(f -> new RAExpression(
+                        iqFactory.createUnaryIQTree(iqFactory.createFilterNode(f), rae.getIQTree()),
+                        rae.getAttributes()))
+                .orElse(rae);
     }
 
     private RAExpression product(RAExpression left, RAExpression right, RAExpressionAttributes attributes) {
         return new RAExpression(
-                Stream.concat(left.getDataAtoms().stream(), right.getDataAtoms().stream())
-                        .collect(ImmutableCollectors.toList()),
-                Stream.concat(left.getFilterAtoms().stream(), right.getFilterAtoms().stream())
-                        .collect(ImmutableCollectors.toList()),
+                iqFactory.createNaryIQTree(iqFactory.createInnerJoinNode(),
+                    ImmutableList.of(left.getIQTree(), right.getIQTree())),
                 attributes);
     }
-
 }

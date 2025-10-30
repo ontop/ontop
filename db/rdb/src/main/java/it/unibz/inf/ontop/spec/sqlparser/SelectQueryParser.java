@@ -93,10 +93,8 @@ public class SelectQueryParser extends BasicSelectQueryParser<RAExpression, RAEx
         try {
             RAExpression base = translateJoins(plainSelect.getFromItem(), plainSelect.getJoins());
 
-            ImmutableList<ImmutableExpression> filter = Optional.ofNullable(plainSelect.getWhere())
-                    .map(w -> expressionParser.parseBooleanExpression(plainSelect.getWhere(), base.getAttributes()))
-                    .map(ImmutableList::of)
-                    .orElseGet(ImmutableList::of);
+            Optional<ImmutableExpression> filter = Optional.ofNullable(plainSelect.getWhere())
+                    .map(w -> expressionParser.parseBooleanExpression(w, base.getAttributes()));
 
             rae = operations.filter(base, filter);
         }
@@ -108,7 +106,7 @@ public class SelectQueryParser extends BasicSelectQueryParser<RAExpression, RAEx
         RAExpressionAttributes attributes =
                 sip.parseSelectItems(plainSelect.getSelectItems());
 
-        return new RAExpression(rae.getDataAtoms(), rae.getFilterAtoms(), attributes);
+        return new RAExpression(rae.getIQTree(), attributes);
     }
 
 

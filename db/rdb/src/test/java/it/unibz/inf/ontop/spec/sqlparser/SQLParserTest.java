@@ -1,10 +1,14 @@
 package it.unibz.inf.ontop.spec.sqlparser;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.dbschema.impl.DatabaseTableDefinition;
 import it.unibz.inf.ontop.dbschema.impl.OfflineMetadataProviderBuilder;
 import it.unibz.inf.ontop.exception.InvalidQueryException;
+import it.unibz.inf.ontop.iq.IQTree;
+import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
+import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.type.DBTermType;
@@ -16,6 +20,7 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 
+import static it.unibz.inf.ontop.model.term.functionsymbol.InequalityLabel.*;
 import static it.unibz.inf.ontop.spec.sqlparser.SQLTestingTools.*;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -23,7 +28,11 @@ public class SQLParserTest {
 
 	private SelectQueryParser sqp;
 
-	@BeforeEach
+    private NamedRelationDefinition student, pet, grade, data_property, object_property, name_with_many_many_so_many_components,
+            name_with_dots_many_many_so_many_components, schema_with_dots_table_with_dots, table_with_dots, tableName, tax, semester,
+            table1, regions, temperature_deviation, suppliers, people, all_tables, all_views, oreda_items, oreda_program;
+
+    @BeforeEach
 	public void beforeEachTest() {
 		OfflineMetadataProviderBuilder builder = createMetadataProviderBuilder();
 		QuotedIDFactory idfac = builder.getQuotedIDFactory();
@@ -36,7 +45,7 @@ public class SQLParserTest {
 		DBTermType varchar10DBType = dbTypeFactory.getDBTermType("VARCHAR", 10);
 		DBTermType varchar8DBType = dbTypeFactory.getDBTermType("VARCHAR", 8);
 
-		builder.createDatabaseRelation(createRelationIdWithDefaultSchema(idfac,"\"public\"", "student"), DatabaseTableDefinition.attributeListBuilder()
+		student = builder.createDatabaseRelation(createRelationIdWithDefaultSchema(idfac,"\"public\"", "student"), DatabaseTableDefinition.attributeListBuilder()
 			.addAttribute(idfac.createAttributeID("id"), integerDBType, false)
 			.addAttribute(idfac.createAttributeID("name"), varchar20DBType, false)
 			.addAttribute(idfac.createAttributeID("birth_year"), integerDBType, false)
@@ -47,29 +56,29 @@ public class SQLParserTest {
 			.addAttribute(idfac.createAttributeID("class"), integerDBType, false)
 			.addAttribute(idfac.createAttributeID("address"), varchar20DBType, false));
 
-		builder.createDatabaseRelation( "QUEST_DATA_PROPERTY_LITERAL_ASSERTION",
+		data_property = builder.createDatabaseRelation( "QUEST_DATA_PROPERTY_LITERAL_ASSERTION",
 			"URI", varchar20DBType, false,
 			"ISBNODE", booleanDBType, false,
 			"IDX", integerDBType, false,
 			"VALUE", varchar20DBType, false,
 			"LANG", varchar20DBType, false);
 
-		builder.createDatabaseRelation("QUEST_OBJECT_PROPERTY_ASSERTION",
+		object_property = builder.createDatabaseRelation("QUEST_OBJECT_PROPERTY_ASSERTION",
 			"URI1", varchar20DBType, false,
 			"URI2", varchar20DBType, false,
 			"ISBNODE", booleanDBType, false,
 			"ISBNODE2", booleanDBType, false,
 			"IDX", integerDBType, false);
 
-		builder.createDatabaseRelation("table1",
+		table1 = builder.createDatabaseRelation("table1",
 			"id", integerDBType, false,
 			"name", varchar20DBType, false,
 			"value", varchar20DBType, false);
 
-		builder.createDatabaseRelation(createRelationIdWithDefaultSchema(idfac,"HR", "REGIONS"), DatabaseTableDefinition.attributeListBuilder()
+		regions = builder.createDatabaseRelation(createRelationIdWithDefaultSchema(idfac,"HR", "REGIONS"), DatabaseTableDefinition.attributeListBuilder()
 			.addAttribute(idfac.createAttributeID("REGION_ID"), dbTypeFactory.getDBLargeIntegerType(), false));
 
-		builder.createDatabaseRelation(ImmutableList.of(idfac.createRelationID("tableName")), DatabaseTableDefinition.attributeListBuilder()
+		tableName = builder.createDatabaseRelation(ImmutableList.of(idfac.createRelationID("tableName")), DatabaseTableDefinition.attributeListBuilder()
 			.addAttribute(idfac.createAttributeID("cast"), integerDBType, false)
 			.addAttribute(idfac.createAttributeID("do"), integerDBType, false)
 			.addAttribute(idfac.createAttributeID("extract"), integerDBType, false)
@@ -86,7 +95,7 @@ public class SQLParserTest {
 			.addAttribute(idfac.createAttributeID("value"), integerDBType, false)
 			.addAttribute(idfac.createAttributeID("xml"), integerDBType, false));
 
-		builder.createDatabaseRelation(ImmutableList.of(idfac.createRelationID("grade")), DatabaseTableDefinition.attributeListBuilder()
+		grade = builder.createDatabaseRelation(ImmutableList.of(idfac.createRelationID("grade")), DatabaseTableDefinition.attributeListBuilder()
 			.addAttribute(idfac.createAttributeID("st_id"), integerDBType, false)
 			.addAttribute(idfac.createAttributeID("class_id"), integerDBType, false)
 			.addAttribute(idfac.createAttributeID("grade"), integerDBType, false)
@@ -96,25 +105,25 @@ public class SQLParserTest {
 			.addAttribute(idfac.createAttributeID("pass"), booleanDBType, false)
 			.addAttribute(idfac.createAttributeID("sm_id"), integerDBType, false));
 
-		builder.createDatabaseRelation("semester",
+		semester = builder.createDatabaseRelation("semester",
 			"id", integerDBType, false);
 
-		builder.createDatabaseRelation("tax",
+		tax = builder.createDatabaseRelation("tax",
 			"payee", varchar20DBType, false,
 			"amount", integerDBType, false);
 
-		builder.createDatabaseRelation("all_tables",
+		all_tables = builder.createDatabaseRelation("all_tables",
 			"table_name", varchar20DBType, false,
 			"owner", varchar20DBType, false);
 
-		builder.createDatabaseRelation("all_views",
+		all_views = builder.createDatabaseRelation("all_views",
 			"owner", varchar20DBType, false);
 
-		builder.createDatabaseRelation("people",
+		people = builder.createDatabaseRelation("people",
 			"\"id\"", varchar20DBType, false,
 			"\"nick2\"", varchar20DBType, false);
 
-		builder.createDatabaseRelation("pet",
+		pet = builder.createDatabaseRelation("pet",
 			"name", varchar20DBType, false,
 			"testcol", varchar20DBType, false);
 
@@ -131,20 +140,20 @@ public class SQLParserTest {
 		builder.createDatabaseRelation("PC",
 			"model", varchar20DBType, false);
 
-		builder.createDatabaseRelation(createRelationIdWithDefaultSchema(idfac,"\"CIM\"", "\"dbo\"", "TEMPERATURE_DEVIATION"), DatabaseTableDefinition.attributeListBuilder()
+		temperature_deviation = builder.createDatabaseRelation(createRelationIdWithDefaultSchema(idfac,"\"CIM\"", "\"dbo\"", "TEMPERATURE_DEVIATION"), DatabaseTableDefinition.attributeListBuilder()
 			.addAttribute(idfac.createAttributeID("ID"), varchar20DBType, false)
 			.addAttribute(idfac.createAttributeID("DATETIME"), dbTypeFactory.getDBDateTimestampType(), false)
 			.addAttribute(idfac.createAttributeID("SCALE"), integerDBType, false)
 			.addAttribute(idfac.createAttributeID("INTERVAL"), dbTypeFactory.getDBDateTimestampType(), false));
 
-		builder.createDatabaseRelation(createRelationIdWithDefaultSchema(idfac,"northwind", "Suppliers"), DatabaseTableDefinition.attributeListBuilder()
+		suppliers = builder.createDatabaseRelation(createRelationIdWithDefaultSchema(idfac,"northwind", "Suppliers"), DatabaseTableDefinition.attributeListBuilder()
 			.addAttribute(idfac.createAttributeID("Region"), varchar20DBType, false)
 			.addAttribute(idfac.createAttributeID("City"), varchar20DBType, false)
 			.addAttribute(idfac.createAttributeID("PostalCode"), varchar20DBType, false)
 			.addAttribute(idfac.createAttributeID("Address"), varchar20DBType, false)
 			.addAttribute(idfac.createAttributeID("Country"), varchar20DBType, false));
 
-		builder.createDatabaseRelation(createRelationIdWithDefaultSchema(idfac,"oreda", "pm_maint_items"), DatabaseTableDefinition.attributeListBuilder()
+		oreda_items = builder.createDatabaseRelation(createRelationIdWithDefaultSchema(idfac,"oreda", "pm_maint_items"), DatabaseTableDefinition.attributeListBuilder()
 			.addAttribute(idfac.createAttributeID("owner_id"), integerDBType, false)
 			.addAttribute(idfac.createAttributeID("inst_id"), integerDBType, false)
 			.addAttribute(idfac.createAttributeID("i_id"), integerDBType, false)
@@ -155,7 +164,7 @@ public class SQLParserTest {
 			.addAttribute(idfac.createAttributeID("mac_code"), varchar8DBType, false)
 			.addAttribute(idfac.createAttributeID("pm_interval"), integerDBType, false));
 
-		builder.createDatabaseRelation(createRelationIdWithDefaultSchema(idfac, "oreda", "pm_program"), DatabaseTableDefinition.attributeListBuilder()
+		oreda_program = builder.createDatabaseRelation(createRelationIdWithDefaultSchema(idfac, "oreda", "pm_program"), DatabaseTableDefinition.attributeListBuilder()
 			.addAttribute(idfac.createAttributeID("owner_id"), integerDBType, false)
 			.addAttribute(idfac.createAttributeID("inst_id"), integerDBType, false)
 			.addAttribute(idfac.createAttributeID("i_id"), integerDBType, false)
@@ -165,16 +174,16 @@ public class SQLParserTest {
 			.addAttribute(idfac.createAttributeID("mac_code"), varchar8DBType, false)
 			.addAttribute(idfac.createAttributeID("pm_interval"), integerDBType, false));
 
-		builder.createDatabaseRelation("\"table.with.dots\"",
+		table_with_dots = builder.createDatabaseRelation("\"table.with.dots\"",
 				"id", varchar20DBType, false);
 
-		builder.createDatabaseRelation(ImmutableList.of(idfac.createRelationID("schema.with.dots", "\"table.with.dots\"")), DatabaseTableDefinition.attributeListBuilder()
+		schema_with_dots_table_with_dots = builder.createDatabaseRelation(ImmutableList.of(idfac.createRelationID("schema.with.dots", "\"table.with.dots\"")), DatabaseTableDefinition.attributeListBuilder()
 				.addAttribute(idfac.createAttributeID("id"), varchar20DBType, false));
 
-		builder.createDatabaseRelation(ImmutableList.of(idfac.createRelationID("name", "many", "many", "so", "many", "components")), DatabaseTableDefinition.attributeListBuilder()
+		name_with_many_many_so_many_components = builder.createDatabaseRelation(ImmutableList.of(idfac.createRelationID("name", "many", "many", "so", "many", "components")), DatabaseTableDefinition.attributeListBuilder()
 				.addAttribute(idfac.createAttributeID("id"), varchar20DBType, false));
 
-		builder.createDatabaseRelation(ImmutableList.of(idfac.createRelationID("\"name.with.dots\"", "many", "many", "\"so.so\"", "many", "components")), DatabaseTableDefinition.attributeListBuilder()
+		name_with_dots_many_many_so_many_components = builder.createDatabaseRelation(ImmutableList.of(idfac.createRelationID("\"name.with.dots\"", "many", "many", "\"so.so\"", "many", "components")), DatabaseTableDefinition.attributeListBuilder()
 				.addAttribute(idfac.createAttributeID("id"), varchar20DBType, false));
 
 		MetadataLookup metadataLookup = builder.build();
@@ -195,7 +204,93 @@ public class SQLParserTest {
 		return rae;
 	}
 
-	@Test
+    private ExtensionalDataNode students() {
+        return students(1);
+    }
+
+    private ExtensionalDataNode students(int idx) {
+        return IQ_FACTORY.createExtensionalDataNode(student, ImmutableMap.of(
+                0, TERM_FACTORY.getVariable("ID" + idx),
+                1, TERM_FACTORY.getVariable("NAME" + idx),
+                2, TERM_FACTORY.getVariable("BIRTH_YEAR" + idx),
+                3, TERM_FACTORY.getVariable("BIRTH_DATE" + idx),
+                4, TERM_FACTORY.getVariable("SEMESTER" + idx),
+                5, TERM_FACTORY.getVariable("NATIONALITY" + idx),
+                6, TERM_FACTORY.getVariable("GRADE" + idx),
+                7, TERM_FACTORY.getVariable("CLASS" + idx),
+                8, TERM_FACTORY.getVariable("ADDRESS" + idx)));
+    }
+
+    private ExtensionalDataNode pets() {
+        return IQ_FACTORY.createExtensionalDataNode(pet, ImmutableMap.of(
+                0, TERM_FACTORY.getVariable("NAME1"),
+                1, TERM_FACTORY.getVariable("TESTCOL1")));
+    }
+
+    private ExtensionalDataNode grades() {
+        return grades(1);
+    }
+    private ExtensionalDataNode grades(int idx) {
+        return IQ_FACTORY.createExtensionalDataNode(grade, ImmutableMap.of(
+                0, TERM_FACTORY.getVariable("ST_ID" + idx),
+                1, TERM_FACTORY.getVariable("CLASS_ID" + idx),
+                2, TERM_FACTORY.getVariable("GRADE" + idx),
+                3, TERM_FACTORY.getVariable("SCORE" + idx),
+                4, TERM_FACTORY.getVariable("COURSE" + idx),
+                5, TERM_FACTORY.getVariable("MARK" + idx),
+                6, TERM_FACTORY.getVariable("PASS" + idx),
+                7, TERM_FACTORY.getVariable("SM_ID" + idx)));
+    }
+
+    private ExtensionalDataNode people() {
+        return IQ_FACTORY.createExtensionalDataNode(people, ImmutableMap.of(
+                0, TERM_FACTORY.getVariable("id1"),
+                1, TERM_FACTORY.getVariable("nick21")));
+    }
+
+    private ExtensionalDataNode all_tables(int idx) {
+        return IQ_FACTORY.createExtensionalDataNode(all_tables, ImmutableMap.of(
+                0, TERM_FACTORY.getVariable("TABLE_NAME" + idx),
+                1, TERM_FACTORY.getVariable("OWNER" + idx)));
+    }
+
+    private ExtensionalDataNode all_views(int idx) {
+        return IQ_FACTORY.createExtensionalDataNode(all_views, ImmutableMap.of(
+                0, TERM_FACTORY.getVariable("OWNER" + idx)));
+    }
+
+    private ExtensionalDataNode oreda_items(int idx) {
+        return IQ_FACTORY.createExtensionalDataNode(oreda_items, ImmutableMap.of(
+                0, TERM_FACTORY.getVariable("OWNER_ID" + idx),
+                1, TERM_FACTORY.getVariable("INST_ID" + idx),
+                2, TERM_FACTORY.getVariable("I_ID" + idx),
+                3, TERM_FACTORY.getVariable("EC_CODE" + idx),
+                4, TERM_FACTORY.getVariable("MI_CODE" + idx),
+                5, TERM_FACTORY.getVariable("SU_CODE" + idx),
+                6, TERM_FACTORY.getVariable("MC_CODE" + idx),
+                7, TERM_FACTORY.getVariable("MAC_CODE" + idx),
+                8, TERM_FACTORY.getVariable("PM_INTERVAL" + idx)));
+    }
+
+    private ExtensionalDataNode oreda_program(int idx) {
+        return IQ_FACTORY.createExtensionalDataNode(oreda_program, ImmutableMap.of(
+                0, TERM_FACTORY.getVariable("OWNER_ID" + idx),
+                1, TERM_FACTORY.getVariable("INST_ID" + idx),
+                2, TERM_FACTORY.getVariable("I_ID" + idx),
+                3, TERM_FACTORY.getVariable("EC_CODE" + idx),
+                4, TERM_FACTORY.getVariable("SU_CODE" + idx),
+                5, TERM_FACTORY.getVariable("MC_CODE" + idx),
+                6, TERM_FACTORY.getVariable("MAC_CODE" + idx),
+                7, TERM_FACTORY.getVariable("PM_INTERVAL" + idx)));
+    }
+
+    private IQTree filter(ImmutableExpression exp, IQTree tree) {
+        return IQ_FACTORY.createUnaryIQTree(IQ_FACTORY.createFilterNode(exp), tree);
+    }
+
+
+
+    @Test
 	public void test_0() throws Exception {
         var ex = assertThrows(UnsupportedSelectQueryException.class, () ->
 		        parse("WITH  temp (n) AS (SELECT DISTINCT name FROM student) SELECT * FROM temp"));
@@ -207,32 +302,32 @@ public class SQLParserTest {
 	@Test
 	public void test_1_1_1() throws Exception {
 		RAExpression re = parse("SELECT * FROM student");
-		assertEquals(1, re.getDataAtoms().size());
-		assertEquals(0, re.getFilterAtoms().size());
+
+        assertEquals(students(), re.getIQTree());
 		assertEquals(9, re.getAttributes().asMap().size());
 	}
 
 	@Test
 	public void test_1_1_2() throws Exception {
 		RAExpression re = parse("SELECT student.* FROM student");
-		assertEquals(1, re.getDataAtoms().size());
-		assertEquals(0, re.getFilterAtoms().size());
+
+        assertEquals(students(), re.getIQTree());
 		assertEquals(9, re.getAttributes().asMap().size());
 	}
 
 	@Test
 	public void test_1_2_1() throws Exception {
 		RAExpression re = parse("SELECT id FROM student");
-		assertEquals(1, re.getDataAtoms().size());
-		assertEquals(0, re.getFilterAtoms().size());
+
+        assertEquals(students(), re.getIQTree());
 		assertEquals(1, re.getAttributes().asMap().size());
 	}
 
 	@Test
 	public void test_1_2_2() throws Exception {
 		RAExpression re = parse("SELECT id, name FROM student");
-		assertEquals(1, re.getDataAtoms().size());
-		assertEquals(0, re.getFilterAtoms().size());
+
+        assertEquals(students(), re.getIQTree());
 		assertEquals(2, re.getAttributes().asMap().size());
 	}
 
@@ -262,16 +357,16 @@ public class SQLParserTest {
 	@Test
 	public void test_1_4() throws Exception {
 		RAExpression re = parse("SELECT student.id FROM student");
-		assertEquals(1, re.getDataAtoms().size());
-		assertEquals(0, re.getFilterAtoms().size());
+
+        assertEquals(students(), re.getIQTree());
 		assertEquals(1, re.getAttributes().asMap().size());
 	}
 
 	@Test
 	public void test_1_5() throws Exception {
 		RAExpression re = parse("SELECT student.id, student.name FROM student");
-		assertEquals(1, re.getDataAtoms().size());
-		assertEquals(0, re.getFilterAtoms().size());
+
+        assertEquals(students(), re.getIQTree());
 		assertEquals(2, re.getAttributes().asMap().size());
 	}
 
@@ -280,26 +375,39 @@ public class SQLParserTest {
 		RAExpression re = parse("SELECT \"URI\" as X, VALUE as Y, LANG as Z\n" +
 				"FROM QUEST_DATA_PROPERTY_LITERAL_ASSERTION\n" +
 				"WHERE ISBNODE = FALSE AND LANG IS NULL AND IDX = 1");
-		assertEquals(1, re.getDataAtoms().size());
-		assertEquals(3, re.getFilterAtoms().size());
-		assertEquals(3, re.getAttributes().asMap().size());
+
+        assertEquals(filter(TERM_FACTORY.getConjunction(TERM_FACTORY.getConjunction(
+                                TERM_FACTORY.getNotYetTypedEquality(TERM_FACTORY.getVariable("ISBNODE1"), TERM_FACTORY.getDBBooleanConstant(false)),
+                                TERM_FACTORY.getDBIsNull(TERM_FACTORY.getVariable("LANG1"))),
+                        TERM_FACTORY.getNotYetTypedEquality(TERM_FACTORY.getVariable("IDX1"), TERM_FACTORY.getDBIntegerConstant(1))),
+                IQ_FACTORY.createExtensionalDataNode(data_property, ImmutableMap.of(
+                        0, TERM_FACTORY.getVariable("URI1"),
+                        1, TERM_FACTORY.getVariable("ISBNODE1"),
+                        2, TERM_FACTORY.getVariable("IDX1"),
+                        3, TERM_FACTORY.getVariable("VALUE1"),
+                        4, TERM_FACTORY.getVariable("LANG1")))), re.getIQTree());
+        assertEquals(3, re.getAttributes().asMap().size());
 	}
 
 	@Test
 	public void test_1_5_extra_2() throws Exception {
 		RAExpression re = parse("SELECT id, name as alias1, value as alias2 FROM table1");
-		assertEquals(1, re.getDataAtoms().size());
-		assertEquals(0, re.getFilterAtoms().size());
-		assertEquals(3, re.getAttributes().asMap().size());
+
+        assertEquals(IQ_FACTORY.createExtensionalDataNode(table1,  ImmutableMap.of(
+                0, TERM_FACTORY.getVariable("ID1"),
+                1, TERM_FACTORY.getVariable("NAME1"),
+                2, TERM_FACTORY.getVariable("VALUE1"))), re.getIQTree());
+        assertEquals(3, re.getAttributes().asMap().size());
 	}
 
 	@Test
 	public void test_1_5_extra_3() throws Exception {
 		// to_char (Oracle specific cast)
 		RAExpression re = parse("select to_char(REGION_ID) as RID FROM HR.REGIONS");
-		assertEquals(1, re.getDataAtoms().size());
-		assertEquals(0, re.getFilterAtoms().size());
-		assertEquals(1, re.getAttributes().asMap().size());
+
+        assertEquals(IQ_FACTORY.createExtensionalDataNode(regions, ImmutableMap.of(
+                0, TERM_FACTORY.getVariable("REGION_ID1"))), re.getIQTree());
+        assertEquals(1, re.getAttributes().asMap().size());
 	}
 
 	@Test
@@ -307,9 +415,18 @@ public class SQLParserTest {
 		RAExpression re = parse("SELECT \"URI1\" as X, \"URI2\" as Y\n" +
 				"FROM QUEST_OBJECT_PROPERTY_ASSERTION\n" +
 				"WHERE ISBNODE = FALSE AND ISBNODE2 = FALSE AND IDX = 2");
-		assertEquals(1, re.getDataAtoms().size());
-		assertEquals(3, re.getFilterAtoms().size());
-		assertEquals(2, re.getAttributes().asMap().size());
+
+        assertEquals(filter(TERM_FACTORY.getConjunction(TERM_FACTORY.getConjunction(
+                                TERM_FACTORY.getNotYetTypedEquality(TERM_FACTORY.getVariable("ISBNODE1"), TERM_FACTORY.getDBBooleanConstant(false)),
+                                TERM_FACTORY.getNotYetTypedEquality(TERM_FACTORY.getVariable("ISBNODE21"), TERM_FACTORY.getDBBooleanConstant(false))),
+                        TERM_FACTORY.getNotYetTypedEquality(TERM_FACTORY.getVariable("IDX1"), TERM_FACTORY.getDBIntegerConstant(2))),
+                IQ_FACTORY.createExtensionalDataNode(object_property, ImmutableMap.of(
+                        0, TERM_FACTORY.getVariable("URI11"),
+                        1, TERM_FACTORY.getVariable("URI21"),
+                        2, TERM_FACTORY.getVariable("ISBNODE1"),
+                        3, TERM_FACTORY.getVariable("ISBNODE21"),
+                        4, TERM_FACTORY.getVariable("IDX1")))), re.getIQTree());
+        assertEquals(2, re.getAttributes().asMap().size());
 	}
 
 	@Test
@@ -320,32 +437,47 @@ public class SQLParserTest {
 				"last, materialized, nulls, partition, range,\n" +
 				"row, rows, siblings, value, xml\n" +
 				"FROM tableName");
-		assertEquals(1, re.getDataAtoms().size());
-		assertEquals(0, re.getFilterAtoms().size());
-		assertEquals(15, re.getAttributes().asMap().size());
+
+        assertEquals(IQ_FACTORY.createExtensionalDataNode(tableName, ImmutableMap.<Integer, Variable>builder()
+                .put(0, TERM_FACTORY.getVariable("CAST1"))
+                .put(1, TERM_FACTORY.getVariable("DO1"))
+                .put(2, TERM_FACTORY.getVariable("EXTRACT1"))
+                .put(3, TERM_FACTORY.getVariable("SIBLINGS1"))
+                .put(4, TERM_FACTORY.getVariable("FIRST1"))
+                .put(5, TERM_FACTORY.getVariable("FOLLOWING1"))
+                .put(6, TERM_FACTORY.getVariable("LAST1"))
+                .put(7, TERM_FACTORY.getVariable("MATERIALIZED1"))
+                .put(8, TERM_FACTORY.getVariable("NULLS1"))
+                .put(9, TERM_FACTORY.getVariable("PARTITION1"))
+                .put(10, TERM_FACTORY.getVariable("RANGE1"))
+                .put(11, TERM_FACTORY.getVariable("ROW1"))
+                .put(12, TERM_FACTORY.getVariable("ROWS1"))
+                .put(13, TERM_FACTORY.getVariable("VALUE1"))
+                .put(14, TERM_FACTORY.getVariable("XML1")).build()), re.getIQTree());
+        assertEquals(15, re.getAttributes().asMap().size());
 	}
 
 	@Test
 	public void test_1_6_1() throws Exception {
 		RAExpression re = parse("SELECT undergraduate.* FROM student as undergraduate");
-		assertEquals(1, re.getDataAtoms().size());
-		assertEquals(0, re.getFilterAtoms().size());
+
+        assertEquals(students(), re.getIQTree());
 		assertEquals(9, re.getAttributes().asMap().size());
 	}
 
 	@Test
 	public void test_1_6_2() throws Exception {
 		RAExpression re = parse("SELECT undergraduate.id FROM student as undergraduate");
-		assertEquals(1, re.getDataAtoms().size());
-		assertEquals(0, re.getFilterAtoms().size());
+
+        assertEquals(students(), re.getIQTree());
 		assertEquals(1, re.getAttributes().asMap().size());
 	}
 
 	@Test
 	public void test_1_7() throws Exception {
 		RAExpression re = parse("SELECT alias.id, alias.name FROM student as alias");
-		assertEquals(1, re.getDataAtoms().size());
-		assertEquals(0, re.getFilterAtoms().size());
+
+        assertEquals(students(), re.getIQTree());
 		assertEquals(2, re.getAttributes().asMap().size());
 	}
 
@@ -360,43 +492,47 @@ public class SQLParserTest {
 	@Test
 	public void test_1_8() throws Exception {
 		RAExpression re = parse("SELECT id FROM \"STUDENT\"");
-		assertEquals(1, re.getDataAtoms().size());
-		assertEquals(0, re.getFilterAtoms().size());
+
+        assertEquals(students(), re.getIQTree());
 		assertEquals(1, re.getAttributes().asMap().size());
 	}
 
 	@Test
 	public void test_1_9() throws Exception {
-		// ROMAN (Feb 2017): changed to upper-case STUDENT (otherwise invalid)
 		RAExpression re = parse("SELECT id FROM \"public\".\"STUDENT\"");
-		assertEquals(1, re.getDataAtoms().size());
-		assertEquals(0, re.getFilterAtoms().size());
+
+        assertEquals(students(), re.getIQTree());
 		assertEquals(1, re.getAttributes().asMap().size());
 	}
 
 	@Test
 	public void test_1_10() throws Exception {
-		// ROMAN (Feb 2017): changed t2 to t1 (otherwise invalid)
 		RAExpression re = parse("SELECT t1.id, t1.name FROM \"public\".\"STUDENT\" as t1");
-		assertEquals(1, re.getDataAtoms().size());
-		assertEquals(0, re.getFilterAtoms().size());
-		assertEquals(2, re.getAttributes().asMap().size());
+
+        assertEquals(students(), re.getIQTree());
+        assertEquals(2, re.getAttributes().asMap().size());
 	}
 
 	@Test
 	public void test_2_1() throws Exception {
 		RAExpression re = parse("SELECT id FROM student WHERE id=1");
-		assertEquals(1, re.getDataAtoms().size());
-		assertEquals(1, re.getFilterAtoms().size());
-		assertEquals(1, re.getAttributes().asMap().size());
+
+        assertEquals(filter(
+                TERM_FACTORY.getNotYetTypedEquality(
+                        TERM_FACTORY.getVariable("ID1"), TERM_FACTORY.getDBIntegerConstant(1)), students()), re.getIQTree());
+        assertEquals(1, re.getAttributes().asMap().size());
 	}
 
 	@Test
 	public void test_2_2() throws Exception {
 		RAExpression re = parse("SELECT id, name FROM student WHERE id=1 AND name='John'");
-		assertEquals(1, re.getDataAtoms().size());
-		assertEquals(2, re.getFilterAtoms().size());
-		assertEquals(2, re.getAttributes().asMap().size());
+
+        assertEquals(filter(TERM_FACTORY.getConjunction(
+                TERM_FACTORY.getNotYetTypedEquality(
+                        TERM_FACTORY.getVariable("ID1"), TERM_FACTORY.getDBIntegerConstant(1)),
+                TERM_FACTORY.getNotYetTypedEquality(
+                        TERM_FACTORY.getVariable("NAME1"), TERM_FACTORY.getDBStringConstant("John"))), students()), re.getIQTree());
+        assertEquals(2, re.getAttributes().asMap().size());
 	}
 
 	@Test
@@ -406,83 +542,127 @@ public class SQLParserTest {
 				+ "WHERE name<>'John' AND semester>2 AND semester<7 AND "
 				+ "birth_year>=1984 AND birth_year<=1990 AND "
 				+ "(nationality='IT' OR nationality='DE')");
-		assertEquals(1, re.getDataAtoms().size());
-		assertEquals(6, re.getFilterAtoms().size()); // OR has precedence over AND
-		assertEquals(5, re.getAttributes().asMap().size());
+
+        assertEquals(filter(TERM_FACTORY.getConjunction(TERM_FACTORY.getConjunction(TERM_FACTORY.getConjunction(TERM_FACTORY.getConjunction(TERM_FACTORY.getConjunction(
+                                                TERM_FACTORY.getDBNot(TERM_FACTORY.getNotYetTypedEquality(TERM_FACTORY.getVariable("NAME1"), TERM_FACTORY.getDBStringConstant("John"))),
+                                                TERM_FACTORY.getDBDefaultInequality(GT, TERM_FACTORY.getVariable("SEMESTER1"), TERM_FACTORY.getDBIntegerConstant(2))),
+                                        TERM_FACTORY.getDBDefaultInequality(LT, TERM_FACTORY.getVariable("SEMESTER1"), TERM_FACTORY.getDBIntegerConstant(7))),
+                                TERM_FACTORY.getDBDefaultInequality(GTE, TERM_FACTORY.getVariable("BIRTH_YEAR1"), TERM_FACTORY.getDBIntegerConstant(1984))),
+                        TERM_FACTORY.getDBDefaultInequality(LTE, TERM_FACTORY.getVariable("BIRTH_YEAR1"), TERM_FACTORY.getDBIntegerConstant(1990))),
+                TERM_FACTORY.getDisjunction(
+                        TERM_FACTORY.getNotYetTypedEquality(TERM_FACTORY.getVariable("NATIONALITY1"), TERM_FACTORY.getDBStringConstant("IT")),
+                        TERM_FACTORY.getNotYetTypedEquality(TERM_FACTORY.getVariable("NATIONALITY1"), TERM_FACTORY.getDBStringConstant("DE")))), students()), re.getIQTree());
+
+        assertEquals(5, re.getAttributes().asMap().size());
 	}
 
 	@Test
 	public void test_2_4() throws Exception {
 		RAExpression re = parse("SELECT graduate.id, graduate.name FROM student as graduate WHERE graduate.name<>'John'");
-		assertEquals(1, re.getDataAtoms().size());
-		assertEquals(1, re.getFilterAtoms().size());
-		assertEquals(2, re.getAttributes().asMap().size());
+
+        assertEquals(filter(
+                TERM_FACTORY.getDBNot(
+                        TERM_FACTORY.getNotYetTypedEquality(
+                                TERM_FACTORY.getVariable("NAME1"), TERM_FACTORY.getDBStringConstant("John"))), students()), re.getIQTree());
+        assertEquals(2, re.getAttributes().asMap().size());
 	}
 
 	@Test
 	public void test_2_5() throws Exception {
 		RAExpression re = parse("SELECT id, name, grade FROM student WHERE grade is null");
-		assertEquals(1, re.getDataAtoms().size());
-		assertEquals(1, re.getFilterAtoms().size());
-		assertEquals(3, re.getAttributes().asMap().size());
+
+        assertEquals(filter(
+                TERM_FACTORY.getDBIsNull(TERM_FACTORY.getVariable("GRADE1")), students()), re.getIQTree());
+        assertEquals(3, re.getAttributes().asMap().size());
 	}
 
 	@Test
 	public void test_2_6() throws Exception {
 		RAExpression re = parse("SELECT id, name, grade FROM student WHERE grade is not null");
-		assertEquals(1, re.getDataAtoms().size());
-		assertEquals(1, re.getFilterAtoms().size());
-		assertEquals(3, re.getAttributes().asMap().size());
+
+        assertEquals(filter(
+                TERM_FACTORY.getDBNot(
+                        TERM_FACTORY.getDBIsNull(TERM_FACTORY.getVariable("GRADE1"))), students()), re.getIQTree());
+        assertEquals(3, re.getAttributes().asMap().size());
 	}
 
 	@Test
 	public void test_2_7() throws Exception {
 		RAExpression re = parse("SELECT id, name, grade FROM student WHERE grade is null AND name<>'John'");
-		assertEquals(1, re.getDataAtoms().size());
-		assertEquals(2, re.getFilterAtoms().size());
-		assertEquals(3, re.getAttributes().asMap().size());
+
+        assertEquals(filter(TERM_FACTORY.getConjunction(
+                TERM_FACTORY.getDBIsNull(
+                        TERM_FACTORY.getVariable("GRADE1")),
+                TERM_FACTORY.getDBNot(
+                        TERM_FACTORY.getNotYetTypedEquality(
+                                TERM_FACTORY.getVariable("NAME1"), TERM_FACTORY.getDBStringConstant("John")))), students()), re.getIQTree());
+        assertEquals(3, re.getAttributes().asMap().size());
 	}
 
 	@Test
 	public void test_2_8() throws Exception {
 		RAExpression re = parse("SELECT id, name FROM \"public\".\"STUDENT\" WHERE name<>'John'");
-		assertEquals(1, re.getDataAtoms().size());
-		assertEquals(1, re.getFilterAtoms().size());
-		assertEquals(2, re.getAttributes().asMap().size());
+
+        assertEquals(filter(
+                TERM_FACTORY.getDBNot(
+                        TERM_FACTORY.getNotYetTypedEquality(
+                                TERM_FACTORY.getVariable("NAME1"), TERM_FACTORY.getDBStringConstant("John"))), students()), re.getIQTree());
+        assertEquals(2, re.getAttributes().asMap().size());
 	}
 
 	@Test
 	public void test_2_9() throws Exception {
 		RAExpression re = parse("SELECT t1.id, t1.name FROM \"public\".\"STUDENT\" as t1 "
 				+ "WHERE t1.name<>'John'");
-		assertEquals(1, re.getDataAtoms().size());
-		assertEquals(1, re.getFilterAtoms().size());
-		assertEquals(2, re.getAttributes().asMap().size());
+
+        assertEquals(filter(
+                TERM_FACTORY.getDBNot(
+                        TERM_FACTORY.getNotYetTypedEquality(
+                                TERM_FACTORY.getVariable("NAME1"), TERM_FACTORY.getDBStringConstant("John"))), students()), re.getIQTree());
+        assertEquals(2, re.getAttributes().asMap().size());
 	}
 
 	@Test
 	public void test_2_10() throws Exception {
 		RAExpression re = parse("SELECT t1.id, t1.name, t1.grade FROM \"public\".\"STUDENT\" as t1 "
 				+ "WHERE t1.grade is not null AND t1.name<>'John'");
-		assertEquals(1, re.getDataAtoms().size());
-		assertEquals(2, re.getFilterAtoms().size());
-		assertEquals(3, re.getAttributes().asMap().size());
+
+        assertEquals(filter(TERM_FACTORY.getConjunction(
+                TERM_FACTORY.getDBNot(
+                        TERM_FACTORY.getDBIsNull(
+                                TERM_FACTORY.getVariable("GRADE1"))),
+                TERM_FACTORY.getDBNot(
+                        TERM_FACTORY.getNotYetTypedEquality(
+                                TERM_FACTORY.getVariable("NAME1"), TERM_FACTORY.getDBStringConstant("John")))), students()), re.getIQTree());
+        assertEquals(3, re.getAttributes().asMap().size());
 	}
 
 	@Test
 	public void test_2_11() throws Exception {
 		RAExpression re = parse("SELECT id, name FROM student WHERE class IN (7, 8, 9)");
-		assertEquals(1, re.getDataAtoms().size());
-		assertEquals(1, re.getFilterAtoms().size());
-		assertEquals(2, re.getAttributes().asMap().size());
+
+        assertEquals(filter(TERM_FACTORY.getDisjunction(
+                TERM_FACTORY.getNotYetTypedEquality(
+                        TERM_FACTORY.getVariable("CLASS1"), TERM_FACTORY.getDBIntegerConstant(7)),
+                TERM_FACTORY.getNotYetTypedEquality(
+                        TERM_FACTORY.getVariable("CLASS1"), TERM_FACTORY.getDBIntegerConstant(8)),
+                TERM_FACTORY.getNotYetTypedEquality(
+                        TERM_FACTORY.getVariable("CLASS1"), TERM_FACTORY.getDBIntegerConstant(9))), students()), re.getIQTree());
+        assertEquals(2, re.getAttributes().asMap().size());
 	}
 
 	@Test
 	public void test_2_12() throws Exception {
 		RAExpression re = parse("SELECT id, name, grade FROM student WHERE name IN ('John', 'Jack', 'Clara')");
-		assertEquals(1, re.getDataAtoms().size());
-		assertEquals(1, re.getFilterAtoms().size());
-		assertEquals(3, re.getAttributes().asMap().size());
+
+        assertEquals(filter(TERM_FACTORY.getDisjunction(
+                TERM_FACTORY.getNotYetTypedEquality(
+                        TERM_FACTORY.getVariable("NAME1"), TERM_FACTORY.getDBStringConstant("John")),
+                TERM_FACTORY.getNotYetTypedEquality(
+                        TERM_FACTORY.getVariable("NAME1"), TERM_FACTORY.getDBStringConstant("Jack")),
+                TERM_FACTORY.getNotYetTypedEquality(
+                        TERM_FACTORY.getVariable("NAME1"), TERM_FACTORY.getDBStringConstant("Clara"))), students()), re.getIQTree());
+        assertEquals(3, re.getAttributes().asMap().size());
 	}
 
 	@Test
@@ -591,9 +771,13 @@ public class SQLParserTest {
 	@Test
 	public void test_4_3() throws Exception {
 		RAExpression re = parse("SELECT name as student_name, address as student_address FROM student WHERE id >= 66 AND id <= 69");
-		assertEquals(1, re.getDataAtoms().size());
-		assertEquals(2, re.getFilterAtoms().size());
-		assertEquals(2, re.getAttributes().asMap().size());
+
+        assertEquals(filter(TERM_FACTORY.getConjunction(
+                TERM_FACTORY.getDBDefaultInequality(GTE,
+                        TERM_FACTORY.getVariable("ID1"), TERM_FACTORY.getDBIntegerConstant(66)),
+                TERM_FACTORY.getDBDefaultInequality(LTE,
+                        TERM_FACTORY.getVariable("ID1"), TERM_FACTORY.getDBIntegerConstant(69))), students()), re.getIQTree());
+        assertEquals(2, re.getAttributes().asMap().size());
 	}
 
 	@Test
@@ -608,41 +792,52 @@ public class SQLParserTest {
 	@Test
 	public void test_5_1() throws Exception {
 		RAExpression re = parse("SELECT t1.id, t1.name, t2.class_id, t2.grade FROM student t1 JOIN grade t2 ON t1.id=t2.st_id");
-		assertEquals(2, re.getDataAtoms().size());
-		assertEquals(1, re.getFilterAtoms().size());
-		assertEquals(4, re.getAttributes().asMap().size());
+
+        assertEquals(filter(TERM_FACTORY.getNotYetTypedEquality(TERM_FACTORY.getVariable("ID1"), TERM_FACTORY.getVariable("ST_ID2")),
+                IQ_FACTORY.createNaryIQTree(IQ_FACTORY.createInnerJoinNode(), ImmutableList.of(students(1), grades(2)))), re.getIQTree());
+        assertEquals(4, re.getAttributes().asMap().size());
 	}
 
 	@Test
 	public void test_5_1_1() throws Exception {
 		RAExpression re = parse("SELECT t1.id as sid, t1.name as fullname FROM student t1 JOIN grade t2 ON t1.id=t2.st_id AND t2.mark='A'");
-		assertEquals(2, re.getDataAtoms().size());
-		assertEquals(2, re.getFilterAtoms().size());
-		assertEquals(2, re.getAttributes().asMap().size());
+
+        assertEquals(filter(TERM_FACTORY.getConjunction(
+                        TERM_FACTORY.getNotYetTypedEquality(TERM_FACTORY.getVariable("ID1"), TERM_FACTORY.getVariable("ST_ID2")),
+                        TERM_FACTORY.getNotYetTypedEquality(TERM_FACTORY.getVariable("MARK2"), TERM_FACTORY.getDBStringConstant("A"))),
+                IQ_FACTORY.createNaryIQTree(IQ_FACTORY.createInnerJoinNode(), ImmutableList.of(students(1), grades(2)))), re.getIQTree());
+        assertEquals(2, re.getAttributes().asMap().size());
 	}
 
 	@Test
 	public void test_5_1_2() throws Exception {
 		RAExpression re = parse("SELECT t1.id, name FROM student t1 JOIN grade t2 ON t1.id=t2.st_id AND t2.\"SCORE\">=25");
-		assertEquals(2, re.getDataAtoms().size());
-		assertEquals(2, re.getFilterAtoms().size());
-		assertEquals(2, re.getAttributes().asMap().size());
+
+        assertEquals(filter(TERM_FACTORY.getConjunction(
+                        TERM_FACTORY.getNotYetTypedEquality(TERM_FACTORY.getVariable("ID1"), TERM_FACTORY.getVariable("ST_ID2")),
+                        TERM_FACTORY.getDBDefaultInequality(GTE, TERM_FACTORY.getVariable("SCORE2"), TERM_FACTORY.getDBIntegerConstant(25))),
+                IQ_FACTORY.createNaryIQTree(IQ_FACTORY.createInnerJoinNode(), ImmutableList.of(students(1), grades(2)))), re.getIQTree());
+        assertEquals(2, re.getAttributes().asMap().size());
 	}
 
 	@Test
 	public void test_5_1_3() throws Exception {
 		RAExpression re = parse("SELECT t1.id, name FROM student t1 JOIN grade t2 ON t1.id=t2.st_id AND t2.pass=true");
-		assertEquals(2, re.getDataAtoms().size());
-		assertEquals(2, re.getFilterAtoms().size());
-		assertEquals(2, re.getAttributes().asMap().size());
+
+        assertEquals(filter(TERM_FACTORY.getConjunction(
+                        TERM_FACTORY.getNotYetTypedEquality(TERM_FACTORY.getVariable("ID1"), TERM_FACTORY.getVariable("ST_ID2")),
+                        TERM_FACTORY.getNotYetTypedEquality(TERM_FACTORY.getVariable("PASS2"), TERM_FACTORY.getDBBooleanConstant(true))),
+                IQ_FACTORY.createNaryIQTree(IQ_FACTORY.createInnerJoinNode(), ImmutableList.of(students(1), grades(2)))), re.getIQTree());
+        assertEquals(2, re.getAttributes().asMap().size());
 	}
 
 	@Test
 	public void test_5_2() throws Exception {
 		RAExpression re = parse("SELECT t1.id, t1.name, t2.class_id, t2.grade FROM student t1 INNER JOIN grade t2 ON t1.id=t2.st_id");
-		assertEquals(2, re.getDataAtoms().size());
-		assertEquals(1, re.getFilterAtoms().size());
-		assertEquals(4, re.getAttributes().asMap().size());
+
+        assertEquals(filter(TERM_FACTORY.getNotYetTypedEquality(TERM_FACTORY.getVariable("ID1"), TERM_FACTORY.getVariable("ST_ID2")),
+                IQ_FACTORY.createNaryIQTree(IQ_FACTORY.createInnerJoinNode(), ImmutableList.of(students(1), grades(2)))), re.getIQTree());
+        assertEquals(4, re.getAttributes().asMap().size());
 	}
 
 	@Test
@@ -696,57 +891,70 @@ public class SQLParserTest {
 	@Test
 	public void test_5_9() throws Exception {
 		RAExpression re = parse("SELECT t1.id, name, score FROM student t1 JOIN grade t2 ON t1.id=t2.st_id JOIN semester t3 ON t2.sm_id=t3.id");
-		assertEquals(3, re.getDataAtoms().size());
-		assertEquals(2, re.getFilterAtoms().size());
-		assertEquals(3, re.getAttributes().asMap().size());
+
+        assertEquals(filter(TERM_FACTORY.getNotYetTypedEquality(TERM_FACTORY.getVariable("SM_ID2"), TERM_FACTORY.getVariable("ID3")),
+                IQ_FACTORY.createNaryIQTree(IQ_FACTORY.createInnerJoinNode(), ImmutableList.of(
+                        filter(TERM_FACTORY.getNotYetTypedEquality(TERM_FACTORY.getVariable("ID1"), TERM_FACTORY.getVariable("ST_ID2")),
+                                IQ_FACTORY.createNaryIQTree(IQ_FACTORY.createInnerJoinNode(), ImmutableList.of(
+                                        students(1),
+                                        grades(2)))),
+                        IQ_FACTORY.createExtensionalDataNode(semester, ImmutableMap.of(
+                                0, TERM_FACTORY.getVariable("ID3")))))), re.getIQTree());
+        assertEquals(3, re.getAttributes().asMap().size());
 	}
 
 	@Test
 	public void test_5_10() throws Exception {
 		RAExpression re = parse("SELECT t1.id, t1.name, t2.score FROM (SELECT id, name FROM student WHERE student.name='John') AS t1 JOIN grade as t2 ON t1.id=t2.st_id");
-		assertEquals(2, re.getDataAtoms().size());
-		assertEquals(2, re.getFilterAtoms().size());
-		assertEquals(3, re.getAttributes().asMap().size());
+
+        assertEquals(filter(TERM_FACTORY.getNotYetTypedEquality(TERM_FACTORY.getVariable("ID1"), TERM_FACTORY.getVariable("ST_ID2")),
+                IQ_FACTORY.createNaryIQTree(IQ_FACTORY.createInnerJoinNode(), ImmutableList.of(
+                        filter(TERM_FACTORY.getNotYetTypedEquality(TERM_FACTORY.getVariable("NAME1"), TERM_FACTORY.getDBStringConstant("John")), students(1)),
+                        grades(2)))), re.getIQTree());
+        assertEquals(3, re.getAttributes().asMap().size());
 	}
 
 	@Test
 	@Disabled("check the intention")
 	public void test_5_11() throws Exception {
 		RAExpression re = parse("SELECT id, name, score FROM student JOIN grade USING (id)");
-		assertEquals(2, re.getDataAtoms().size());
-		assertEquals(2, re.getFilterAtoms().size());
+        
 		assertEquals(3, re.getAttributes().asMap().size());
 	}
 
 	@Test
 	public void test_6_1() throws Exception {
 		RAExpression re = parse("SELECT t1.id, t1.name, t2.grade FROM (SELECT id, name FROM student) t1, (SELECT st_id as sid, grade FROM grade) t2 WHERE t1.id=t2.sid");
-		assertEquals(2, re.getDataAtoms().size());
-		assertEquals(1, re.getFilterAtoms().size());
-		assertEquals(3, re.getAttributes().asMap().size());
+
+        assertEquals(filter(TERM_FACTORY.getNotYetTypedEquality(TERM_FACTORY.getVariable("ID1"), TERM_FACTORY.getVariable("ST_ID2")),
+                IQ_FACTORY.createNaryIQTree(IQ_FACTORY.createInnerJoinNode(), ImmutableList.of(students(1), grades(2)))), re.getIQTree());
+        assertEquals(3, re.getAttributes().asMap().size());
 	}
 
 	@Test
 	public void test_6_2() throws Exception {
 		RAExpression re = parse("SELECT * FROM (SELECT id, name, score FROM student JOIN grade ON student.id=grade.st_id) t1");
-		assertEquals(2, re.getDataAtoms().size());
-		assertEquals(1, re.getFilterAtoms().size());
-		assertEquals(3, re.getAttributes().asMap().size());
+
+        assertEquals(filter(TERM_FACTORY.getNotYetTypedEquality(TERM_FACTORY.getVariable("ID1"), TERM_FACTORY.getVariable("ST_ID2")),
+                IQ_FACTORY.createNaryIQTree(IQ_FACTORY.createInnerJoinNode(), ImmutableList.of(students(1), grades(2)))), re.getIQTree());
+        assertEquals(3, re.getAttributes().asMap().size());
 	}
 
 	@Test
 	public void test_6_3() throws Exception {
 		RAExpression re = parse("SELECT * FROM (SELECT id, name, score FROM student JOIN grade ON student.id=grade.st_id) t1 WHERE t1.score>=25");
-		assertEquals(2, re.getDataAtoms().size());
-		assertEquals(2, re.getFilterAtoms().size());
-		assertEquals(3, re.getAttributes().asMap().size());
+
+        assertEquals(filter(TERM_FACTORY.getDBDefaultInequality(GTE, TERM_FACTORY.getVariable("SCORE2"), TERM_FACTORY.getDBIntegerConstant(25)),
+                filter(TERM_FACTORY.getNotYetTypedEquality(TERM_FACTORY.getVariable("ID1"), TERM_FACTORY.getVariable("ST_ID2")),
+                        IQ_FACTORY.createNaryIQTree(IQ_FACTORY.createInnerJoinNode(), ImmutableList.of(students(1), grades(2))))), re.getIQTree());
+        assertEquals(3, re.getAttributes().asMap().size());
 	}
 
 	@Test
 	public void test_7_1() throws Exception {
 		RAExpression re = parse("SELECT ('ID-' || student.id) as sid FROM student");
-		assertEquals(1, re.getDataAtoms().size());
-		assertEquals(0, re.getFilterAtoms().size());
+
+        assertEquals(students(), re.getIQTree());
 		assertEquals(1, re.getAttributes().asMap().size());
 		assertFalse(re.getAttributes().asMap().keySet().iterator().next() instanceof Variable);
 	}
@@ -754,8 +962,8 @@ public class SQLParserTest {
 	@Test
 	public void test_7_1_b() throws Exception {
 		RAExpression re = parse("SELECT CONCAT('ID-', student.id, 'b') as sid FROM student");
-		assertEquals(1, re.getDataAtoms().size());
-		assertEquals(0, re.getFilterAtoms().size());
+
+        assertEquals(students(), re.getIQTree());
 		assertEquals(1, re.getAttributes().asMap().size());
 		assertFalse(re.getAttributes().asMap().keySet().iterator().next() instanceof Variable);
 	}
@@ -764,8 +972,8 @@ public class SQLParserTest {
 	@Test
 	public void test_7_2() throws Exception {
 		RAExpression re = parse("SELECT (grade.score * 30 / 100) as percentage from grade");
-		assertEquals(1, re.getDataAtoms().size());
-		assertEquals(0, re.getFilterAtoms().size());
+
+        assertEquals(grades(), re.getIQTree());
 		assertEquals(1, re.getAttributes().asMap().size());
 		assertFalse(re.getAttributes().asMap().keySet().iterator().next() instanceof Variable);
 	}
@@ -814,105 +1022,159 @@ public class SQLParserTest {
 	@Test
 	public void test_9_1() throws Exception {
 		RAExpression re = parse("SELECT id, name, address from student where name = 'John'");
-		assertEquals(1, re.getDataAtoms().size());
-		assertEquals(1, re.getFilterAtoms().size());
-		assertEquals(3, re.getAttributes().asMap().size());
+
+        assertEquals(filter(
+                TERM_FACTORY.getNotYetTypedEquality(
+                        TERM_FACTORY.getVariable("NAME1"), TERM_FACTORY.getDBStringConstant("John")), students()), re.getIQTree());
+        assertEquals(3, re.getAttributes().asMap().size());
 	}
 
 	@Test
 	public void test_9_2() throws Exception {
 		RAExpression re = parse("SELECT id, name, address from student where id = 20");
-		assertEquals(1, re.getDataAtoms().size());
-		assertEquals(1, re.getFilterAtoms().size());
-		assertEquals(3, re.getAttributes().asMap().size());
+
+        assertEquals(filter(
+                TERM_FACTORY.getNotYetTypedEquality(
+                        TERM_FACTORY.getVariable("ID1"), TERM_FACTORY.getDBIntegerConstant(20)), students()), re.getIQTree());
+        assertEquals(3, re.getAttributes().asMap().size());
 	}
 
 	@Test
 	public void test_9_3() throws Exception {
 		RAExpression re = parse("SELECT payee, amount from tax where amount = 12.345");
-		assertEquals(1, re.getDataAtoms().size());
-		assertEquals(1, re.getFilterAtoms().size());
-		assertEquals(2, re.getAttributes().asMap().size());
+
+        assertEquals(filter(TERM_FACTORY.getNotYetTypedEquality(TERM_FACTORY.getVariable("AMOUNT1"), TERM_FACTORY.getDBConstant("12.345", CORE_SINGLETONS.getTypeFactory().getDBTypeFactory().getDBDoubleType())),
+                IQ_FACTORY.createExtensionalDataNode(tax, ImmutableMap.of(0, TERM_FACTORY.getVariable("PAYEE1"),
+                        1, TERM_FACTORY.getVariable("AMOUNT1")))), re.getIQTree());
+        assertEquals(2, re.getAttributes().asMap().size());
 	}
 
 	@Test
 	public void test_9_4_1() throws Exception {
 		RAExpression re = parse("SELECT id, name, address from student where birth_date = '1984-01-22 00:02:01.234'");
-		assertEquals(1, re.getDataAtoms().size());
-		assertEquals(1, re.getFilterAtoms().size());
-		assertEquals(3, re.getAttributes().asMap().size());
+
+        assertEquals(filter(
+                TERM_FACTORY.getNotYetTypedEquality(
+                        TERM_FACTORY.getVariable("BIRTH_DATE1"), TERM_FACTORY.getDBStringConstant("1984-01-22 00:02:01.234")), students()), re.getIQTree());
+        assertEquals(3, re.getAttributes().asMap().size());
 	}
 
 	@Test
 	public void test_9_4_2() throws Exception {
 		RAExpression re = parse("SELECT id, name, address from student where birth_date = '1984-01-22 00:02:01'");
-		assertEquals(1, re.getDataAtoms().size());
-		assertEquals(1, re.getFilterAtoms().size());
-		assertEquals(3, re.getAttributes().asMap().size());
+
+        assertEquals(filter(
+                TERM_FACTORY.getNotYetTypedEquality(
+                        TERM_FACTORY.getVariable("BIRTH_DATE1"), TERM_FACTORY.getDBStringConstant("1984-01-22 00:02:01")), students()), re.getIQTree());
+        assertEquals(3, re.getAttributes().asMap().size());
 	}
 
 	@Test
 	public void test_9_4_3() throws Exception {
 		RAExpression re = parse("SELECT id, name, address from student where birth_date = '1984-01-22'");
-		assertEquals(1, re.getDataAtoms().size());
-		assertEquals(1, re.getFilterAtoms().size());
-		assertEquals(3, re.getAttributes().asMap().size());
+
+        assertEquals(filter(
+                TERM_FACTORY.getNotYetTypedEquality(
+                        TERM_FACTORY.getVariable("BIRTH_DATE1"), TERM_FACTORY.getDBStringConstant("1984-01-22")), students()), re.getIQTree());
+        assertEquals(3, re.getAttributes().asMap().size());
 	}
 
 	@Test
 	public void test_9_5() throws Exception {
 		RAExpression re = parse("SELECT st_id, course, score from grade where pass = TRUE");
-		assertEquals(1, re.getDataAtoms().size());
-		assertEquals(1, re.getFilterAtoms().size());
+
+        assertEquals(filter(TERM_FACTORY.getNotYetTypedEquality(TERM_FACTORY.getVariable("PASS1"), TERM_FACTORY.getDBBooleanConstant(true)), grades()), re.getIQTree());
 		assertEquals(3, re.getAttributes().asMap().size());
 	}
 
 	@Test
 	public void test_10_1() throws Exception {
 		RAExpression re = parse("SELECT name from grade, student where pass = TRUE AND course = 'CS001' AND ( (score = 8 AND mark = 'B') OR (score = 7 AND mark = 'C') OR (score >= 9 AND mark = 'A') )");
-		assertEquals(2, re.getDataAtoms().size());
-		assertEquals(3, re.getFilterAtoms().size());
-		assertEquals(1, re.getAttributes().asMap().size());
+
+        assertEquals(filter(TERM_FACTORY.getConjunction(TERM_FACTORY.getConjunction(
+                                TERM_FACTORY.getNotYetTypedEquality(TERM_FACTORY.getVariable("PASS1"), TERM_FACTORY.getDBBooleanConstant(true)),
+                                TERM_FACTORY.getNotYetTypedEquality(TERM_FACTORY.getVariable("COURSE1"), TERM_FACTORY.getDBStringConstant("CS001"))),
+                        TERM_FACTORY.getDisjunction(TERM_FACTORY.getDisjunction(
+                                        TERM_FACTORY.getConjunction(
+                                                TERM_FACTORY.getNotYetTypedEquality(TERM_FACTORY.getVariable("SCORE1"), TERM_FACTORY.getDBIntegerConstant(8)),
+                                                TERM_FACTORY.getNotYetTypedEquality(TERM_FACTORY.getVariable("MARK1"), TERM_FACTORY.getDBStringConstant("B"))),
+                                        TERM_FACTORY.getConjunction(
+                                                TERM_FACTORY.getNotYetTypedEquality(TERM_FACTORY.getVariable("SCORE1"), TERM_FACTORY.getDBIntegerConstant(7)),
+                                                TERM_FACTORY.getNotYetTypedEquality(TERM_FACTORY.getVariable("MARK1"), TERM_FACTORY.getDBStringConstant("C")))),
+                                TERM_FACTORY.getConjunction(
+                                        TERM_FACTORY.getDBDefaultInequality(GTE, TERM_FACTORY.getVariable("SCORE1"), TERM_FACTORY.getDBIntegerConstant(9)),
+                                        TERM_FACTORY.getNotYetTypedEquality(TERM_FACTORY.getVariable("MARK1"), TERM_FACTORY.getDBStringConstant("A"))))),
+                IQ_FACTORY.createNaryIQTree(IQ_FACTORY.createInnerJoinNode(), ImmutableList.of(grades(), students(2)))), re.getIQTree());
+        assertEquals(1, re.getAttributes().asMap().size());
 	}
 
 	@Test
 	public void test_10_2() throws Exception {
 		RAExpression re = parse("SELECT name from grade, student where pass = FALSE AND ( course = 'CS001' OR ( (score = 6 AND mark = 'D') OR (score <= 5 AND mark = 'E') ) )");
-		assertEquals(2, re.getDataAtoms().size());
-		assertEquals(2, re.getFilterAtoms().size());
-		assertEquals(1, re.getAttributes().asMap().size());
+
+        assertEquals(filter(TERM_FACTORY.getConjunction(
+                        TERM_FACTORY.getNotYetTypedEquality(TERM_FACTORY.getVariable("PASS1"), TERM_FACTORY.getDBBooleanConstant(false)),
+                        TERM_FACTORY.getDisjunction(
+                                TERM_FACTORY.getNotYetTypedEquality(TERM_FACTORY.getVariable("COURSE1"), TERM_FACTORY.getDBStringConstant("CS001")),
+                                TERM_FACTORY.getDisjunction(
+                                        TERM_FACTORY.getConjunction(
+                                                TERM_FACTORY.getNotYetTypedEquality(TERM_FACTORY.getVariable("SCORE1"), TERM_FACTORY.getDBIntegerConstant(6)),
+                                                TERM_FACTORY.getNotYetTypedEquality(TERM_FACTORY.getVariable("MARK1"), TERM_FACTORY.getDBStringConstant("D"))),
+                                        TERM_FACTORY.getConjunction(
+                                                TERM_FACTORY.getDBDefaultInequality(LTE, TERM_FACTORY.getVariable("SCORE1"), TERM_FACTORY.getDBIntegerConstant(5)),
+                                                TERM_FACTORY.getNotYetTypedEquality(TERM_FACTORY.getVariable("MARK1"), TERM_FACTORY.getDBStringConstant("E")))))),
+                IQ_FACTORY.createNaryIQTree(IQ_FACTORY.createInnerJoinNode(), ImmutableList.of(grades(), students(2)))), re.getIQTree());
+        assertEquals(1, re.getAttributes().asMap().size());
 	}
 
 	@Test
 	public void test_11() throws Exception {
 		RAExpression re = parse("SELECT \"NAME\" from grade, student where pass = FALSE AND ( \"COURSE\" = 'CS001' OR ( (score = 6 AND mark = 'D') OR (score <= 5 AND mark = 'E') ) )");
-		assertEquals(2, re.getDataAtoms().size());
-		assertEquals(2, re.getFilterAtoms().size());
-		assertEquals(1, re.getAttributes().asMap().size());
+
+        assertEquals(filter(TERM_FACTORY.getConjunction(
+                        TERM_FACTORY.getNotYetTypedEquality(TERM_FACTORY.getVariable("PASS1"), TERM_FACTORY.getDBBooleanConstant(false)),
+                        TERM_FACTORY.getDisjunction(
+                                TERM_FACTORY.getNotYetTypedEquality(TERM_FACTORY.getVariable("COURSE1"), TERM_FACTORY.getDBStringConstant("CS001")),
+                                TERM_FACTORY.getDisjunction(
+                                        TERM_FACTORY.getConjunction(
+                                                TERM_FACTORY.getNotYetTypedEquality(TERM_FACTORY.getVariable("SCORE1"), TERM_FACTORY.getDBIntegerConstant(6)),
+                                                TERM_FACTORY.getNotYetTypedEquality(TERM_FACTORY.getVariable("MARK1"), TERM_FACTORY.getDBStringConstant("D"))),
+                                        TERM_FACTORY.getConjunction(
+                                                TERM_FACTORY.getDBDefaultInequality(LTE, TERM_FACTORY.getVariable("SCORE1"), TERM_FACTORY.getDBIntegerConstant(5)),
+                                                TERM_FACTORY.getNotYetTypedEquality(TERM_FACTORY.getVariable("MARK1"), TERM_FACTORY.getDBStringConstant("E")))))),
+                IQ_FACTORY.createNaryIQTree(IQ_FACTORY.createInnerJoinNode(), ImmutableList.of(grades(), students(2)))), re.getIQTree());
+        assertEquals(1, re.getAttributes().asMap().size());
 	}
 
 	@Test
 	public void test_11_1() throws Exception {
 		RAExpression re = parse("select t1.owner NAME from all_tables t1, all_tables t2, ALL_VIEWS where t1.table_name = t2.table_name and t1.owner = t2.owner and t1.owner = ALL_VIEWS.OWNER");
-		assertEquals(3, re.getDataAtoms().size());
-		assertEquals(3, re.getFilterAtoms().size());
-		assertEquals(1, re.getAttributes().asMap().size());
+
+        assertEquals(filter(TERM_FACTORY.getConjunction(TERM_FACTORY.getConjunction(
+                                TERM_FACTORY.getNotYetTypedEquality(TERM_FACTORY.getVariable("TABLE_NAME1"), TERM_FACTORY.getVariable("TABLE_NAME2")),
+                                TERM_FACTORY.getNotYetTypedEquality(TERM_FACTORY.getVariable("OWNER1"), TERM_FACTORY.getVariable("OWNER2"))),
+                        TERM_FACTORY.getNotYetTypedEquality(TERM_FACTORY.getVariable("OWNER1"), TERM_FACTORY.getVariable("OWNER3"))),
+                IQ_FACTORY.createNaryIQTree(IQ_FACTORY.createInnerJoinNode(), ImmutableList.of(
+                        IQ_FACTORY.createNaryIQTree(IQ_FACTORY.createInnerJoinNode(), ImmutableList.of(all_tables(1), all_tables(2))), all_views(3)
+                ))), re.getIQTree());
+        assertEquals(1, re.getAttributes().asMap().size());
 	}
 
 	@Test
 	public void test_12() throws Exception {
 		RAExpression re = parse("select name from grade, student where score BETWEEN 6 AND 8");
-		assertEquals(2, re.getDataAtoms().size());
-		assertEquals(2, re.getFilterAtoms().size());
-		assertEquals(1, re.getAttributes().asMap().size());
+
+        assertEquals(filter(TERM_FACTORY.getConjunction(
+                        TERM_FACTORY.getDBDefaultInequality(GTE, TERM_FACTORY.getVariable("SCORE1"), TERM_FACTORY.getDBIntegerConstant(6)),
+                        TERM_FACTORY.getDBDefaultInequality(LTE, TERM_FACTORY.getVariable("SCORE1"), TERM_FACTORY.getDBIntegerConstant(8))),
+                IQ_FACTORY.createNaryIQTree(IQ_FACTORY.createInnerJoinNode(), ImmutableList.of(grades(), students(2)))), re.getIQTree());
+        assertEquals(1, re.getAttributes().asMap().size());
 	}
 
 	@Test
 	public void test_13() throws Exception {
 		RAExpression re = parse("select REGEXP_REPLACE(name, ' +', ' ') as reg from student ");
-		assertEquals(1, re.getDataAtoms().size());
-		assertEquals(0, re.getFilterAtoms().size());
-		assertEquals(1, re.getAttributes().asMap().size());
+        assertEquals(students(), re.getIQTree());
 		assertFalse(re.getAttributes().asMap().keySet().iterator().next() instanceof Variable);
 	}
 
@@ -947,8 +1209,8 @@ public class SQLParserTest {
 	@Test
 	public void testCast1() throws Exception {
 		RAExpression re = parse("SELECT CAST(\"view0\".\"nick2\" AS CHAR (8000) CHARACTER SET utf8) AS \"v0\" FROM people \"view0\" WHERE \"view0\".\"nick2\" IS NOT NULL");
-		assertEquals(1, re.getDataAtoms().size());
-		assertEquals(1, re.getFilterAtoms().size());
+
+        assertEquals(filter(TERM_FACTORY.getDBNot(TERM_FACTORY.getDBIsNull(TERM_FACTORY.getVariable("nick21"))), people()), re.getIQTree());
 		assertEquals(1, re.getAttributes().asMap().size());
 	}
 
@@ -965,57 +1227,78 @@ public class SQLParserTest {
 	@Test
 	public void testRegexMySQL() throws Exception {
 		RAExpression re = parse("SELECT * FROM pet WHERE name REGEXP '^b'");
-		assertEquals(1, re.getDataAtoms().size());
-		assertEquals(1, re.getFilterAtoms().size());
-		assertEquals(2, re.getAttributes().asMap().size());
+
+        assertEquals(filter(
+                TERM_FACTORY.getDBRegexpMatches(
+                        ImmutableList.of(TERM_FACTORY.getVariable("NAME1"), TERM_FACTORY.getDBStringConstant("^b"), TERM_FACTORY.getDBStringConstant("i"))),
+                pets()), re.getIQTree());
+        assertEquals(2, re.getAttributes().asMap().size());
 	}
 
 	@Test
 	public void testRegexBinaryMySQL() throws Exception {
 		RAExpression re = parse("SELECT * FROM pet WHERE name REGEXP BINARY '^b'");
-		assertEquals(1, re.getDataAtoms().size());
-		assertEquals(1, re.getFilterAtoms().size());
-		assertEquals(2, re.getAttributes().asMap().size());
+
+        assertEquals(filter(
+                TERM_FACTORY.getDBRegexpMatches(
+                        ImmutableList.of(TERM_FACTORY.getVariable("NAME1"), TERM_FACTORY.getDBStringConstant("^b"))),
+                pets()), re.getIQTree());
+        assertEquals(2, re.getAttributes().asMap().size());
 	}
 
 	@Test
 	public void testRegexPostgres() throws Exception {
 		RAExpression re = parse("SELECT * FROM pet WHERE name ~ 'foo'");
-		assertEquals(1, re.getDataAtoms().size());
-		assertEquals(1, re.getFilterAtoms().size());
-		assertEquals(2, re.getAttributes().asMap().size());
+
+        assertEquals(filter(
+                TERM_FACTORY.getDBRegexpMatches(
+                        ImmutableList.of(TERM_FACTORY.getVariable("NAME1"), TERM_FACTORY.getDBStringConstant("foo"))),
+                pets()), re.getIQTree());
+        assertEquals(2, re.getAttributes().asMap().size());
 	}
 
 	@Test
 	public void testRegexPostgresSimilarTo() throws Exception {
 		RAExpression re = parse("SELECT * FROM pet WHERE 'abc' SIMILAR TO 'abc'");
-		assertEquals(1, re.getDataAtoms().size());
-		assertEquals(1, re.getFilterAtoms().size());
-		assertEquals(2, re.getAttributes().asMap().size());
+
+        assertEquals(filter(
+                TERM_FACTORY.getImmutableExpression(DB_FS_FACTORY.getDBSimilarTo(),
+                        ImmutableList.of(TERM_FACTORY.getDBStringConstant("abc"), TERM_FACTORY.getDBStringConstant("abc"))),
+                pets()), re.getIQTree());
+        assertEquals(2, re.getAttributes().asMap().size());
 	}
 
 	@Test
 	public void testRegexOracle() throws Exception {
 		RAExpression re = parse("SELECT * FROM pet WHERE REGEXP_LIKE(testcol, '[[:alpha:]]')");
-		assertEquals(1, re.getDataAtoms().size());
-		assertEquals(1, re.getFilterAtoms().size());
-		assertEquals(2, re.getAttributes().asMap().size());
+
+        assertEquals(filter(
+                TERM_FACTORY.getDBRegexpMatches(
+                        ImmutableList.of(TERM_FACTORY.getVariable("TESTCOL1"), TERM_FACTORY.getDBStringConstant("[[:alpha:]]"))),
+                pets()), re.getIQTree());
+        assertEquals(2, re.getAttributes().asMap().size());
 	}
 
 	@Test
 	public void testRegexNotOracle() throws Exception {
 		RAExpression re = parse("SELECT * FROM pet WHERE NOT REGEXP_LIKE(testcol, '[[:alpha:]]')");
-		assertEquals(1, re.getDataAtoms().size());
-		assertEquals(1, re.getFilterAtoms().size());
-		assertEquals(2, re.getAttributes().asMap().size());
+
+        assertEquals(filter(TERM_FACTORY.getDBNot(
+                        TERM_FACTORY.getDBRegexpMatches(
+                                ImmutableList.of(TERM_FACTORY.getVariable("TESTCOL1"), TERM_FACTORY.getDBStringConstant("[[:alpha:]]")))),
+                pets()), re.getIQTree());
+        assertEquals(2, re.getAttributes().asMap().size());
 	}
 
 	@Test
 	public void testRegexNotOracle_1() throws Exception {
 		RAExpression re = parse("SELECT * FROM pet WHERE NOT (REGEXP_LIKE(testcol, '[[:alpha:]]'))");
-		assertEquals(1, re.getDataAtoms().size());
-		assertEquals(1, re.getFilterAtoms().size());
-		assertEquals(2, re.getAttributes().asMap().size());
+
+        assertEquals(filter(TERM_FACTORY.getDBNot(
+                        TERM_FACTORY.getDBRegexpMatches(
+                                ImmutableList.of(TERM_FACTORY.getVariable("TESTCOL1"), TERM_FACTORY.getDBStringConstant("[[:alpha:]]")))),
+                pets()), re.getIQTree());
+        assertEquals(2, re.getAttributes().asMap().size());
 	}
 
 	@Test
@@ -1023,17 +1306,22 @@ public class SQLParserTest {
 		RAExpression re = parse("SELECT MD5(CONCAT(COALESCE(Address, RAND()), COALESCE(City, RAND()),\n" +
 				"COALESCE(Region, RAND()), COALESCE(PostalCode, RAND()), COALESCE(Country,\n" +
 				"RAND()) )) AS locationID FROM northwind.Suppliers");
-		assertEquals(1, re.getDataAtoms().size());
-		assertEquals(0, re.getFilterAtoms().size());
-		assertEquals(1, re.getAttributes().asMap().size());
+
+        assertEquals(IQ_FACTORY.createExtensionalDataNode(suppliers, ImmutableMap.of(
+                0, TERM_FACTORY.getVariable("REGION1"),
+                1, TERM_FACTORY.getVariable("CITY1"),
+                2, TERM_FACTORY.getVariable("POSTALCODE1"),
+                3, TERM_FACTORY.getVariable("ADDRESS1"),
+                4, TERM_FACTORY.getVariable("COUNTRY1"))), re.getIQTree());
+        assertEquals(1, re.getAttributes().asMap().size());
         assertInstanceOf(ImmutableFunctionalTerm.class, re.getAttributes().asMap().values().iterator().next());
 	}
 
 	@Test
 	public void test_concatOracle() throws Exception {
 		RAExpression re = parse("SELECT ('ID-' || student.id || 'type1') \"sid\" FROM student");
-		assertEquals(1, re.getDataAtoms().size());
-		assertEquals(0, re.getFilterAtoms().size());
+
+        assertEquals(students(), re.getIQTree());
 		assertEquals(1, re.getAttributes().asMap().size());
 		assertFalse(re.getAttributes().asMap().keySet().iterator().next() instanceof Variable);
 	}
@@ -1041,8 +1329,8 @@ public class SQLParserTest {
 	@Test
 	public void test_RegexpReplace() throws Exception {
 		RAExpression re = parse("SELECT REGEXP_REPLACE('Hello World', ' +', ' ') as reg FROM student");
-		assertEquals(1, re.getDataAtoms().size());
-		assertEquals(0, re.getFilterAtoms().size());
+
+        assertEquals(students(), re.getIQTree());
 		assertEquals(1, re.getAttributes().asMap().size());
 		assertFalse(re.getAttributes().asMap().keySet().iterator().next() instanceof Variable);
 	}
@@ -1066,17 +1354,30 @@ public class SQLParserTest {
 				"      ,\"SCALE\"\n" +
 				"      ,\"INTERVAL\"\n" +
 				"  FROM \"CIM\".\"dbo\".\"TEMPERATURE_DEVIATION\" where \"INTERVAL\" = '0-10'");
-		assertEquals(1, re.getDataAtoms().size());
-		assertEquals(1, re.getFilterAtoms().size());
-		assertEquals(4, re.getAttributes().asMap().size());
+
+        assertEquals(filter(TERM_FACTORY.getNotYetTypedEquality(TERM_FACTORY.getVariable("INTERVAL1"), TERM_FACTORY.getDBStringConstant("0-10")),
+                IQ_FACTORY.createExtensionalDataNode(temperature_deviation, ImmutableMap.of(
+                        0, TERM_FACTORY.getVariable("ID1"),
+                        1, TERM_FACTORY.getVariable("DATETIME1"),
+                        2, TERM_FACTORY.getVariable("SCALE1"),
+                        3, TERM_FACTORY.getVariable("INTERVAL1")))), re.getIQTree());
+        assertEquals(4, re.getAttributes().asMap().size());
 	}
 
 	@Test
 	public void test_double_subquery() throws Exception {
 		RAExpression re = parse("SELECT * FROM (SELECT * FROM oreda.pm_maint_items) AS child, (SELECT * FROM oreda.pm_program) AS parent  WHERE child.i_id=parent.i_id AND child.inst_id=parent.inst_id AND child.su_code=parent.su_code AND child.pm_interval=parent.pm_interval AND child.mc_code=parent.mc_code AND child.mac_code=parent.mac_code AND child.owner_id=parent.owner_id");
-		assertEquals(2, re.getDataAtoms().size());
-		assertEquals(7, re.getFilterAtoms().size());
-		assertEquals(1, re.getAttributes().asMap().size());
+
+        assertEquals(filter(TERM_FACTORY.getConjunction(TERM_FACTORY.getConjunction(TERM_FACTORY.getConjunction(TERM_FACTORY.getConjunction(TERM_FACTORY.getConjunction(TERM_FACTORY.getConjunction(
+                                                                TERM_FACTORY.getNotYetTypedEquality(TERM_FACTORY.getVariable("I_ID1"), TERM_FACTORY.getVariable("I_ID2")),
+                                                                TERM_FACTORY.getNotYetTypedEquality(TERM_FACTORY.getVariable("INST_ID1"), TERM_FACTORY.getVariable("INST_ID2"))),
+                                                        TERM_FACTORY.getNotYetTypedEquality(TERM_FACTORY.getVariable("SU_CODE1"), TERM_FACTORY.getVariable("SU_CODE2"))),
+                                                TERM_FACTORY.getNotYetTypedEquality(TERM_FACTORY.getVariable("PM_INTERVAL1"), TERM_FACTORY.getVariable("PM_INTERVAL2"))),
+                                        TERM_FACTORY.getNotYetTypedEquality(TERM_FACTORY.getVariable("MC_CODE1"), TERM_FACTORY.getVariable("MC_CODE2"))),
+                                TERM_FACTORY.getNotYetTypedEquality(TERM_FACTORY.getVariable("MAC_CODE1"), TERM_FACTORY.getVariable("MAC_CODE2"))),
+                        TERM_FACTORY.getNotYetTypedEquality(TERM_FACTORY.getVariable("OWNER_ID1"), TERM_FACTORY.getVariable("OWNER_ID2"))),
+                IQ_FACTORY.createNaryIQTree(IQ_FACTORY.createInnerJoinNode(), ImmutableList.of(oreda_items(1), oreda_program(2)))), re.getIQTree());
+        assertEquals(1, re.getAttributes().asMap().size());
 	}
 
 	@Test //due to IN with subselect
@@ -1090,32 +1391,35 @@ public class SQLParserTest {
     @Test
     public void test_lower() throws Exception {
         RAExpression re = parse("select id, name from student where lower(name)=lower('ColleeN')");
-        assertEquals(1, re.getDataAtoms().size());
-        assertEquals(1, re.getFilterAtoms().size());
+
+        assertEquals(filter(
+                TERM_FACTORY.getNotYetTypedEquality(
+                        TERM_FACTORY.getDBLower(TERM_FACTORY.getVariable("NAME1")),
+                        TERM_FACTORY.getDBLower(TERM_FACTORY.getDBStringConstant("ColleeN"))), students()), re.getIQTree());
         assertEquals(2, re.getAttributes().asMap().size());
     }
 
     @Test
     public void test_lower2() throws Exception {
         RAExpression re = parse("select id, lower(name) as lower_name from student");
-        assertEquals(1, re.getDataAtoms().size());
-        assertEquals(0, re.getFilterAtoms().size());
+
+        assertEquals(students(), re.getIQTree());
         assertEquals(2, re.getAttributes().asMap().size());
     }
 
 	@Test // issue 157
 	public void test_locate() throws Exception {
 		RAExpression re = parse("select id, locate('A', name, 2) as pos from student");
-		assertEquals(1, re.getDataAtoms().size());
-		assertEquals(0, re.getFilterAtoms().size());
+
+        assertEquals(students(), re.getIQTree());
 		assertEquals(2, re.getAttributes().asMap().size());
 	}
 
 	@Test // issue 157
 	public void test_position() throws Exception {
 		RAExpression re = parse("select id, position('A', name) as pos from student");
-		assertEquals(1, re.getDataAtoms().size());
-		assertEquals(0, re.getFilterAtoms().size());
+
+        assertEquals(students(), re.getIQTree());
 		assertEquals(2, re.getAttributes().asMap().size());
 	}
 
@@ -1130,33 +1434,37 @@ public class SQLParserTest {
 	@Test
 	public void test_table_with_dots() throws Exception {
 		RAExpression re = parse("select * from \"table.with.dots\"");
-		assertEquals(1, re.getDataAtoms().size());
-		assertEquals(0, re.getFilterAtoms().size());
-		assertEquals(1, re.getAttributes().asMap().size());
+
+        assertEquals(IQ_FACTORY.createExtensionalDataNode(table_with_dots, ImmutableMap.of(
+                0, TERM_FACTORY.getVariable("ID1"))), re.getIQTree());
+        assertEquals(1, re.getAttributes().asMap().size());
 	}
 
 
 	@Test
 	public void test_schema_with_dots() throws Exception {
 		RAExpression re = parse("select * from \"SCHEMA.WITH.DOTS\".\"table.with.dots\"");
-		assertEquals(1, re.getDataAtoms().size());
-		assertEquals(0, re.getFilterAtoms().size());
-		assertEquals(1, re.getAttributes().asMap().size());
+
+        assertEquals(IQ_FACTORY.createExtensionalDataNode(schema_with_dots_table_with_dots, ImmutableMap.of(
+                0, TERM_FACTORY.getVariable("ID1"))), re.getIQTree());
+        assertEquals(1, re.getAttributes().asMap().size());
 	}
 
 	@Test
 	public void test_multiple_components() throws Exception {
 		RAExpression re = parse("select * from name.many.many.so.many.components");
-		assertEquals(1, re.getDataAtoms().size());
-		assertEquals(0, re.getFilterAtoms().size());
-		assertEquals(1, re.getAttributes().asMap().size());
+
+        assertEquals(IQ_FACTORY.createExtensionalDataNode(name_with_many_many_so_many_components, ImmutableMap.of(
+                0, TERM_FACTORY.getVariable("ID1"))), re.getIQTree());
+        assertEquals(1, re.getAttributes().asMap().size());
 	}
 
 	@Test
 	public void test_multiple_dotted_components() throws Exception {
 		RAExpression re = parse("select * from \"name.with.dots\".many.many.\"so.so\".many.components");
-		assertEquals(1, re.getDataAtoms().size());
-		assertEquals(0, re.getFilterAtoms().size());
-		assertEquals(1, re.getAttributes().asMap().size());
+
+        assertEquals(IQ_FACTORY.createExtensionalDataNode(name_with_dots_many_many_so_many_components, ImmutableMap.of(
+                0, TERM_FACTORY.getVariable("ID1"))), re.getIQTree());
+        assertEquals(1, re.getAttributes().asMap().size());
 	}
 }

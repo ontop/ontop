@@ -17,6 +17,7 @@ import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.select.*;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Function;
 
 public abstract class BasicSelectQueryParser<T, O extends RAOperations<T>> {
@@ -192,10 +193,10 @@ public abstract class BasicSelectQueryParser<T, O extends RAOperations<T>> {
                     return left;
                 }
 
-                Function<RAExpressionAttributes, ImmutableList<ImmutableExpression>> getAtomOnExpression =
+                Function<RAExpressionAttributes, Optional<ImmutableExpression>> getAtomOnExpression =
                         attributes -> join.getOnExpressions().stream()
                                 .map(exp -> expressionParser.parseBooleanExpression(exp, attributes))
-                                .collect(ImmutableCollectors.toList());
+                                .reduce(termFactory::getConjunction);
 
                 if (join.isLeft())
                     return leftJoinOn(left, right, getAtomOnExpression, join);
@@ -240,13 +241,13 @@ public abstract class BasicSelectQueryParser<T, O extends RAOperations<T>> {
     }
 
     protected T leftJoinOn(T left, T right,
-                           Function<RAExpressionAttributes, ImmutableList<ImmutableExpression>> getAtomOnExpression,
+                           Function<RAExpressionAttributes, Optional<ImmutableExpression>> getAtomOnExpression,
                            Join join) {
         throw new UnsupportedSelectQueryRuntimeException("[LEFT|RIGHT] OUTER join is not supported", join);
     }
 
     protected T fullJoinOn(T left, T right,
-                           Function<RAExpressionAttributes, ImmutableList<ImmutableExpression>> getAtomOnExpression,
+                           Function<RAExpressionAttributes, Optional<ImmutableExpression>> getAtomOnExpression,
                            Join join) {
         throw new UnsupportedSelectQueryRuntimeException("FULL OUTER join is not supported", join);
     }

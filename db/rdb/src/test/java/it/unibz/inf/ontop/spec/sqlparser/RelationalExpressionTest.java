@@ -5,7 +5,6 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.dbschema.impl.OfflineMetadataProviderBuilder;
-import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.spec.sqlparser.exception.IllegalJoinException;
@@ -15,10 +14,10 @@ import net.sf.jsqlparser.schema.Table;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.util.Optional;
+
 import static it.unibz.inf.ontop.spec.sqlparser.SQLTestingTools.*;
 import static org.junit.jupiter.api.Assertions.*;
-
-// TODO: REFACTOR
 
 public class RelationalExpressionTest {
 
@@ -67,8 +66,18 @@ public class RelationalExpressionTest {
     public void cross_join_test() throws IllegalJoinException {
         RAExpression relationalExpression = ops.crossJoin(re1, re2);
 
-        crossJoinAndJoinOnCommonAsserts(relationalExpression);
-        assertTrue(relationalExpression.getFilterAtoms().isEmpty());
+        assertEquals(IQ_FACTORY.createNaryIQTree(IQ_FACTORY.createInnerJoinNode(),
+                ImmutableList.of(re1.getIQTree(), re2.getIQTree())), relationalExpression.getIQTree());
+
+        assertEquals(ImmutableMap.builder()
+                        .put(qualified(TABLE_P,1), x)
+                        .put(qualified(TABLE_P,2), y)
+                        .put(unqualified(TABLE_P,2), y)
+                        .put(qualified(TABLE_T,1), u)
+                        .put(qualified(TABLE_T,2), v)
+                        .put(unqualified(TABLE_T,2), v).build(),
+                relationalExpression.getAttributes().asMap());
+
     }
 
     @Test
@@ -81,18 +90,28 @@ public class RelationalExpressionTest {
 
     @Test
     public void join_on_test() throws IllegalJoinException {
-        ImmutableFunctionalTerm eq = TERM_FACTORY.getNotYetTypedEquality(x, u);
+        ImmutableExpression eq = TERM_FACTORY.getNotYetTypedEquality(x, u);
 
         EqualsTo onExpression = new EqualsTo();
         onExpression.setLeftExpression(new Column(new Table(TABLE_P.getID().getSQLRendering()), "A"));
         onExpression.setRightExpression(new Column(new Table(TABLE_Q.getID().getSQLRendering()), "A"));
 
         RAExpression relationalExpression = ops.joinOn(re1, re2,
-                attributes -> ImmutableList.of(new ExpressionParser(idFactory, CORE_SINGLETONS)
+                attributes -> Optional.of(new ExpressionParser(idFactory, CORE_SINGLETONS)
                         .parseBooleanExpression(onExpression,  attributes)));
 
-        crossJoinAndJoinOnCommonAsserts(relationalExpression);
-        assertEquals(ImmutableList.of(eq), relationalExpression.getFilterAtoms());
+        assertEquals(IQ_FACTORY.createUnaryIQTree(IQ_FACTORY.createFilterNode(eq),
+                IQ_FACTORY.createNaryIQTree(IQ_FACTORY.createInnerJoinNode(),
+                        ImmutableList.of(re1.getIQTree(), re2.getIQTree()))), relationalExpression.getIQTree());
+
+        assertEquals(ImmutableMap.builder()
+                        .put(qualified(TABLE_P,1), x)
+                        .put(qualified(TABLE_P,2), y)
+                        .put(unqualified(TABLE_P,2), y)
+                        .put(qualified(TABLE_T,1), u)
+                        .put(qualified(TABLE_T,2), v)
+                        .put(unqualified(TABLE_T,2), v).build(),
+                relationalExpression.getAttributes().asMap());
     }
 
     @Test
@@ -104,7 +123,7 @@ public class RelationalExpressionTest {
         onExpression.setRightExpression(new Column(new Table(TABLE_Q.getID().getSQLRendering()), "A"));
 
         var ex = assertThrows(IllegalJoinException.class, () -> ops.joinOn(re1, re1_1,
-                attributes -> ImmutableList.of(new ExpressionParser(idFactory, CORE_SINGLETONS)
+                attributes -> Optional.of(new ExpressionParser(idFactory, CORE_SINGLETONS)
                         .parseBooleanExpression(onExpression, attributes))));
 
         assertEquals("Relation alias P occurs in both arguments of the JOIN", ex.getMessage());
@@ -116,7 +135,18 @@ public class RelationalExpressionTest {
 
         RAExpression relationalExpression = ops.naturalJoin(re1, re2);
 
-        naturalUsingCommonAsserts(relationalExpression);
+        assertEquals(IQ_FACTORY.createUnaryIQTree(
+                IQ_FACTORY.createFilterNode(TERM_FACTORY.getNotYetTypedEquality(x, u)),
+                IQ_FACTORY.createNaryIQTree(IQ_FACTORY.createInnerJoinNode(),
+                        ImmutableList.of(re1.getIQTree(), re2.getIQTree()))), relationalExpression.getIQTree());
+
+        assertEquals(ImmutableMap.of(
+                unqualified(TABLE_P,1), x,
+                qualified(TABLE_P,2), y,
+                unqualified(TABLE_P,2), y,
+                qualified(TABLE_T,2), v,
+                unqualified(TABLE_T,2), v),
+                relationalExpression.getAttributes().asMap());
     }
 
     @Test
@@ -134,7 +164,7 @@ public class RelationalExpressionTest {
         onExpression.setRightExpression(new Column(new Table(TABLE_Q.getID().getSQLRendering()), "A"));
 
         RAExpression re = ops.joinOn(re1, re2,
-                attributes -> ImmutableList.of(new ExpressionParser(idFactory, CORE_SINGLETONS)
+                attributes -> Optional.of(new ExpressionParser(idFactory, CORE_SINGLETONS)
                         .parseBooleanExpression(onExpression, attributes)));
 
         // This is used to simulate an ambiguity during the operation of natural join
@@ -149,9 +179,19 @@ public class RelationalExpressionTest {
         RAExpression relationalExpression =
                 ops.joinUsing(re1, re2, ImmutableSet.of(idFactory.createAttributeID("A")));
 
-        naturalUsingCommonAsserts(relationalExpression);
-    }
+        assertEquals(IQ_FACTORY.createUnaryIQTree(
+                IQ_FACTORY.createFilterNode(TERM_FACTORY.getNotYetTypedEquality(x, u)),
+                IQ_FACTORY.createNaryIQTree(IQ_FACTORY.createInnerJoinNode(),
+                        ImmutableList.of(re1.getIQTree(), re2.getIQTree()))), relationalExpression.getIQTree());
 
+        assertEquals(ImmutableMap.of(
+                unqualified(TABLE_P,1), x,
+                qualified(TABLE_P,2), y,
+                unqualified(TABLE_P,2), y,
+                qualified(TABLE_T,2), v,
+                unqualified(TABLE_T,2), v),
+                relationalExpression.getAttributes().asMap());
+    }
 
     @Test
     public void join_using_exception_test() throws IllegalJoinException {
@@ -178,7 +218,7 @@ public class RelationalExpressionTest {
         onExpression.setRightExpression(new Column(new Table(TABLE_Q.getID().getSQLRendering()), "A"));
 
         RAExpression relationalExpression = ops.joinOn(re1, re2,
-                attributes -> ImmutableList.of(new ExpressionParser(idFactory, CORE_SINGLETONS)
+                attributes -> Optional.of(new ExpressionParser(idFactory, CORE_SINGLETONS)
                         .parseBooleanExpression(onExpression, attributes)));
 
         // This is used to simulate an ambiguity during the operation of natural join
@@ -193,10 +233,9 @@ public class RelationalExpressionTest {
     public void alias_test() {
         RelationID tableAlias = idFactory.createRelationID("S");
 
-        RAExpression actual =  ops.withAlias(re1, tableAlias);
+        RAExpression actual = ops.withAlias(re1, tableAlias);
 
-        ExtensionalDataNode f1 = re1.getDataAtoms().get(0);
-        assertTrue(actual.getDataAtoms().contains(f1));
+        assertEquals(re1.getIQTree(), actual.getIQTree());
 
         assertEquals(ImmutableMap.of(
                 unqualified(TABLE_P,1), x,
@@ -216,40 +255,6 @@ public class RelationalExpressionTest {
                 re1.getAttributes().asMap());
     }
 
-
-    private void naturalUsingCommonAsserts(RAExpression relationalExpression) {
-        ExtensionalDataNode f1 = re1.getDataAtoms().get(0);
-        ExtensionalDataNode f2 = re2.getDataAtoms().get(0);
-
-        assertTrue(relationalExpression.getDataAtoms().contains(f1));
-        assertTrue(relationalExpression.getDataAtoms().contains(f2));
-        assertEquals(ImmutableList.of(TERM_FACTORY.getNotYetTypedEquality(x, u)), relationalExpression.getFilterAtoms());
-
-        assertEquals(ImmutableMap.of(
-                unqualified(TABLE_P,1), x,
-                qualified(TABLE_P,2), y,
-                unqualified(TABLE_P,2), y,
-                qualified(TABLE_T,2), v,
-                unqualified(TABLE_T,2), v),
-                relationalExpression.getAttributes().asMap());
-    }
-
-    private void crossJoinAndJoinOnCommonAsserts(RAExpression relationalExpression) {
-        ExtensionalDataNode f1 = re1.getDataAtoms().get(0);
-        assertTrue(relationalExpression.getDataAtoms().contains(f1));
-
-        ExtensionalDataNode f2 = re2.getDataAtoms().get(0);
-        assertTrue(relationalExpression.getDataAtoms().contains(f2));
-
-        assertEquals(ImmutableMap.builder()
-                .put(qualified(TABLE_P,1), x)
-                .put(qualified(TABLE_P,2), y)
-                .put(unqualified(TABLE_P,2), y)
-                .put(qualified(TABLE_T,1), u)
-                .put(qualified(TABLE_T,2), v)
-                .put(unqualified(TABLE_T,2), v).build(),
-                relationalExpression.getAttributes().asMap());
-    }
 
     private static QualifiedAttributeID qualified(NamedRelationDefinition table, int index) {
         return new QualifiedAttributeID(table.getID(), table.getAttribute(index).getID());

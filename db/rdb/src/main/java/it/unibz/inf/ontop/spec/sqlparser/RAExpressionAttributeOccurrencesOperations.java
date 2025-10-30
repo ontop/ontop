@@ -14,6 +14,7 @@ import it.unibz.inf.ontop.spec.sqlparser.exception.IllegalJoinException;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Collection;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
@@ -61,7 +62,7 @@ public class RAExpressionAttributeOccurrencesOperations implements RAOperations<
      */
 
     @Override
-    public RAExpressionAttributeOccurrences crossJoin(RAExpressionAttributeOccurrences left, RAExpressionAttributeOccurrences right) throws IllegalJoinException {
+    public RAExpressionAttributeOccurrences crossJoin(RAExpressionAttributeOccurrences left, RAExpressionAttributeOccurrences right) {
         return new RAExpressionAttributeOccurrences(idUnionStream(left, right)
             .collect(ImmutableCollectors.toMap(
                     Function.identity(),
@@ -81,7 +82,7 @@ public class RAExpressionAttributeOccurrencesOperations implements RAOperations<
      */
 
     @Override
-    public RAExpressionAttributeOccurrences joinUsing(RAExpressionAttributeOccurrences left, RAExpressionAttributeOccurrences right, ImmutableSet<QuotedID> using) throws IllegalJoinException {
+    public RAExpressionAttributeOccurrences joinUsing(RAExpressionAttributeOccurrences left, RAExpressionAttributeOccurrences right, ImmutableSet<QuotedID> using) {
         if (!using.stream().allMatch(left::isUnique) || !using.stream().allMatch(right::isUnique))
             return null;
 
@@ -93,7 +94,7 @@ public class RAExpressionAttributeOccurrencesOperations implements RAOperations<
     }
 
     @Override
-    public RAExpressionAttributeOccurrences joinOn(RAExpressionAttributeOccurrences left, RAExpressionAttributeOccurrences right, Function<RAExpressionAttributes, ImmutableList<ImmutableExpression>> getAtomOnExpression) throws IllegalJoinException {
+    public RAExpressionAttributeOccurrences joinOn(RAExpressionAttributeOccurrences left, RAExpressionAttributeOccurrences right, Function<RAExpressionAttributes, Optional<ImmutableExpression>> getAtomOnExpression) {
         return crossJoin(left, right);
     }
 
@@ -103,7 +104,7 @@ public class RAExpressionAttributeOccurrencesOperations implements RAOperations<
     }
 
     @Override
-    public RAExpressionAttributeOccurrences filter(RAExpressionAttributeOccurrences rae, ImmutableList<ImmutableExpression> filter) {
+    public RAExpressionAttributeOccurrences filter(RAExpressionAttributeOccurrences rae, Optional<ImmutableExpression> filter) {
         return rae;
     }
 

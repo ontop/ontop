@@ -66,7 +66,7 @@ public class SQLPPMappingConverterImpl implements SQLPPMappingConverter {
 
             try {
                 RAExpression re = getRAExpression(assertion, metadataLookup);
-                tree = sqlQueryParser.convert(re);
+                tree = re.getIQTree();
 
                 lookup = placeholderLookup(assertion, metadataLookup.getQuotedIDFactory(), re.getUnqualifiedAttributes());
             }

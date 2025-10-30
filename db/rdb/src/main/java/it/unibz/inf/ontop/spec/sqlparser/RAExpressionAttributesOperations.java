@@ -9,6 +9,7 @@ import it.unibz.inf.ontop.spec.sqlparser.exception.IllegalJoinException;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -121,7 +122,7 @@ public class RAExpressionAttributesOperations implements RAOperations<RAExpressi
     }
 
     @Override
-    public RAExpressionAttributes joinOn(RAExpressionAttributes left, RAExpressionAttributes right, Function<RAExpressionAttributes, ImmutableList<ImmutableExpression>> getAtomOnExpression) throws IllegalJoinException {
+    public RAExpressionAttributes joinOn(RAExpressionAttributes left, RAExpressionAttributes right, Function<RAExpressionAttributes, Optional<ImmutableExpression>> getAtomOnExpression) throws IllegalJoinException {
         return crossJoin(left, right);
     }
 
@@ -131,7 +132,7 @@ public class RAExpressionAttributesOperations implements RAOperations<RAExpressi
     }
 
     @Override
-    public RAExpressionAttributes filter(RAExpressionAttributes rae, ImmutableList<ImmutableExpression> filter) {
+    public RAExpressionAttributes filter(RAExpressionAttributes rae, Optional<ImmutableExpression> filter) {
         return rae;
     }
 

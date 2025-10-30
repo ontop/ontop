@@ -9,6 +9,7 @@ import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.spec.sqlparser.exception.IllegalJoinException;
 
+import java.util.Optional;
 import java.util.function.Function;
 
 public interface RAOperations<T> {
@@ -20,7 +21,7 @@ public interface RAOperations<T> {
 
     T crossJoin(T left, T right) throws IllegalJoinException;
     T joinUsing(T left, T right, ImmutableSet<QuotedID> using) throws IllegalJoinException;
-    T joinOn(T left, T right, Function<RAExpressionAttributes, ImmutableList<ImmutableExpression>> getAtomOnExpression) throws IllegalJoinException;
+    T joinOn(T left, T right, Function<RAExpressionAttributes, Optional<ImmutableExpression>> getAtomOnExpression) throws IllegalJoinException;
 
     default T naturalJoin(T left, T right) throws IllegalJoinException {
         return joinUsing(left, right, getSharedAttributeNames(left, right));
@@ -28,5 +29,6 @@ public interface RAOperations<T> {
 
     ImmutableSet<QuotedID> getSharedAttributeNames(T left, T right);
 
-    T filter(T rae, ImmutableList<ImmutableExpression> filter);
+    @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
+    T filter(T rae, Optional<ImmutableExpression> filter);
 }

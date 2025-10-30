@@ -6,6 +6,7 @@ import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.dbschema.impl.DatabaseTableDefinition;
 import it.unibz.inf.ontop.dbschema.impl.OfflineMetadataProviderBuilder;
 import it.unibz.inf.ontop.exception.InvalidQueryException;
+import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.type.DBTermType;
@@ -80,8 +81,13 @@ public class SelectQueryParserTest {
     public void inner_join_on_same_table_test() throws Exception {
         RAExpression re = parse("SELECT p1.A, p2.B FROM P p1 INNER JOIN P p2 on p1.A = p2.A ");
 
-        assertEquals(ImmutableList.of(eqOf(A1, A2)), re.getFilterAtoms());
-        assertMatches(ImmutableList.of(dataAtomOf(TABLE_P, A1, B1), dataAtomOf(TABLE_P, A2, B2)), re.getDataAtoms());
+        assertEquals(join(eqOf(A1, A2), dataAtomOf(TABLE_P, A1, B1), dataAtomOf(TABLE_P, A2, B2)), re.getIQTree());
+    }
+
+    private IQTree join(ImmutableExpression exp, IQTree tree1, IQTree tree2) {
+        return IQ_FACTORY.createUnaryIQTree(IQ_FACTORY.createFilterNode(exp),
+                IQ_FACTORY.createNaryIQTree(IQ_FACTORY.createInnerJoinNode(),
+                        ImmutableList.of(tree1, tree2)));
     }
 
 
@@ -117,9 +123,9 @@ public class SelectQueryParserTest {
     public void subjoin_test() throws Exception {
         RAExpression re = parse("SELECT S.A, S.C FROM R JOIN (P NATURAL JOIN Q) AS S ON R.A = S.A");
 
-        assertEquals(ImmutableList.of(eqOf(A2, A3), eqOf(A1, A2)), re.getFilterAtoms());
-        assertMatches(ImmutableList.of(dataAtomOf(TABLE_R, A1, B1, C1, D1),
-                dataAtomOf(TABLE_P, A2, B2), dataAtomOf(TABLE_Q, A3, C3)), re.getDataAtoms());
+        assertEquals(join(eqOf(A1, A2), dataAtomOf(TABLE_R, A1, B1, C1, D1),
+                        join(eqOf(A2, A3), dataAtomOf(TABLE_P, A2, B2), dataAtomOf(TABLE_Q, A3, C3))),
+                re.getIQTree());
     }
 
     @Test
@@ -127,8 +133,7 @@ public class SelectQueryParserTest {
         RAExpression re = parse("SELECT 1");
 
         assertEquals(ImmutableMap.of(), re.getAttributes().asMap());
-        assertEquals(ImmutableList.of(), re.getFilterAtoms());
-        assertMatches(ImmutableList.of(), re.getDataAtoms());
+        assertEquals(IQ_FACTORY.createTrueNode(), re.getIQTree());
     }
 
     @Test
@@ -136,16 +141,15 @@ public class SelectQueryParserTest {
         RAExpression re = parse("SELECT 1 AS A");
 
         assertEquals(ImmutableMap.of(new QualifiedAttributeID(null, idfac.createAttributeID("A")), TERM_FACTORY.getDBConstant("1", integerDBType)), re.getAttributes().asMap());
-        assertEquals(ImmutableList.of(), re.getFilterAtoms());
-        assertMatches(ImmutableList.of(), re.getDataAtoms());
+        assertEquals(IQ_FACTORY.createTrueNode(), re.getIQTree());
     }
 
     @Test
     public void select_one_from() throws Exception {
         RAExpression re = parse("SELECT 1 FROM Q");
+
         assertEquals(ImmutableMap.of(), re.getAttributes().asMap());
-        assertEquals(ImmutableList.of(), re.getFilterAtoms());
-        assertMatches(ImmutableList.of(dataAtomOf(TABLE_Q, A1, C1)), re.getDataAtoms());
+        assertEquals(dataAtomOf(TABLE_Q, A1, C1), re.getIQTree());
     }
 
     @Test
@@ -153,8 +157,7 @@ public class SelectQueryParserTest {
         RAExpression re = parse("SELECT 1 AS A FROM Q");
 
         assertEquals(ImmutableMap.of(new QualifiedAttributeID(null, idfac.createAttributeID("A")), TERM_FACTORY.getDBConstant("1", integerDBType)), re.getAttributes().asMap());
-        assertEquals(ImmutableList.of(), re.getFilterAtoms());
-        assertMatches(ImmutableList.of(dataAtomOf(TABLE_Q, A1, C1)), re.getDataAtoms());
+        assertEquals(dataAtomOf(TABLE_Q, A1, C1), re.getIQTree());
     }
 
     @Test
@@ -169,8 +172,7 @@ public class SelectQueryParserTest {
     public void select_natural_join_schema() throws Exception {
         RAExpression re = parse("SELECT A FROM S.PP NATURAL JOIN S.QQ");
 
-        assertEquals(ImmutableList.of(eqOf(A1, A2)), re.getFilterAtoms());
-        assertMatches(ImmutableList.of(dataAtomOf(TABLE_SP, A1, B1), dataAtomOf(TABLE_SQ, A2, C2)), re.getDataAtoms());
+        assertEquals(join(eqOf(A1, A2), dataAtomOf(TABLE_SP, A1, B1), dataAtomOf(TABLE_SQ, A2, C2)), re.getIQTree());
     }
 
     @Test
@@ -341,8 +343,7 @@ public class SelectQueryParserTest {
     public void select_simple_join() throws Exception {
         RAExpression re = parse("SELECT * FROM P, Q");
 
-        assertEquals(ImmutableList.of(), re.getFilterAtoms());
-        assertMatches(ImmutableList.of(dataAtomOf(TABLE_P, A1, B1), dataAtomOf(TABLE_Q, A2, C2)), re.getDataAtoms());
+        assertEquals(IQ_FACTORY.createNaryIQTree(IQ_FACTORY.createInnerJoinNode(), ImmutableList.of(dataAtomOf(TABLE_P, A1, B1), dataAtomOf(TABLE_Q, A2, C2))), re.getIQTree());
     }
 
     @Test
@@ -361,47 +362,42 @@ public class SelectQueryParserTest {
     public void select_natural_join() throws Exception {
         RAExpression re = parse("SELECT A FROM P NATURAL JOIN Q");
 
-        assertEquals(ImmutableList.of(eqOf(A1, A2)), re.getFilterAtoms());
-        assertMatches(ImmutableList.of(dataAtomOf(TABLE_P, A1, B1), dataAtomOf(TABLE_Q, A2, C2)), re.getDataAtoms());
+        assertEquals(join(eqOf(A1, A2), dataAtomOf(TABLE_P, A1, B1), dataAtomOf(TABLE_Q, A2, C2)), re.getIQTree());
     }
 
     @Test
     public void select_cross_join() throws Exception {
         RAExpression re = parse("SELECT * FROM P CROSS JOIN Q");
-        assertEquals(ImmutableList.of(), re.getFilterAtoms());
-        assertMatches(ImmutableList.of(dataAtomOf(TABLE_P, A1, B1), dataAtomOf(TABLE_Q, A2, C2)), re.getDataAtoms());
+
+        assertEquals(IQ_FACTORY.createNaryIQTree(IQ_FACTORY.createInnerJoinNode(), ImmutableList.of(dataAtomOf(TABLE_P, A1, B1), dataAtomOf(TABLE_Q, A2, C2))), re.getIQTree());
     }
 
     @Test
     public void select_join_on() throws Exception {
         RAExpression re = parse("SELECT * FROM P JOIN Q ON P.A = Q.A");
 
-        assertEquals(ImmutableList.of(eqOf(A1, A2)), re.getFilterAtoms());
-        assertMatches(ImmutableList.of(dataAtomOf(TABLE_P, A1, B1), dataAtomOf(TABLE_Q, A2, C2)), re.getDataAtoms());
+        assertEquals(join(eqOf(A1, A2), dataAtomOf(TABLE_P, A1, B1), dataAtomOf(TABLE_Q, A2, C2)), re.getIQTree());
     }
 
     @Test
     public void select_inner_join_on() throws Exception {
         RAExpression re = parse("SELECT * FROM P INNER JOIN Q ON P.A = Q.A");
 
-        assertEquals(ImmutableList.of(eqOf(A1, A2)), re.getFilterAtoms());
-        assertMatches(ImmutableList.of(dataAtomOf(TABLE_P, A1, B1), dataAtomOf(TABLE_Q, A2, C2)), re.getDataAtoms());
+        assertEquals(join(eqOf(A1, A2), dataAtomOf(TABLE_P, A1, B1), dataAtomOf(TABLE_Q, A2, C2)), re.getIQTree());
     }
 
     @Test
     public void select_join_using() throws Exception {
         RAExpression re = parse("SELECT * FROM P JOIN Q USING(A)");
 
-        assertEquals(ImmutableList.of(eqOf(A1, A2)), re.getFilterAtoms());
-        assertMatches(ImmutableList.of(dataAtomOf(TABLE_P, A1, B1), dataAtomOf(TABLE_Q, A2, C2)), re.getDataAtoms());
+        assertEquals(join(eqOf(A1, A2), dataAtomOf(TABLE_P, A1, B1), dataAtomOf(TABLE_Q, A2, C2)), re.getIQTree());
     }
 
     @Test
     public void select_inner_join_using() throws Exception {
         RAExpression re = parse("SELECT * FROM P INNER JOIN Q USING(A)");
 
-        assertEquals(ImmutableList.of(eqOf(A1, A2)), re.getFilterAtoms());
-        assertMatches(ImmutableList.of(dataAtomOf(TABLE_P, A1, B1), dataAtomOf(TABLE_Q, A2, C2)), re.getDataAtoms());
+        assertEquals(join(eqOf(A1, A2), dataAtomOf(TABLE_P, A1, B1), dataAtomOf(TABLE_Q, A2, C2)), re.getIQTree());
     }
 
 
@@ -760,27 +756,22 @@ public class SelectQueryParserTest {
     public void join_using_2_test() throws Exception {
         RAExpression re = parse("SELECT A, B FROM P INNER JOIN R USING (A,B)");
 
-        assertEquals(ImmutableList.of(eqOf(A1, A2), eqOf(B1, B2)), re.getFilterAtoms());
-        assertMatches(ImmutableList.of(dataAtomOf(TABLE_P, A1, B1), dataAtomOf(TABLE_R, A2, B2, C2, D2)), re.getDataAtoms());
+        assertEquals(join(TERM_FACTORY.getConjunction(eqOf(A1, A2), eqOf(B1, B2)), dataAtomOf(TABLE_P, A1, B1), dataAtomOf(TABLE_R, A2, B2, C2, D2)), re.getIQTree());
     }
 
     @Test
     public void select_join_2_test() throws Exception {
         RAExpression re = parse("SELECT a.A, b.B FROM P AS a JOIN R AS b ON (a.A = b.B)");
 
-        assertEquals(ImmutableList.of(eqOf(A1, B2)), re.getFilterAtoms());
-        assertMatches(ImmutableList.of(dataAtomOf(TABLE_P, A1, B1), dataAtomOf(TABLE_R, A2, B2, C2, D2)), re.getDataAtoms());
+        assertEquals(join(eqOf(A1, B2), dataAtomOf(TABLE_P, A1, B1), dataAtomOf(TABLE_R, A2, B2, C2, D2)), re.getIQTree());
     }
-
-
 
     @Test
     public void sub_select_one_test() throws Exception {
         String  query = "SELECT * FROM (SELECT * FROM P) AS S";
         RAExpression re = parse(query);
 
-        assertEquals(ImmutableList.of(), re.getFilterAtoms());
-        assertMatches(ImmutableList.of(dataAtomOf(TABLE_P, A1, B1)), re.getDataAtoms());
+        assertEquals(dataAtomOf(TABLE_P, A1, B1), re.getIQTree());
     }
 
     @Test
@@ -788,8 +779,7 @@ public class SelectQueryParserTest {
         String  query = "SELECT * FROM (SELECT * FROM (SELECT * FROM P) AS T) AS S";
         RAExpression re = parse(query);
 
-        assertEquals(ImmutableList.of(), re.getFilterAtoms());
-        assertMatches(ImmutableList.of(dataAtomOf(TABLE_P, A1, B1)), re.getDataAtoms());
+        assertEquals(dataAtomOf(TABLE_P, A1, B1), re.getIQTree());
     }
 
     @Test
@@ -797,8 +787,7 @@ public class SelectQueryParserTest {
         String  query = "SELECT * FROM (SELECT * FROM P, Q) AS S";
         RAExpression re = parse(query);
 
-        assertEquals(ImmutableList.of(), re.getFilterAtoms());
-        assertMatches(ImmutableList.of(dataAtomOf(TABLE_P, A1, B1), dataAtomOf(TABLE_Q, A2, C2)), re.getDataAtoms());
+        assertEquals(IQ_FACTORY.createNaryIQTree(IQ_FACTORY.createInnerJoinNode(), ImmutableList.of(dataAtomOf(TABLE_P, A1, B1), dataAtomOf(TABLE_Q, A2, C2))), re.getIQTree());
     }
 
 
@@ -807,8 +796,7 @@ public class SelectQueryParserTest {
         String  query = "SELECT * FROM (SELECT * FROM P) AS S, Q";
         RAExpression re = parse(query);
 
-        assertEquals(ImmutableList.of(), re.getFilterAtoms());
-        assertMatches(ImmutableList.of(dataAtomOf(TABLE_P, A1, B1), dataAtomOf(TABLE_Q, A2, C2)), re.getDataAtoms());
+        assertEquals(IQ_FACTORY.createNaryIQTree(IQ_FACTORY.createInnerJoinNode(), ImmutableList.of(dataAtomOf(TABLE_P, A1, B1), dataAtomOf(TABLE_Q, A2, C2))), re.getIQTree());
     }
 
 

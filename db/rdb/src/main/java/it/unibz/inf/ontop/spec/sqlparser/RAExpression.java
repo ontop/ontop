@@ -1,43 +1,28 @@
 package it.unibz.inf.ontop.spec.sqlparser;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
+import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.dbschema.QuotedID;
 
-/**
- * Created by Roman Kontchakov on 01/11/2016.
- *
- */
 public class RAExpression {
 
-    private final ImmutableList<ExtensionalDataNode> atoms;
-    private final ImmutableList<ImmutableExpression> filters;
+    private final IQTree iqTree;
     private final RAExpressionAttributes attributes;
 
     /**
      * constructs a relation expression
-     * @param atoms           an {@link ImmutableList}<{@link ExtensionalDataNode}>
-     * @param filters         an {@link ImmutableList}<{@link ImmutableExpression}>
+     * @param iqTree          a {@link IQTree}
      * @param attributes      an {@link RAExpressionAttributes}
      */
-    public RAExpression(ImmutableList<ExtensionalDataNode> atoms,
-                        ImmutableList<ImmutableExpression> filters,
+    public RAExpression(IQTree iqTree,
                         RAExpressionAttributes attributes) {
-        this.atoms = atoms;
-        this.filters = filters.stream().flatMap(ImmutableExpression::flattenAND).collect(ImmutableList.toImmutableList());
+        this.iqTree = iqTree;
         this.attributes = attributes;
     }
 
 
-    public ImmutableList<ExtensionalDataNode> getDataAtoms() {
-        return atoms;
-    }
-
-    public ImmutableList<ImmutableExpression> getFilterAtoms() {
-        return filters;
-    }
+    public IQTree getIQTree() { return iqTree; }
 
     public RAExpressionAttributes getAttributes() { return attributes; }
 
@@ -48,6 +33,6 @@ public class RAExpression {
 
     @Override
     public String toString() {
-        return "RAExpression : " + atoms + " FILTER " + filters + " with " + attributes;
+        return "RAExpression : " + iqTree + " with " + attributes;
     }
 }

@@ -116,7 +116,7 @@ public class JsonSQLLens extends JsonLens {
         try {
             SQLQueryParser sq = new SQLQueryParser(coreSingletons);
             raExpression = sq.getRAExpression(query, parentCacheMetadataLookup);
-            initialChild = sq.convert(raExpression);
+            initialChild = raExpression.getIQTree();
         }
         catch (InvalidQueryException e) {
             throw new MetadataExtractionException("Unsupported expression for " + ":\n" + e);
@@ -183,10 +183,10 @@ public class JsonSQLLens extends JsonLens {
                                     .collect(ImmutableCollectors.toSet())))
                         .collect(ImmutableCollectors.toSet()),
                     relation, coreSingletons);
-        } catch (AttributeNotFoundException e) {
+        }
+        catch (AttributeNotFoundException e) {
             throw new MetadataExtractionException(String.format(
                     "Cannot find attribute %s for Functional Dependency.", e.getAttributeID()));
         }
-
     }
 }
