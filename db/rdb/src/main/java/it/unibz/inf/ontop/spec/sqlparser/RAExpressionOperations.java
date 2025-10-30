@@ -18,7 +18,6 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
 public class RAExpressionOperations implements RAOperations<RAExpression> {
 
@@ -39,17 +38,17 @@ public class RAExpressionOperations implements RAOperations<RAExpression> {
     @Override
     public RAExpression create(NamedRelationDefinition relation, ImmutableList<Variable> variables) {
         return new RAExpression(
-                createExtensionalDataNodes(relation, variables),
+                createExtensionalDataNode(relation, variables),
                 aops.create(relation, variables));
     }
 
     public RAExpression createWithoutName(RelationDefinition relation, ImmutableList<Variable> variables) {
         return new RAExpression(
-                createExtensionalDataNodes(relation, variables),
+                createExtensionalDataNode(relation, variables),
                 aops.create(aops.getAttributesMap(relation, variables)));
     }
 
-    private ExtensionalDataNode createExtensionalDataNodes(RelationDefinition relation, ImmutableList<Variable> variables) {
+    private ExtensionalDataNode createExtensionalDataNode(RelationDefinition relation, ImmutableList<Variable> variables) {
         ImmutableMap<Integer, Variable> terms = IntStream.range(0, variables.size()).boxed()
                 .collect(ImmutableCollectors.toMap(Function.identity(), variables::get));
 

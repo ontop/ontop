@@ -93,7 +93,7 @@ public class RAExpressionAttributes  {
                 .filter(e -> condition.test(e.getKey()));
     }
 
-    public ImmutableSet<QuotedID> getAttributes() {
+    public ImmutableSet<QuotedID> getAllAttributes() {
         return occurrences.keySet();
     }
 
