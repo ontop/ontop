@@ -97,7 +97,7 @@ public class SelectQueryParserTest {
         var ex = assertThrows(InvalidQueryException.class, () ->
                 parse("SELECT A, C FROM P INNER JOIN Q on P.A =  Q.A NATURAL JOIN R"));
 
-        assertEquals("it.unibz.inf.ontop.spec.sqlparser.exception.IllegalJoinException: Attribute(s) [A] are ambiguous attributes", ex.getMessage().substring(0, ex.getMessage().indexOf(": {")));
+        assertEquals("it.unibz.inf.ontop.spec.sqlparser.exception.IllegalJoinException: Attribute A is ambiguous with attributes", ex.getMessage().substring(0, ex.getMessage().indexOf(": {")));
     }
 
 

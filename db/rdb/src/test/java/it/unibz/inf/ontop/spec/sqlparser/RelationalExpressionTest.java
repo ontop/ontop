@@ -171,7 +171,7 @@ public class RelationalExpressionTest {
         RAExpression re3 = ops.create(TABLE_R, ImmutableList.of(u, v));
 
         var ex = assertThrows(IllegalJoinException.class, () -> ops.naturalJoin(re, re3));
-        assertEquals("Attribute(s) [A] are ambiguous", ex.getMessage());
+        assertEquals("Attribute A is ambiguous", ex.getMessage());
     }
 
     @Test
@@ -208,7 +208,7 @@ public class RelationalExpressionTest {
         RAExpression re2p = ops.create(TABLE_Q, ImmutableList.of(u, v));
 
         var ex = assertThrows(IllegalJoinException.class, () -> ops.joinUsing(re1, re2p, ImmutableSet.of(idFactory.createAttributeID("A"))));
-        assertEquals("Attribute(s) [A] cannot be found", ex.getMessage());
+        assertEquals("Attribute A cannot be found", ex.getMessage());
     }
 
     @Test
@@ -225,7 +225,7 @@ public class RelationalExpressionTest {
         RAExpression re3 = ops.create(TABLE_R, ImmutableList.of(u, v));
 
         var ex = assertThrows(IllegalJoinException.class, () -> ops.joinUsing(relationalExpression, re3, ImmutableSet.of(idFactory.createAttributeID("A"))));
-        assertEquals("Attribute(s) [A] are ambiguous", ex.getMessage());
+        assertEquals("Attribute A is ambiguous", ex.getMessage());
     }
 
 

@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.spec.sqlparser;
 
 import com.google.common.collect.*;
+import it.unibz.inf.ontop.dbschema.RelationID;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.dbschema.QualifiedAttributeID;
 import it.unibz.inf.ontop.dbschema.QuotedID;
@@ -10,22 +11,19 @@ import java.util.Map;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
-/**
- * Created by roman on 24/01/2017.
- */
 public class RAExpressionAttributes  {
 
     private final ImmutableMap<QualifiedAttributeID, ImmutableTerm> attributes;
-    private final RAExpressionAttributeOccurrences occurrences;
+    private final ImmutableMap<QuotedID, ImmutableSet<RelationID>> occurrences;
 
     /**
      * constructs a relation expression
      *
-     * @param attributes  an {@link ImmutableMap}<{@link QualifiedAttributeID}, {@link ImmutableTerm}>
-     * @param occurrences an {@link RAExpressionAttributeOccurrences}>>
+     * @param attributes  a map from {@link QualifiedAttributeID},to {@link ImmutableTerm}
+     * @param occurrences a map from {@link QuotedID} to a set of {@link RelationID}
      */
     public RAExpressionAttributes(ImmutableMap<QualifiedAttributeID, ImmutableTerm> attributes,
-                           RAExpressionAttributeOccurrences occurrences) {
+                                  ImmutableMap<QuotedID, ImmutableSet<RelationID>> occurrences) {
         this.attributes = attributes;
         this.occurrences = occurrences;
     }
@@ -42,8 +40,45 @@ public class RAExpressionAttributes  {
         return attributes.get(id);
     }
 
-    RAExpressionAttributeOccurrences getOccurrences() { return occurrences; }
 
+
+    /**
+     * checks if there is an occurrence of the non-qualified attribute
+     *
+     * @param attribute a  {@link QuotedID}
+     * @return true if contains the attribute; otherwise false
+     */
+
+    public boolean isAbsent(QuotedID attribute) {
+        ImmutableSet<RelationID> occ = occurrences.get(attribute);
+        return (occ == null) || occ.isEmpty();
+    }
+
+    /**
+     * checks if occurrence of the non-qualified attribute are ambiguous
+     *     (at least two relations contain the attribute)
+     *
+     * @param attribute a  {@link QuotedID}
+     * @return true if the attribute is ambiguous; otherwise false
+     */
+
+    public boolean isAmbiguous(QuotedID attribute) {
+        ImmutableSet<RelationID> occ = occurrences.get(attribute);
+        return (occ != null) && occ.size() > 1;
+    }
+
+    /**
+     * checks if occurrence of the non-qualified attribute is unique
+     *     (exactly one relation contains the attribute)
+     *
+     * @param attribute a  {@link QuotedID}
+     * @return true if the attribute is unique; otherwise false
+     */
+
+    public boolean isUnique(QuotedID attribute) {
+        ImmutableSet<RelationID> occ = occurrences.get(attribute);
+        return (occ != null) && occ.size() == 1;
+    }
 
 
 
@@ -56,6 +91,14 @@ public class RAExpressionAttributes  {
     Stream<Map.Entry<QualifiedAttributeID, ImmutableTerm>> selectAttributes(Predicate<QualifiedAttributeID> condition) {
         return attributes.entrySet().stream()
                 .filter(e -> condition.test(e.getKey()));
+    }
+
+    public ImmutableSet<QuotedID> getAttributes() {
+        return occurrences.keySet();
+    }
+
+    public ImmutableSet<RelationID> getOccurrences(QuotedID id) {
+        return occurrences.getOrDefault(id, ImmutableSet.of());
     }
 
 
