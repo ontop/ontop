@@ -16,11 +16,9 @@ import java.util.stream.Stream;
 
 public class RAExpressionAttributesOperations implements RAOperations<RAExpressionAttributes> {
 
-    private final RAExpressionAttributeOccurrencesOperations aoops = new RAExpressionAttributeOccurrencesOperations();
-
     @Override
     public RAExpressionAttributes create() {
-        return new RAExpressionAttributes(ImmutableMap.of(), aoops.create());
+        return new RAExpressionAttributes(ImmutableMap.of(), new RAExpressionAttributeOccurrences(ImmutableMap.of()));
     }
 
     @Override
@@ -31,20 +29,29 @@ public class RAExpressionAttributesOperations implements RAOperations<RAExpressi
                         .flatMap(id -> Stream.of(id, id.getTableOnlyID()))
                         .distinct()
                         .collect(ImmutableCollectors.toSet())),
-                aoops.create(relation, variables));
+                create(relation.getAttributes().stream().map(Attribute::getID), ImmutableSet.of(relation.getID())));
     }
 
     public RAExpressionAttributes create(ImmutableMap<QuotedID, ImmutableTerm> unqualifiedAttributes) {
         return new RAExpressionAttributes(
                 attachAliases(unqualifiedAttributes, ImmutableSet.of()),
-                aoops.create(unqualifiedAttributes.keySet(), ImmutableSet.of()));
+                create(unqualifiedAttributes.keySet().stream(), ImmutableSet.of()));
     }
 
     @Override
     public RAExpressionAttributes withAlias(RAExpressionAttributes rae, RelationID aliasId) {
         ImmutableMap<QuotedID, ImmutableTerm> unqualifiedAttributes = rae.getUnqualifiedAttributes();
         return new RAExpressionAttributes(attachAliases(unqualifiedAttributes, ImmutableSet.of(aliasId)),
-                aoops.withAlias(rae.getOccurrences(), aliasId));
+                create(rae.getOccurrences().getAttributes().stream(), ImmutableSet.of(aliasId)));
+    }
+
+    private RAExpressionAttributeOccurrences create(Stream<QuotedID> attributeIds, ImmutableSet<RelationID> relationIds) {
+        return create(attributeIds, id -> relationIds);
+    }
+
+    private RAExpressionAttributeOccurrences create(Stream<QuotedID> attributeIds, Function<QuotedID, ImmutableSet<RelationID>> relationIdsFunction) {
+        return new RAExpressionAttributeOccurrences(attributeIds
+                .collect(ImmutableCollectors.toMap(id -> id, relationIdsFunction)));
     }
 
     /**
@@ -70,7 +77,10 @@ public class RAExpressionAttributesOperations implements RAOperations<RAExpressi
                 .collect(ImmutableCollectors.toMap());
 
         return new RAExpressionAttributes(attributes,
-                aoops.crossJoin(left.getOccurrences(), right.getOccurrences()));
+                /*
+                    R.X, R.Y and S.X, S.Y -> R.X, RS.Y, S.Y
+                */
+                create(idUnionStream(left.getOccurrences(), right.getOccurrences()), unionOf(left.getOccurrences(), right.getOccurrences())));
     }
 
     /**
@@ -88,10 +98,8 @@ public class RAExpressionAttributesOperations implements RAOperations<RAExpressi
     public RAExpressionAttributes joinUsing(RAExpressionAttributes left, RAExpressionAttributes right, ImmutableSet<QuotedID> using) throws IllegalJoinException {
         checkRelationAliasesConsistency(left, right);
 
-        RAExpressionAttributeOccurrences occurrences = aoops.joinUsing(
-                left.getOccurrences(), right.getOccurrences(), using);
+        if (!using.stream().allMatch(left.getOccurrences()::isUnique) || !using.stream().allMatch(right.getOccurrences()::isUnique)) {
 
-        if (occurrences == null) {
             ImmutableList<QuotedID> notFound = using.stream()
                     .filter(id -> left.getOccurrences().isAbsent(id) || right.getOccurrences().isAbsent(id))
                     .collect(ImmutableCollectors.toList());
@@ -105,6 +113,16 @@ public class RAExpressionAttributesOperations implements RAOperations<RAExpressi
                             (!notFound.isEmpty() && !ambiguous.isEmpty() ? ", " : "") +
                             (!ambiguous.isEmpty() ? "Attribute(s) " + ambiguous + " are ambiguous" : ""));
         }
+
+        /*
+         *      R.X, R.Y, R.U and S.Y, S.Z using U ->  empty
+         *      R.X, R.Y and S.Y, S.Z, S.U using U ->  empty
+         *      R.X, R.Y, R.U and S.Y, S.Z, S.U using U -> R.X, RS.Y, S.Y, R.U
+         *            (the choice or R/S is arbitrary, but we keep it unambiguous)
+         */
+
+        Function<QuotedID, ImmutableSet<RelationID>> u = unionOf(left.getOccurrences(), right.getOccurrences());
+        RAExpressionAttributeOccurrences occurrences = create(idUnionStream(left.getOccurrences(), right.getOccurrences()), id -> using.contains(id) ? left.getOccurrences().get(id) : u.apply(id));
 
         ImmutableMap<QualifiedAttributeID, ImmutableTerm> attributes = Stream.concat(
                 left.selectAttributes(id ->
@@ -128,7 +146,7 @@ public class RAExpressionAttributesOperations implements RAOperations<RAExpressi
 
     @Override
     public ImmutableSet<QuotedID> getSharedAttributeNames(RAExpressionAttributes left, RAExpressionAttributes right) {
-        return aoops.getSharedAttributeNames(left.getOccurrences(), right.getOccurrences());
+        return Sets.intersection(left.getOccurrences().getAttributes(), right.getOccurrences().getAttributes()).immutableCopy();
     }
 
     @Override
@@ -177,5 +195,16 @@ public class RAExpressionAttributesOperations implements RAOperations<RAExpressi
                                         .map(a -> new QualifiedAttributeID(a, e.getKey())))
                                 .map(i -> Maps.immutableEntry(i, e.getValue())))
                         .collect(ImmutableCollectors.toMap());
+    }
+
+    private static Stream<QuotedID> idUnionStream(RAExpressionAttributeOccurrences o1, RAExpressionAttributeOccurrences o2) {
+        return Stream.of(o1, o2)
+                .map(RAExpressionAttributeOccurrences::getAttributes)
+                .flatMap(ImmutableSet::stream)
+                .distinct();
+    }
+
+    private static Function<QuotedID, ImmutableSet<RelationID>> unionOf(RAExpressionAttributeOccurrences left, RAExpressionAttributeOccurrences right) {
+        return id -> Sets.union(left.get(id), right.get(id)).immutableCopy();
     }
 }
