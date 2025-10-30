@@ -30,16 +30,10 @@ import net.sf.jsqlparser.statement.select.SubSelect;
 
 import java.util.*;
 import java.util.function.BiFunction;
-import java.util.function.BinaryOperator;
 import java.util.stream.IntStream;
 
 import static it.unibz.inf.ontop.model.term.functionsymbol.InequalityLabel.*;
 
-
-/**
- * Created by Roman Kontchakov on 10/11/2016.
- *
- */
 
 public class ExpressionParser {
 
@@ -60,9 +54,9 @@ public class ExpressionParser {
         return visitor.getTerm(expression);
     }
 
-    public ImmutableList<ImmutableExpression> parseBooleanExpression(Expression expression, RAExpressionAttributes attributes) {
+    public ImmutableExpression parseBooleanExpression(Expression expression, RAExpressionAttributes attributes) {
         TermVisitor visitor = new TermVisitor(attributes);
-        return visitor.getExpression(expression).flattenAND().collect(ImmutableCollectors.toList());
+        return visitor.getExpression(expression);
     }
 
 

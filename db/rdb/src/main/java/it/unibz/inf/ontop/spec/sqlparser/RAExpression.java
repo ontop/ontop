@@ -26,7 +26,7 @@ public class RAExpression {
                         ImmutableList<ImmutableExpression> filters,
                         RAExpressionAttributes attributes) {
         this.atoms = atoms;
-        this.filters = filters;
+        this.filters = filters.stream().flatMap(ImmutableExpression::flattenAND).collect(ImmutableList.toImmutableList());
         this.attributes = attributes;
     }
 

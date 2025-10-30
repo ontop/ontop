@@ -11,6 +11,7 @@ import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.select.*;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Created by Roman Kontchakov on 01/11/2016.
@@ -92,9 +93,10 @@ public class SelectQueryParser extends BasicSelectQueryParser<RAExpression, RAEx
         try {
             RAExpression base = translateJoins(plainSelect.getFromItem(), plainSelect.getJoins());
 
-            ImmutableList<ImmutableExpression> filter = plainSelect.getWhere() == null
-                    ? ImmutableList.of()
-                    : expressionParser.parseBooleanExpression(plainSelect.getWhere(), base.getAttributes());
+            ImmutableList<ImmutableExpression> filter = Optional.ofNullable(plainSelect.getWhere())
+                    .map(w -> expressionParser.parseBooleanExpression(plainSelect.getWhere(), base.getAttributes()))
+                    .map(ImmutableList::of)
+                    .orElseGet(ImmutableList::of);
 
             rae = operations.filter(base, filter);
         }

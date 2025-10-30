@@ -50,7 +50,7 @@ public class JsonBasicLens extends JsonBasicOrJoinLens {
     public ImmutableList<ImmutableList<Attribute>> getAttributesIncludingParentOnes(Lens lens,
                                                                                     ImmutableList<Attribute> parentAttributes,
                                                                                     CoreSingletons coreSingletons) {
-        if (filterExpression != null && (!filterExpression.isEmpty()))
+        if (!filterExpression.isEmpty())
             // TODO: log a warning
             return ImmutableList.of();
 
@@ -60,7 +60,7 @@ public class JsonBasicLens extends JsonBasicOrJoinLens {
     public boolean propagateUniqueConstraintsUp(Lens relation, ImmutableList<NamedRelationDefinition> parents,
                                                 QuotedIDFactory idFactory) throws MetadataExtractionException {
         //There is no guarantee a UC will hold in the parent if the lens performed a filter.
-        if(filterExpression != null && !filterExpression.isEmpty())
+        if(!filterExpression.isEmpty())
             return false;
 
         ImmutableList<UniqueConstraint> ucs = relation.getUniqueConstraints();

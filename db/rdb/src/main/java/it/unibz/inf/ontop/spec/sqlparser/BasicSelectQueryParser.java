@@ -194,7 +194,7 @@ public abstract class BasicSelectQueryParser<T, O extends RAOperations<T>> {
 
                 Function<RAExpressionAttributes, ImmutableList<ImmutableExpression>> getAtomOnExpression =
                         attributes -> join.getOnExpressions().stream()
-                                .flatMap(exp -> expressionParser.parseBooleanExpression(exp, attributes).stream())
+                                .map(exp -> expressionParser.parseBooleanExpression(exp, attributes))
                                 .collect(ImmutableCollectors.toList());
 
                 if (join.isLeft())

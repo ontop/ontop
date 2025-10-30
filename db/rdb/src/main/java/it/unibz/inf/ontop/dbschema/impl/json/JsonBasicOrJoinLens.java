@@ -50,12 +50,14 @@ public abstract class JsonBasicOrJoinLens extends JsonBasicOrJoinOrNestedLens {
 
     protected JsonBasicOrJoinLens(List<String> name, @Nullable UniqueConstraints uniqueConstraints,
                                   @Nullable OtherFunctionalDependencies otherFunctionalDependencies,
-                                  @Nullable ForeignKeys foreignKeys, @Nullable NonNullConstraints nonNullConstraints,
+                                  @Nullable ForeignKeys foreignKeys,
+                                  @Nullable NonNullConstraints nonNullConstraints,
                                   @Nullable IRISafeConstraints iriSafeConstraints,
-                                  @Nullable Columns columns, @Nonnull String filterExpression) {
+                                  @Nullable Columns columns,
+                                  @Nullable String filterExpression) {
         super(name, uniqueConstraints, otherFunctionalDependencies, foreignKeys, nonNullConstraints, iriSafeConstraints);
         this.columns = columns == null ? new Columns(new ArrayList<>(), new ArrayList<>()) : columns;
-        this.filterExpression = filterExpression;
+        this.filterExpression = filterExpression == null ? "" : filterExpression;
     }
 
     @Override
@@ -273,20 +275,19 @@ public abstract class JsonBasicOrJoinLens extends JsonBasicOrJoinOrNestedLens {
         }
     }
 
-    private ImmutableList<ImmutableExpression> extractFilter(RAExpressionAttributes parentAttributeMap,
+    private Optional<ImmutableExpression> extractFilter(RAExpressionAttributes parentAttributeMap,
                                                              QuotedIDFactory quotedIdFactory,
                                                              CoreSingletons coreSingletons) throws MetadataExtractionException {
-        if (filterExpression == null || filterExpression.isEmpty())
-            return ImmutableList.of();
+        if (filterExpression.isEmpty())
+            return Optional.empty();
 
         try {
             String sqlQuery = "SELECT * FROM fakeTable WHERE " + filterExpression;
             ExpressionParser parser = new ExpressionParser(quotedIdFactory, coreSingletons);
             Select statement = JSqlParserTools.parse(sqlQuery, !quotedIdFactory.supportsSquareBracketQuotation());
             PlainSelect plainSelect = (PlainSelect) statement.getSelectBody();
-            return plainSelect.getWhere() == null
-                    ? ImmutableList.of()
-                    : parser.parseBooleanExpression(plainSelect.getWhere(), parentAttributeMap);
+            return Optional.ofNullable(plainSelect.getWhere())
+                    .map(where -> parser.parseBooleanExpression(where, parentAttributeMap));
         }
         catch (InvalidQueryException | JSQLParserException e) {
             throw new MetadataExtractionException("Unsupported filter expression for " + ":\n" + e);

@@ -88,8 +88,8 @@ public class RelationalExpressionTest {
         onExpression.setRightExpression(new Column(new Table(TABLE_Q.getID().getSQLRendering()), "A"));
 
         RAExpression relationalExpression = ops.joinOn(re1, re2,
-                attributes -> new ExpressionParser(idFactory, CORE_SINGLETONS)
-                        .parseBooleanExpression(onExpression,  attributes));
+                attributes -> ImmutableList.of(new ExpressionParser(idFactory, CORE_SINGLETONS)
+                        .parseBooleanExpression(onExpression,  attributes)));
 
         crossJoinAndJoinOnCommonAsserts(relationalExpression);
         assertEquals(ImmutableList.of(eq), relationalExpression.getFilterAtoms());
@@ -104,8 +104,8 @@ public class RelationalExpressionTest {
         onExpression.setRightExpression(new Column(new Table(TABLE_Q.getID().getSQLRendering()), "A"));
 
         var ex = assertThrows(IllegalJoinException.class, () -> ops.joinOn(re1, re1_1,
-                attributes -> new ExpressionParser(idFactory, CORE_SINGLETONS)
-                        .parseBooleanExpression(onExpression, attributes)));
+                attributes -> ImmutableList.of(new ExpressionParser(idFactory, CORE_SINGLETONS)
+                        .parseBooleanExpression(onExpression, attributes))));
 
         assertEquals("Relation alias P occurs in both arguments of the JOIN", ex.getMessage());
     }
@@ -134,8 +134,8 @@ public class RelationalExpressionTest {
         onExpression.setRightExpression(new Column(new Table(TABLE_Q.getID().getSQLRendering()), "A"));
 
         RAExpression re = ops.joinOn(re1, re2,
-                attributes -> new ExpressionParser(idFactory, CORE_SINGLETONS)
-                        .parseBooleanExpression(onExpression, attributes));
+                attributes -> ImmutableList.of(new ExpressionParser(idFactory, CORE_SINGLETONS)
+                        .parseBooleanExpression(onExpression, attributes)));
 
         // This is used to simulate an ambiguity during the operation of natural join
         RAExpression re3 = ops.create(TABLE_R, ImmutableList.of(u, v));
@@ -178,8 +178,8 @@ public class RelationalExpressionTest {
         onExpression.setRightExpression(new Column(new Table(TABLE_Q.getID().getSQLRendering()), "A"));
 
         RAExpression relationalExpression = ops.joinOn(re1, re2,
-                attributes -> new ExpressionParser(idFactory, CORE_SINGLETONS)
-                        .parseBooleanExpression(onExpression, attributes));
+                attributes -> ImmutableList.of(new ExpressionParser(idFactory, CORE_SINGLETONS)
+                        .parseBooleanExpression(onExpression, attributes)));
 
         // This is used to simulate an ambiguity during the operation of natural join
         RAExpression re3 = ops.create(TABLE_R, ImmutableList.of(u, v));
