@@ -8,6 +8,7 @@ import it.unibz.inf.ontop.dbschema.QuotedID;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Map;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
@@ -23,18 +24,45 @@ public class RAExpressionAttributes  {
      * @param occurrences a map from {@link QuotedID} to a set of {@link RelationID}
      */
     public RAExpressionAttributes(ImmutableMap<QualifiedAttributeID, ImmutableTerm> attributes,
-                                  ImmutableMap<QuotedID, ImmutableSet<RelationID>> occurrences) {
+                                  ImmutableSet<QuotedID> attributeIds,
+                                  Function<QuotedID, ImmutableSet<RelationID>> relationIdsFunction) {
         this.attributes = attributes;
-        this.occurrences = occurrences;
+        this.occurrences = attributeIds.stream()
+                .collect(ImmutableCollectors.toMap(id -> id, relationIdsFunction));
     }
+
+    public static class DuplicateAttrbuteEntriesException extends Exception {
+        private final ImmutableSet<QuotedID> duplicates;
+
+        public DuplicateAttrbuteEntriesException(ImmutableSet<QuotedID> duplicates) {
+            this.duplicates = duplicates;
+        }
+
+        public ImmutableSet<QuotedID> getDuplicates() { return duplicates; }
+    }
+
+    public static RAExpressionAttributes of(ImmutableMultimap<QuotedID, ? extends ImmutableTerm> multimap) throws DuplicateAttrbuteEntriesException {
+
+        ImmutableSet<QuotedID> duplicateAttributeIds = multimap.asMap().entrySet().stream()
+                .filter(e -> e.getValue().size() > 1)
+                .map(Map.Entry::getKey)
+                .collect(ImmutableCollectors.toSet());
+
+        if (!duplicateAttributeIds.isEmpty())
+            throw new DuplicateAttrbuteEntriesException(duplicateAttributeIds);
+
+        return new RAExpressionAttributes(
+                multimap.entries().stream()
+                        .collect(ImmutableCollectors.toMap(e -> new QualifiedAttributeID(null, e.getKey()), Map.Entry::getValue)),
+                multimap.keySet(),
+                id -> ImmutableSet.of());
+    }
+
 
     public ImmutableMap<QualifiedAttributeID, ImmutableTerm> asMap() {
         return attributes;
     }
 
-    public ImmutableTerm get(QuotedID attributeId) {
-        return get(new QualifiedAttributeID(null, attributeId));
-    }
 
     public ImmutableTerm get(QualifiedAttributeID id) {
         return attributes.get(id);
@@ -67,20 +95,6 @@ public class RAExpressionAttributes  {
         return (occ != null) && occ.size() > 1;
     }
 
-    /**
-     * checks if occurrence of the non-qualified attribute is unique
-     *     (exactly one relation contains the attribute)
-     *
-     * @param attribute a  {@link QuotedID}
-     * @return true if the attribute is unique; otherwise false
-     */
-
-    public boolean isUnique(QuotedID attribute) {
-        ImmutableSet<RelationID> occ = occurrences.get(attribute);
-        return (occ != null) && occ.size() == 1;
-    }
-
-
 
     public ImmutableMap<QuotedID, ImmutableTerm> getUnqualifiedAttributes() {
         return selectAttributes(id -> id.getRelation() == null)
@@ -88,12 +102,12 @@ public class RAExpressionAttributes  {
     }
 
 
-    Stream<Map.Entry<QualifiedAttributeID, ImmutableTerm>> selectAttributes(Predicate<QualifiedAttributeID> condition) {
+    public Stream<Map.Entry<QualifiedAttributeID, ImmutableTerm>> selectAttributes(Predicate<QualifiedAttributeID> condition) {
         return attributes.entrySet().stream()
                 .filter(e -> condition.test(e.getKey()));
     }
 
-    public ImmutableSet<QuotedID> getAllAttributes() {
+    public ImmutableSet<QuotedID> getAllUnqualifiedAttributes() {
         return occurrences.keySet();
     }
 

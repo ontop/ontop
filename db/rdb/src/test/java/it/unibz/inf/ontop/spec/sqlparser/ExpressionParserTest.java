@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.spec.sqlparser;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import it.unibz.inf.ontop.dbschema.QualifiedAttributeID;
 import it.unibz.inf.ontop.dbschema.QuotedIDFactory;
@@ -1657,13 +1658,13 @@ public class ExpressionParserTest {
         Statement statement = CCJSqlParserUtil.parse(sql);
         SelectItem si = ((PlainSelect) ((Select) statement).getSelectBody()).getSelectItems().get(0);
         net.sf.jsqlparser.expression.Expression exp = ((SelectExpressionItem) si).getExpression();
-        return parser.parseTerm(exp, new RAExpressionAttributes(map, null));
+        return parser.parseTerm(exp, new RAExpressionAttributes(map, ImmutableSet.of(), id -> ImmutableSet.of()));
     }
 
     private ImmutableExpression parseBooleanExpression(String sql, ImmutableMap<QualifiedAttributeID, ImmutableTerm> map) throws JSQLParserException {
         ExpressionParser parser = new ExpressionParser(IDFAC, CORE_SINGLETONS);
         Statement statement = CCJSqlParserUtil.parse(sql);
         net.sf.jsqlparser.expression.Expression exp = ((PlainSelect) ((Select) statement).getSelectBody()).getWhere();
-        return parser.parseBooleanExpression(exp, new RAExpressionAttributes(map, null));
+        return parser.parseBooleanExpression(exp, new RAExpressionAttributes(map, ImmutableSet.of(), id -> ImmutableSet.of()));
     }
 }

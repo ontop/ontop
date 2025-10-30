@@ -235,25 +235,19 @@ public abstract class JsonBasicOrJoinLens extends JsonBasicOrJoinOrNestedLens {
 
         RawQuotedIDFactory idFactory = new RawQuotedIDFactory(quotedIdFactory);
 
-        ImmutableMap<QuotedID, Collection<Variable>> map = parentDefinitionMap.stream()
+        ImmutableMultimap<QuotedID, Variable> multimap = parentDefinitionMap.stream()
                 .flatMap(p -> p.attributeVariableMap.entrySet().stream()
                         .map(e -> Maps.immutableEntry(
                                 idFactory.createAttributeID(p.getPrefixedAttributeName(e.getKey())),
                                 e.getValue())))
-                .collect(ImmutableCollectors.toMultimap()).asMap();
+                .collect(ImmutableCollectors.toMultimap());
 
-        ImmutableSet<QuotedID> conflictingAttributeIds = map.entrySet().stream()
-                .filter(e -> e.getValue().size() > 1)
-                .map(Map.Entry::getKey)
-                .collect(ImmutableCollectors.toSet());
-
-        if (!conflictingAttributeIds.isEmpty())
-            throw new ConflictingVariableInJoinViewException(conflictingAttributeIds);
-
-        return new RAExpressionAttributes(map.entrySet().stream()
-                .collect(ImmutableCollectors.toMap(
-                        e -> new QualifiedAttributeID(null, e.getKey()),
-                        e -> e.getValue().iterator().next())), null);
+        try {
+            return RAExpressionAttributes.of(multimap);
+        }
+        catch (RAExpressionAttributes.DuplicateAttrbuteEntriesException e) {
+            throw new ConflictingVariableInJoinViewException(e.getDuplicates());
+        }
     }
 
     private ImmutableTerm extractExpression(AddColumns column,

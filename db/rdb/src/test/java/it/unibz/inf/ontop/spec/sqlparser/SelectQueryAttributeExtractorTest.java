@@ -21,8 +21,8 @@ public class SelectQueryAttributeExtractorTest {
         MetadataLookup metadataLookup = builder.build();
         QuotedIDFactory idfac = metadataLookup.getQuotedIDFactory();
         DefaultSelectQueryAttributeExtractor ae = new DefaultSelectQueryAttributeExtractor(metadataLookup, CORE_SINGLETONS);
-        RAExpressionAttributes r = ae.getRAExpressionAttributes(JSqlParserTools.parse("SELECT 1 AS A"));
-        assertEquals(ImmutableSet.of(idfac.createAttributeID("A")), r.getUnqualifiedAttributes().keySet());
+        ImmutableList<QuotedID> r = ae.getRAExpressionAttributes(JSqlParserTools.parse("SELECT 1 AS A"));
+        assertEquals(ImmutableList.of(idfac.createAttributeID("A")), r);
     }
 
     @Test // issue 184
@@ -32,8 +32,8 @@ public class SelectQueryAttributeExtractorTest {
         MetadataLookup metadataLookup = builder.build();
         QuotedIDFactory idfac = metadataLookup.getQuotedIDFactory();
         DefaultSelectQueryAttributeExtractor ae = new DefaultSelectQueryAttributeExtractor(metadataLookup, CORE_SINGLETONS);
-        RAExpressionAttributes r = ae.getRAExpressionAttributes(JSqlParserTools.parse("select STUDY_ID, patient_name(STUDY_ID) as label from demographics order by STUDY_ID limit 50"));
-        assertEquals(ImmutableSet.of(idfac.createAttributeID("study_id"), idfac.createAttributeID("label")), r.getUnqualifiedAttributes().keySet());
+        ImmutableList<QuotedID> r = ae.getRAExpressionAttributes(JSqlParserTools.parse("select STUDY_ID, patient_name(STUDY_ID) as label from demographics order by STUDY_ID limit 50"));
+        assertEquals(ImmutableList.of(idfac.createAttributeID("study_id"), idfac.createAttributeID("label")), r);
     }
 
     @Test

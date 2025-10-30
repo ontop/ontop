@@ -634,8 +634,7 @@ public abstract class AbstractDBMetadataProvider implements DBMetadataProvider {
         try {
             DefaultSelectQueryAttributeExtractor sqae = new DefaultSelectQueryAttributeExtractor(this, coreSingletons);
             Select select = JSqlParserTools.parse(query, !getQuotedIDFactory().supportsSquareBracketQuotation());
-            ImmutableMap<QuotedID, ImmutableTerm> attrs = sqae.getRAExpressionAttributes(select).getUnqualifiedAttributes();
-            attributes = ImmutableList.copyOf(attrs.keySet());
+            attributes = sqae.getRAExpressionAttributes(select);
         }
         catch (JSQLParserException e) {
             LOGGER.info("FAILED TO PARSE: {} {}", query, getJSQLParserErrorMessage(query, e));

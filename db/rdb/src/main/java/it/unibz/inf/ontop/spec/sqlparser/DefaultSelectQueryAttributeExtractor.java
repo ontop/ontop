@@ -1,5 +1,6 @@
 package it.unibz.inf.ontop.spec.sqlparser;
 
+import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.exception.InvalidQueryException;
 import it.unibz.inf.ontop.injection.CoreSingletons;
@@ -20,9 +21,9 @@ public class DefaultSelectQueryAttributeExtractor extends BasicSelectQueryParser
         super(metadata, coreSingletons, new RAExpressionAttributesOperations());
     }
 
-    public RAExpressionAttributes getRAExpressionAttributes(Select select) throws InvalidQueryException, UnsupportedSelectQueryException {
+    public ImmutableList<QuotedID> getRAExpressionAttributes(Select select) throws InvalidQueryException, UnsupportedSelectQueryException {
         try {
-            return translateSelect(select.getSelectBody(), select.getWithItemsList());
+            return ImmutableList.copyOf(translateSelect(select.getSelectBody(), select.getWithItemsList()).getUnqualifiedAttributes().keySet());
         }
         catch (InvalidSelectQueryRuntimeException e) {
             throw new InvalidQueryException(e.getMessage(), e.getObject());

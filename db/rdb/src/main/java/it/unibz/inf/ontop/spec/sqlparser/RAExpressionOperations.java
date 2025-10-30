@@ -3,10 +3,7 @@ package it.unibz.inf.ontop.spec.sqlparser;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import it.unibz.inf.ontop.dbschema.NamedRelationDefinition;
-import it.unibz.inf.ontop.dbschema.QuotedID;
-import it.unibz.inf.ontop.dbschema.RelationDefinition;
-import it.unibz.inf.ontop.dbschema.RelationID;
+import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
@@ -42,10 +39,11 @@ public class RAExpressionOperations implements RAOperations<RAExpression> {
                 aops.create(relation, variables));
     }
 
+    @Override
     public RAExpression createWithoutName(RelationDefinition relation, ImmutableList<Variable> variables) {
         return new RAExpression(
                 createExtensionalDataNode(relation, variables),
-                aops.create(aops.getAttributesMap(relation, variables)));
+                aops.createWithoutName(relation, variables));
     }
 
     private ExtensionalDataNode createExtensionalDataNode(RelationDefinition relation, ImmutableList<Variable> variables) {
@@ -114,6 +112,7 @@ public class RAExpressionOperations implements RAOperations<RAExpression> {
                                                                ImmutableSet<QuotedID> using) {
 
         return using.stream()
+                .map(id -> new QualifiedAttributeID(null, id))
                 .map(id -> termFactory.getNotYetTypedEquality(re1.get(id), re2.get(id)))
                 .reduce(termFactory::getConjunction);
     }
