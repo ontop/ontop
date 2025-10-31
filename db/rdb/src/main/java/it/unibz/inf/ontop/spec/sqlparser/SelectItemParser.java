@@ -1,6 +1,5 @@
 package it.unibz.inf.ontop.spec.sqlparser;
 
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Maps;
 import it.unibz.inf.ontop.dbschema.QuotedID;
@@ -61,7 +60,7 @@ public class SelectItemParser {
 
         @Override
         public void visit(AllColumns allColumns) {
-            stream =  attributes.selectAttributes(a -> !a.isQualified())
+            stream =  attributes.getAttributesMapSelection(a -> !a.isQualified())
                     .map(e -> Maps.immutableEntry(e.getKey().getAttribute(), e.getValue()));
         }
 
@@ -70,7 +69,7 @@ public class SelectItemParser {
             Table table = allTableColumns.getTable();
             RelationID id = JSqlParserTools.getRelationId(idfac, table);
 
-            stream = attributes.selectAttributes(a -> a.isQualified() && a.getRelation().equals(id))
+            stream = attributes.getAttributesMapSelection(a -> a.isQualified() && a.getRelation().equals(id))
                     .map(e -> Maps.immutableEntry(e.getKey().getAttribute(), e.getValue()));
         }
 

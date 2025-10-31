@@ -38,7 +38,7 @@ public class RAExpressionAttributesOperations implements RAOperations<RAExpressi
 
     @Override
     public RAExpressionAttributes withAlias(RAExpressionAttributes rae, RelationID aliasId) {
-        return create(rae.getUnqualifiedAttributes(), ImmutableSet.of(aliasId), rae.getAllUnqualifiedAttributes(), Optional.of(aliasId));
+        return create(rae.getUnqualifiedAttributesMap(), ImmutableSet.of(aliasId), rae.getAllUnqualifiedAttributes(), Optional.of(aliasId));
     }
 
     private ImmutableMap<QuotedID, ImmutableTerm> getRelationAttributeMap(RelationDefinition relation, ImmutableList<Variable> variables) {
@@ -77,8 +77,8 @@ public class RAExpressionAttributesOperations implements RAOperations<RAExpressi
         checkRelationAliasesConsistency(left, right);
 
         ImmutableMap<QualifiedAttributeID, ImmutableTerm> attributes = Stream.concat(
-                        left.selectAttributes(id -> id.isQualified() || right.isAbsent(id.getAttribute())),
-                        right.selectAttributes(id -> id.isQualified() || left.isAbsent(id.getAttribute())))
+                        left.getAttributesMapSelection(id -> id.isQualified() || right.isAbsent(id.getAttribute())),
+                        right.getAttributesMapSelection(id -> id.isQualified() || left.isAbsent(id.getAttribute())))
                 .collect(ImmutableCollectors.toMap());
 
         return new RAExpressionAttributes(
@@ -105,25 +105,25 @@ public class RAExpressionAttributesOperations implements RAOperations<RAExpressi
     public RAExpressionAttributes joinUsing(RAExpressionAttributes left, RAExpressionAttributes right, ImmutableSet<QuotedID> using) throws IllegalJoinException {
         checkRelationAliasesConsistency(left, right);
 
-        ImmutableList<QuotedID> notFound = using.stream()
+        ImmutableList<QuotedID> absent = using.stream()
                 .filter(id -> left.isAbsent(id) || right.isAbsent(id))
                 .collect(ImmutableCollectors.toList());
 
         ImmutableList<QuotedID> ambiguous = using.stream()
                 .filter(id -> left.isAmbiguous(id) || right.isAmbiguous(id))
                 .collect(ImmutableCollectors.toList());
-        
-        if (!notFound.isEmpty() || !ambiguous.isEmpty()) {
-            throw new IllegalJoinException(left, right, notFound, ambiguous);
+
+        if (!absent.isEmpty() || !ambiguous.isEmpty()) {
+            throw new IllegalJoinException(left, right, absent, ambiguous);
         }
 
         ImmutableMap<QualifiedAttributeID, ImmutableTerm> attributes = Stream.concat(
-                        left.selectAttributes(id ->
+                        left.getAttributesMapSelection(id ->
                                 (id.isQualified() && !using.contains(id.getAttribute()))
                                         || (!id.isQualified() && right.isAbsent(id.getAttribute()))
                                         || (!id.isQualified() && using.contains(id.getAttribute()))),
 
-                        right.selectAttributes(id ->
+                        right.getAttributesMapSelection(id ->
                                 (id.isQualified() && !using.contains(id.getAttribute()))
                                         || (!id.isQualified() && left.isAbsent(id.getAttribute()))))
 
@@ -173,7 +173,7 @@ public class RAExpressionAttributesOperations implements RAOperations<RAExpressi
     }
 
     private ImmutableSet<RelationID> getRelationAliases(RAExpressionAttributes rae) {
-        return rae.selectAttributes(QualifiedAttributeID::isQualified)
+        return rae.getAttributesMapSelection(QualifiedAttributeID::isQualified)
                 .map(Map.Entry::getKey)
                 .map(QualifiedAttributeID::getRelation)
                 .distinct()

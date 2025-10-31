@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.spec.sqlparser;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.dbschema.impl.DatabaseTableDefinition;
 import it.unibz.inf.ontop.dbschema.impl.OfflineMetadataProviderBuilder;
@@ -9,8 +10,10 @@ import it.unibz.inf.ontop.exception.InvalidQueryException;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
+import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.spec.sqlparser.exception.UnsupportedSelectQueryException;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import net.sf.jsqlparser.JSQLParserException;
 import org.junit.jupiter.api.Test;
 
@@ -76,6 +79,11 @@ public class SelectQueryParserTest {
         return parser.parse(sql);
     }
 
+    private RAExpressionAttributes getSelectAttributes(ImmutableMap<String, ImmutableTerm> map) {
+        return new RAExpressionAttributes(map.entrySet().stream()
+                .collect(ImmutableCollectors.toMap(e -> new QualifiedAttributeID(null, idfac.createAttributeID(e.getKey())), e -> e.getValue())),
+                map.keySet().stream().map(id -> idfac.createAttributeID(id)).collect(ImmutableCollectors.toSet()), id -> ImmutableSet.of());
+    }
 
     @Test
     public void inner_join_on_same_table_test() throws Exception {
@@ -132,7 +140,7 @@ public class SelectQueryParserTest {
     public void select_one_no_from() throws Exception {
         RAExpression re = parse("SELECT 1");
 
-        assertEquals(ImmutableMap.of(), re.getAttributes().asMap());
+        assertEquals(getSelectAttributes(ImmutableMap.of()), re.getAttributes());
         assertEquals(IQ_FACTORY.createTrueNode(), re.getIQTree());
     }
 
@@ -140,7 +148,7 @@ public class SelectQueryParserTest {
     public void select_one_no_from_alias() throws Exception {
         RAExpression re = parse("SELECT 1 AS A");
 
-        assertEquals(ImmutableMap.of(new QualifiedAttributeID(null, idfac.createAttributeID("A")), TERM_FACTORY.getDBConstant("1", integerDBType)), re.getAttributes().asMap());
+        assertEquals(getSelectAttributes(ImmutableMap.of("A", TERM_FACTORY.getDBConstant("1", integerDBType))), re.getAttributes());
         assertEquals(IQ_FACTORY.createTrueNode(), re.getIQTree());
     }
 
@@ -148,7 +156,7 @@ public class SelectQueryParserTest {
     public void select_one_from() throws Exception {
         RAExpression re = parse("SELECT 1 FROM Q");
 
-        assertEquals(ImmutableMap.of(), re.getAttributes().asMap());
+        assertEquals(getSelectAttributes(ImmutableMap.of()), re.getAttributes());
         assertEquals(dataAtomOf(TABLE_Q, A1, C1), re.getIQTree());
     }
 
@@ -156,7 +164,7 @@ public class SelectQueryParserTest {
     public void select_one_from_alias() throws Exception {
         RAExpression re = parse("SELECT 1 AS A FROM Q");
 
-        assertEquals(ImmutableMap.of(new QualifiedAttributeID(null, idfac.createAttributeID("A")), TERM_FACTORY.getDBConstant("1", integerDBType)), re.getAttributes().asMap());
+        assertEquals(getSelectAttributes(ImmutableMap.of("A", TERM_FACTORY.getDBConstant("1", integerDBType))), re.getAttributes());
         assertEquals(dataAtomOf(TABLE_Q, A1, C1), re.getIQTree());
     }
 

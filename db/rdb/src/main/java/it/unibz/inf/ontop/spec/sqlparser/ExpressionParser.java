@@ -493,7 +493,7 @@ public class ExpressionParser {
                 else
                     throw new InvalidSelectQueryRuntimeException("Unable to find attribute "
                             + expression
-                            + " (available attributes are " + attributes.asMap().keySet() + ")", expression);
+                            + " (available attributes are " + attributes.getAttributes() + ")", expression);
             }
             else {
                 // if it is an attribute name (qualified or not)

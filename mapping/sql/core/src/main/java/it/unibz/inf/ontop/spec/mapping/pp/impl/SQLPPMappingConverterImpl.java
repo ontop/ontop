@@ -68,7 +68,7 @@ public class SQLPPMappingConverterImpl implements SQLPPMappingConverter {
                 RAExpression re = getRAExpression(assertion, metadataLookup);
                 tree = re.getIQTree();
 
-                lookup = placeholderLookup(assertion, metadataLookup.getQuotedIDFactory(), re.getUnqualifiedAttributes());
+                lookup = placeholderLookup(assertion, metadataLookup.getQuotedIDFactory(), re.getUnqualifiedAttributesMap());
             }
             /*
              * NB: runtime exceptions are also caught due to some JDBC drivers throwing them instead of SQLException-s

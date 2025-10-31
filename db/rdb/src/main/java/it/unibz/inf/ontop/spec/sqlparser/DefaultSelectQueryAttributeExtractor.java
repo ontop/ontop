@@ -5,6 +5,7 @@ import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.exception.InvalidQueryException;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.spec.sqlparser.exception.*;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.statement.select.*;
 
@@ -23,7 +24,11 @@ public class DefaultSelectQueryAttributeExtractor extends BasicSelectQueryParser
 
     public ImmutableList<QuotedID> getRAExpressionAttributes(Select select) throws InvalidQueryException, UnsupportedSelectQueryException {
         try {
-            return ImmutableList.copyOf(translateSelect(select.getSelectBody(), select.getWithItemsList()).getUnqualifiedAttributes().keySet());
+            RAExpressionAttributes attributes = translateSelect(select.getSelectBody(), select.getWithItemsList());
+            return attributes.getAttributes().stream()
+                    .filter(a -> !a.isQualified())
+                    .map(QualifiedAttributeID::getAttribute)
+                    .collect(ImmutableCollectors.toList());
         }
         catch (InvalidSelectQueryRuntimeException e) {
             throw new InvalidQueryException(e.getMessage(), e.getObject());

@@ -26,8 +26,8 @@ public class RAExpression {
 
     public RAExpressionAttributes getAttributes() { return attributes; }
 
-    public ImmutableMap<QuotedID, ImmutableTerm> getUnqualifiedAttributes() {
-        return attributes.getUnqualifiedAttributes();
+    public ImmutableMap<QuotedID, ImmutableTerm> getUnqualifiedAttributesMap() {
+        return attributes.getUnqualifiedAttributesMap();
     }
 
 

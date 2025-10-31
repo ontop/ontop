@@ -21,7 +21,6 @@ public class RAExpressionAttributes  {
      * constructs a relation expression
      *
      * @param attributes  a map from {@link QualifiedAttributeID},to {@link ImmutableTerm}
-     * @param occurrences a map from {@link QuotedID} to a set of {@link RelationID}
      */
     public RAExpressionAttributes(ImmutableMap<QualifiedAttributeID, ImmutableTerm> attributes,
                                   ImmutableSet<QuotedID> attributeIds,
@@ -59,10 +58,9 @@ public class RAExpressionAttributes  {
     }
 
 
-    public ImmutableMap<QualifiedAttributeID, ImmutableTerm> asMap() {
-        return attributes;
+    public ImmutableSet<QualifiedAttributeID> getAttributes() {
+        return attributes.keySet();
     }
-
 
     public ImmutableTerm get(QualifiedAttributeID id) {
         return attributes.get(id);
@@ -96,13 +94,13 @@ public class RAExpressionAttributes  {
     }
 
 
-    public ImmutableMap<QuotedID, ImmutableTerm> getUnqualifiedAttributes() {
-        return selectAttributes(id -> id.getRelation() == null)
+    public ImmutableMap<QuotedID, ImmutableTerm> getUnqualifiedAttributesMap() {
+        return getAttributesMapSelection(id -> id.getRelation() == null)
                 .collect(ImmutableCollectors.toMap(e -> e.getKey().getAttribute(), Map.Entry::getValue));
     }
 
 
-    public Stream<Map.Entry<QualifiedAttributeID, ImmutableTerm>> selectAttributes(Predicate<QualifiedAttributeID> condition) {
+    public Stream<Map.Entry<QualifiedAttributeID, ImmutableTerm>> getAttributesMapSelection(Predicate<QualifiedAttributeID> condition) {
         return attributes.entrySet().stream()
                 .filter(e -> condition.test(e.getKey()));
     }
@@ -119,5 +117,14 @@ public class RAExpressionAttributes  {
     @Override
     public String toString() {
         return "attributes: " + attributes + " with " + occurrences;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof RAExpressionAttributes) {
+            RAExpressionAttributes other = (RAExpressionAttributes) obj;
+            return other.attributes.equals(this.attributes) && other.occurrences.equals(this.occurrences);
+        }
+        return false;
     }
 }
