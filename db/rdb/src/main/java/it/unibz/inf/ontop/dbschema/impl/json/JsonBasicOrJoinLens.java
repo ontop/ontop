@@ -21,6 +21,7 @@ import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.spec.sqlparser.ExpressionParser;
 import it.unibz.inf.ontop.spec.sqlparser.JSqlParserTools;
 import it.unibz.inf.ontop.spec.sqlparser.RAExpressionAttributes;
+import it.unibz.inf.ontop.spec.sqlparser.exception.UnsupportedSelectQueryException;
 import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -257,12 +258,7 @@ public abstract class JsonBasicOrJoinLens extends JsonBasicOrJoinOrNestedLens {
 
         try {
             ExpressionParser parser = new ExpressionParser(quotedIdFactory, coreSingletons);
-            net.sf.jsqlparser.expression.Expression exp;
-            String sqlQuery = "SELECT " + column.expression + " FROM fakeTable";
-            Select statement = JSqlParserTools.parse(sqlQuery, !quotedIdFactory.supportsSquareBracketQuotation());
-            SelectItem si = ((PlainSelect) statement.getSelectBody()).getSelectItems().get(0);
-            exp = ((SelectExpressionItem) si).getExpression();
-            return parser.parseTerm(exp, parentAttributeMap);
+            return parser.parseTerm(column.expression, parentAttributeMap);
         }
         catch (Exception e) {
             throw new MetadataExtractionException("Unsupported expression for " + column.name + " in " + name + ":\n" + e, e);
@@ -276,14 +272,10 @@ public abstract class JsonBasicOrJoinLens extends JsonBasicOrJoinOrNestedLens {
             return Optional.empty();
 
         try {
-            String sqlQuery = "SELECT * FROM fakeTable WHERE " + filterExpression;
             ExpressionParser parser = new ExpressionParser(quotedIdFactory, coreSingletons);
-            Select statement = JSqlParserTools.parse(sqlQuery, !quotedIdFactory.supportsSquareBracketQuotation());
-            PlainSelect plainSelect = (PlainSelect) statement.getSelectBody();
-            return Optional.ofNullable(plainSelect.getWhere())
-                    .map(where -> parser.parseBooleanExpression(where, parentAttributeMap));
+            return Optional.of(parser.parseBooleanExpression(filterExpression, parentAttributeMap));
         }
-        catch (InvalidQueryException | JSQLParserException e) {
+        catch (InvalidQueryException | UnsupportedSelectQueryException e) {
             throw new MetadataExtractionException("Unsupported filter expression for " + ":\n" + e);
         }
     }

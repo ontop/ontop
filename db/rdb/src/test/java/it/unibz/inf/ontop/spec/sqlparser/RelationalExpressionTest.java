@@ -8,9 +8,6 @@ import it.unibz.inf.ontop.dbschema.impl.OfflineMetadataProviderBuilder;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.spec.sqlparser.exception.IllegalJoinException;
-import net.sf.jsqlparser.expression.operators.relational.EqualsTo;
-import net.sf.jsqlparser.schema.Column;
-import net.sf.jsqlparser.schema.Table;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -98,13 +95,7 @@ public class RelationalExpressionTest {
     public void join_on_test() throws IllegalJoinException {
         ImmutableExpression eq = TERM_FACTORY.getNotYetTypedEquality(x, u);
 
-        EqualsTo onExpression = new EqualsTo();
-        onExpression.setLeftExpression(new Column(new Table(TABLE_P.getID().getSQLRendering()), "A"));
-        onExpression.setRightExpression(new Column(new Table(TABLE_Q.getID().getSQLRendering()), "A"));
-
-        RAExpression relationalExpression = ops.joinOn(re1, re2,
-                attributes -> Optional.of(new ExpressionParser(idFactory, CORE_SINGLETONS)
-                        .parseBooleanExpression(onExpression,  attributes)));
+        RAExpression relationalExpression = ops.joinOn(re1, re2, a -> Optional.of(eq));
 
         assertEquals(IQ_FACTORY.createUnaryIQTree(IQ_FACTORY.createFilterNode(eq),
                 IQ_FACTORY.createNaryIQTree(IQ_FACTORY.createInnerJoinNode(),
@@ -131,13 +122,8 @@ public class RelationalExpressionTest {
     public void join_on_exception_test() throws IllegalJoinException {
         RAExpression re1_1 = ops.withAlias(re2, idFactory.createRelationID("P"));
 
-        EqualsTo onExpression = new EqualsTo();
-        onExpression.setLeftExpression(new Column(new Table(TABLE_P.getID().getSQLRendering()), "A"));
-        onExpression.setRightExpression(new Column(new Table(TABLE_Q.getID().getSQLRendering()), "A"));
-
         var ex = assertThrows(IllegalJoinException.class, () -> ops.joinOn(re1, re1_1,
-                attributes -> Optional.of(new ExpressionParser(idFactory, CORE_SINGLETONS)
-                        .parseBooleanExpression(onExpression, attributes))));
+                a -> Optional.of(TERM_FACTORY.getNotYetTypedEquality(x, u))));
 
         assertEquals("Relation alias P occurs in both arguments of the JOIN", ex.getMessage());
     }
@@ -174,13 +160,7 @@ public class RelationalExpressionTest {
 
     @Test
     public void natural_join_ambiguity_test() throws IllegalJoinException {
-        EqualsTo onExpression = new EqualsTo();
-        onExpression.setLeftExpression(new Column(new Table(TABLE_P.getID().getSQLRendering()), "A"));
-        onExpression.setRightExpression(new Column(new Table(TABLE_Q.getID().getSQLRendering()), "A"));
-
-        RAExpression re = ops.joinOn(re1, re2,
-                attributes -> Optional.of(new ExpressionParser(idFactory, CORE_SINGLETONS)
-                        .parseBooleanExpression(onExpression, attributes)));
+        RAExpression re = ops.joinOn(re1, re2,a -> Optional.of(TERM_FACTORY.getNotYetTypedEquality(x, u)));
 
         // This is used to simulate an ambiguity during the operation of natural join
         RAExpression re3 = ops.create(TABLE_R, ImmutableList.of(u, v));
@@ -230,13 +210,8 @@ public class RelationalExpressionTest {
 
     @Test
     public void join_using_ambiguity_test() throws IllegalJoinException {
-        EqualsTo onExpression = new EqualsTo();
-        onExpression.setLeftExpression(new Column(new Table(TABLE_P.getID().getSQLRendering()), "A"));
-        onExpression.setRightExpression(new Column(new Table(TABLE_Q.getID().getSQLRendering()), "A"));
-
         RAExpression relationalExpression = ops.joinOn(re1, re2,
-                attributes -> Optional.of(new ExpressionParser(idFactory, CORE_SINGLETONS)
-                        .parseBooleanExpression(onExpression, attributes)));
+                a -> Optional.of(TERM_FACTORY.getNotYetTypedEquality(x, u)));
 
         // This is used to simulate an ambiguity during the operation of natural join
         RAExpression re3 = ops.create(TABLE_R, ImmutableList.of(u, v));

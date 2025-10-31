@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.spec.sqlparser;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
+import it.unibz.inf.ontop.exception.InvalidQueryException;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.*;
@@ -11,10 +12,11 @@ import it.unibz.inf.ontop.dbschema.QuotedID;
 import it.unibz.inf.ontop.dbschema.QuotedIDFactory;
 import it.unibz.inf.ontop.dbschema.RelationID;
 import it.unibz.inf.ontop.model.type.DBTypeFactory;
-import it.unibz.inf.ontop.model.type.TermTypeInference;
 import it.unibz.inf.ontop.spec.sqlparser.exception.InvalidSelectQueryRuntimeException;
+import it.unibz.inf.ontop.spec.sqlparser.exception.UnsupportedSelectQueryException;
 import it.unibz.inf.ontop.spec.sqlparser.exception.UnsupportedSelectQueryRuntimeException;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
+import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.expression.*;
 import net.sf.jsqlparser.expression.operators.arithmetic.*;
 import net.sf.jsqlparser.expression.operators.conditional.AndExpression;
@@ -24,9 +26,7 @@ import net.sf.jsqlparser.expression.operators.relational.*;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.create.table.ColDataType;
-import net.sf.jsqlparser.statement.select.AllColumns;
-import net.sf.jsqlparser.statement.select.AllTableColumns;
-import net.sf.jsqlparser.statement.select.SubSelect;
+import net.sf.jsqlparser.statement.select.*;
 
 import java.util.*;
 import java.util.function.BiFunction;
@@ -59,6 +59,30 @@ public class ExpressionParser {
         return visitor.getExpression(expression);
     }
 
+
+    public ImmutableTerm parseTerm(String expression, RAExpressionAttributes attributes) throws InvalidQueryException, UnsupportedSelectQueryException {
+        return parseTerm(parseJSqlExpression(expression), attributes);
+    }
+
+    public ImmutableExpression parseBooleanExpression(String expression, RAExpressionAttributes attributes) throws InvalidQueryException, UnsupportedSelectQueryException {
+        return parseBooleanExpression(parseJSqlExpression(expression), attributes);
+    }
+
+
+    private Expression parseJSqlExpression(String expression) throws InvalidQueryException, UnsupportedSelectQueryException {
+        try {
+            String sqlQuery = "SELECT " + expression + " FROM fakeTable";
+            Select statement = JSqlParserTools.parse(sqlQuery, !idfac.supportsSquareBracketQuotation());
+            SelectItem si = ((PlainSelect) statement.getSelectBody()).getSelectItems().get(0);
+            return ((SelectExpressionItem) si).getExpression();
+        }
+        catch (JSQLParserException | InvalidSelectQueryRuntimeException e) {
+            throw new InvalidQueryException(e.getMessage());
+        }
+        catch (UnsupportedSelectQueryRuntimeException e) {
+            throw new UnsupportedSelectQueryException(e.getMessage(), expression);
+        }
+    }
 
 
 

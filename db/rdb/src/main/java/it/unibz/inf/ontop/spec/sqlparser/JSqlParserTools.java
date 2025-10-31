@@ -17,18 +17,12 @@ import java.util.List;
 
 public class JSqlParserTools {
 
-
-
     public static Select parse(String sql, boolean withSquareBracketArrayAccess) throws JSQLParserException, InvalidQueryException {
         Statement statement = CCJSqlParserUtil.parse(sql, parser -> parser.withSquareBracketQuotation(!withSquareBracketArrayAccess));
         if (!(statement instanceof Select))
             throw new InvalidQueryException("The query is not a SELECT statement", statement);
 
         return (Select) statement;
-    }
-
-    public static Select parse(String sql) throws JSQLParserException, InvalidQueryException {
-        return parse(sql, false);
     }
 
     private static Field partsField;

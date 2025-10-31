@@ -12,10 +12,6 @@ import net.sf.jsqlparser.statement.select.*;
 import java.util.List;
 import java.util.Optional;
 
-/**
- * Created by Roman Kontchakov on 01/11/2016.
- *
- */
 public class SelectQueryParser extends BasicSelectQueryParser<RAExpression, RAExpressionOperations> {
 
     public SelectQueryParser(MetadataLookup metadata, CoreSingletons coreSingletons) {
@@ -24,7 +20,7 @@ public class SelectQueryParser extends BasicSelectQueryParser<RAExpression, RAEx
 
     public RAExpression parse(String sql) throws JSQLParserException, InvalidQueryException, UnsupportedSelectQueryException {
         try {
-            Select select = JSqlParserTools.parse(sql);
+            Select select = JSqlParserTools.parse(sql, !idfac.supportsSquareBracketQuotation());
             return translateSelect(select.getSelectBody(), select.getWithItemsList());
         }
         catch (InvalidSelectQueryRuntimeException e) {

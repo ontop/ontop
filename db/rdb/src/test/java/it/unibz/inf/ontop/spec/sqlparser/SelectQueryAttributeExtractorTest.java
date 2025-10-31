@@ -21,7 +21,7 @@ public class SelectQueryAttributeExtractorTest {
         MetadataLookup metadataLookup = builder.build();
         QuotedIDFactory idfac = metadataLookup.getQuotedIDFactory();
         DefaultSelectQueryAttributeExtractor ae = new DefaultSelectQueryAttributeExtractor(metadataLookup, CORE_SINGLETONS);
-        ImmutableList<QuotedID> r = ae.getRAExpressionAttributes(JSqlParserTools.parse("SELECT 1 AS A"));
+        ImmutableList<QuotedID> r = ae.getRAExpressionAttributes(JSqlParserTools.parse("SELECT 1 AS A", false));
         assertEquals(ImmutableList.of(idfac.createAttributeID("A")), r);
     }
 
@@ -32,7 +32,7 @@ public class SelectQueryAttributeExtractorTest {
         MetadataLookup metadataLookup = builder.build();
         QuotedIDFactory idfac = metadataLookup.getQuotedIDFactory();
         DefaultSelectQueryAttributeExtractor ae = new DefaultSelectQueryAttributeExtractor(metadataLookup, CORE_SINGLETONS);
-        ImmutableList<QuotedID> r = ae.getRAExpressionAttributes(JSqlParserTools.parse("select STUDY_ID, patient_name(STUDY_ID) as label from demographics order by STUDY_ID limit 50"));
+        ImmutableList<QuotedID> r = ae.getRAExpressionAttributes(JSqlParserTools.parse("select STUDY_ID, patient_name(STUDY_ID) as label from demographics order by STUDY_ID limit 50", false));
         assertEquals(ImmutableList.of(idfac.createAttributeID("study_id"), idfac.createAttributeID("label")), r);
     }
 
@@ -123,7 +123,7 @@ public class SelectQueryAttributeExtractorTest {
                 "union\n" +
                 "select abomSerialNumberMale as rotorID from AssemblyData\n" +
                 "union\n" +
-                "select abomSerialNumberFemale as rotorID from AssemblyData) as R")));
+                "select abomSerialNumberFemale as rotorID from AssemblyData) as R", false)));
 
         assertEquals("Complex SELECT statements are not supported SELECT zpolrotorid AS rotorID FROM LinkData" +
                 " UNION SELECT abomSerialNumberMale AS rotorID FROM AssemblyData UNION SELECT abomSerialNumberFemale AS rotorID FROM AssemblyData", ex.getMessage());
