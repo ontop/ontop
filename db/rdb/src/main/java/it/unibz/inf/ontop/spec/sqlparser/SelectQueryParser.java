@@ -5,7 +5,6 @@ import it.unibz.inf.ontop.exception.InvalidQueryException;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.spec.sqlparser.exception.*;
-import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.select.*;
 
@@ -18,17 +17,8 @@ public class SelectQueryParser extends BasicSelectQueryParser<RAExpression, RAEx
         super(metadata, coreSingletons, new RAExpressionOperations(coreSingletons.getTermFactory(), coreSingletons.getIQFactory()));
     }
 
-    public RAExpression parse(String sql) throws JSQLParserException, InvalidQueryException, UnsupportedSelectQueryException {
-        try {
-            Select select = JSqlParserTools.parse(sql, !idfac.supportsSquareBracketQuotation());
-            return translateSelect(select.getSelectBody(), select.getWithItemsList());
-        }
-        catch (InvalidSelectQueryRuntimeException e) {
-            throw new InvalidQueryException(e.getMessage(), e.getObject());
-        }
-        catch (UnsupportedSelectQueryRuntimeException e) {
-            throw new UnsupportedSelectQueryException(e.getMessage(), e.getObject());
-        }
+    public RAExpression parse(String sql) throws QueryParseException, InvalidQueryException, UnsupportedSelectQueryException {
+        return parseJSqlSelectQuery(sql);
     }
 
 

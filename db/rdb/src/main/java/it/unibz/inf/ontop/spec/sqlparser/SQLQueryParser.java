@@ -6,8 +6,8 @@ import it.unibz.inf.ontop.dbschema.RelationDefinition;
 import it.unibz.inf.ontop.exception.InvalidQueryException;
 import it.unibz.inf.ontop.exception.MetadataExtractionException;
 import it.unibz.inf.ontop.injection.CoreSingletons;
+import it.unibz.inf.ontop.spec.sqlparser.exception.QueryParseException;
 import it.unibz.inf.ontop.spec.sqlparser.exception.UnsupportedSelectQueryException;
-import net.sf.jsqlparser.JSQLParserException;
 
 /**
  * High-level SQL query parser
@@ -26,7 +26,7 @@ public class SQLQueryParser {
         try {
             return sqp.parse(sourceQuery);
         }
-        catch (UnsupportedSelectQueryException | JSQLParserException e) {
+        catch (UnsupportedSelectQueryException | QueryParseException e) {
             RelationDefinition view = metadataLookup.getBlackBoxView(sourceQuery);
             return sqp.translateParserView(view);
         }

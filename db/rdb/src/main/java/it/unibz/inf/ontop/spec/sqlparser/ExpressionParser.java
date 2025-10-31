@@ -13,10 +13,10 @@ import it.unibz.inf.ontop.dbschema.QuotedIDFactory;
 import it.unibz.inf.ontop.dbschema.RelationID;
 import it.unibz.inf.ontop.model.type.DBTypeFactory;
 import it.unibz.inf.ontop.spec.sqlparser.exception.InvalidSelectQueryRuntimeException;
+import it.unibz.inf.ontop.spec.sqlparser.exception.QueryParseException;
 import it.unibz.inf.ontop.spec.sqlparser.exception.UnsupportedSelectQueryException;
 import it.unibz.inf.ontop.spec.sqlparser.exception.UnsupportedSelectQueryRuntimeException;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
-import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.expression.*;
 import net.sf.jsqlparser.expression.operators.arithmetic.*;
 import net.sf.jsqlparser.expression.operators.conditional.AndExpression;
@@ -71,12 +71,12 @@ public class ExpressionParser {
 
     private Expression parseJSqlExpression(String expression) throws InvalidQueryException, UnsupportedSelectQueryException {
         try {
-            String sqlQuery = "SELECT " + expression + " FROM fakeTable";
+            String sqlQuery = "SELECT \n" + expression + "\n FROM fakeTable";
             Select statement = JSqlParserTools.parse(sqlQuery, !idfac.supportsSquareBracketQuotation());
             SelectItem si = ((PlainSelect) statement.getSelectBody()).getSelectItems().get(0);
             return ((SelectExpressionItem) si).getExpression();
         }
-        catch (JSQLParserException | InvalidSelectQueryRuntimeException e) {
+        catch (QueryParseException | InvalidSelectQueryRuntimeException e) {
             throw new InvalidQueryException(e.getMessage());
         }
         catch (UnsupportedSelectQueryRuntimeException e) {

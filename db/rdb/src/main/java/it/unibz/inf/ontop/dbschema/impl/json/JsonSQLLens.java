@@ -109,14 +109,11 @@ public class JsonSQLLens extends JsonLens {
         AtomFactory atomFactory = coreSingletons.getAtomFactory();
         ConstructionSubstitutionNormalizer substitutionNormalizer = coreSingletons.getConstructionSubstitutionNormalizer();
         SubstitutionFactory substitutionFactory = coreSingletons.getSubstitutionFactory();
-        IQTreeTools iqTreeTools = coreSingletons.getIQTreeTools();
+        SQLQueryParser sq = new SQLQueryParser(coreSingletons);
 
-        IQTree initialChild;
         RAExpression raExpression;
         try {
-            SQLQueryParser sq = new SQLQueryParser(coreSingletons);
             raExpression = sq.getRAExpression(query, parentCacheMetadataLookup);
-            initialChild = raExpression.getIQTree();
         }
         catch (InvalidQueryException e) {
             throw new MetadataExtractionException("Unsupported expression for " + ":\n" + e);
@@ -127,7 +124,7 @@ public class JsonSQLLens extends JsonLens {
                         e -> termFactory.getVariable(e.getKey().getName()),
                         Map.Entry::getValue));
 
-        IQTree iqTree = substitutionNormalizer.createNormalizedConstructionTree(ascendingSubstitution, ascendingSubstitution.getDomain(), initialChild);
+        IQTree iqTree = substitutionNormalizer.createNormalizedConstructionTree(ascendingSubstitution, ascendingSubstitution.getDomain(), raExpression.getIQTree());
 
         NotYetTypedEqualityTransformer notYetTypedEqualityTransformer = coreSingletons.getNotYetTypedEqualityTransformer();
         IQTree transformedTree = notYetTypedEqualityTransformer.transform(iqTree);

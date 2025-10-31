@@ -53,7 +53,7 @@ public class SQLPPMappingConverterImpl implements SQLPPMappingConverter {
         this.substitutionFactory = coreSingletons.getSubstitutionFactory();
         this.sqlQueryParser = sqlQueryParser;
 
-        ignoreInvalidMappingEntries = ((OntopOBDASettings)coreSingletons.getSettings()).ignoreInvalidMappingEntries();
+        this.ignoreInvalidMappingEntries = ((OntopOBDASettings)coreSingletons.getSettings()).ignoreInvalidMappingEntries();
     }
 
     @Override

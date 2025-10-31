@@ -12,9 +12,9 @@ import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.type.DBTermType;
+import it.unibz.inf.ontop.spec.sqlparser.exception.QueryParseException;
 import it.unibz.inf.ontop.spec.sqlparser.exception.UnsupportedSelectQueryException;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
-import net.sf.jsqlparser.JSQLParserException;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -39,7 +39,7 @@ public class SelectQueryParserTest {
     private static final String D1 = "D1";
     private static final String D2 = "D2";
 
-    private RAExpression parse(String sql) throws JSQLParserException, InvalidQueryException, UnsupportedSelectQueryException {
+    private RAExpression parse(String sql) throws QueryParseException, InvalidQueryException, UnsupportedSelectQueryException {
 
         OfflineMetadataProviderBuilder builder = createMetadataProviderBuilder();
         integerDBType = builder.getDBTypeFactory().getDBLargeIntegerType();
@@ -439,170 +439,170 @@ public class SelectQueryParserTest {
 
     @Test
     public void select_natural_outer_join() throws Exception {
-        var ex = assertThrows(JSQLParserException.class, () ->
+        var ex = assertThrows(QueryParseException.class, () ->
                 parse("SELECT * FROM P NATURAL OUTER JOIN Q"));
 
-        assertTrue(ex.getMessage().startsWith("Encountered unexpected token: \"NATURAL\""));
+        assertTrue(ex.getOriginalMessage().startsWith("Encountered unexpected token: \"NATURAL\""));
     }
 
     @Test
     public void select_cross_outer_join() throws Exception {
-        var ex = assertThrows(JSQLParserException.class, () ->
+        var ex = assertThrows(QueryParseException.class, () ->
                 parse("SELECT * FROM P CROSS OUTER JOIN Q"));
 
-        assertTrue(ex.getMessage().startsWith("Encountered unexpected token: \"CROSS\""));
+        assertTrue(ex.getOriginalMessage().startsWith("Encountered unexpected token: \"CROSS\""));
     }
 
     @Test
     public void select_natural_inner_join() throws Exception {
-        var ex = assertThrows(JSQLParserException.class, () ->
+        var ex = assertThrows(QueryParseException.class, () ->
                 parse("SELECT * FROM P NATURAL INNER JOIN Q"));
 
-        assertTrue(ex.getMessage().startsWith("Encountered unexpected token: \"NATURAL\""));
+        assertTrue(ex.getOriginalMessage().startsWith("Encountered unexpected token: \"NATURAL\""));
     }
 
     @Test
     public void select_cross_inner_join() throws Exception {
-        var ex = assertThrows(JSQLParserException.class, () ->
+        var ex = assertThrows(QueryParseException.class, () ->
                 parse("SELECT * FROM P CROSS INNER JOIN Q"));
 
-        assertTrue(ex.getMessage().startsWith("Encountered unexpected token: \"CROSS\""));
+        assertTrue(ex.getOriginalMessage().startsWith("Encountered unexpected token: \"CROSS\""));
     }
 
     @Test
     public void select_right_inner_join() throws Exception {
-        var ex = assertThrows(JSQLParserException.class, () ->
+        var ex = assertThrows(QueryParseException.class, () ->
                 parse("SELECT * FROM P RIGHT INNER JOIN Q"));
 
-        assertTrue(ex.getMessage().startsWith("Encountered unexpected token: \"RIGHT\""));
+        assertTrue(ex.getOriginalMessage().startsWith("Encountered unexpected token: \"RIGHT\""));
     }
 
     @Test
     public void select_full_inner_join() throws Exception {
-        var ex = assertThrows(JSQLParserException.class, () ->
+        var ex = assertThrows(QueryParseException.class, () ->
                 parse("SELECT * FROM P FULL INNER JOIN Q"));
 
-        assertTrue(ex.getMessage().startsWith("Encountered unexpected token: \"FULL\""));
+        assertTrue(ex.getOriginalMessage().startsWith("Encountered unexpected token: \"FULL\""));
     }
 
     @Test
     public void select_left_inner_join() throws Exception {
-        var ex = assertThrows(JSQLParserException.class, () ->
+        var ex = assertThrows(QueryParseException.class, () ->
                 parse("SELECT * FROM P LEFT INNER JOIN Q"));
 
-        assertTrue(ex.getMessage().startsWith("Encountered unexpected token: \"LEFT\""));
+        assertTrue(ex.getOriginalMessage().startsWith("Encountered unexpected token: \"LEFT\""));
     }
 
     @Test
     public void select_natural_outer_join_on() throws Exception {
-        var ex = assertThrows(JSQLParserException.class, () ->
+        var ex = assertThrows(QueryParseException.class, () ->
                 parse("SELECT * FROM P NATURAL OUTER JOIN Q ON P.A = Q.A"));
 
-        assertTrue(ex.getMessage().startsWith("Encountered unexpected token: \"NATURAL\""));
+        assertTrue(ex.getOriginalMessage().startsWith("Encountered unexpected token: \"NATURAL\""));
     }
 
     @Test
     public void select_cross_outer_join_on() throws Exception {
-        var ex = assertThrows(JSQLParserException.class, () ->
+        var ex = assertThrows(QueryParseException.class, () ->
                 parse("SELECT * FROM P CROSS OUTER JOIN Q ON P.A = Q.A"));
 
-        assertTrue(ex.getMessage().startsWith("Encountered unexpected token: \"CROSS\""));
+        assertTrue(ex.getOriginalMessage().startsWith("Encountered unexpected token: \"CROSS\""));
     }
 
     @Test
     public void select_natural_inner_join_on() throws Exception {
-        var ex = assertThrows(JSQLParserException.class, () ->
+        var ex = assertThrows(QueryParseException.class, () ->
                 parse("SELECT * FROM P NATURAL INNER JOIN Q ON P.A = Q.A"));
 
-        assertTrue(ex.getMessage().startsWith("Encountered unexpected token: \"NATURAL\""));
+        assertTrue(ex.getOriginalMessage().startsWith("Encountered unexpected token: \"NATURAL\""));
     }
 
     @Test
     public void select_cross_inner_join_on() throws Exception {
-        var ex = assertThrows(JSQLParserException.class, () ->
+        var ex = assertThrows(QueryParseException.class, () ->
                 parse("SELECT * FROM P CROSS INNER JOIN Q ON P.A = Q.A"));
 
-        assertTrue(ex.getMessage().startsWith("Encountered unexpected token: \"CROSS\""));
+        assertTrue(ex.getOriginalMessage().startsWith("Encountered unexpected token: \"CROSS\""));
     }
 
     @Test
     public void select_right_inner_join_on() throws Exception {
-        var ex = assertThrows(JSQLParserException.class, () ->
+        var ex = assertThrows(QueryParseException.class, () ->
                 parse("SELECT * FROM P RIGHT INNER JOIN Q ON P.A = Q.A"));
 
-        assertTrue(ex.getMessage().startsWith("Encountered unexpected token: \"RIGHT\""));
+        assertTrue(ex.getOriginalMessage().startsWith("Encountered unexpected token: \"RIGHT\""));
     }
 
     @Test
     public void select_full_inner_join_on() throws Exception {
-        var ex = assertThrows(JSQLParserException.class, () ->
+        var ex = assertThrows(QueryParseException.class, () ->
                 parse("SELECT * FROM P FULL INNER JOIN Q ON P.A = Q.A"));
 
-        assertTrue(ex.getMessage().startsWith("Encountered unexpected token: \"FULL\""));
+        assertTrue(ex.getOriginalMessage().startsWith("Encountered unexpected token: \"FULL\""));
     }
 
     @Test
     public void select_left_inner_join_on() throws Exception {
-        var ex = assertThrows(JSQLParserException.class, () ->
+        var ex = assertThrows(QueryParseException.class, () ->
                 parse("SELECT * FROM P LEFT INNER JOIN Q ON P.A = Q.A"));
 
-        assertTrue(ex.getMessage().startsWith("Encountered unexpected token: \"LEFT\""));
+        assertTrue(ex.getOriginalMessage().startsWith("Encountered unexpected token: \"LEFT\""));
     }
 
     @Test
     public void select_natural_outer_join_using() throws Exception {
-        var ex = assertThrows(JSQLParserException.class, () ->
+        var ex = assertThrows(QueryParseException.class, () ->
                 parse("SELECT * FROM P NATURAL OUTER JOIN Q USING(A)"));
 
-        assertTrue(ex.getMessage().startsWith("Encountered unexpected token: \"NATURAL\""));
+        assertTrue(ex.getOriginalMessage().startsWith("Encountered unexpected token: \"NATURAL\""));
     }
 
     @Test
     public void select_cross_outer_join_using() throws Exception {
-        var ex = assertThrows(JSQLParserException.class, () ->
+        var ex = assertThrows(QueryParseException.class, () ->
                 parse("SELECT * FROM P CROSS OUTER JOIN Q USING(A)"));
 
-        assertTrue(ex.getMessage().startsWith("Encountered unexpected token: \"CROSS\""));
+        assertTrue(ex.getOriginalMessage().startsWith("Encountered unexpected token: \"CROSS\""));
     }
 
     @Test
     public void select_natural_inner_join_using() throws Exception {
-        var ex = assertThrows(JSQLParserException.class, () ->
+        var ex = assertThrows(QueryParseException.class, () ->
                 parse("SELECT * FROM P NATURAL INNER JOIN Q USING(A)"));
 
-        assertTrue(ex.getMessage().startsWith("Encountered unexpected token: \"NATURAL\""));
+        assertTrue(ex.getOriginalMessage().startsWith("Encountered unexpected token: \"NATURAL\""));
     }
 
     @Test
     public void select_cross_inner_join_using() throws Exception {
-        var ex = assertThrows(JSQLParserException.class, () ->
+        var ex = assertThrows(QueryParseException.class, () ->
                 parse("SELECT * FROM P CROSS INNER JOIN Q USING(A)"));
 
-        assertTrue(ex.getMessage().startsWith("Encountered unexpected token: \"CROSS\""));
+        assertTrue(ex.getOriginalMessage().startsWith("Encountered unexpected token: \"CROSS\""));
     }
 
     @Test
     public void select_right_inner_join_using() throws Exception {
-        var ex = assertThrows(JSQLParserException.class, () ->
+        var ex = assertThrows(QueryParseException.class, () ->
                 parse("SELECT * FROM P RIGHT INNER JOIN Q USING(A)"));
 
-        assertTrue(ex.getMessage().startsWith("Encountered unexpected token: \"RIGHT\""));
+        assertTrue(ex.getOriginalMessage().startsWith("Encountered unexpected token: \"RIGHT\""));
     }
 
     @Test
     public void select_full_inner_join_using() throws Exception {
-        var ex = assertThrows(JSQLParserException.class, () ->
+        var ex = assertThrows(QueryParseException.class, () ->
                 parse("SELECT * FROM P FULL INNER JOIN Q USING(A)"));
 
-        assertTrue(ex.getMessage().startsWith("Encountered unexpected token: \"FULL\""));
+        assertTrue(ex.getOriginalMessage().startsWith("Encountered unexpected token: \"FULL\""));
     }
 
     @Test
     public void select_left_inner_join_using() throws Exception {
-        var ex = assertThrows(JSQLParserException.class, () ->
+        var ex = assertThrows(QueryParseException.class, () ->
                 parse("SELECT * FROM P LEFT INNER JOIN Q USING(A)"));
 
-        assertTrue(ex.getMessage().startsWith("Encountered unexpected token: \"LEFT\""));
+        assertTrue(ex.getOriginalMessage().startsWith("Encountered unexpected token: \"LEFT\""));
     }
 
 

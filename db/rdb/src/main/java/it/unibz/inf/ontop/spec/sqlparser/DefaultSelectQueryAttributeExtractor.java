@@ -12,30 +12,16 @@ import net.sf.jsqlparser.statement.select.*;
 import java.util.List;
 
 
-/**
- * Created by Roman Kontchakov on 25/01/2017.
- */
-
 public class DefaultSelectQueryAttributeExtractor extends BasicSelectQueryParser<RAExpressionAttributes, RAExpressionAttributesOperations> {
 
     public DefaultSelectQueryAttributeExtractor(MetadataLookup metadata, CoreSingletons coreSingletons) {
         super(metadata, coreSingletons, new RAExpressionAttributesOperations());
     }
 
-    public ImmutableList<QuotedID> getRAExpressionAttributes(Select select) throws InvalidQueryException, UnsupportedSelectQueryException {
-        try {
-            RAExpressionAttributes attributes = translateSelect(select.getSelectBody(), select.getWithItemsList());
-            return attributes.getAttributes().stream()
-                    .filter(a -> !a.isQualified())
-                    .map(QualifiedAttributeID::getAttribute)
-                    .collect(ImmutableCollectors.toList());
-        }
-        catch (InvalidSelectQueryRuntimeException e) {
-            throw new InvalidQueryException(e.getMessage(), e.getObject());
-        }
-        catch (UnsupportedSelectQueryRuntimeException e) {
-            throw new UnsupportedSelectQueryException(e.getMessage(), e.getObject());
-        }
+    public ImmutableList<QuotedID> getRAExpressionAttributes(String sql) throws InvalidQueryException, UnsupportedSelectQueryException, QueryParseException {
+        RAExpressionAttributes attributes = parseJSqlSelectQuery(sql);
+        return attributes.getUnqualifiedAttributesMap().keySet().stream()
+                .collect(ImmutableCollectors.toList());
     }
 
 

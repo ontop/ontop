@@ -15,12 +15,10 @@ public class RAExpression {
      * @param iqTree          a {@link IQTree}
      * @param attributes      an {@link RAExpressionAttributes}
      */
-    public RAExpression(IQTree iqTree,
-                        RAExpressionAttributes attributes) {
+    RAExpression(IQTree iqTree, RAExpressionAttributes attributes) {
         this.iqTree = iqTree;
         this.attributes = attributes;
     }
-
 
     public IQTree getIQTree() { return iqTree; }
 
@@ -29,7 +27,6 @@ public class RAExpression {
     public ImmutableMap<QuotedID, ImmutableTerm> getUnqualifiedAttributesMap() {
         return attributes.getUnqualifiedAttributesMap();
     }
-
 
     @Override
     public String toString() {

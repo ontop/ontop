@@ -3,15 +3,15 @@ package it.unibz.inf.ontop.spec.sqlparser;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.dbschema.*;
+import it.unibz.inf.ontop.exception.InvalidQueryException;
 import it.unibz.inf.ontop.exception.MetadataExtractionException;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
-import it.unibz.inf.ontop.spec.sqlparser.exception.IllegalJoinException;
-import it.unibz.inf.ontop.spec.sqlparser.exception.InvalidSelectQueryRuntimeException;
-import it.unibz.inf.ontop.spec.sqlparser.exception.UnsupportedSelectQueryRuntimeException;
+import it.unibz.inf.ontop.spec.sqlparser.exception.*;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
+import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.expression.Alias;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.select.*;
@@ -40,6 +40,19 @@ public abstract class BasicSelectQueryParser<T, O extends RAOperations<T>> {
         this.metadata = metadata;
         this.termFactory = coreSingletons.getTermFactory();
         this.operations = operations;
+    }
+
+    protected T parseJSqlSelectQuery(String sql) throws InvalidQueryException, UnsupportedSelectQueryException, QueryParseException {
+        try {
+            Select select = JSqlParserTools.parse(sql, !idfac.supportsSquareBracketQuotation());
+            return translateSelect(select.getSelectBody(), select.getWithItemsList());
+        }
+        catch (InvalidSelectQueryRuntimeException e) {
+            throw new InvalidQueryException(e.getMessage(), e.getObject());
+        }
+        catch (UnsupportedSelectQueryRuntimeException e) {
+            throw new UnsupportedSelectQueryException(e.getMessage(), e.getObject());
+        }
     }
 
 
