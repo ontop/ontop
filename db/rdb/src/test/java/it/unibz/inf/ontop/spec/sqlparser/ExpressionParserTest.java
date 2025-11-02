@@ -1645,11 +1645,11 @@ public class ExpressionParserTest {
 
     private ImmutableTerm parseTerm(String sql, ImmutableMap<QuotedID, ImmutableTerm> map) throws UnsupportedSelectQueryException, InvalidQueryException {
         ExpressionParser parser = new ExpressionParser(IDFAC, CORE_SINGLETONS);
-        return parser.parseTerm(sql, RAExpressionAttributes.of(map.entrySet().stream().collect(ImmutableCollectors.toMap(Map.Entry::getKey, e -> ImmutableMap.of(ImmutableSet.of(), e.getValue())))));
+        return parser.parseTerm(sql, RAExpressionAttributes.ofUnqualifiedAttributesMap(map));
     }
 
     private ImmutableExpression parseBooleanExpression(String sql, ImmutableMap<QuotedID, ImmutableTerm> map) throws UnsupportedSelectQueryException, InvalidQueryException {
         ExpressionParser parser = new ExpressionParser(IDFAC, CORE_SINGLETONS);
-        return parser.parseBooleanExpression(sql, RAExpressionAttributes.of(map.entrySet().stream().collect(ImmutableCollectors.toMap(Map.Entry::getKey, e -> ImmutableMap.of(ImmutableSet.of(), e.getValue())))));
+        return parser.parseBooleanExpression(sql, RAExpressionAttributes.ofUnqualifiedAttributesMap(map));
     }
 }

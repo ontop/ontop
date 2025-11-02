@@ -67,9 +67,9 @@ public class RelationalExpressionTest {
                 ImmutableList.of(re1.getIQTree(), re2.getIQTree())), relationalExpression.getIQTree());
 
         assertEquals(RAExpressionAttributes.of(ImmutableMap.of(
-                        TABLE_P.getAttribute(1).getID(), ImmutableMap.of(ImmutableSet.of(TABLE_P.getID()), x, ImmutableSet.of(TABLE_T.getID()), u),
-                        TABLE_P.getAttribute(2).getID(), ImmutableMap.of(ImmutableSet.of(TABLE_P.getID()), y),
-                        TABLE_T.getAttribute(2).getID(), ImmutableMap.of(ImmutableSet.of(TABLE_T.getID()), v))),
+                        TABLE_P.getAttribute(1).getID(), RAExpressionAttributes.Occurrences.of(TABLE_P.getAllIDs(), x, TABLE_T.getAllIDs(), u),
+                        TABLE_P.getAttribute(2).getID(), RAExpressionAttributes.Occurrences.of(TABLE_P.getAllIDs(), y),
+                        TABLE_T.getAttribute(2).getID(), RAExpressionAttributes.Occurrences.of(TABLE_T.getAllIDs(), v))),
                 relationalExpression.getAttributes());
     }
 
@@ -78,7 +78,7 @@ public class RelationalExpressionTest {
         RAExpression re1_1 = ops.withAlias(re2, idFactory.createRelationID("P"));
 
         var ex = assertThrows(IllegalJoinException.class, () -> ops.crossJoin(re1, re1_1));
-        assertEquals("Relation alias P occurs in both arguments of the JOIN", ex.getMessage());
+        assertEquals("Relation alias P occurs in both arguments of the JOIN attributes: {A={[P]=x}, B={[P]=y}} and attributes: {A={[P]=u}, C={[P]=v}}", ex.getMessage());
     }
 
     @Test
@@ -92,9 +92,9 @@ public class RelationalExpressionTest {
                         ImmutableList.of(re1.getIQTree(), re2.getIQTree()))), relationalExpression.getIQTree());
 
         assertEquals(RAExpressionAttributes.of(ImmutableMap.of(
-                        TABLE_P.getAttribute(1).getID(), ImmutableMap.of(ImmutableSet.of(TABLE_P.getID()), x, ImmutableSet.of(TABLE_T.getID()), u),
-                        TABLE_P.getAttribute(2).getID(), ImmutableMap.of(ImmutableSet.of(TABLE_P.getID()), y),
-                        TABLE_T.getAttribute(2).getID(), ImmutableMap.of(ImmutableSet.of(TABLE_T.getID()), v))),
+                        TABLE_P.getAttribute(1).getID(), RAExpressionAttributes.Occurrences.of(TABLE_P.getAllIDs(), x, TABLE_T.getAllIDs(), u),
+                        TABLE_P.getAttribute(2).getID(), RAExpressionAttributes.Occurrences.of(TABLE_P.getAllIDs(), y),
+                        TABLE_T.getAttribute(2).getID(), RAExpressionAttributes.Occurrences.of(TABLE_T.getAllIDs(), v))),
                 relationalExpression.getAttributes());
     }
 
@@ -105,7 +105,7 @@ public class RelationalExpressionTest {
         var ex = assertThrows(IllegalJoinException.class, () -> ops.joinOn(re1, re1_1,
                 a -> Optional.of(TERM_FACTORY.getNotYetTypedEquality(x, u))));
 
-        assertEquals("Relation alias P occurs in both arguments of the JOIN", ex.getMessage());
+        assertEquals("Relation alias P occurs in both arguments of the JOIN attributes: {A={[P]=x}, B={[P]=y}} and attributes: {A={[P]=u}, C={[P]=v}}", ex.getMessage());
     }
 
     @Test
@@ -120,9 +120,9 @@ public class RelationalExpressionTest {
                         ImmutableList.of(re1.getIQTree(), re2.getIQTree()))), relationalExpression.getIQTree());
 
         assertEquals(RAExpressionAttributes.of(ImmutableMap.of(
-                        TABLE_P.getAttribute(1).getID(), ImmutableMap.of(ImmutableSet.of(), x),
-                        TABLE_P.getAttribute(2).getID(), ImmutableMap.of(ImmutableSet.of(TABLE_P.getID()), y),
-                        TABLE_T.getAttribute(2).getID(), ImmutableMap.of(ImmutableSet.of(TABLE_T.getID()), v))),
+                        TABLE_P.getAttribute(1).getID(), RAExpressionAttributes.Occurrences.of(ImmutableSet.of(), x),
+                        TABLE_P.getAttribute(2).getID(), RAExpressionAttributes.Occurrences.of(TABLE_P.getAllIDs(), y),
+                        TABLE_T.getAttribute(2).getID(), RAExpressionAttributes.Occurrences.of(TABLE_T.getAllIDs(), v))),
                 relationalExpression.getAttributes());
     }
 
@@ -131,7 +131,7 @@ public class RelationalExpressionTest {
         RAExpression re1_1 = ops.withAlias(re2, idFactory.createRelationID("P"));
 
         var ex = assertThrows(IllegalJoinException.class, () -> ops.naturalJoin(re1, re1_1));
-        assertEquals("Relation alias P occurs in both arguments of the JOIN", ex.getMessage());
+        assertEquals("Relation alias P occurs in both arguments of the JOIN attributes: {A={[P]=x}, B={[P]=y}} and attributes: {A={[P]=u}, C={[P]=v}}", ex.getMessage());
     }
 
     @Test
@@ -142,7 +142,7 @@ public class RelationalExpressionTest {
         RAExpression re3 = ops.create(TABLE_R, ImmutableList.of(u, v));
 
         var ex = assertThrows(IllegalJoinException.class, () -> ops.naturalJoin(re, re3));
-        assertEquals("Attribute A is ambiguous", ex.getMessage());
+        assertEquals("Attribute A is ambiguous with attributes: {A={[P]=x, [Q]=u}, B={[P]=y}, C={[Q]=v}} and attributes: {A={[R]=u}, B={[R]=v}}", ex.getMessage());
     }
 
     @Test
@@ -156,9 +156,9 @@ public class RelationalExpressionTest {
                         ImmutableList.of(re1.getIQTree(), re2.getIQTree()))), relationalExpression.getIQTree());
 
         assertEquals(RAExpressionAttributes.of(ImmutableMap.of(
-                        TABLE_P.getAttribute(1).getID(), ImmutableMap.of(ImmutableSet.of(), x),
-                        TABLE_P.getAttribute(2).getID(), ImmutableMap.of(ImmutableSet.of(TABLE_P.getID()), y),
-                        TABLE_T.getAttribute(2).getID(), ImmutableMap.of(ImmutableSet.of(TABLE_T.getID()), v))),
+                        TABLE_P.getAttribute(1).getID(), RAExpressionAttributes.Occurrences.of(ImmutableSet.of(), x),
+                        TABLE_P.getAttribute(2).getID(), RAExpressionAttributes.Occurrences.of(TABLE_P.getAllIDs(), y),
+                        TABLE_T.getAttribute(2).getID(), RAExpressionAttributes.Occurrences.of(TABLE_T.getAllIDs(), v))),
                 relationalExpression.getAttributes());
     }
 
@@ -169,7 +169,7 @@ public class RelationalExpressionTest {
         var ex = assertThrows(IllegalJoinException.class, () -> ops.joinUsing(re1, re1_1,
                 ImmutableSet.of(idFactory.createAttributeID("A"))));
 
-        assertEquals("Relation alias P occurs in both arguments of the JOIN", ex.getMessage());
+        assertEquals("Relation alias P occurs in both arguments of the JOIN attributes: {A={[P]=x}, B={[P]=y}} and attributes: {A={[P]=u}, C={[P]=v}}", ex.getMessage());
     }
 
     @Test
@@ -177,7 +177,7 @@ public class RelationalExpressionTest {
         RAExpression re2p = ops.create(TABLE_Q, ImmutableList.of(u, v));
 
         var ex = assertThrows(IllegalJoinException.class, () -> ops.joinUsing(re1, re2p, ImmutableSet.of(idFactory.createAttributeID("A"))));
-        assertEquals("Attribute A cannot be found", ex.getMessage());
+        assertEquals("Attribute A cannot be found with attributes: {A={[P]=x}, B={[P]=y}} and attributes: {C={[Q]=u}, D={[Q]=v}}", ex.getMessage());
     }
 
     @Test
@@ -189,7 +189,7 @@ public class RelationalExpressionTest {
         RAExpression re3 = ops.create(TABLE_R, ImmutableList.of(u, v));
 
         var ex = assertThrows(IllegalJoinException.class, () -> ops.joinUsing(relationalExpression, re3, ImmutableSet.of(idFactory.createAttributeID("A"))));
-        assertEquals("Attribute A is ambiguous", ex.getMessage());
+        assertEquals("Attribute A is ambiguous with attributes: {A={[P]=x, [Q]=u}, B={[P]=y}, C={[Q]=v}} and attributes: {A={[R]=u}, B={[R]=v}}", ex.getMessage());
     }
 
 
@@ -201,24 +201,16 @@ public class RelationalExpressionTest {
 
         assertEquals(re1.getIQTree(), actual.getIQTree());
         assertEquals(RAExpressionAttributes.of(ImmutableMap.of(
-                        TABLE_P.getAttribute(1).getID(), ImmutableMap.of(ImmutableSet.of(tableAlias), x),
-                        TABLE_P.getAttribute(2).getID(), ImmutableMap.of(ImmutableSet.of(tableAlias), y))),
+                        TABLE_P.getAttribute(1).getID(), RAExpressionAttributes.Occurrences.of(ImmutableSet.of(tableAlias), x),
+                        TABLE_P.getAttribute(2).getID(), RAExpressionAttributes.Occurrences.of(ImmutableSet.of(tableAlias), y))),
                 actual.getAttributes());
     }
 
     @Test
     public void create_test() {
         assertEquals(RAExpressionAttributes.of(ImmutableMap.of(
-                        TABLE_P.getAttribute(1).getID(), ImmutableMap.of(ImmutableSet.of(TABLE_P.getID()), x),
-                        TABLE_P.getAttribute(2).getID(), ImmutableMap.of(ImmutableSet.of(TABLE_P.getID()), y))),
+                        TABLE_P.getAttribute(1).getID(), RAExpressionAttributes.Occurrences.of(TABLE_P.getAllIDs(), x),
+                        TABLE_P.getAttribute(2).getID(), RAExpressionAttributes.Occurrences.of(TABLE_P.getAllIDs(), y))),
                 re1.getAttributes());
-    }
-
-
-    private static QualifiedAttributeID qualified(NamedRelationDefinition table, int index) {
-        return new QualifiedAttributeID(table.getID(), table.getAttribute(index).getID());
-    }
-    private static QualifiedAttributeID unqualified(NamedRelationDefinition table, int index) {
-        return new QualifiedAttributeID(null, table.getAttribute(index).getID());
     }
 }

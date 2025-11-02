@@ -34,7 +34,7 @@ public class DefaultSelectQueryAttributeExtractor extends BasicSelectQueryParser
             attributes = translateJoins(plainSelect.getFromItem(), plainSelect.getJoins());
         }
         catch (IllegalJoinException e) {
-            throw new InvalidSelectQueryRuntimeException(e.toString(), plainSelect);
+            throw new InvalidSelectQueryRuntimeException(e.getMessage(), plainSelect);
         }
 
         SelectItemParser sip = new SelectItemParser(attributes,

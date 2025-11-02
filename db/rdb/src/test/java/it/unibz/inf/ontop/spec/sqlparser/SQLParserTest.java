@@ -2,7 +2,6 @@ package it.unibz.inf.ontop.spec.sqlparser;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.dbschema.impl.DatabaseTableDefinition;
 import it.unibz.inf.ontop.dbschema.impl.OfflineMetadataProviderBuilder;
@@ -10,15 +9,12 @@ import it.unibz.inf.ontop.exception.InvalidQueryException;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
-import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.DBTypeFactory;
 import it.unibz.inf.ontop.spec.sqlparser.exception.QueryParseException;
 import it.unibz.inf.ontop.spec.sqlparser.exception.UnsupportedSelectQueryException;
-import it.unibz.inf.ontop.utils.ImmutableCollectors;
-import net.sf.jsqlparser.JSQLParserException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -294,42 +290,27 @@ public class SQLParserTest {
         return IQ_FACTORY.createUnaryIQTree(IQ_FACTORY.createFilterNode(exp), tree);
     }
 
-    private RAExpressionAttributes getSelectAttributes(String id1) {
-        return getSelectAttributes(id1, TERM_FACTORY.getVariable(id1.toUpperCase() + "1"));
+    private RAExpressionAttributes getSelectAttributes(String... ids) {
+        ImmutableMap.Builder<QuotedID, ImmutableTerm> builder = ImmutableMap.builder();
+        for (String id : ids)
+            builder.put(idfac.createAttributeID(id.toUpperCase()), TERM_FACTORY.getVariable(id.toUpperCase() + "1"));
+        return RAExpressionAttributes.ofUnqualifiedAttributesMap(builder.build());
     }
 
     private RAExpressionAttributes getSelectAttributes(String id1, ImmutableTerm t1) {
-        return getSelectAttributes(ImmutableMap.of(id1, t1));
-    }
-
-    private RAExpressionAttributes getSelectAttributes(String id1, String id2) {
-        return getSelectAttributes(
-                id1, TERM_FACTORY.getVariable(id1.toUpperCase() + "1"),
-                id2, TERM_FACTORY.getVariable(id2.toUpperCase() + "1"));
+        return RAExpressionAttributes.ofUnqualifiedAttributesMap(ImmutableMap.of(idfac.createAttributeID(id1), t1));
     }
 
     private RAExpressionAttributes getSelectAttributes(String id1, ImmutableTerm t1, String id2, ImmutableTerm t2) {
-        return getSelectAttributes(ImmutableMap.of(id1, t1, id2, t2));
-    }
-
-    private RAExpressionAttributes getSelectAttributes(String id1, String id2, String id3) {
-        return getSelectAttributes(
-                id1, TERM_FACTORY.getVariable(id1.toUpperCase() + "1"),
-                id2, TERM_FACTORY.getVariable(id2.toUpperCase() + "1"),
-                id3, TERM_FACTORY.getVariable(id3.toUpperCase() + "1"));
+        return RAExpressionAttributes.ofUnqualifiedAttributesMap(ImmutableMap.of(idfac.createAttributeID(id1), t1, idfac.createAttributeID(id2), t2));
     }
 
     private RAExpressionAttributes getSelectAttributes(String id1, ImmutableTerm t1, String id2, ImmutableTerm t2, String id3, ImmutableTerm t3) {
-        return getSelectAttributes(ImmutableMap.of(id1, t1, id2, t2, id3, t3));
+        return RAExpressionAttributes.ofUnqualifiedAttributesMap(ImmutableMap.of(
+                idfac.createAttributeID(id1), t1,
+                idfac.createAttributeID(id2), t2,
+                idfac.createAttributeID(id3), t3));
     }
-
-    private RAExpressionAttributes getSelectAttributes(ImmutableMap<String, ImmutableTerm> map) {
-        return RAExpressionAttributes.of(map.entrySet().stream()
-                .collect(ImmutableCollectors.toMap(
-                        e -> idfac.createAttributeID(e.getKey()),
-                        e -> ImmutableMap.of(ImmutableSet.of(), e.getValue()))));
-    }
-
 
 
     @Test
@@ -346,16 +327,8 @@ public class SQLParserTest {
 		RAExpression re = parse("SELECT * FROM student");
 
         assertEquals(students(), re.getIQTree());
-        assertEquals(getSelectAttributes(ImmutableMap.of(
-                "ID", TERM_FACTORY.getVariable("ID1"),
-                "NAME", TERM_FACTORY.getVariable("NAME1"),
-                "BIRTH_YEAR", TERM_FACTORY.getVariable("BIRTH_YEAR1"),
-                "BIRTH_DATE", TERM_FACTORY.getVariable("BIRTH_DATE1"),
-                "SEMESTER", TERM_FACTORY.getVariable("SEMESTER1"),
-                "NATIONALITY", TERM_FACTORY.getVariable("NATIONALITY1"),
-                "GRADE", TERM_FACTORY.getVariable("GRADE1"),
-                "CLASS", TERM_FACTORY.getVariable("CLASS1"),
-                "ADDRESS", TERM_FACTORY.getVariable("ADDRESS1"))), re.getAttributes());
+        assertEquals(getSelectAttributes("ID", "NAME", "BIRTH_YEAR", "BIRTH_DATE",
+                        "SEMESTER", "NATIONALITY", "GRADE", "CLASS", "ADDRESS"), re.getAttributes());
     }
 
 	@Test
@@ -363,16 +336,8 @@ public class SQLParserTest {
 		RAExpression re = parse("SELECT student.* FROM student");
 
         assertEquals(students(), re.getIQTree());
-        assertEquals(getSelectAttributes(ImmutableMap.of(
-                "ID", TERM_FACTORY.getVariable("ID1"),
-                "NAME", TERM_FACTORY.getVariable("NAME1"),
-                "BIRTH_YEAR", TERM_FACTORY.getVariable("BIRTH_YEAR1"),
-                "BIRTH_DATE", TERM_FACTORY.getVariable("BIRTH_DATE1"),
-                "SEMESTER", TERM_FACTORY.getVariable("SEMESTER1"),
-                "NATIONALITY", TERM_FACTORY.getVariable("NATIONALITY1"),
-                "GRADE", TERM_FACTORY.getVariable("GRADE1"),
-                "CLASS", TERM_FACTORY.getVariable("CLASS1"),
-                "ADDRESS", TERM_FACTORY.getVariable("ADDRESS1"))), re.getAttributes());
+        assertEquals(getSelectAttributes("ID", "NAME", "BIRTH_YEAR", "BIRTH_DATE", "SEMESTER",
+                        "NATIONALITY", "GRADE", "CLASS", "ADDRESS"), re.getAttributes());
     }
 
 	@Test
@@ -529,23 +494,9 @@ public class SQLParserTest {
                 .put(12, TERM_FACTORY.getVariable("ROWS1"))
                 .put(13, TERM_FACTORY.getVariable("VALUE1"))
                 .put(14, TERM_FACTORY.getVariable("XML1")).build()), re.getIQTree());
-        assertEquals(getSelectAttributes(ImmutableMap.<String, ImmutableTerm>builder()
-                .put("CAST", TERM_FACTORY.getVariable("CAST1"))
-                .put("DO", TERM_FACTORY.getVariable("DO1"))
-                .put("EXTRACT", TERM_FACTORY.getVariable("EXTRACT1"))
-                .put("FIRST", TERM_FACTORY.getVariable("FIRST1"))
-                .put("FOLLOWING", TERM_FACTORY.getVariable("FOLLOWING1"))
-                .put("LAST", TERM_FACTORY.getVariable("LAST1"))
-                .put("MATERIALIZED", TERM_FACTORY.getVariable("MATERIALIZED1"))
-                .put("NULLS", TERM_FACTORY.getVariable("NULLS1"))
-                .put("PARTITION", TERM_FACTORY.getVariable("PARTITION1"))
-                .put("RANGE", TERM_FACTORY.getVariable("RANGE1"))
-                .put("ROW", TERM_FACTORY.getVariable("ROW1"))
-                .put("ROWS", TERM_FACTORY.getVariable("ROWS1"))
-                .put("SIBLINGS", TERM_FACTORY.getVariable("SIBLINGS1"))
-                .put("VALUE", TERM_FACTORY.getVariable("VALUE1"))
-                .put("XML", TERM_FACTORY.getVariable("XML1")).build()), re.getAttributes());
-
+        assertEquals(getSelectAttributes("CAST", "DO", "EXTRACT", "FIRST",
+                "FOLLOWING", "LAST", "MATERIALIZED", "NULLS", "PARTITION", "RANGE", "ROW",
+                "ROWS", "SIBLINGS", "VALUE", "XML"), re.getAttributes());
     }
 
 	@Test
@@ -553,16 +504,8 @@ public class SQLParserTest {
 		RAExpression re = parse("SELECT undergraduate.* FROM student as undergraduate");
 
         assertEquals(students(), re.getIQTree());
-        assertEquals(getSelectAttributes(ImmutableMap.of(
-                "ID", TERM_FACTORY.getVariable("ID1"),
-                "NAME", TERM_FACTORY.getVariable("NAME1"),
-                "BIRTH_YEAR", TERM_FACTORY.getVariable("BIRTH_YEAR1"),
-                "BIRTH_DATE", TERM_FACTORY.getVariable("BIRTH_DATE1"),
-                "SEMESTER", TERM_FACTORY.getVariable("SEMESTER1"),
-                "NATIONALITY", TERM_FACTORY.getVariable("NATIONALITY1"),
-                "GRADE", TERM_FACTORY.getVariable("GRADE1"),
-                "CLASS", TERM_FACTORY.getVariable("CLASS1"),
-                "ADDRESS", TERM_FACTORY.getVariable("ADDRESS1"))), re.getAttributes());
+        assertEquals(getSelectAttributes("ID", "NAME", "BIRTH_YEAR", "BIRTH_DATE",
+                "SEMESTER", "NATIONALITY", "GRADE", "CLASS", "ADDRESS"), re.getAttributes());
     }
 
 	@Test
@@ -653,12 +596,7 @@ public class SQLParserTest {
                         TERM_FACTORY.getNotYetTypedEquality(TERM_FACTORY.getVariable("NATIONALITY1"), TERM_FACTORY.getDBStringConstant("IT")),
                         TERM_FACTORY.getNotYetTypedEquality(TERM_FACTORY.getVariable("NATIONALITY1"), TERM_FACTORY.getDBStringConstant("DE")))), students()), re.getIQTree());
 
-        assertEquals(getSelectAttributes(ImmutableMap.of(
-                "ID", TERM_FACTORY.getVariable("ID1"),
-                "NAME", TERM_FACTORY.getVariable("NAME1"),
-                "SEMESTER", TERM_FACTORY.getVariable("SEMESTER1"),
-                "BIRTH_YEAR", TERM_FACTORY.getVariable("BIRTH_YEAR1"),
-                "NATIONALITY", TERM_FACTORY.getVariable("NATIONALITY1"))), re.getAttributes());
+        assertEquals(getSelectAttributes("ID", "NAME", "SEMESTER", "BIRTH_YEAR", "NATIONALITY"), re.getAttributes());
 	}
 
 	@Test
@@ -904,11 +842,11 @@ public class SQLParserTest {
 
         assertEquals(filter(TERM_FACTORY.getNotYetTypedEquality(TERM_FACTORY.getVariable("ID1"), TERM_FACTORY.getVariable("ST_ID2")),
                 IQ_FACTORY.createNaryIQTree(IQ_FACTORY.createInnerJoinNode(), ImmutableList.of(students(1), grades(2)))), re.getIQTree());
-        assertEquals(getSelectAttributes(ImmutableMap.of(
-                "ID", TERM_FACTORY.getVariable("ID1"),
-                "NAME", TERM_FACTORY.getVariable("NAME1"),
-                "CLASS_ID", TERM_FACTORY.getVariable("CLASS_ID2"),
-                "GRADE", TERM_FACTORY.getVariable("GRADE2"))), re.getAttributes());
+        assertEquals(RAExpressionAttributes.ofUnqualifiedAttributesMap(ImmutableMap.of(
+                idfac.createAttributeID("ID"), SQLTestingTools.TERM_FACTORY.getVariable("ID1"),
+                idfac.createAttributeID("NAME"), SQLTestingTools.TERM_FACTORY.getVariable("NAME1"),
+                idfac.createAttributeID("CLASS_ID"), SQLTestingTools.TERM_FACTORY.getVariable("CLASS_ID2"),
+                idfac.createAttributeID("GRADE"), SQLTestingTools.TERM_FACTORY.getVariable("GRADE2"))), re.getAttributes());
 
     }
 
@@ -954,12 +892,11 @@ public class SQLParserTest {
 
         assertEquals(filter(TERM_FACTORY.getNotYetTypedEquality(TERM_FACTORY.getVariable("ID1"), TERM_FACTORY.getVariable("ST_ID2")),
                 IQ_FACTORY.createNaryIQTree(IQ_FACTORY.createInnerJoinNode(), ImmutableList.of(students(1), grades(2)))), re.getIQTree());
-        assertEquals(getSelectAttributes(ImmutableMap.of(
-                "ID", TERM_FACTORY.getVariable("ID1"),
-                "NAME", TERM_FACTORY.getVariable("NAME1"),
-                "CLASS_ID", TERM_FACTORY.getVariable("CLASS_ID2"),
-                "GRADE", TERM_FACTORY.getVariable("GRADE2"))), re.getAttributes());
-
+        assertEquals(RAExpressionAttributes.ofUnqualifiedAttributesMap(ImmutableMap.of(
+                idfac.createAttributeID("ID"), SQLTestingTools.TERM_FACTORY.getVariable("ID1"),
+                idfac.createAttributeID("NAME"), SQLTestingTools.TERM_FACTORY.getVariable("NAME1"),
+                idfac.createAttributeID("CLASS_ID"), SQLTestingTools.TERM_FACTORY.getVariable("CLASS_ID2"),
+                idfac.createAttributeID("GRADE"), SQLTestingTools.TERM_FACTORY.getVariable("GRADE2"))), re.getAttributes());
     }
 
 	@Test
@@ -1283,7 +1220,7 @@ public class SQLParserTest {
                                                 TERM_FACTORY.getDBDefaultInequality(LTE, TERM_FACTORY.getVariable("SCORE1"), TERM_FACTORY.getDBIntegerConstant(5)),
                                                 TERM_FACTORY.getNotYetTypedEquality(TERM_FACTORY.getVariable("MARK1"), TERM_FACTORY.getDBStringConstant("E")))))),
                 IQ_FACTORY.createNaryIQTree(IQ_FACTORY.createInnerJoinNode(), ImmutableList.of(grades(), students(2)))), re.getIQTree());
-        assertEquals(getSelectAttributes("NAME",  TERM_FACTORY.getVariable("NAME2")), re.getAttributes());
+        assertEquals(getSelectAttributes("NAME", TERM_FACTORY.getVariable("NAME2")), re.getAttributes());
 	}
 
 	@Test
@@ -1508,11 +1445,7 @@ public class SQLParserTest {
                         1, TERM_FACTORY.getVariable("DATETIME1"),
                         2, TERM_FACTORY.getVariable("SCALE1"),
                         3, TERM_FACTORY.getVariable("INTERVAL1")))), re.getIQTree());
-        assertEquals(getSelectAttributes(ImmutableMap.of(
-                "ID", TERM_FACTORY.getVariable("ID1"),
-                "DATETIME", TERM_FACTORY.getVariable("DATETIME1"),
-                "SCALE", TERM_FACTORY.getVariable("SCALE1"),
-                "INTERVAL", TERM_FACTORY.getVariable("INTERVAL1"))), re.getAttributes());
+        assertEquals(getSelectAttributes("ID", "DATETIME", "SCALE", "INTERVAL"), re.getAttributes());
     }
 
 	@Test

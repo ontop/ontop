@@ -84,7 +84,7 @@ public class SelectQueryParser extends BasicSelectQueryParser<RAExpression, RAEx
             rae = operations.filter(base, filter);
         }
         catch (IllegalJoinException e) {
-            throw new InvalidSelectQueryRuntimeException(e.toString(), plainSelect);
+            throw new InvalidSelectQueryRuntimeException(e.getMessage(), plainSelect);
         }
 
         SelectItemParser sip = new SelectItemParser(rae.getAttributes(), expressionParser::parseTerm, idfac);

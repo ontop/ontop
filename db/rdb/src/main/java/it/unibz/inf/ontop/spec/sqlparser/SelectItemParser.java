@@ -60,8 +60,7 @@ public class SelectItemParser {
 
         @Override
         public void visit(AllColumns allColumns) {
-            stream =  attributes.getAttributesMapSelection(a -> !a.isQualified())
-                    .map(e -> Maps.immutableEntry(e.getKey().getAttribute(), e.getValue()));
+            stream =  attributes.getUnqualifiedAttributesMap().entrySet().stream();
         }
 
         @Override
@@ -69,8 +68,7 @@ public class SelectItemParser {
             Table table = allTableColumns.getTable();
             RelationID id = JSqlParserTools.getRelationId(idfac, table);
 
-            stream = attributes.getAttributesMapSelection(a -> a.isQualified() && a.getRelation().equals(id))
-                    .map(e -> Maps.immutableEntry(e.getKey().getAttribute(), e.getValue()));
+            stream = attributes.getRelationAttributesMap(id).entrySet().stream();
         }
 
         @Override
