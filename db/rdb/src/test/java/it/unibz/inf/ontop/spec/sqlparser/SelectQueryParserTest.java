@@ -33,11 +33,13 @@ public class SelectQueryParserTest {
     private static final String A3 = "A3";
     private static final String B1 = "B1";
     private static final String B2 = "B2";
+    private static final String B3 = "B3";
     private static final String C1 = "C1";
     private static final String C2 = "C2";
     private static final String C3 = "C3";
     private static final String D1 = "D1";
     private static final String D2 = "D2";
+    private static final String D3 = "D3";
 
     private RAExpression parse(String sql) throws QueryParseException, InvalidQueryException, UnsupportedSelectQueryException {
 
@@ -80,9 +82,10 @@ public class SelectQueryParserTest {
     }
 
     private RAExpressionAttributes getSelectAttributes(ImmutableMap<String, ImmutableTerm> map) {
-        return new RAExpressionAttributes(map.entrySet().stream()
-                .collect(ImmutableCollectors.toMap(e -> new QualifiedAttributeID(null, idfac.createAttributeID(e.getKey())), e -> e.getValue())),
-                map.keySet().stream().map(id -> idfac.createAttributeID(id)).collect(ImmutableCollectors.toSet()), id -> ImmutableSet.of());
+        return RAExpressionAttributes.of(map.entrySet().stream()
+                .collect(ImmutableCollectors.toMap(
+                        e -> idfac.createAttributeID(e.getKey()),
+                        e -> ImmutableMap.of(ImmutableSet.of(), e.getValue()))));
     }
 
     @Test
@@ -103,7 +106,7 @@ public class SelectQueryParserTest {
     public void inner_join_on_inner_join_ambiguity_test() throws Exception {
         // common column name "A" appears more than once in left table
         var ex = assertThrows(InvalidQueryException.class, () ->
-                parse("SELECT A, C FROM P INNER JOIN Q on P.A =  Q.A NATURAL JOIN R"));
+                parse("SELECT A, C FROM P INNER JOIN Q on P.A = Q.A NATURAL JOIN R"));
 
         assertEquals("it.unibz.inf.ontop.spec.sqlparser.exception.IllegalJoinException: Attribute A is ambiguous with attributes", ex.getMessage().substring(0, ex.getMessage().indexOf(": {")));
     }
@@ -115,16 +118,17 @@ public class SelectQueryParserTest {
         var ex = assertThrows(InvalidQueryException.class, () ->
                 parse("SELECT A, P.B, R.C, D FROM P NATURAL JOIN Q INNER JOIN R on Q.C =  R.C"));
 
-        assertEquals("Unable to find attribute A (available attributes are [P.B, Q.C, R.A, R.B, R.C, D, R.D]) (from A)", ex.getMessage());
+        assertEquals("Unable to find attribute A (available attributes are [R.A, P.B, R.B, Q.C, R.C, D, R.D]) (from A)", ex.getMessage());
     }
 
     @Test
     public void inner_join_on_inner_join_test() throws Exception {
-        // common column name "A" appears more than once in left table
-        var ex = assertThrows(InvalidQueryException.class, () ->
-                parse("SELECT A, P.B, R.C, D FROM P NATURAL JOIN Q INNER JOIN R on Q.C =  R.C"));
+        RAExpression re = parse("SELECT P.B, R.C, D FROM P NATURAL JOIN Q INNER JOIN R on Q.C =  R.C");
 
-        assertEquals("Unable to find attribute A (available attributes are [P.B, Q.C, R.A, R.B, R.C, D, R.D]) (from A)", ex.getMessage());
+        assertEquals(join(eqOf(C2, C3),
+                        join(eqOf(A1, A2), dataAtomOf(TABLE_P, A1, B1), dataAtomOf(TABLE_Q, A2, C2)),
+                dataAtomOf(TABLE_R, A3, B3, C3, D3)),
+                re.getIQTree());
     }
 
     @Test

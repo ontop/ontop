@@ -303,7 +303,8 @@ public class SQLParserTest {
     }
 
     private RAExpressionAttributes getSelectAttributes(String id1, String id2) {
-        return getSelectAttributes(id1, TERM_FACTORY.getVariable(id1.toUpperCase() + "1"),
+        return getSelectAttributes(
+                id1, TERM_FACTORY.getVariable(id1.toUpperCase() + "1"),
                 id2, TERM_FACTORY.getVariable(id2.toUpperCase() + "1"));
     }
 
@@ -312,7 +313,8 @@ public class SQLParserTest {
     }
 
     private RAExpressionAttributes getSelectAttributes(String id1, String id2, String id3) {
-        return getSelectAttributes(id1, TERM_FACTORY.getVariable(id1.toUpperCase() + "1"),
+        return getSelectAttributes(
+                id1, TERM_FACTORY.getVariable(id1.toUpperCase() + "1"),
                 id2, TERM_FACTORY.getVariable(id2.toUpperCase() + "1"),
                 id3, TERM_FACTORY.getVariable(id3.toUpperCase() + "1"));
     }
@@ -322,9 +324,10 @@ public class SQLParserTest {
     }
 
     private RAExpressionAttributes getSelectAttributes(ImmutableMap<String, ImmutableTerm> map) {
-        return new RAExpressionAttributes(map.entrySet().stream()
-                .collect(ImmutableCollectors.toMap(e -> new QualifiedAttributeID(null, idfac.createAttributeID(e.getKey())), e -> e.getValue())),
-                map.keySet().stream().map(id -> idfac.createAttributeID(id)).collect(ImmutableCollectors.toSet()), id -> ImmutableSet.of());
+        return RAExpressionAttributes.of(map.entrySet().stream()
+                .collect(ImmutableCollectors.toMap(
+                        e -> idfac.createAttributeID(e.getKey()),
+                        e -> ImmutableMap.of(ImmutableSet.of(), e.getValue()))));
     }
 
 

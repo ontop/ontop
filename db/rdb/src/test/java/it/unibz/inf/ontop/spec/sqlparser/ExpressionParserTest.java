@@ -3,7 +3,7 @@ package it.unibz.inf.ontop.spec.sqlparser;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
-import it.unibz.inf.ontop.dbschema.QualifiedAttributeID;
+import it.unibz.inf.ontop.dbschema.QuotedID;
 import it.unibz.inf.ontop.dbschema.QuotedIDFactory;
 import it.unibz.inf.ontop.dbschema.impl.OfflineMetadataProviderBuilder;
 import it.unibz.inf.ontop.exception.InvalidQueryException;
@@ -16,9 +16,11 @@ import it.unibz.inf.ontop.model.vocabulary.SPARQL;
 import it.unibz.inf.ontop.spec.sqlparser.exception.InvalidSelectQueryRuntimeException;
 import it.unibz.inf.ontop.spec.sqlparser.exception.UnsupportedSelectQueryException;
 import it.unibz.inf.ontop.spec.sqlparser.exception.UnsupportedSelectQueryRuntimeException;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
+import java.util.Map;
 import java.util.stream.Stream;
 
 import static it.unibz.inf.ontop.model.term.functionsymbol.InequalityLabel.*;
@@ -127,8 +129,7 @@ public class ExpressionParserTest {
     @Test
     public void addition_test() throws Exception {
         Variable v = TERM_FACTORY.getVariable("x0");
-        ImmutableTerm translation = parseTerm("X + 1", ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
+        ImmutableTerm translation = parseTerm("X + 1", ImmutableMap.of(IDFAC.createAttributeID("X"), v));
 
         assertEquals(TERM_FACTORY.getImmutableFunctionalTerm(
                 DB_FS_FACTORY.getUntypedDBMathBinaryOperator("+"),
@@ -139,8 +140,7 @@ public class ExpressionParserTest {
     @Test
     public void subtraction_test() throws Exception {
         Variable v = TERM_FACTORY.getVariable("x0");
-        ImmutableTerm translation = parseTerm("X - 1", ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
+        ImmutableTerm translation = parseTerm("X - 1", ImmutableMap.of(IDFAC.createAttributeID("X"), v));
 
         assertEquals(TERM_FACTORY.getImmutableFunctionalTerm(
                 DB_FS_FACTORY.getUntypedDBMathBinaryOperator("-"),
@@ -151,8 +151,7 @@ public class ExpressionParserTest {
     @Test
     public void multiplication_test() throws Exception {
         Variable v = TERM_FACTORY.getVariable("x0");
-        ImmutableTerm translation = parseTerm("X * 2", ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
+        ImmutableTerm translation = parseTerm("X * 2", ImmutableMap.of(IDFAC.createAttributeID("X"), v));
 
         assertEquals(TERM_FACTORY.getImmutableFunctionalTerm(
                 DB_FS_FACTORY.getUntypedDBMathBinaryOperator("*"),
@@ -163,8 +162,7 @@ public class ExpressionParserTest {
     @Test
     public void division_test() throws Exception {
         Variable v = TERM_FACTORY.getVariable("x0");
-        ImmutableTerm translation = parseTerm("X / 2", ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
+        ImmutableTerm translation = parseTerm("X / 2", ImmutableMap.of(IDFAC.createAttributeID("X"), v));
 
         assertEquals(TERM_FACTORY.getImmutableFunctionalTerm(
                 DB_FS_FACTORY.getUntypedDBMathBinaryOperator("/"),
@@ -176,8 +174,7 @@ public class ExpressionParserTest {
     public void modulo_test() throws Exception {
         Variable v = TERM_FACTORY.getVariable("x0");
         var ex = assertThrows(UnsupportedOperationException.class, () ->
-                parseTerm("X % 2", ImmutableMap.of(
-                    new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v)));
+                parseTerm("X % 2", ImmutableMap.of(IDFAC.createAttributeID("X"), v)));
 
         assertEquals("The untyped math operator % is not supported", ex.getMessage());
     //    assertEquals(TERM_FACTORY.getImmutableFunctionalTerm(
@@ -190,8 +187,7 @@ public class ExpressionParserTest {
     public void integer_div_test() throws Exception {
         Variable v = TERM_FACTORY.getVariable("x0");
         var ex = assertThrows(UnsupportedOperationException.class, () ->
-                parseTerm("X DIV 2", ImmutableMap.of(
-                    new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v)));
+                parseTerm("X DIV 2", ImmutableMap.of(IDFAC.createAttributeID("X"), v)));
 
         assertEquals("The untyped math operator DIV is not supported", ex.getMessage());
 //        assertEquals(TERM_FACTORY.getImmutableFunctionalTerm(
@@ -204,8 +200,7 @@ public class ExpressionParserTest {
     public void concat_2_test() throws Exception {
         Variable v = TERM_FACTORY.getVariable("x0");
 
-        ImmutableTerm translation = parseTerm("X || 'B'", ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
+        ImmutableTerm translation = parseTerm("X || 'B'", ImmutableMap.of(IDFAC.createAttributeID("X"), v));
 
         assertEquals(TERM_FACTORY.getImmutableFunctionalTerm(
                 DB_FS_FACTORY.getNullRejectingDBConcat(2),
@@ -217,7 +212,7 @@ public class ExpressionParserTest {
     public void concat_3_Test() throws Exception {
         Variable v = TERM_FACTORY.getVariable("x0");
         ImmutableTerm translation = parseTerm("'A' || X || 'B'", ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
+                IDFAC.createAttributeID("X"), v));
 
         DBFunctionSymbol concat = DB_FS_FACTORY.getNullRejectingDBConcat(2);
 
@@ -234,7 +229,7 @@ public class ExpressionParserTest {
     public void function_CONCAT_test() throws Exception {
         Variable v = TERM_FACTORY.getVariable("x0");
         ImmutableTerm translation = parseTerm("CONCAT('A', X, 'B')", ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
+                IDFAC.createAttributeID("X"), v));
 
         assertEquals(TERM_FACTORY.getImmutableFunctionalTerm(
                 DB_FS_FACTORY.getRegularDBFunctionSymbol("CONCAT", 3),
@@ -250,7 +245,7 @@ public class ExpressionParserTest {
     public void equalsTo_Test() throws Exception {
         Variable v = TERM_FACTORY.getVariable("x0");
         ImmutableExpression translation = parseBooleanExpression("X = 'B'", ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
+                IDFAC.createAttributeID("X"), v));
 
         assertEquals(TERM_FACTORY.getNotYetTypedEquality(
                 v,
@@ -261,7 +256,7 @@ public class ExpressionParserTest {
     public void not_equalsTo_test() throws Exception {
         Variable v = TERM_FACTORY.getVariable("x0");
         ImmutableExpression translation = parseBooleanExpression("X <> 'B'", ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
+                IDFAC.createAttributeID("X"), v));
 
         assertEquals(TERM_FACTORY.getDBNot(TERM_FACTORY.getNotYetTypedEquality(
                 v,
@@ -272,7 +267,7 @@ public class ExpressionParserTest {
     public void not_equalsTo_bang_test() throws Exception {
         Variable v = TERM_FACTORY.getVariable("x0");
         ImmutableExpression translation = parseBooleanExpression("X != 'B'", ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
+                IDFAC.createAttributeID("X"), v));
 
         assertEquals(TERM_FACTORY.getDBNot(TERM_FACTORY.getNotYetTypedEquality(
                 v,
@@ -283,7 +278,7 @@ public class ExpressionParserTest {
     public void equalsTo_constant_with_quoteTest() throws Exception {
         Variable v = TERM_FACTORY.getVariable("x0");
         ImmutableExpression translation = parseBooleanExpression("X = 'Jane''s dogs'", ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
+                IDFAC.createAttributeID("X"), v));
 
         assertEquals(TERM_FACTORY.getNotYetTypedEquality(
                 v,
@@ -294,7 +289,7 @@ public class ExpressionParserTest {
     public void equalsTo_constant_with_quote2Test() throws Exception {
         Variable v = TERM_FACTORY.getVariable("x0");
         ImmutableExpression translation = parseBooleanExpression("X = 'Jane''''s dogs'", ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
+                IDFAC.createAttributeID("X"), v));
 
         assertEquals(TERM_FACTORY.getNotYetTypedEquality(
                 v,
@@ -305,7 +300,7 @@ public class ExpressionParserTest {
     public void greater_than_test() throws Exception {
         Variable v = TERM_FACTORY.getVariable("x0");
         ImmutableExpression translation = parseBooleanExpression("X > 3", ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
+                IDFAC.createAttributeID("X"), v));
 
         assertEquals(TERM_FACTORY.getImmutableExpression(
                 DB_FS_FACTORY.getDBDefaultInequality(GT),
@@ -317,7 +312,7 @@ public class ExpressionParserTest {
     public void greater_than_or_equals_test() throws Exception {
         Variable v = TERM_FACTORY.getVariable("x0");
         ImmutableExpression translation = parseBooleanExpression("X >= 3", ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
+                IDFAC.createAttributeID("X"), v));
 
         assertEquals(TERM_FACTORY.getImmutableExpression(
                 DB_FS_FACTORY.getDBDefaultInequality(GTE),
@@ -329,7 +324,7 @@ public class ExpressionParserTest {
     public void minor_than_test() throws Exception {
         Variable v = TERM_FACTORY.getVariable("x0");
         ImmutableExpression translation = parseBooleanExpression("X < 3", ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
+                IDFAC.createAttributeID("X"), v));
 
         assertEquals(TERM_FACTORY.getImmutableExpression(
                 DB_FS_FACTORY.getDBDefaultInequality(LT),
@@ -341,7 +336,7 @@ public class ExpressionParserTest {
     public void minor_than_equals_test() throws Exception {
         Variable v = TERM_FACTORY.getVariable("x0");
         ImmutableExpression translation = parseBooleanExpression("X <= 3", ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
+                IDFAC.createAttributeID("X"), v));
 
         assertEquals(TERM_FACTORY.getImmutableExpression(
                 DB_FS_FACTORY.getDBDefaultInequality(LTE),
@@ -353,7 +348,7 @@ public class ExpressionParserTest {
     public void not_equals_to_test() throws Exception {
         Variable v = TERM_FACTORY.getVariable("x0");
         ImmutableExpression translation = parseBooleanExpression("NOT X = 'B'", ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
+                IDFAC.createAttributeID("X"), v));
 
         assertEquals(TERM_FACTORY.getImmutableExpression(NOT, TERM_FACTORY.getNotYetTypedEquality(
                 v,
@@ -364,7 +359,7 @@ public class ExpressionParserTest {
     public void not_not_equals_to_test() throws Exception {
         Variable v = TERM_FACTORY.getVariable("x0");
         ImmutableExpression translation = parseBooleanExpression("NOT X <> 'B'", ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
+                IDFAC.createAttributeID("X"), v));
 
         assertEquals(TERM_FACTORY.getNotYetTypedEquality(
                 v,
@@ -375,7 +370,7 @@ public class ExpressionParserTest {
     public void not_not_equals_to_bang_test() throws Exception {
         Variable v = TERM_FACTORY.getVariable("x0");
         ImmutableExpression translation = parseBooleanExpression("NOT X != 'B'", ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
+                IDFAC.createAttributeID("X"), v));
 
         assertEquals(TERM_FACTORY.getNotYetTypedEquality(
                 v,
@@ -386,7 +381,7 @@ public class ExpressionParserTest {
     public void not_greater_than_test() throws Exception {
         Variable v = TERM_FACTORY.getVariable("x0");
         ImmutableExpression translation = parseBooleanExpression("NOT X > 3", ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
+                IDFAC.createAttributeID("X"), v));
 
         assertEquals(TERM_FACTORY.getImmutableExpression(NOT, TERM_FACTORY.getImmutableExpression(
                 DB_FS_FACTORY.getDBDefaultInequality(GT),
@@ -398,7 +393,7 @@ public class ExpressionParserTest {
     public void not_greater_than_equals_test() throws Exception {
         Variable v = TERM_FACTORY.getVariable("x0");
         ImmutableExpression translation = parseBooleanExpression("NOT X >= 3", ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
+                IDFAC.createAttributeID("X"), v));
 
         assertEquals(TERM_FACTORY.getImmutableExpression(NOT, TERM_FACTORY.getImmutableExpression(
                 DB_FS_FACTORY.getDBDefaultInequality(GTE),
@@ -410,7 +405,7 @@ public class ExpressionParserTest {
     public void not_minor_than_test() throws Exception {
         Variable v = TERM_FACTORY.getVariable("x0");
         ImmutableExpression translation = parseBooleanExpression("NOT X < 3", ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
+                IDFAC.createAttributeID("X"), v));
 
         assertEquals(TERM_FACTORY.getImmutableExpression(NOT, TERM_FACTORY.getImmutableExpression(
                 DB_FS_FACTORY.getDBDefaultInequality(LT),
@@ -422,7 +417,7 @@ public class ExpressionParserTest {
     public void not_minor_than_equals_test() throws Exception {
         Variable v = TERM_FACTORY.getVariable("x0");
         ImmutableExpression translation = parseBooleanExpression("NOT X <= 3", ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
+                IDFAC.createAttributeID("X"), v));
 
         assertEquals(TERM_FACTORY.getImmutableExpression(NOT, TERM_FACTORY.getImmutableExpression(
                 DB_FS_FACTORY.getDBDefaultInequality(LTE),
@@ -434,7 +429,7 @@ public class ExpressionParserTest {
     public void is_distinct_from_test1() throws Exception {
         Variable v = TERM_FACTORY.getVariable("x0");
         ImmutableExpression translation = parseBooleanExpression("1 IS DISTINCT FROM 1", ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
+                IDFAC.createAttributeID("X"), v));
 
         assertEquals(TERM_FACTORY.getDBNot(
                 TERM_FACTORY.getNotYetTypedEquality(TERM_FACTORY.getDBConstant("1", dbLongType),
@@ -445,7 +440,7 @@ public class ExpressionParserTest {
     public void is_distinct_from_test2() throws Exception {
         Variable v = TERM_FACTORY.getVariable("x0");
         ImmutableExpression translation = parseBooleanExpression("1 IS DISTINCT FROM NULL", ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
+                IDFAC.createAttributeID("X"), v));
 
         assertEquals(TERM_FACTORY.getDBBooleanConstant(true), translation.simplify());
     }
@@ -454,7 +449,7 @@ public class ExpressionParserTest {
     public void is_distinct_from_test3() throws Exception {
         Variable v = TERM_FACTORY.getVariable("x0");
         ImmutableExpression translation = parseBooleanExpression("NULL IS DISTINCT FROM 2", ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
+                IDFAC.createAttributeID("X"), v));
 
         assertEquals(TERM_FACTORY.getDBBooleanConstant(true), translation.simplify());
     }
@@ -463,7 +458,7 @@ public class ExpressionParserTest {
     public void is_distinct_from_test4() throws Exception {
         Variable v = TERM_FACTORY.getVariable("x0");
         ImmutableExpression translation = parseBooleanExpression("NULL IS DISTINCT FROM NULL", ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
+                IDFAC.createAttributeID("X"), v));
 
         assertEquals(TERM_FACTORY.getDBBooleanConstant(false), translation.simplify());
     }
@@ -472,7 +467,7 @@ public class ExpressionParserTest {
     public void is_not_distinct_from_test1() throws Exception {
         Variable v = TERM_FACTORY.getVariable("x0");
         ImmutableExpression translation = parseBooleanExpression("1 IS NOT DISTINCT FROM 1", ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
+                IDFAC.createAttributeID("X"), v));
 
         assertEquals(
                 TERM_FACTORY.getNotYetTypedEquality(
@@ -486,7 +481,7 @@ public class ExpressionParserTest {
     public void array_test() throws Exception {
         Variable v = TERM_FACTORY.getVariable("x0");
         ImmutableTerm translation = parseTerm("X[0]", ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
+                IDFAC.createAttributeID("X"), v));
 
         assertEquals(TERM_FACTORY.getImmutableFunctionalTerm(
                         DB_FS_FACTORY.getDBArrayAccess(), v,
@@ -499,7 +494,7 @@ public class ExpressionParserTest {
         Variable v = TERM_FACTORY.getVariable("x0");
         var ex = assertThrows(UnsupportedSelectQueryRuntimeException.class, () ->
                 parseTerm("X[2:4]", ImmutableMap.of(
-                        new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v)));
+                        IDFAC.createAttributeID("X"), v)));
 
         assertEquals("Array intervals are not supported", ex.getMessage());
     }
@@ -508,7 +503,7 @@ public class ExpressionParserTest {
     public void in_test() throws Exception {
         Variable v = TERM_FACTORY.getVariable("x0");
         ImmutableExpression translation = parseBooleanExpression("X IN (1, 3)", ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
+                IDFAC.createAttributeID("X"), v));
 
         assertEquals(TERM_FACTORY.getImmutableExpression(DB_FS_FACTORY.getDBOr(2),
                 TERM_FACTORY.getNotYetTypedEquality(
@@ -523,7 +518,7 @@ public class ExpressionParserTest {
     public void in_test_2() throws Exception {
         Variable v = TERM_FACTORY.getVariable("x0");
         ImmutableExpression translation = parseBooleanExpression("X IN (1)", ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
+                IDFAC.createAttributeID("X"), v));
 
         assertEquals(TERM_FACTORY.getNotYetTypedEquality(
                         v,
@@ -534,7 +529,7 @@ public class ExpressionParserTest {
     public void not_in_test() throws Exception {
         Variable v = TERM_FACTORY.getVariable("x0");
         ImmutableExpression translation = parseBooleanExpression("X NOT IN (1, 3)", ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
+                IDFAC.createAttributeID("X"), v));
 
         assertEquals(TERM_FACTORY.getImmutableExpression(NOT,
                 TERM_FACTORY.getImmutableExpression(DB_FS_FACTORY.getDBOr(2),
@@ -552,8 +547,8 @@ public class ExpressionParserTest {
         Variable v2 = TERM_FACTORY.getVariable("y0");
 
         ImmutableExpression translation = parseBooleanExpression("(X, Y) IN ((1, 3), (2,4))", ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v1,
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("Y")), v2));
+                IDFAC.createAttributeID("X"), v1,
+                IDFAC.createAttributeID("Y"), v2));
 
         assertEquals(TERM_FACTORY.getImmutableExpression(DB_FS_FACTORY.getDBOr(2),
                 TERM_FACTORY.getConjunction(
@@ -580,8 +575,8 @@ public class ExpressionParserTest {
         Variable v2 = TERM_FACTORY.getVariable("y0");
 
         ImmutableExpression translation = parseBooleanExpression("(X, Y) IN ((1, 3))", ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v1,
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("Y")), v2));
+                IDFAC.createAttributeID("X"), v1,
+                IDFAC.createAttributeID("Y"), v2));
 
         assertEquals(TERM_FACTORY.getConjunction(
                                 TERM_FACTORY.getNotYetTypedEquality(
@@ -597,7 +592,7 @@ public class ExpressionParserTest {
     public void is_null_test() throws Exception {
         Variable v = TERM_FACTORY.getVariable("x0");
         ImmutableExpression translation = parseBooleanExpression("X IS NULL", ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
+                IDFAC.createAttributeID("X"), v));
 
         assertEquals(TERM_FACTORY.getImmutableExpression(DB_FS_FACTORY.getDBIsNull(), v), translation);
     }
@@ -606,7 +601,7 @@ public class ExpressionParserTest {
     public void is_not_null_test() throws Exception {
         Variable v = TERM_FACTORY.getVariable("x0");
         ImmutableExpression translation = parseBooleanExpression("X IS NOT NULL", ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
+                IDFAC.createAttributeID("X"), v));
 
         assertEquals(TERM_FACTORY.getImmutableExpression(NOT,
                 TERM_FACTORY.getImmutableExpression(DB_FS_FACTORY.getDBIsNull(), v)), translation);
@@ -616,7 +611,7 @@ public class ExpressionParserTest {
     public void between_test() throws Exception {
         Variable v = TERM_FACTORY.getVariable("x0");
         ImmutableExpression translation = parseBooleanExpression("X BETWEEN 1 AND 3", ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
+                IDFAC.createAttributeID("X"), v));
 
         assertEquals(TERM_FACTORY.getConjunction(
                 TERM_FACTORY.getImmutableExpression(
@@ -633,7 +628,7 @@ public class ExpressionParserTest {
     public void not_between_test() throws Exception {
         Variable v = TERM_FACTORY.getVariable("x0");
         ImmutableExpression translation = parseBooleanExpression("X NOT BETWEEN 1 AND 3", ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
+                IDFAC.createAttributeID("X"), v));
 
         assertEquals(TERM_FACTORY.getImmutableExpression(DB_FS_FACTORY.getDBOr(2),
                         TERM_FACTORY.getImmutableExpression(
@@ -650,7 +645,7 @@ public class ExpressionParserTest {
     public void like_test() throws Exception {
         Variable v = TERM_FACTORY.getVariable("x0");
         ImmutableExpression translation = parseBooleanExpression("X LIKE '_A%'", ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
+                IDFAC.createAttributeID("X"), v));
 
         assertEquals(TERM_FACTORY.getImmutableExpression(DB_FS_FACTORY.getDBLike(),
                 v,
@@ -661,7 +656,7 @@ public class ExpressionParserTest {
     public void not_like_test() throws Exception {
         Variable v = TERM_FACTORY.getVariable("x0");
         ImmutableExpression translation = parseBooleanExpression("X NOT LIKE '_A%'", ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
+                IDFAC.createAttributeID("X"), v));
 
         assertEquals(TERM_FACTORY.getImmutableExpression(NOT,
                 TERM_FACTORY.getImmutableExpression(DB_FS_FACTORY.getDBLike(),
@@ -673,7 +668,7 @@ public class ExpressionParserTest {
     public void regexp_match_test() throws Exception {
         Variable v = TERM_FACTORY.getVariable("x0");
         ImmutableExpression translation = parseBooleanExpression("X ~ 'A.*B'", ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
+                IDFAC.createAttributeID("X"), v));
 
         assertEquals(TERM_FACTORY.getImmutableExpression(DB_FS_FACTORY.getDBRegexpMatches2(),
                 v,
@@ -684,7 +679,7 @@ public class ExpressionParserTest {
     public void regexp_not_match_test() throws Exception {
         Variable v = TERM_FACTORY.getVariable("x0");
         ImmutableExpression translation = parseBooleanExpression("X !~ 'A.*B'", ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
+                IDFAC.createAttributeID("X"), v));
 
         assertEquals(TERM_FACTORY.getImmutableExpression(NOT,
                 TERM_FACTORY.getImmutableExpression(DB_FS_FACTORY.getDBRegexpMatches2(),
@@ -696,7 +691,7 @@ public class ExpressionParserTest {
     public void regexp_match_ignore_case_test() throws Exception {
         Variable v = TERM_FACTORY.getVariable("x0");
         ImmutableExpression translation = parseBooleanExpression("X ~* 'A.*B'", ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
+                IDFAC.createAttributeID("X"), v));
 
         assertEquals(TERM_FACTORY.getImmutableExpression(DB_FS_FACTORY.getDBRegexpMatches3(),
                 v,
@@ -708,7 +703,7 @@ public class ExpressionParserTest {
     public void regexp_not_match_ignore_case_test() throws Exception {
         Variable v = TERM_FACTORY.getVariable("x0");
         ImmutableExpression translation = parseBooleanExpression("X !~* 'A.*B'", ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
+                IDFAC.createAttributeID("X"), v));
 
         assertEquals(TERM_FACTORY.getImmutableExpression(NOT,
                 TERM_FACTORY.getImmutableExpression(DB_FS_FACTORY.getDBRegexpMatches3(),
@@ -721,7 +716,7 @@ public class ExpressionParserTest {
     public void not_regexp_match_test() throws Exception {
         Variable v = TERM_FACTORY.getVariable("x0");
         ImmutableExpression translation = parseBooleanExpression("NOT X ~ 'A.*B'", ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
+                IDFAC.createAttributeID("X"), v));
 
         assertEquals(TERM_FACTORY.getImmutableExpression(NOT,
                 TERM_FACTORY.getImmutableExpression(DB_FS_FACTORY.getDBRegexpMatches2(),
@@ -733,7 +728,7 @@ public class ExpressionParserTest {
     public void not_regexp_not_match_test() throws Exception {
         Variable v = TERM_FACTORY.getVariable("x0");
         ImmutableExpression translation = parseBooleanExpression("NOT X !~ 'A.*B'", ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
+                IDFAC.createAttributeID("X"), v));
 
         assertEquals(TERM_FACTORY.getImmutableExpression(DB_FS_FACTORY.getDBRegexpMatches2(),
                 v,
@@ -744,7 +739,7 @@ public class ExpressionParserTest {
     public void not_regexp_match_ignore_case_test() throws Exception {
         Variable v = TERM_FACTORY.getVariable("x0");
         ImmutableExpression translation = parseBooleanExpression("NOT X ~* 'A.*B'", ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
+                IDFAC.createAttributeID("X"), v));
 
         assertEquals(TERM_FACTORY.getImmutableExpression(NOT,
                 TERM_FACTORY.getImmutableExpression(DB_FS_FACTORY.getDBRegexpMatches3(),
@@ -757,7 +752,7 @@ public class ExpressionParserTest {
     public void not_regexp_not_match_ignore_case_test() throws Exception {
         Variable v = TERM_FACTORY.getVariable("x0");
         ImmutableExpression translation = parseBooleanExpression("NOT X !~* 'A.*B'", ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
+                IDFAC.createAttributeID("X"), v));
 
         assertEquals(TERM_FACTORY.getImmutableExpression(DB_FS_FACTORY.getDBRegexpMatches3(),
                 v,
@@ -770,7 +765,7 @@ public class ExpressionParserTest {
     public void regexp_MySQL_match_test() throws Exception {
         Variable v = TERM_FACTORY.getVariable("x0");
         ImmutableExpression translation = parseBooleanExpression("X REGEXP BINARY 'A.*B'", ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
+                IDFAC.createAttributeID("X"), v));
 
         assertEquals(TERM_FACTORY.getImmutableExpression(DB_FS_FACTORY.getDBRegexpMatches2(),
                 v,
@@ -781,7 +776,7 @@ public class ExpressionParserTest {
     public void regexp_MySQL_match_ignore_case_test() throws Exception {
         Variable v = TERM_FACTORY.getVariable("x0");
         ImmutableExpression translation = parseBooleanExpression("X REGEXP 'A.*B'", ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
+                IDFAC.createAttributeID("X"), v));
 
         assertEquals(TERM_FACTORY.getImmutableExpression(DB_FS_FACTORY.getDBRegexpMatches3(),
                 v,
@@ -793,7 +788,7 @@ public class ExpressionParserTest {
     public void not_regexp_MySQL_match_test() throws Exception {
         Variable v = TERM_FACTORY.getVariable("x0");
         ImmutableExpression translation = parseBooleanExpression("NOT X REGEXP BINARY 'A.*B'", ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
+                IDFAC.createAttributeID("X"), v));
 
         assertEquals(TERM_FACTORY.getImmutableExpression(NOT,
                 TERM_FACTORY.getImmutableExpression(DB_FS_FACTORY.getDBRegexpMatches2(),
@@ -805,7 +800,7 @@ public class ExpressionParserTest {
     public void not_regexp_MySQL_match_infix_NOT_test() throws Exception {
         Variable v = TERM_FACTORY.getVariable("x0");
         ImmutableExpression translation = parseBooleanExpression(" X NOT REGEXP BINARY 'A.*B'", ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
+                IDFAC.createAttributeID("X"), v));
 
         assertEquals(TERM_FACTORY.getImmutableExpression(NOT,
                 TERM_FACTORY.getImmutableExpression(DB_FS_FACTORY.getDBRegexpMatches2(),
@@ -817,7 +812,7 @@ public class ExpressionParserTest {
     public void not_regexp_MySQL_match_ignore_case_test() throws Exception {
         Variable v = TERM_FACTORY.getVariable("x0");
         ImmutableExpression translation = parseBooleanExpression("NOT X REGEXP 'A.*B'", ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
+                IDFAC.createAttributeID("X"), v));
 
         assertEquals(TERM_FACTORY.getImmutableExpression(NOT,
                 TERM_FACTORY.getImmutableExpression(DB_FS_FACTORY.getDBRegexpMatches3(),
@@ -830,7 +825,7 @@ public class ExpressionParserTest {
     public void not_regexp_MySQL_match_ignore_case_infix_NOT_test() throws Exception {
         Variable v = TERM_FACTORY.getVariable("x0");
         ImmutableExpression translation = parseBooleanExpression(" X NOT REGEXP 'A.*B'", ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
+                IDFAC.createAttributeID("X"), v));
 
         assertEquals(TERM_FACTORY.getImmutableExpression(NOT,
                 TERM_FACTORY.getImmutableExpression(DB_FS_FACTORY.getDBRegexpMatches3(),
@@ -843,7 +838,7 @@ public class ExpressionParserTest {
     public void and_test() throws Exception {
         Variable v = TERM_FACTORY.getVariable("x0");
         ImmutableExpression translation = parseBooleanExpression("X >= 1 AND X <= 3", ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
+                IDFAC.createAttributeID("X"), v));
 
         assertEquals(TERM_FACTORY.getConjunction(
                 TERM_FACTORY.getImmutableExpression(
@@ -860,7 +855,7 @@ public class ExpressionParserTest {
     public void not_and_test_brackets() throws Exception {
         Variable v = TERM_FACTORY.getVariable("x0");
         ImmutableExpression translation = parseBooleanExpression("NOT (X >= 1 AND X <= 3)", ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
+                IDFAC.createAttributeID("X"), v));
 
         assertEquals(TERM_FACTORY.getDBNot(
                         TERM_FACTORY.getConjunction(
@@ -878,7 +873,7 @@ public class ExpressionParserTest {
     public void not_not_and_test_brackets() throws Exception {
         Variable v = TERM_FACTORY.getVariable("x0");
         ImmutableExpression translation = parseBooleanExpression("NOT (NOT (X >= 1 AND X <= 3))", ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
+                IDFAC.createAttributeID("X"), v));
 
         assertEquals(TERM_FACTORY.getConjunction(
                 TERM_FACTORY.getImmutableExpression(
@@ -896,7 +891,7 @@ public class ExpressionParserTest {
     public void or_test() throws Exception {
         Variable v = TERM_FACTORY.getVariable("x0");
         ImmutableExpression translation = parseBooleanExpression("X < 1 OR X > 3", ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
+                IDFAC.createAttributeID("X"), v));
 
         assertEquals(TERM_FACTORY.getImmutableExpression(DB_FS_FACTORY.getDBOr(2),
                 TERM_FACTORY.getImmutableExpression(
@@ -913,7 +908,7 @@ public class ExpressionParserTest {
     public void parenthesis_test() throws Exception {
         Variable v = TERM_FACTORY.getVariable("x0");
         ImmutableExpression translation = parseBooleanExpression("(X >= 1)", ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
+                IDFAC.createAttributeID("X"), v));
 
         assertEquals(TERM_FACTORY.getImmutableExpression(
                 DB_FS_FACTORY.getDBDefaultInequality(GTE),
@@ -925,7 +920,7 @@ public class ExpressionParserTest {
     public void not_parenthesis_test() throws Exception {
         Variable v = TERM_FACTORY.getVariable("x0");
         ImmutableExpression translation = parseBooleanExpression("NOT (X >= 1)", ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
+                IDFAC.createAttributeID("X"), v));
 
         assertEquals(TERM_FACTORY.getImmutableExpression(NOT,
                 TERM_FACTORY.getImmutableExpression(
@@ -938,7 +933,7 @@ public class ExpressionParserTest {
     public void ontop_contains_role_test() throws Exception {
         Variable v = TERM_FACTORY.getVariable("x0");
         ImmutableExpression translation = parseBooleanExpression("ontop_contains_role('admin')", ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
+                IDFAC.createAttributeID("X"), v));
 
         assertEquals(TERM_FACTORY.getImmutableExpression(DB_FS_FACTORY.getOntopContainsRole(), TERM_FACTORY.getDBStringConstant("admin")), translation);
     }
@@ -947,7 +942,7 @@ public class ExpressionParserTest {
     public void ontop_contains_group_test() throws Exception {
         Variable v = TERM_FACTORY.getVariable("x0");
         ImmutableExpression translation = parseBooleanExpression("ontop_contains_group('admin')", ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
+                IDFAC.createAttributeID("X"), v));
 
         assertEquals(TERM_FACTORY.getImmutableExpression(DB_FS_FACTORY.getOntopContainsGroup(), TERM_FACTORY.getDBStringConstant("admin")), translation);
     }
@@ -956,7 +951,7 @@ public class ExpressionParserTest {
     public void ontop_contains_role_or_group_test() throws Exception {
         Variable v = TERM_FACTORY.getVariable("x0");
         ImmutableExpression translation = parseBooleanExpression("ontop_contains_role_or_group('admin')", ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
+                IDFAC.createAttributeID("X"), v));
 
         assertEquals(TERM_FACTORY.getImmutableExpression(DB_FS_FACTORY.getOntopContainsRoleOrGroup(), TERM_FACTORY.getDBStringConstant("admin")), translation);
     }
@@ -965,7 +960,7 @@ public class ExpressionParserTest {
     public void ontop_user_test() throws Exception {
         Variable v = TERM_FACTORY.getVariable("x0");
         ImmutableExpression translation = parseBooleanExpression("ontop_user() = 'roger'", ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
+                IDFAC.createAttributeID("X"), v));
 
         assertEquals(TERM_FACTORY.getNotYetTypedEquality(TERM_FACTORY.getImmutableFunctionalTerm(DB_FS_FACTORY.getOntopUser()), TERM_FACTORY.getDBStringConstant("roger")), translation);
     }
@@ -974,7 +969,7 @@ public class ExpressionParserTest {
     public void unary_plus_test() throws Exception {
         Variable v = TERM_FACTORY.getVariable("x0");
         ImmutableTerm translation = parseTerm("+X ", ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
+                IDFAC.createAttributeID("X"), v));
 
         assertEquals(v, translation);
     }
@@ -983,7 +978,7 @@ public class ExpressionParserTest {
     public void unary_minus_test() throws Exception {
         Variable v = TERM_FACTORY.getVariable("x0");
         ImmutableTerm translation = parseTerm("-X ", ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
+                IDFAC.createAttributeID("X"), v));
 
         assertEquals(TERM_FACTORY.getImmutableFunctionalTerm(
                 DB_FS_FACTORY.getUntypedDBMathBinaryOperator(SPARQL.MULTIPLY),
@@ -995,7 +990,7 @@ public class ExpressionParserTest {
     public void case_when_test() throws Exception {
         Variable v = TERM_FACTORY.getVariable("x0");
         ImmutableTerm translation = parseTerm("CASE A WHEN 1 THEN 3 ELSE 4 END", ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("A")), v));
+                IDFAC.createAttributeID("A"), v));
 
         assertEquals(TERM_FACTORY.getIfThenElse(
                 TERM_FACTORY.getNotYetTypedEquality(v, TERM_FACTORY.getDBConstant("1", DB_TYPE_FACTORY.getDBLargeIntegerType())),
@@ -1008,7 +1003,7 @@ public class ExpressionParserTest {
     public void case_when_test_3() throws Exception {
         Variable v = TERM_FACTORY.getVariable("x0");
         ImmutableTerm translation = parseTerm("CASE A WHEN 1 THEN 3 WHEN 2 THEN 4 ELSE 5 END", ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("A")), v));
+                IDFAC.createAttributeID("A"), v));
 
         assertEquals(TERM_FACTORY.getDBCase(
                 Stream.of(Maps.immutableEntry(TERM_FACTORY.getNotYetTypedEquality(v, TERM_FACTORY.getDBConstant("1", DB_TYPE_FACTORY.getDBLargeIntegerType())),
@@ -1023,7 +1018,7 @@ public class ExpressionParserTest {
     public void case_when_test_3b() throws Exception {
         Variable v = TERM_FACTORY.getVariable("x0");
         ImmutableTerm translation = parseTerm("CASE WHEN A = 1 THEN 3 WHEN A = 2 THEN 4 ELSE 5 END", ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("A")), v));
+                IDFAC.createAttributeID("A"), v));
 
         assertEquals(TERM_FACTORY.getDBCase(
                 Stream.of(Maps.immutableEntry(TERM_FACTORY.getNotYetTypedEquality(v, TERM_FACTORY.getDBConstant("1", DB_TYPE_FACTORY.getDBLargeIntegerType())),
@@ -1038,7 +1033,7 @@ public class ExpressionParserTest {
     public void case_when_test_4() throws Exception {
         Variable v = TERM_FACTORY.getVariable("x0");
         ImmutableTerm translation = parseTerm("CASE A WHEN 1 THEN 3 WHEN 2 THEN 4 END", ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("A")), v));
+                IDFAC.createAttributeID("A"), v));
 
         assertEquals(TERM_FACTORY.getDBCase(
                 Stream.of(Maps.immutableEntry(TERM_FACTORY.getNotYetTypedEquality(v, TERM_FACTORY.getDBConstant("1", DB_TYPE_FACTORY.getDBLargeIntegerType())),
@@ -1053,7 +1048,7 @@ public class ExpressionParserTest {
     public void case_when_test_4_null() throws Exception {
         Variable v = TERM_FACTORY.getVariable("x0");
         ImmutableTerm translation = parseTerm("CASE A WHEN 1 THEN 3 WHEN 2 THEN 4 ELSE NULL END", ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("A")), v));
+                IDFAC.createAttributeID("A"), v));
 
         assertEquals(TERM_FACTORY.getDBCase(
                 Stream.of(Maps.immutableEntry(TERM_FACTORY.getNotYetTypedEquality(v, TERM_FACTORY.getDBConstant("1", DB_TYPE_FACTORY.getDBLargeIntegerType())),
@@ -1068,7 +1063,7 @@ public class ExpressionParserTest {
     public void case_when_test_4b() throws Exception {
         Variable v = TERM_FACTORY.getVariable("x0");
         ImmutableTerm translation = parseTerm("CASE WHEN A = 1 THEN 3 WHEN A = 2 THEN 4 END", ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("A")), v));
+                IDFAC.createAttributeID("A"), v));
 
         assertEquals(TERM_FACTORY.getDBCase(
                 Stream.of(Maps.immutableEntry(TERM_FACTORY.getNotYetTypedEquality(v, TERM_FACTORY.getDBConstant("1", DB_TYPE_FACTORY.getDBLargeIntegerType())),
@@ -1083,7 +1078,7 @@ public class ExpressionParserTest {
     public void case_when_test_4b_null() throws Exception {
         Variable v = TERM_FACTORY.getVariable("x0");
         ImmutableTerm translation = parseTerm("CASE WHEN A = 1 THEN 3 WHEN A = 2 THEN 4 ELSE NULL END", ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("A")), v));
+                IDFAC.createAttributeID("A"), v));
 
         assertEquals(TERM_FACTORY.getDBCase(
                 Stream.of(Maps.immutableEntry(TERM_FACTORY.getNotYetTypedEquality(v, TERM_FACTORY.getDBConstant("1", DB_TYPE_FACTORY.getDBLargeIntegerType())),
@@ -1098,7 +1093,7 @@ public class ExpressionParserTest {
     public void boolean_column_test() throws Exception {
         Variable v = TERM_FACTORY.getVariable("x0");
         ImmutableExpression translation = parseBooleanExpression("X", ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
+                IDFAC.createAttributeID("X"), v));
 
         assertEquals(TERM_FACTORY.getImmutableExpression(DB_FS_FACTORY.getIsTrue(), v), translation);
     }
@@ -1107,7 +1102,7 @@ public class ExpressionParserTest {
     public void not_boolean_column_test() throws Exception {
         Variable v = TERM_FACTORY.getVariable("x0");
         ImmutableExpression translation = parseBooleanExpression("NOT X", ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
+                IDFAC.createAttributeID("X"), v));
 
         assertEquals(TERM_FACTORY.getImmutableExpression(
                 DB_FS_FACTORY.getDBNot(),
@@ -1123,7 +1118,7 @@ public class ExpressionParserTest {
         Variable v = TERM_FACTORY.getVariable("x0");
         var ex = assertThrows(UnsupportedSelectQueryRuntimeException.class, () ->
                 parseTerm("(SELECT A FROM Q WHERE A = P.B)", ImmutableMap.of(
-                    new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v)));
+                    IDFAC.createAttributeID("X"), v)));
 
         assertEquals("SubSelect is not supported yet", ex.getMessage());
     }
@@ -1133,7 +1128,7 @@ public class ExpressionParserTest {
         Variable v = TERM_FACTORY.getVariable("x0");
         var ex = assertThrows(UnsupportedSelectQueryRuntimeException.class, () ->
                 parseBooleanExpression("EXISTS (SELECT * FROM Q WHERE A = P.B)", ImmutableMap.of(
-                        new QualifiedAttributeID(null, IDFAC.createAttributeID("A")), v)));
+                        IDFAC.createAttributeID("A"), v)));
 
         assertEquals("EXISTS is not supported yet", ex.getMessage());
     }
@@ -1143,7 +1138,7 @@ public class ExpressionParserTest {
         Variable v = TERM_FACTORY.getVariable("x0");
         var ex = assertThrows(UnsupportedSelectQueryRuntimeException.class, () ->
                 parseBooleanExpression("NOT EXISTS (SELECT * FROM Q WHERE A = P.B)", ImmutableMap.of(
-                        new QualifiedAttributeID(null, IDFAC.createAttributeID("A")), v)));
+                        IDFAC.createAttributeID("A"), v)));
 
         assertEquals("EXISTS is not supported yet", ex.getMessage());
     }
@@ -1153,7 +1148,7 @@ public class ExpressionParserTest {
         Variable v = TERM_FACTORY.getVariable("x0");
         var ex = assertThrows(UnsupportedSelectQueryRuntimeException.class, () ->
                 parseBooleanExpression("A > ALL (SELECT C FROM Q WHERE A = P.B)", ImmutableMap.of(
-                        new QualifiedAttributeID(null, IDFAC.createAttributeID("A")), v)));
+                        IDFAC.createAttributeID("A"), v)));
 
         assertEquals("ALL is not supported yet", ex.getMessage());
     }
@@ -1163,7 +1158,7 @@ public class ExpressionParserTest {
         Variable v = TERM_FACTORY.getVariable("x0");
         var ex = assertThrows(UnsupportedSelectQueryRuntimeException.class, () ->
                 parseBooleanExpression("A > ANY (SELECT C FROM Q WHERE A = P.B)", ImmutableMap.of(
-                        new QualifiedAttributeID(null, IDFAC.createAttributeID("A")), v)));
+                        IDFAC.createAttributeID("A"), v)));
 
         assertEquals("ANY is not supported yet", ex.getMessage());
     }
@@ -1174,8 +1169,8 @@ public class ExpressionParserTest {
         Variable u = TERM_FACTORY.getVariable("y0");
         var ex = assertThrows(UnsupportedSelectQueryRuntimeException.class, () ->
                 parseTerm("X & Y", ImmutableMap.of(
-                    new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v,
-                    new QualifiedAttributeID(null, IDFAC.createAttributeID("Y")), u)));
+                    IDFAC.createAttributeID("X"), v,
+                    IDFAC.createAttributeID("Y"), u)));
 
         assertEquals("Bitwise AND is not supported", ex.getMessage());
     }
@@ -1186,8 +1181,8 @@ public class ExpressionParserTest {
         Variable u = TERM_FACTORY.getVariable("y0");
         var ex = assertThrows(UnsupportedSelectQueryRuntimeException.class, () ->
                 parseTerm("X | Y", ImmutableMap.of(
-                        new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v,
-                        new QualifiedAttributeID(null, IDFAC.createAttributeID("Y")), u)));
+                        IDFAC.createAttributeID("X"), v,
+                        IDFAC.createAttributeID("Y"), u)));
 
         assertEquals("Bitwise OR is not supported", ex.getMessage());
     }
@@ -1198,8 +1193,8 @@ public class ExpressionParserTest {
         Variable u = TERM_FACTORY.getVariable("y0");
         var ex = assertThrows(UnsupportedSelectQueryRuntimeException.class, () ->
                 parseTerm("X ^ Y", ImmutableMap.of(
-                        new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v,
-                        new QualifiedAttributeID(null, IDFAC.createAttributeID("Y")), u)));
+                        IDFAC.createAttributeID("X"), v,
+                        IDFAC.createAttributeID("Y"), u)));
 
         assertEquals("Bitwise XOR is not supported", ex.getMessage());
     }
@@ -1208,7 +1203,7 @@ public class ExpressionParserTest {
     public void extract_variable_test() throws Exception {
         Variable v = TERM_FACTORY.getVariable("x0");
         ImmutableTerm translation = parseTerm("EXTRACT(MONTH FROM X)", ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
+                IDFAC.createAttributeID("X"), v));
 
         assertEquals(TERM_FACTORY.getImmutableFunctionalTerm(DB_FS_FACTORY.getExtractFunctionSymbol("MONTH"),
                 v), translation);
@@ -1218,7 +1213,7 @@ public class ExpressionParserTest {
     public void extract_test() throws Exception {
         Variable v = TERM_FACTORY.getVariable("x0");
         ImmutableTerm translation = parseTerm("EXTRACT(MONTH FROM CURRENT_DATE)", ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
+                IDFAC.createAttributeID("X"), v));
 
         assertEquals(TERM_FACTORY.getImmutableFunctionalTerm(DB_FS_FACTORY.getExtractFunctionSymbol("MONTH"),
                 TERM_FACTORY.getImmutableFunctionalTerm(DB_FS_FACTORY.getCurrentDateTimeSymbol("DATE"))), translation);
@@ -1228,7 +1223,7 @@ public class ExpressionParserTest {
     public void extract_current_date_brackets_test() throws Exception {
         Variable v = TERM_FACTORY.getVariable("x0");
         ImmutableTerm translation = parseTerm("EXTRACT(MONTH FROM CURRENT_DATE())", ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
+                IDFAC.createAttributeID("X"), v));
 
         assertEquals(TERM_FACTORY.getImmutableFunctionalTerm(DB_FS_FACTORY.getExtractFunctionSymbol("MONTH"),
                 TERM_FACTORY.getImmutableFunctionalTerm(DB_FS_FACTORY.getCurrentDateTimeSymbol("DATE"))), translation);
@@ -1238,7 +1233,7 @@ public class ExpressionParserTest {
     public void extract_from_literal_test() throws Exception {
         Variable v = TERM_FACTORY.getVariable("x0");
         ImmutableTerm translation = parseTerm("EXTRACT(YEAR FROM DATE '1998-03-07')", ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
+                IDFAC.createAttributeID("X"), v));
 
         assertEquals(TERM_FACTORY.getImmutableFunctionalTerm(DB_FS_FACTORY.getExtractFunctionSymbol("YEAR"),
                 TERM_FACTORY.getDBConstant("1998-03-07", DB_TYPE_FACTORY.getDBDateType())),
@@ -1259,7 +1254,7 @@ public class ExpressionParserTest {
         Variable v = TERM_FACTORY.getVariable("x0");
         var ex = assertThrows(UnsupportedSelectQueryRuntimeException.class, () ->
                 parseTerm("SUM(X)", ImmutableMap.of(
-                        new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v)));
+                        IDFAC.createAttributeID("X"), v)));
 
         assertEquals("Unsupported SQL function", ex.getMessage());
     }
@@ -1269,7 +1264,7 @@ public class ExpressionParserTest {
         Variable v = TERM_FACTORY.getVariable("x0");
         var ex = assertThrows(UnsupportedSelectQueryRuntimeException.class, () ->
                 parseTerm("AVG(X)", ImmutableMap.of(
-                        new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v)));
+                        IDFAC.createAttributeID("X"), v)));
 
         assertEquals("Unsupported SQL function", ex.getMessage());
     }
@@ -1279,7 +1274,7 @@ public class ExpressionParserTest {
         Variable v = TERM_FACTORY.getVariable("x0");
         var ex = assertThrows(UnsupportedSelectQueryRuntimeException.class, () ->
                 parseTerm("MIN(X)", ImmutableMap.of(
-                        new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v)));
+                        IDFAC.createAttributeID("X"), v)));
 
         assertEquals("Unsupported SQL function", ex.getMessage());
     }
@@ -1289,7 +1284,7 @@ public class ExpressionParserTest {
         Variable v = TERM_FACTORY.getVariable("x0");
         var ex = assertThrows(UnsupportedSelectQueryRuntimeException.class, () ->
                 parseTerm("MAX(X)", ImmutableMap.of(
-                        new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v)));
+                        IDFAC.createAttributeID("X"), v)));
 
         assertEquals("Unsupported SQL function", ex.getMessage());
     }
@@ -1299,7 +1294,7 @@ public class ExpressionParserTest {
         Variable v = TERM_FACTORY.getVariable("x0");
         var ex = assertThrows(UnsupportedSelectQueryRuntimeException.class, () ->
                 parseTerm("COUNT(X)", ImmutableMap.of(
-                        new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v)));
+                        IDFAC.createAttributeID("X"), v)));
 
         assertEquals("Unsupported SQL function", ex.getMessage());
     }
@@ -1309,7 +1304,7 @@ public class ExpressionParserTest {
         Variable v = TERM_FACTORY.getVariable("x0");
         var ex = assertThrows(UnsupportedSelectQueryRuntimeException.class, () ->
                 parseTerm("COUNT(*)", ImmutableMap.of(
-                        new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v)));
+                        IDFAC.createAttributeID("X"), v)));
 
         assertEquals("Unsupported SQL function", ex.getMessage());
     }
@@ -1337,7 +1332,7 @@ public class ExpressionParserTest {
         Variable v = TERM_FACTORY.getVariable("x0");
         var ex = assertThrows(InvalidSelectQueryRuntimeException.class, () ->
                 parseBooleanExpression("B = ?", ImmutableMap.of(
-                        new QualifiedAttributeID(null, IDFAC.createAttributeID("B")), v)));
+                        IDFAC.createAttributeID("B"), v)));
 
         assertEquals("JDBC parameters are not allowed", ex.getMessage());
     }
@@ -1347,7 +1342,7 @@ public class ExpressionParserTest {
         Variable v = TERM_FACTORY.getVariable("x0");
         var ex = assertThrows(InvalidSelectQueryRuntimeException.class, () ->
                 parseBooleanExpression("B = :name", ImmutableMap.of(
-                        new QualifiedAttributeID(null, IDFAC.createAttributeID("B")), v)));
+                        IDFAC.createAttributeID("B"), v)));
 
         assertEquals("JDBC named parameters are not allowed", ex.getMessage());
     }
@@ -1357,9 +1352,9 @@ public class ExpressionParserTest {
         Variable v = TERM_FACTORY.getVariable("x0");
         Variable u = TERM_FACTORY.getVariable("y0");
         var ex = assertThrows(UnsupportedSelectQueryRuntimeException.class, () ->
-                parseBooleanExpression("P.A = Q.A(+)", ImmutableMap.of(
-                        new QualifiedAttributeID(IDFAC.createRelationID("P"), IDFAC.createAttributeID("A")), v,
-                        new QualifiedAttributeID(IDFAC.createRelationID( "Q"), IDFAC.createAttributeID("A")), u)));
+                parseBooleanExpression("A = B(+)", ImmutableMap.of(
+                        IDFAC.createAttributeID("A"), v,
+                        IDFAC.createAttributeID("B"), u)));
 
         assertEquals("Old Oracle OUTER JOIN syntax is not supported", ex.getMessage());
     }
@@ -1368,7 +1363,7 @@ public class ExpressionParserTest {
     public void true_column_test() throws Exception {
         Variable v = TERM_FACTORY.getVariable("x0");
         ImmutableExpression translation = parseBooleanExpression("A = true", ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("A")), v));
+                IDFAC.createAttributeID("A"), v));
 
         assertEquals(TERM_FACTORY.getNotYetTypedEquality(
                 v,
@@ -1379,7 +1374,7 @@ public class ExpressionParserTest {
     public void false_column_test() throws Exception {
         Variable v = TERM_FACTORY.getVariable("x0");
         ImmutableExpression translation = parseBooleanExpression("A = false", ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("A")), v));
+                IDFAC.createAttributeID("A"), v));
 
         assertEquals(TERM_FACTORY.getNotYetTypedEquality(
                 v,
@@ -1390,7 +1385,7 @@ public class ExpressionParserTest {
     public void function_REGEXP_LIKE_test() throws Exception {
         Variable v = TERM_FACTORY.getVariable("x0");
         ImmutableExpression translation = parseBooleanExpression("REGEXP_LIKE(X, '^Ste(v|ph)en$')", ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
+                IDFAC.createAttributeID("X"), v));
 
         assertEquals(TERM_FACTORY.getImmutableExpression(DB_FS_FACTORY.getDBRegexpMatches2(), v,
                 TERM_FACTORY.getDBStringConstant("^Ste(v|ph)en$")), translation);
@@ -1400,7 +1395,7 @@ public class ExpressionParserTest {
     public void function_REGEXP_LIKE_3_test() throws Exception {
         Variable v = TERM_FACTORY.getVariable("x0");
         ImmutableExpression translation = parseBooleanExpression("REGEXP_LIKE(X, '^Ste(v|ph)en$', 'i')", ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
+                IDFAC.createAttributeID("X"), v));
 
         assertEquals(TERM_FACTORY.getImmutableExpression(DB_FS_FACTORY.getDBRegexpMatches3(), v,
                 TERM_FACTORY.getDBStringConstant("^Ste(v|ph)en$"),
@@ -1412,7 +1407,7 @@ public class ExpressionParserTest {
     public void function_REGEXP_LIKE_4_test() throws Exception {
         Variable v = TERM_FACTORY.getVariable("x0");
         ImmutableExpression translation = parseBooleanExpression("REGEXP_LIKE(X, '^Ste(v|ph)en$', 'i', '')", ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
+                IDFAC.createAttributeID("X"), v));
 
         assertEquals(TERM_FACTORY.getImmutableFunctionalTerm(DB_FS_FACTORY.getDBRegexpReplace4(), v,
                 TERM_FACTORY.getDBStringConstant("^Ste(v|ph)en$"),
@@ -1424,7 +1419,7 @@ public class ExpressionParserTest {
     public void function_REGEXP_REPLACE_test() throws Exception {
         Variable v = TERM_FACTORY.getVariable("x0");
         ImmutableTerm translation = parseTerm("REGEXP_REPLACE(X, '^Ste(v|ph)en$', '')", ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
+                IDFAC.createAttributeID("X"), v));
 
         assertEquals(TERM_FACTORY.getImmutableFunctionalTerm(DB_FS_FACTORY.getDBRegexpReplace3(), v,
                 TERM_FACTORY.getDBStringConstant("^Ste(v|ph)en$"),
@@ -1435,7 +1430,7 @@ public class ExpressionParserTest {
     public void function_REGEXP_REPLACE_4_test() throws Exception {
         Variable v = TERM_FACTORY.getVariable("x0");
         ImmutableTerm translation = parseTerm("REGEXP_REPLACE(X, '^Ste(v|ph)en$', '', 'i')", ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
+                IDFAC.createAttributeID("X"), v));
 
         assertEquals(TERM_FACTORY.getImmutableFunctionalTerm(DB_FS_FACTORY.getDBRegexpReplace4(), v,
                 TERM_FACTORY.getDBStringConstant("^Ste(v|ph)en$"),
@@ -1447,7 +1442,7 @@ public class ExpressionParserTest {
     public void function_REGEXP_REPLACE_6_test() throws Exception {
         Variable v = TERM_FACTORY.getVariable("x0");
         ImmutableTerm translation = parseTerm("REGEXP_REPLACE(X, '^Ste(v|ph)en$', '', 1, 0, 'i')", ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
+                IDFAC.createAttributeID("X"), v));
 
         assertEquals(TERM_FACTORY.getImmutableFunctionalTerm(DB_FS_FACTORY.getRegularDBFunctionSymbol("REGEXP_REPLACE", 6), v,
                 TERM_FACTORY.getDBStringConstant("^Ste(v|ph)en$"),
@@ -1461,7 +1456,7 @@ public class ExpressionParserTest {
     public void function_REGEXP_REPLACE_6a_test() throws Exception {
         Variable v = TERM_FACTORY.getVariable("x0");
         ImmutableTerm translation = parseTerm("REGEXP_REPLACE(X, '^Ste(v|ph)en$', '', 2, 0, 'i')", ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
+                IDFAC.createAttributeID("X"), v));
 
         assertEquals(TERM_FACTORY.getImmutableFunctionalTerm(DB_FS_FACTORY.getRegularDBFunctionSymbol("REGEXP_REPLACE", 6), v,
                 TERM_FACTORY.getDBStringConstant("^Ste(v|ph)en$"),
@@ -1475,7 +1470,7 @@ public class ExpressionParserTest {
     public void function_REGEXP_REPLACE_7_test() throws Exception {
         Variable v = TERM_FACTORY.getVariable("x0");
         ImmutableTerm translation = parseTerm("REGEXP_REPLACE(X, '^Ste(v|ph)en$', '', 1, 0, 'i', '')", ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
+                IDFAC.createAttributeID("X"), v));
 
         assertEquals(TERM_FACTORY.getImmutableFunctionalTerm(DB_FS_FACTORY.getRegularDBFunctionSymbol("REGEXP_REPLACE", 7), v,
                 TERM_FACTORY.getDBStringConstant("^Ste(v|ph)en$"),
@@ -1490,7 +1485,7 @@ public class ExpressionParserTest {
     public void function_REPLACE_test() throws Exception {
         Variable v = TERM_FACTORY.getVariable("x0");
         ImmutableTerm translation = parseTerm("REPLACE(X,'J')", ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
+                IDFAC.createAttributeID("X"), v));
 
         assertEquals(TERM_FACTORY.getImmutableFunctionalTerm(DB_FS_FACTORY.getRegularDBFunctionSymbol("REPLACE", 2), v,
                 TERM_FACTORY.getDBStringConstant("J")), translation);
@@ -1500,7 +1495,7 @@ public class ExpressionParserTest {
     public void function_REPLACE_3_test() throws Exception {
         Variable v = TERM_FACTORY.getVariable("x0");
         ImmutableTerm translation = parseTerm("REPLACE(X, 'J', 'BL')", ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
+                IDFAC.createAttributeID("X"), v));
 
         assertEquals(TERM_FACTORY.getImmutableFunctionalTerm(DB_FS_FACTORY.getRegularDBFunctionSymbol("REPLACE", 3), v,
                 TERM_FACTORY.getDBStringConstant("J"),
@@ -1511,7 +1506,7 @@ public class ExpressionParserTest {
     public void function_REPLACE_4_test() throws Exception {
         Variable v = TERM_FACTORY.getVariable("x0");
         ImmutableTerm translation = parseTerm("REPLACE(X, 'J', 'BL', 'i')", ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
+                IDFAC.createAttributeID("X"), v));
 
         assertEquals(TERM_FACTORY.getImmutableFunctionalTerm(DB_FS_FACTORY.getRegularDBFunctionSymbol("REPLACE", 4), v,
                 TERM_FACTORY.getDBStringConstant("J"),
@@ -1523,7 +1518,7 @@ public class ExpressionParserTest {
     public void function_SUBSTR_2_test() throws Exception {
         Variable v = TERM_FACTORY.getVariable("x0");
         ImmutableTerm translation = parseTerm("SUBSTR(X, 1)", ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
+                IDFAC.createAttributeID("X"), v));
 
         assertEquals(TERM_FACTORY.getImmutableFunctionalTerm(DB_FS_FACTORY.getRegularDBFunctionSymbol("SUBSTR", 2), v,
                 TERM_FACTORY.getDBConstant("1", dbLongType)), translation);
@@ -1533,7 +1528,7 @@ public class ExpressionParserTest {
     public void function_SUBSTR_3_test() throws Exception {
         Variable v = TERM_FACTORY.getVariable("x0");
         ImmutableTerm translation = parseTerm("SUBSTR(X, 1, 2)", ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
+                IDFAC.createAttributeID("X"), v));
 
         assertEquals(TERM_FACTORY.getImmutableFunctionalTerm(DB_FS_FACTORY.getRegularDBFunctionSymbol("SUBSTR", 3), v,
                 TERM_FACTORY.getDBConstant("1", dbLongType),
@@ -1545,7 +1540,7 @@ public class ExpressionParserTest {
         // SQL:99: SUBSTRING <left paren> <character value expression> FROM <start position> [ FOR <string length> ] <right paren>
         Variable v = TERM_FACTORY.getVariable("x0");
         ImmutableTerm translation = parseTerm("SUBSTRING(X FROM 1)", ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
+                IDFAC.createAttributeID("X"), v));
         assertEquals(TERM_FACTORY.getImmutableFunctionalTerm(DB_FS_FACTORY.getDBSubString2(), v,
                 TERM_FACTORY.getDBConstant("1", dbLongType)), translation);
     }
@@ -1555,7 +1550,7 @@ public class ExpressionParserTest {
         // SQL:99: SUBSTRING <left paren> <character value expression> FROM <start position> [ FOR <string length> ] <right paren>
         Variable v = TERM_FACTORY.getVariable("x0");
         ImmutableTerm translation = parseTerm("SUBSTRING(X FROM 1 FOR 2)", ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
+                IDFAC.createAttributeID("X"), v));
         assertEquals(TERM_FACTORY.getImmutableFunctionalTerm(DB_FS_FACTORY.getDBSubString3(), v,
                 TERM_FACTORY.getDBConstant("1", dbLongType),
                 TERM_FACTORY.getDBConstant("2", dbLongType)), translation);
@@ -1565,7 +1560,7 @@ public class ExpressionParserTest {
     public void function_SUBSTRING_2_test() throws Exception {
         Variable v = TERM_FACTORY.getVariable("x0");
         ImmutableTerm translation = parseTerm("SUBSTRING(X, 1)", ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
+                IDFAC.createAttributeID("X"), v));
 
         assertEquals(TERM_FACTORY.getImmutableFunctionalTerm(DB_FS_FACTORY.getDBSubString2(), v,
                 TERM_FACTORY.getDBConstant("1", dbLongType)), translation);
@@ -1575,7 +1570,7 @@ public class ExpressionParserTest {
     public void function_SUBSTRING_3_test() throws Exception {
         Variable v = TERM_FACTORY.getVariable("x0");
         ImmutableTerm translation = parseTerm("SUBSTRING(X, 1, 2)", ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
+                IDFAC.createAttributeID("X"), v));
 
         assertEquals(TERM_FACTORY.getImmutableFunctionalTerm(DB_FS_FACTORY.getDBSubString3(), v,
                 TERM_FACTORY.getDBConstant("1", dbLongType),
@@ -1586,7 +1581,7 @@ public class ExpressionParserTest {
     public void function_LCASE_test() throws Exception {
         Variable v = TERM_FACTORY.getVariable("x0");
         ImmutableTerm translation = parseTerm("LCASE(X)", ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
+                IDFAC.createAttributeID("X"), v));
 
         assertEquals(TERM_FACTORY.getImmutableFunctionalTerm(DB_FS_FACTORY.getDBLower(), v), translation);
     }
@@ -1595,7 +1590,7 @@ public class ExpressionParserTest {
     public void function_LOWER_test() throws Exception {
         Variable v = TERM_FACTORY.getVariable("x0");
         ImmutableTerm translation = parseTerm("LOWER(X)", ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
+                IDFAC.createAttributeID("X"), v));
 
         assertEquals(TERM_FACTORY.getImmutableFunctionalTerm(DB_FS_FACTORY.getDBLower(), v), translation);
     }
@@ -1604,7 +1599,7 @@ public class ExpressionParserTest {
     public void function_UCASE_test() throws Exception {
         Variable v = TERM_FACTORY.getVariable("x0");
         ImmutableTerm translation = parseTerm("UCASE(X)", ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
+                IDFAC.createAttributeID("X"), v));
 
         assertEquals(TERM_FACTORY.getImmutableFunctionalTerm(DB_FS_FACTORY.getDBUpper(), v), translation);
     }
@@ -1613,7 +1608,7 @@ public class ExpressionParserTest {
     public void function_UPPER_test() throws Exception {
         Variable v = TERM_FACTORY.getVariable("x0");
         ImmutableTerm translation = parseTerm("UPPER(X)", ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
+                IDFAC.createAttributeID("X"), v));
 
         assertEquals(TERM_FACTORY.getImmutableFunctionalTerm(DB_FS_FACTORY.getDBUpper(), v), translation);
     }
@@ -1622,7 +1617,7 @@ public class ExpressionParserTest {
     public void function_LENGTH_test() throws Exception {
         Variable v = TERM_FACTORY.getVariable("x0");
         ImmutableTerm translation = parseTerm("LENGTH(X)", ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
+                IDFAC.createAttributeID("X"), v));
 
         DBFunctionSymbol lengthFunctionSymbol = DB_FS_FACTORY.getRegularDBFunctionSymbol("LENGTH", 1);
         assertEquals(TERM_FACTORY.getImmutableFunctionalTerm(lengthFunctionSymbol, v), translation);
@@ -1632,7 +1627,7 @@ public class ExpressionParserTest {
     public void function_LEN_test() throws Exception {
         Variable v = TERM_FACTORY.getVariable("x0");
         ImmutableTerm translation = parseTerm("LEN(X)", ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
+                IDFAC.createAttributeID("X"), v));
 
         DBFunctionSymbol lenFunctionSymbol = DB_FS_FACTORY.getRegularDBFunctionSymbol("LEN", 1);
         assertEquals(TERM_FACTORY.getImmutableFunctionalTerm(lenFunctionSymbol, v), translation);
@@ -1642,19 +1637,19 @@ public class ExpressionParserTest {
     public void function_CONVERT_test() throws Exception {
         Variable v = TERM_FACTORY.getVariable("x0");
         ImmutableTerm translation = parseTerm("CONVERT(VARCHAR(50), X)", ImmutableMap.of(
-                new QualifiedAttributeID(null, IDFAC.createAttributeID("X")), v));
+                IDFAC.createAttributeID("X"), v));
 
         DBFunctionSymbol castFunctionSymbol = DB_FS_FACTORY.getDBCastFunctionSymbol(DB_TYPE_FACTORY.getDBTermType("VARCHAR(50)"));
         assertEquals(TERM_FACTORY.getImmutableFunctionalTerm(castFunctionSymbol, v), translation);
     }
 
-    private ImmutableTerm parseTerm(String sql, ImmutableMap<QualifiedAttributeID, ImmutableTerm> map) throws UnsupportedSelectQueryException, InvalidQueryException {
+    private ImmutableTerm parseTerm(String sql, ImmutableMap<QuotedID, ImmutableTerm> map) throws UnsupportedSelectQueryException, InvalidQueryException {
         ExpressionParser parser = new ExpressionParser(IDFAC, CORE_SINGLETONS);
-        return parser.parseTerm(sql, new RAExpressionAttributes(map, ImmutableSet.of(), id -> ImmutableSet.of()));
+        return parser.parseTerm(sql, RAExpressionAttributes.of(map.entrySet().stream().collect(ImmutableCollectors.toMap(Map.Entry::getKey, e -> ImmutableMap.of(ImmutableSet.of(), e.getValue())))));
     }
 
-    private ImmutableExpression parseBooleanExpression(String sql, ImmutableMap<QualifiedAttributeID, ImmutableTerm> map) throws UnsupportedSelectQueryException, InvalidQueryException {
+    private ImmutableExpression parseBooleanExpression(String sql, ImmutableMap<QuotedID, ImmutableTerm> map) throws UnsupportedSelectQueryException, InvalidQueryException {
         ExpressionParser parser = new ExpressionParser(IDFAC, CORE_SINGLETONS);
-        return parser.parseBooleanExpression(sql, new RAExpressionAttributes(map, ImmutableSet.of(), id -> ImmutableSet.of()));
+        return parser.parseBooleanExpression(sql, RAExpressionAttributes.of(map.entrySet().stream().collect(ImmutableCollectors.toMap(Map.Entry::getKey, e -> ImmutableMap.of(ImmutableSet.of(), e.getValue())))));
     }
 }

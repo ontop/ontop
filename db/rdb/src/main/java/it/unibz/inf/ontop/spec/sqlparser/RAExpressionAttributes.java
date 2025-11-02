@@ -14,6 +14,7 @@ import java.util.stream.Stream;
 
 public class RAExpressionAttributes  {
 
+    private final ImmutableMap<QuotedID, ImmutableMap<ImmutableSet<RelationID>, ImmutableTerm>> map;
     private final ImmutableMap<QualifiedAttributeID, ImmutableTerm> attributes;
     private final ImmutableMap<QuotedID, ImmutableSet<RelationID>> occurrences;
 
@@ -22,12 +23,18 @@ public class RAExpressionAttributes  {
      *
      * @param attributes  a map from {@link QualifiedAttributeID},to {@link ImmutableTerm}
      */
-    public RAExpressionAttributes(ImmutableMap<QualifiedAttributeID, ImmutableTerm> attributes,
+    private RAExpressionAttributes(ImmutableMap<QuotedID, ImmutableMap<ImmutableSet<RelationID>, ImmutableTerm>> map,
+                                  ImmutableMap<QualifiedAttributeID, ImmutableTerm> attributes,
                                   ImmutableSet<QuotedID> attributeIds,
                                   Function<QuotedID, ImmutableSet<RelationID>> relationIdsFunction) {
+        this.map = map;
         this.attributes = attributes;
         this.occurrences = attributeIds.stream()
                 .collect(ImmutableCollectors.toMap(id -> id, relationIdsFunction));
+    }
+
+    ImmutableMap<QuotedID, ImmutableMap<ImmutableSet<RelationID>, ImmutableTerm>> getMap() {
+        return map;
     }
 
     public static class DuplicateAttrbuteEntriesException extends Exception {
@@ -50,11 +57,29 @@ public class RAExpressionAttributes  {
         if (!duplicateAttributeIds.isEmpty())
             throw new DuplicateAttrbuteEntriesException(duplicateAttributeIds);
 
-        return new RAExpressionAttributes(
-                multimap.entries().stream()
-                        .collect(ImmutableCollectors.toMap(e -> new QualifiedAttributeID(null, e.getKey()), Map.Entry::getValue)),
-                multimap.keySet(),
-                id -> ImmutableSet.of());
+        return of(multimap.entries().stream()
+                .collect(ImmutableCollectors.toMap(
+                        Map.Entry::getKey,
+                        e -> ImmutableMap.of(ImmutableSet.of(), e.getValue()))));
+    }
+
+    public static RAExpressionAttributes of(ImmutableMap<QuotedID, ImmutableMap<ImmutableSet<RelationID>, ImmutableTerm>> map) {
+        ImmutableMap<QualifiedAttributeID, ImmutableTerm> attributeMapWithAliases = map.entrySet().stream()
+                .flatMap(e -> Streams.concat(
+                        Stream.of(e.getValue())
+                                .filter(m -> m.size() == 1)
+                                .map(m -> Maps.immutableEntry(new QualifiedAttributeID(null, e.getKey()), m.entrySet().iterator().next().getValue())),
+                        e.getValue().entrySet().stream()
+                                .flatMap(e2 -> e2.getKey().stream()
+                                        .map(id -> Maps.immutableEntry(new QualifiedAttributeID(id, e.getKey()), e2.getValue())))))
+                .collect(ImmutableCollectors.toMap());
+
+        Function<QuotedID, ImmutableSet<RelationID>> f = id -> map.get(id).entrySet().stream()
+                .flatMap(e -> e.getKey().stream()
+                        .findFirst().stream())
+                .collect(ImmutableCollectors.toSet());
+
+        return new RAExpressionAttributes(map, attributeMapWithAliases, map.keySet(), f);
     }
 
 
@@ -107,10 +132,6 @@ public class RAExpressionAttributes  {
 
     public ImmutableSet<QuotedID> getAllUnqualifiedAttributes() {
         return occurrences.keySet();
-    }
-
-    public ImmutableSet<RelationID> getOccurrences(QuotedID id) {
-        return occurrences.getOrDefault(id, ImmutableSet.of());
     }
 
 

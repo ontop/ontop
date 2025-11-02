@@ -17,7 +17,7 @@ public class RAExpressionAttributesOperations implements RAOperations<RAExpressi
 
     @Override
     public RAExpressionAttributes create() {
-        return new RAExpressionAttributes(ImmutableMap.of(), ImmutableSet.of(), id -> ImmutableSet.of());
+        return RAExpressionAttributes.of(ImmutableMap.of());
     }
 
     @Override
@@ -27,18 +27,25 @@ public class RAExpressionAttributesOperations implements RAOperations<RAExpressi
                 .distinct()
                 .collect(ImmutableCollectors.toSet());
         ImmutableMap<QuotedID, ImmutableTerm> unqualifiedAttributes = getRelationAttributeMap(relation, variables);
-        return create(unqualifiedAttributes, relationAllIds, unqualifiedAttributes.keySet(), Optional.of(relation.getID()));
+        return RAExpressionAttributes.of(unqualifiedAttributes.entrySet().stream()
+                .map(e -> Maps.immutableEntry(e.getKey(), ImmutableMap.of(relationAllIds, e.getValue())))
+                .collect(ImmutableCollectors.toMap()));
     }
 
     @Override
     public RAExpressionAttributes createWithoutName(RelationDefinition relation, ImmutableList<Variable> variables) {
         ImmutableMap<QuotedID, ImmutableTerm> unqualifiedAttributes = getRelationAttributeMap(relation, variables);
-        return create(unqualifiedAttributes, ImmutableSet.of(), unqualifiedAttributes.keySet(), Optional.empty());
+        return RAExpressionAttributes.of(unqualifiedAttributes.entrySet().stream()
+                .map(e -> Maps.immutableEntry(e.getKey(), ImmutableMap.of(ImmutableSet.<RelationID>of(), e.getValue())))
+                .collect(ImmutableCollectors.toMap()));
     }
 
     @Override
     public RAExpressionAttributes withAlias(RAExpressionAttributes rae, RelationID aliasId) {
-        return create(rae.getUnqualifiedAttributesMap(), ImmutableSet.of(aliasId), rae.getAllUnqualifiedAttributes(), Optional.of(aliasId));
+        ImmutableMap<QuotedID, ImmutableTerm> unqualifiedAttributes = rae.getUnqualifiedAttributesMap();
+        return RAExpressionAttributes.of(unqualifiedAttributes.entrySet().stream()
+                .map(e -> Maps.immutableEntry(e.getKey(), ImmutableMap.of(ImmutableSet.of(aliasId), e.getValue())))
+                .collect(ImmutableCollectors.toMap()));
     }
 
     private ImmutableMap<QuotedID, ImmutableTerm> getRelationAttributeMap(RelationDefinition relation, ImmutableList<Variable> variables) {
@@ -47,24 +54,10 @@ public class RAExpressionAttributesOperations implements RAOperations<RAExpressi
                         attribute -> variables.get(attribute.getIndex() - 1)));
     }
 
-    private RAExpressionAttributes create(ImmutableMap<QuotedID, ImmutableTerm> attributeMap, ImmutableSet<RelationID> relationAllIds, ImmutableSet<QuotedID> allUnqualifiedAttributes, Optional<RelationID> optionalRelationId) {
-
-        ImmutableMap<QualifiedAttributeID, ImmutableTerm> attributeMapWithAliases = attributeMap.entrySet().stream()
-                .flatMap(e -> Stream.concat(
-                                Stream.of(new QualifiedAttributeID(null, e.getKey())),
-                                relationAllIds.stream()
-                                        .map(a -> new QualifiedAttributeID(a, e.getKey())))
-                        .map(i -> Maps.immutableEntry(i, e.getValue())))
-                .collect(ImmutableCollectors.toMap());
-
-        ImmutableSet<RelationID> relationIds = optionalRelationId.map(ImmutableSet::of).orElseGet(ImmutableSet::of);
-
-        return new RAExpressionAttributes(attributeMapWithAliases, allUnqualifiedAttributes, id -> relationIds);
-    }
-
 
     /**
      * CROSS JOIN (also denoted by , in SQL)
+     *      (R.X, R.Y) x (S.Y, S.Z) -> R.X, RS.Y, S.Z
      *
      * @param left  an {@link RAExpressionAttributes}
      * @param right an {@link RAExpressionAttributes}
@@ -76,29 +69,28 @@ public class RAExpressionAttributesOperations implements RAOperations<RAExpressi
     public RAExpressionAttributes crossJoin(RAExpressionAttributes left, RAExpressionAttributes right) throws IllegalJoinException {
         checkRelationAliasesConsistency(left, right);
 
-        ImmutableMap<QualifiedAttributeID, ImmutableTerm> attributes = Stream.concat(
-                        left.getAttributesMapSelection(id -> id.isQualified() || right.isAbsent(id.getAttribute())),
-                        right.getAttributesMapSelection(id -> id.isQualified() || left.isAbsent(id.getAttribute())))
-                .collect(ImmutableCollectors.toMap());
+        var map = Sets.union(left.getMap().keySet(), right.getMap().keySet()).stream()
+                .collect(ImmutableCollectors.toMap(
+                        id -> id,
+                        id -> Stream.concat(left.getMap().getOrDefault(id, ImmutableMap.of()).entrySet().stream(), right.getMap().getOrDefault(id, ImmutableMap.of()).entrySet().stream())
+                                .collect(ImmutableCollectors.toMap())));
 
-        return new RAExpressionAttributes(
-                attributes,
-                /*
-                 *   R.X, R.Y and S.X, S.Y -> R.X, RS.Y, S.Y
-                 */
-                union(left.getAllUnqualifiedAttributes(), right.getAllUnqualifiedAttributes()),
-                id -> union(left.getOccurrences(id), right.getOccurrences(id)));
+        return RAExpressionAttributes.of(map);
     }
 
     /**
      * JOIN USING
+     *      (R.X, R.Y, R.U) and (S.Y, S.Z) using U ->  exception as S.U is missing
+     *      (R.X, R.Y) and (S.Y, S.Z, S.U) using U ->  exception as R.U is missing
+     *      (R.X, R.Y, R.U) and (S.Y, S.Z, S.U) using U -> R.X, RS.Y, S.Z, R.U
+     *            (the choice or R/S is arbitrary, but we keep it unambiguous)
      *
      * @param left  an {@link RAExpressionAttributes}
      * @param right an {@link RAExpressionAttributes}
      * @param using an {@link ImmutableSet}<{@link QuotedID}>
      * @return an {@link RAExpressionAttributes}
-     * @throws IllegalJoinException if the same relatio alias occurs in both arguments
-     *                              or one of the `using' attributes is ambiguous or absent
+     * @throws IllegalJoinException if the same relation alias occurs in both arguments
+     *                              or one of the `using` attributes is ambiguous or absent
      */
 
     @Override
@@ -117,30 +109,15 @@ public class RAExpressionAttributesOperations implements RAOperations<RAExpressi
             throw new IllegalJoinException(left, right, absent, ambiguous);
         }
 
-        ImmutableMap<QualifiedAttributeID, ImmutableTerm> attributes = Stream.concat(
-                        left.getAttributesMapSelection(id ->
-                                (id.isQualified() && !using.contains(id.getAttribute()))
-                                        || (!id.isQualified() && right.isAbsent(id.getAttribute()))
-                                        || (!id.isQualified() && using.contains(id.getAttribute()))),
+        var map = Sets.union(left.getMap().keySet(), right.getMap().keySet()).stream()
+                .collect(ImmutableCollectors.toMap(
+                        id -> id,
+                        id -> using.contains(id)
+                                ? ImmutableMap.of(ImmutableSet.<RelationID>of(), left.getMap().get(id).entrySet().iterator().next().getValue())
+                                : Stream.concat(left.getMap().getOrDefault(id, ImmutableMap.of()).entrySet().stream(), right.getMap().getOrDefault(id, ImmutableMap.of()).entrySet().stream())
+                                .collect(ImmutableCollectors.toMap())));
 
-                        right.getAttributesMapSelection(id ->
-                                (id.isQualified() && !using.contains(id.getAttribute()))
-                                        || (!id.isQualified() && left.isAbsent(id.getAttribute()))))
-
-                .collect(ImmutableCollectors.toMap());
-
-        return new RAExpressionAttributes(
-                attributes,
-                union(left.getAllUnqualifiedAttributes(), right.getAllUnqualifiedAttributes()),
-                /*
-                 *      R.X, R.Y, R.U and S.Y, S.Z using U ->  empty
-                 *      R.X, R.Y and S.Y, S.Z, S.U using U ->  empty
-                 *      R.X, R.Y, R.U and S.Y, S.Z, S.U using U -> R.X, RS.Y, S.Y, R.U
-                 *            (the choice or R/S is arbitrary, but we keep it unambiguous)
-                 */
-                id -> using.contains(id)
-                        ? left.getOccurrences(id)
-                        : union(left.getOccurrences(id), right.getOccurrences(id)));
+        return RAExpressionAttributes.of(map);
     }
 
 
@@ -178,9 +155,5 @@ public class RAExpressionAttributesOperations implements RAOperations<RAExpressi
                 .map(QualifiedAttributeID::getRelation)
                 .distinct()
                 .collect(ImmutableCollectors.toSet());
-    }
-
-    private static <T> ImmutableSet<T> union(ImmutableSet<T> left, ImmutableSet<T> right) {
-        return Sets.union(left, right).immutableCopy();
     }
 }

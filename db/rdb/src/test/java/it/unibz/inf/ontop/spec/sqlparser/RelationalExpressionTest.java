@@ -66,20 +66,10 @@ public class RelationalExpressionTest {
         assertEquals(IQ_FACTORY.createNaryIQTree(IQ_FACTORY.createInnerJoinNode(),
                 ImmutableList.of(re1.getIQTree(), re2.getIQTree())), relationalExpression.getIQTree());
 
-        ImmutableMap<QuotedID, ImmutableSet<RelationID>> map = ImmutableMap.of(
-                TABLE_P.getAttribute(1).getID(), ImmutableSet.of(TABLE_P.getID(), TABLE_T.getID()),
-                TABLE_P.getAttribute(2).getID(), ImmutableSet.of(TABLE_P.getID()),
-                TABLE_T.getAttribute(2).getID(), ImmutableSet.of(TABLE_T.getID()));
-
-        assertEquals(new RAExpressionAttributes(ImmutableMap.of(
-                        qualified(TABLE_P,1), x,
-                        qualified(TABLE_P,2), y,
-                        unqualified(TABLE_P,2), y,
-                        qualified(TABLE_T,1), u,
-                        qualified(TABLE_T,2), v,
-                        unqualified(TABLE_T,2), v),
-                        map.keySet(),
-                        map::get),
+        assertEquals(RAExpressionAttributes.of(ImmutableMap.of(
+                        TABLE_P.getAttribute(1).getID(), ImmutableMap.of(ImmutableSet.of(TABLE_P.getID()), x, ImmutableSet.of(TABLE_T.getID()), u),
+                        TABLE_P.getAttribute(2).getID(), ImmutableMap.of(ImmutableSet.of(TABLE_P.getID()), y),
+                        TABLE_T.getAttribute(2).getID(), ImmutableMap.of(ImmutableSet.of(TABLE_T.getID()), v))),
                 relationalExpression.getAttributes());
     }
 
@@ -101,20 +91,10 @@ public class RelationalExpressionTest {
                 IQ_FACTORY.createNaryIQTree(IQ_FACTORY.createInnerJoinNode(),
                         ImmutableList.of(re1.getIQTree(), re2.getIQTree()))), relationalExpression.getIQTree());
 
-        ImmutableMap<QuotedID, ImmutableSet<RelationID>> map = ImmutableMap.of(
-                TABLE_P.getAttribute(1).getID(), ImmutableSet.of(TABLE_P.getID(), TABLE_T.getID()),
-                TABLE_P.getAttribute(2).getID(), ImmutableSet.of(TABLE_P.getID()),
-                TABLE_T.getAttribute(2).getID(), ImmutableSet.of(TABLE_T.getID()));
-
-        assertEquals(new RAExpressionAttributes(ImmutableMap.of(
-                        qualified(TABLE_P,1), x,
-                        qualified(TABLE_P,2), y,
-                        unqualified(TABLE_P,2), y,
-                        qualified(TABLE_T,1), u,
-                        qualified(TABLE_T,2), v,
-                        unqualified(TABLE_T,2), v),
-                        map.keySet(),
-                        map::get),
+        assertEquals(RAExpressionAttributes.of(ImmutableMap.of(
+                        TABLE_P.getAttribute(1).getID(), ImmutableMap.of(ImmutableSet.of(TABLE_P.getID()), x, ImmutableSet.of(TABLE_T.getID()), u),
+                        TABLE_P.getAttribute(2).getID(), ImmutableMap.of(ImmutableSet.of(TABLE_P.getID()), y),
+                        TABLE_T.getAttribute(2).getID(), ImmutableMap.of(ImmutableSet.of(TABLE_T.getID()), v))),
                 relationalExpression.getAttributes());
     }
 
@@ -139,14 +119,10 @@ public class RelationalExpressionTest {
                 IQ_FACTORY.createNaryIQTree(IQ_FACTORY.createInnerJoinNode(),
                         ImmutableList.of(re1.getIQTree(), re2.getIQTree()))), relationalExpression.getIQTree());
 
-        assertEquals(new RAExpressionAttributes(ImmutableMap.of(
-                        unqualified(TABLE_P,1), x,
-                        qualified(TABLE_P,2), y,
-                        unqualified(TABLE_P,2), y,
-                        qualified(TABLE_T,2), v,
-                        unqualified(TABLE_T,2), v),
-                        ImmutableSet.of(TABLE_P.getAttribute(1).getID(), TABLE_P.getAttribute(2).getID(), TABLE_T.getAttribute(2).getID()),
-                        id -> id.equals(TABLE_T.getAttribute(2).getID()) ? ImmutableSet.of(TABLE_T.getID()) : ImmutableSet.of(TABLE_P.getID())),
+        assertEquals(RAExpressionAttributes.of(ImmutableMap.of(
+                        TABLE_P.getAttribute(1).getID(), ImmutableMap.of(ImmutableSet.of(), x),
+                        TABLE_P.getAttribute(2).getID(), ImmutableMap.of(ImmutableSet.of(TABLE_P.getID()), y),
+                        TABLE_T.getAttribute(2).getID(), ImmutableMap.of(ImmutableSet.of(TABLE_T.getID()), v))),
                 relationalExpression.getAttributes());
     }
 
@@ -179,14 +155,10 @@ public class RelationalExpressionTest {
                 IQ_FACTORY.createNaryIQTree(IQ_FACTORY.createInnerJoinNode(),
                         ImmutableList.of(re1.getIQTree(), re2.getIQTree()))), relationalExpression.getIQTree());
 
-        assertEquals(new RAExpressionAttributes(ImmutableMap.of(
-                        unqualified(TABLE_P,1), x,
-                        qualified(TABLE_P,2), y,
-                        unqualified(TABLE_P,2), y,
-                        qualified(TABLE_T,2), v,
-                        unqualified(TABLE_T,2), v),
-                        ImmutableSet.of(TABLE_P.getAttribute(1).getID(), TABLE_P.getAttribute(2).getID(), TABLE_T.getAttribute(2).getID()),
-                        id -> id.equals(TABLE_T.getAttribute(2).getID()) ? ImmutableSet.of(TABLE_T.getID()) : ImmutableSet.of(TABLE_P.getID())),
+        assertEquals(RAExpressionAttributes.of(ImmutableMap.of(
+                        TABLE_P.getAttribute(1).getID(), ImmutableMap.of(ImmutableSet.of(), x),
+                        TABLE_P.getAttribute(2).getID(), ImmutableMap.of(ImmutableSet.of(TABLE_P.getID()), y),
+                        TABLE_T.getAttribute(2).getID(), ImmutableMap.of(ImmutableSet.of(TABLE_T.getID()), v))),
                 relationalExpression.getAttributes());
     }
 
@@ -228,26 +200,17 @@ public class RelationalExpressionTest {
         RAExpression actual = ops.withAlias(re1, tableAlias);
 
         assertEquals(re1.getIQTree(), actual.getIQTree());
-
-        assertEquals(new RAExpressionAttributes(ImmutableMap.of(
-                        unqualified(TABLE_P,1), x,
-                        unqualified(TABLE_P,2), y,
-                        new QualifiedAttributeID(tableAlias, TABLE_P.getAttribute(1).getID()), x,
-                        new QualifiedAttributeID(tableAlias, TABLE_P.getAttribute(2).getID()), y),
-                        ImmutableSet.of(TABLE_P.getAttribute(1).getID(), TABLE_P.getAttribute(2).getID()),
-                        id -> ImmutableSet.of(tableAlias)),
+        assertEquals(RAExpressionAttributes.of(ImmutableMap.of(
+                        TABLE_P.getAttribute(1).getID(), ImmutableMap.of(ImmutableSet.of(tableAlias), x),
+                        TABLE_P.getAttribute(2).getID(), ImmutableMap.of(ImmutableSet.of(tableAlias), y))),
                 actual.getAttributes());
     }
 
     @Test
     public void create_test() {
-        assertEquals(new RAExpressionAttributes(ImmutableMap.of(
-                        unqualified(TABLE_P,1), x,
-                        unqualified(TABLE_P,2), y,
-                        qualified(TABLE_P,1), x,
-                        qualified(TABLE_P,2), y),
-                        ImmutableSet.of(TABLE_P.getAttribute(1).getID(), TABLE_P.getAttribute(2).getID()),
-                        id -> ImmutableSet.of(TABLE_P.getID())),
+        assertEquals(RAExpressionAttributes.of(ImmutableMap.of(
+                        TABLE_P.getAttribute(1).getID(), ImmutableMap.of(ImmutableSet.of(TABLE_P.getID()), x),
+                        TABLE_P.getAttribute(2).getID(), ImmutableMap.of(ImmutableSet.of(TABLE_P.getID()), y))),
                 re1.getAttributes());
     }
 
