@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.iq.optimizer;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.dbschema.NamedRelationDefinition;
 import it.unibz.inf.ontop.dbschema.UniqueConstraint;
 import it.unibz.inf.ontop.dbschema.impl.OfflineMetadataProviderBuilder;
@@ -581,7 +582,6 @@ public class FlattenLiftTest {
     }
 
     @Test
-    @Ignore
     public void testConsecutiveFlatten1() {
 
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(
@@ -622,17 +622,17 @@ public class FlattenLiftTest {
                 IQ_FACTORY.createUnaryIQTree(
                         rootNode,
                         IQ_FACTORY.createUnaryIQTree(
-                                flatten4,
+                                flatten2,
                                 IQ_FACTORY.createUnaryIQTree(
-                                        flatten2,
+                                        flatten4,
                                         IQ_FACTORY.createUnaryIQTree(
                                                 filter,
                                                 IQ_FACTORY.createUnaryIQTree(
-                                                        flatten3,
+                                                        flatten1,
                                                         IQ_FACTORY.createUnaryIQTree(
-                                                                flatten5,
+                                                                flatten3,
                                                                 IQ_FACTORY.createUnaryIQTree(
-                                                                        flatten1,
+                                                                        flatten5,
                                                                         dataNode
                                                                 ))))))));
 
@@ -707,6 +707,97 @@ public class FlattenLiftTest {
 
         optimizeAndCompare(initialIQ, expectedIQ);
     }
+
+    @Test
+    public void testLiftAboveConstruct() {
+
+        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(
+                ATOM_FACTORY.getRDFAnswerPredicate(2), X, O1);
+        ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
+
+        ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X, O1));
+
+        FlattenNode flatten1 = IQ_FACTORY.createFlattenNode(O1, N1, Optional.empty(), JSON_TYPE);
+
+        ExtensionalDataNode dataNode = createExtensionalDataNode(TABLE5, ImmutableList.of(X, N1, N2, N4, N5));
+
+        IQ initialIQ = IQ_FACTORY.createIQ(
+                projectionAtom,
+                IQ_FACTORY.createUnaryIQTree(
+                        rootNode,
+                        IQ_FACTORY.createUnaryIQTree(
+                                constructionNode,
+                                IQ_FACTORY.createUnaryIQTree(
+                                        flatten1,
+                                        dataNode))));
+
+        ConstructionNode updatedConstructionNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X, N1));
+
+        IQ expectedIQ = IQ_FACTORY.createIQ(
+                projectionAtom,
+                IQ_FACTORY.createUnaryIQTree(
+                        rootNode,
+                        IQ_FACTORY.createUnaryIQTree(
+                                flatten1,
+                                IQ_FACTORY.createUnaryIQTree(
+                                        updatedConstructionNode,
+                                        dataNode))));
+
+        optimizeAndCompare(initialIQ, expectedIQ);
+    }
+
+    @Test
+    public void testNonLiftAboveConstructDueToProjection() {
+
+        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(
+                ATOM_FACTORY.getRDFAnswerPredicate(1), X);
+        ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
+
+        ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X));
+
+        FlattenNode flatten1 = IQ_FACTORY.createFlattenNode(O1, N1, Optional.empty(), JSON_TYPE);
+
+        ExtensionalDataNode dataNode = createExtensionalDataNode(TABLE5, ImmutableList.of(X, N1, N2, N4, N5));
+
+        IQ initialIQ = IQ_FACTORY.createIQ(
+                projectionAtom,
+                IQ_FACTORY.createUnaryIQTree(
+                        rootNode,
+                        IQ_FACTORY.createUnaryIQTree(
+                                constructionNode,
+                                IQ_FACTORY.createUnaryIQTree(
+                                        flatten1,
+                                        dataNode))));
+
+        optimizeAndCompare(initialIQ, initialIQ);
+    }
+
+    @Test
+    public void testNonLiftAboveConstructDueToSubstitutionRange() {
+
+        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(
+                ATOM_FACTORY.getRDFAnswerPredicate(2), X, Y);
+        ConstructionNode rootNode = IQ_FACTORY.createConstructionNode(projectionAtom.getVariables());
+
+        ConstructionNode constructionNode = IQ_FACTORY.createConstructionNode(ImmutableSet.of(X, Y), SUBSTITUTION_FACTORY.getSubstitution(Y, TERM_FACTORY.getDBCoalesce(O1, N2)));
+
+        FlattenNode flatten1 = IQ_FACTORY.createFlattenNode(O1, N1, Optional.empty(), JSON_TYPE);
+
+        ExtensionalDataNode dataNode = createExtensionalDataNode(TABLE5, ImmutableList.of(X, N1, N2, N4, N5));
+
+        IQ initialIQ = IQ_FACTORY.createIQ(
+                projectionAtom,
+                IQ_FACTORY.createUnaryIQTree(
+                        rootNode,
+                        IQ_FACTORY.createUnaryIQTree(
+                                constructionNode,
+                                IQ_FACTORY.createUnaryIQTree(
+                                        flatten1,
+                                        dataNode))));
+
+        optimizeAndCompare(initialIQ, initialIQ);
+    }
+
 
     private static void optimizeAndCompare(IQ query, IQ expectedQuery) {
         LOGGER.debug("\nBefore optimization: \n" +  query);

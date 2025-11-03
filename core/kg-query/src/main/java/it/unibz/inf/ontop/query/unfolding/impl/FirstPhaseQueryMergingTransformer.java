@@ -22,6 +22,7 @@ import static it.unibz.inf.ontop.spec.mapping.Mapping.RDFAtomIndexPattern.*;
 
 public class FirstPhaseQueryMergingTransformer extends AbstractMultiPhaseQueryMergingTransformer {
 
+    // mutable
     private boolean areSomeIntensionalNodesRemaining; //(?s ?p ?o) or (?s ?p ?o ?g)
 
     protected FirstPhaseQueryMergingTransformer(Mapping mapping, VariableGenerator variableGenerator,

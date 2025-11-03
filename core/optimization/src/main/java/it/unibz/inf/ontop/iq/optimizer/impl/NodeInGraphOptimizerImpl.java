@@ -4,66 +4,59 @@ import com.google.common.collect.*;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.CoreSingletons;
-import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
-import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
-import it.unibz.inf.ontop.iq.UnaryIQTree;
+import it.unibz.inf.ontop.iq.NaryIQTree;
+import it.unibz.inf.ontop.iq.impl.IQTreeTools;
+import it.unibz.inf.ontop.iq.impl.NaryIQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.optimizer.NodeInGraphOptimizer;
+import it.unibz.inf.ontop.iq.transform.IQTreeVariableGeneratorTransformer;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
 import it.unibz.inf.ontop.model.atom.*;
-import it.unibz.inf.ontop.model.term.ImmutableTerm;
-import it.unibz.inf.ontop.model.term.TermFactory;
-import it.unibz.inf.ontop.model.term.Variable;
-import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
+import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Stream;
 
+import static it.unibz.inf.ontop.iq.impl.UnaryIQTreeTools.UnaryIQTreeDecomposition;
 
 /**
  * Tries to eliminate nodeInGraph atoms where:
  *    - the node is a variable
  *    - all arguments are ground
  */
-public class NodeInGraphOptimizerImpl implements NodeInGraphOptimizer {
+public class NodeInGraphOptimizerImpl extends AbstractIQOptimizer implements NodeInGraphOptimizer {
 
-    private final CoreSingletons coreSingletons;
-    private final IntermediateQueryFactory iqFactory;
+    private final TermFactory termFactory;
+    private final SubstitutionFactory substitutionFactory;
+    private final IQTreeTools iqTreeTools;
+
+    private final IQTreeVariableGeneratorTransformer transformer;
 
     @Inject
-    protected NodeInGraphOptimizerImpl(CoreSingletons coreSingletons,
-                                       IntermediateQueryFactory iqFactory) {
-        this.coreSingletons = coreSingletons;
-        this.iqFactory = iqFactory;
-    }
+    protected NodeInGraphOptimizerImpl(CoreSingletons coreSingletons) {
+        super(coreSingletons.getIQFactory());
+        this.termFactory = coreSingletons.getTermFactory();
+        this.substitutionFactory = coreSingletons.getSubstitutionFactory();
+        this.iqTreeTools = coreSingletons.getIQTreeTools();
 
+        this.transformer = IQTreeVariableGeneratorTransformer.of(
+                IQTreeVariableGeneratorTransformer.of(new Transformer()),
+                IQTree::normalizeForOptimization);
+    }
 
     @Override
-    public IQ optimize(IQ query) {
-        var tree = query.getTree();
-        var transformer = new Transformer(coreSingletons);
-        var newTree = tree.acceptTransformer(transformer)
-                .normalizeForOptimization(query.getVariableGenerator());
-
-        return newTree.equals(tree)
-                ? query
-                : iqFactory.createIQ(query.getProjectionAtom(), newTree);
-
+    protected IQTreeVariableGeneratorTransformer getTransformer() {
+        return transformer;
     }
 
-    protected static class Transformer extends DefaultRecursiveIQTreeVisitingTransformer {
-        private final SubstitutionFactory substitutionFactory;
-        private final TermFactory termFactory;
+    private class Transformer extends DefaultRecursiveIQTreeVisitingTransformer {
 
-        protected Transformer(CoreSingletons coreSingletons) {
-            super(coreSingletons);
-            this.substitutionFactory = coreSingletons.getSubstitutionFactory();
-            this.termFactory = coreSingletons.getTermFactory();
+        Transformer() {
+            super(NodeInGraphOptimizerImpl.this.iqFactory);
         }
 
         /**
@@ -81,60 +74,49 @@ public class NodeInGraphOptimizerImpl implements NodeInGraphOptimizer {
         }
 
         @Override
-        public IQTree transformInnerJoin(IQTree tree, InnerJoinNode rootNode, ImmutableList<IQTree> children) {
+        public IQTree transformInnerJoin(NaryIQTree tree, InnerJoinNode rootNode, ImmutableList<IQTree> children) {
             // Recursive
-            var updatedChildren = children.stream()
-                    .map(t -> t.acceptTransformer(this))
-                    .collect(ImmutableCollectors.toList());
+            var updatedChildren = NaryIQTreeTools.transformChildren(children, this::transform);
 
             var nodeInGraphContextMultimap = extractNodeInGraphContexts(updatedChildren);
             var removableNodeInGraphAtoms = selectRemovableNodeInGraphAtoms(nodeInGraphContextMultimap.keySet(), updatedChildren);
             var newChildren = simplifyChildren(removableNodeInGraphAtoms, nodeInGraphContextMultimap, updatedChildren);
             return newChildren.equals(children)
                     ? tree
-                    : newChildren.size() == 1
-                        ? rootNode.getOptionalFilterCondition()
-                            .map(f -> (IQTree) iqFactory.createUnaryIQTree(
-                                    iqFactory.createFilterNode(f),
-                                    newChildren.iterator().next()))
-                            .orElseGet(() -> newChildren.iterator().next())
-                        : iqFactory.createNaryIQTree(rootNode, newChildren);
+                    : iqTreeTools.createOptionalInnerJoinTree(rootNode.getOptionalFilterCondition(), newChildren)
+                        .orElseThrow(() -> new MinorOntopInternalBugException("should not happen"));
         }
 
         private ImmutableMultimap<NodeInGraphContext, IQTree> extractNodeInGraphContexts(ImmutableList<IQTree> children) {
             return children.stream()
-                    .filter(c -> c.getRootNode() instanceof UnionNode)
                     .flatMap(c -> extractNodeInGraphContextsFromUnionNode(c).stream())
                     .collect(ImmutableCollectors.toMultimap());
         }
 
-        private Optional<Map.Entry<NodeInGraphContext, IQTree>> extractNodeInGraphContextsFromUnionNode(
-                IQTree unionTree) {
-            return unionTree.getChildren().stream()
-                    .flatMap(t -> extractContext(t)
-                            .map(c -> Maps.immutableEntry(c, unionTree))
-                            .stream())
-                    .findAny();
+        private Optional<Map.Entry<NodeInGraphContext, IQTree>> extractNodeInGraphContextsFromUnionNode(IQTree unionTree) {
+            return NaryIQTreeTools.UnionDecomposition.of(unionTree)
+                    .getOptionalNode()
+                    .flatMap(n -> unionTree.getChildren().stream()
+                            .flatMap(t -> extractContext(t)
+                                    .map(c -> Maps.immutableEntry(c, unionTree))
+                                    .stream())
+                            .findAny());
         }
 
         private Optional<NodeInGraphContext> extractContext(IQTree childOfUnion) {
-            var rootNode = childOfUnion.getRootNode();
-            if (rootNode instanceof ConstructionNode) {
-                return childOfUnion.getChildren().stream()
-                        .findFirst()
-                        .flatMap(this::extractNodeInGraphAtomWithVariable)
-                        .map(a -> extractContext(a, (ConstructionNode) rootNode));
-            }
-            return extractNodeInGraphAtomWithVariable(childOfUnion)
-                    .map(a -> new NodeInGraphContext(
-                            ImmutableSet.of((Variable) a.getPredicate().getNode(a.getArguments())),
-                            a));
+            var construction = UnaryIQTreeDecomposition.of(childOfUnion, ConstructionNode.class);
+            return construction.isPresent()
+                    ? extractNodeInGraphAtomWithVariable(construction.getChild())
+                        .map(a -> new NodeInGraphContext(getNodes(getFirstNode(a), construction.getNode()), a))
+                    : extractNodeInGraphAtomWithVariable(childOfUnion)
+                        .map(a -> new NodeInGraphContext(ImmutableSet.of(getFirstNode(a)), a));
         }
 
         private Optional<DataAtom<NodeInGraphPredicate>> extractNodeInGraphAtomWithVariable(IQTree tree) {
             return Optional.of(tree)
                     .filter(t -> t instanceof IntensionalDataNode)
-                    .map(t -> ((IntensionalDataNode) t).getProjectionAtom())
+                    .map(t -> (IntensionalDataNode) t)
+                    .map(IntensionalDataNode::getProjectionAtom)
                     .filter(a -> a.getPredicate() instanceof NodeInGraphPredicate)
                     .filter(a -> !((NodeInGraphPredicate) a.getPredicate())
                             .getNode(a.getArguments())
@@ -142,17 +124,15 @@ public class NodeInGraphOptimizerImpl implements NodeInGraphOptimizer {
                     .map(a -> (DataAtom<NodeInGraphPredicate>)(DataAtom<?>) a);
         }
 
-        private NodeInGraphContext extractContext(DataAtom<NodeInGraphPredicate> nodeInGraphAtom,
-                                                  ConstructionNode constructionNode) {
-            var firstNode = (Variable) nodeInGraphAtom.getPredicate().getNode(nodeInGraphAtom.getArguments());
-            var nodes = Stream.concat(
-                    Stream.of(firstNode),
-                    constructionNode.getSubstitution().stream()
-                            .filter(e -> e.getValue().equals(firstNode))
-                            .map(Map.Entry::getKey))
-                    .collect(ImmutableSet.toImmutableSet());
+        private Variable getFirstNode(DataAtom<NodeInGraphPredicate> nodeInGraphAtom) {
+            return (Variable) nodeInGraphAtom.getPredicate().getNode(nodeInGraphAtom.getArguments());
+        }
 
-            return new NodeInGraphContext(nodes, nodeInGraphAtom);
+        private ImmutableSet<Variable> getNodes(Variable firstNode, ConstructionNode constructionNode) {
+            return Sets.union(
+                            ImmutableSet.of(firstNode),
+                            constructionNode.getSubstitution().getPreImage(v -> v.equals(firstNode)))
+                    .immutableCopy();
         }
 
         private ImmutableMap<NodeInGraphContext, DataAtom<RDFAtomPredicate>> selectRemovableNodeInGraphAtoms(ImmutableSet<NodeInGraphContext> nodeInGraphContexts, ImmutableList<IQTree> updatedChildren) {
@@ -161,7 +141,8 @@ public class NodeInGraphOptimizerImpl implements NodeInGraphOptimizer {
 
             var triplesOrQuads = updatedChildren.stream()
                     .filter(c -> c instanceof IntensionalDataNode)
-                    .map(c -> ((IntensionalDataNode) c).getProjectionAtom())
+                    .map(c -> (IntensionalDataNode) c)
+                    .map(IntensionalDataNode::getProjectionAtom)
                     .filter(a -> a.getPredicate() instanceof RDFAtomPredicate)
                     .map(a -> (DataAtom<RDFAtomPredicate>)(DataAtom<?>) a)
                     .collect(ImmutableSet.toImmutableSet());
@@ -239,37 +220,35 @@ public class NodeInGraphOptimizerImpl implements NodeInGraphOptimizer {
             var newProjectedVariables = Sets.union(child.getVariables(), pushedDataAtom.getVariables())
                     .immutableCopy();
 
-            if (!(child.getRootNode() instanceof UnionNode))
+            var union = NaryIQTreeTools.UnionDecomposition.of(child);
+            if (!union.isPresent())
                 throw new MinorOntopInternalBugException("Was expecting the child to be a union node");
 
             var pushedIntensionalNode = iqFactory.createIntensionalDataNode(
                     (DataAtom<AtomPredicate>)(DataAtom<?>)pushedDataAtom);
 
-            var newUnionNode = iqFactory.createUnionNode(newProjectedVariables);
-            return iqFactory.createNaryIQTree(
-                    newUnionNode,
-                    child.getChildren().stream()
-                            .map(c -> pushDataAtomIntoChildOfUnion(c, pushedIntensionalNode))
-                            .collect(ImmutableCollectors.toList()));
+            return iqTreeTools.createUnionTree(newProjectedVariables,
+                    union.transformChildren(
+                            c -> pushDataAtomIntoChildOfUnion(c, pushedIntensionalNode)));
+        }
+
+        private boolean isNodeGraphPredicateNode(IQTree child) {
+            return (child instanceof IntensionalDataNode)
+                    && (((IntensionalDataNode) child).getProjectionAtom().getPredicate() instanceof NodeInGraphPredicate);
         }
 
         private IQTree pushDataAtomIntoChildOfUnion(IQTree tree, IntensionalDataNode pushedIntensionalNode) {
-            var rootNode = tree.getRootNode();
-            if (rootNode instanceof ConstructionNode) {
-                var child = ((UnaryIQTree) tree).getChild();
-                if ((child instanceof IntensionalDataNode)
-                        && (((IntensionalDataNode) child).getProjectionAtom().getPredicate() instanceof NodeInGraphPredicate))
-                    return pushDataAtomIntoConstructionTreeWithNodeInGraph(tree, pushedIntensionalNode, (ConstructionNode) rootNode);
+            var construction = UnaryIQTreeDecomposition.of(tree, ConstructionNode.class);
+            if (construction.isPresent()) {
+                if (isNodeGraphPredicateNode(construction.getChild()))
+                    return pushDataAtomIntoConstructionTreeWithNodeInGraph(tree, pushedIntensionalNode, construction.getNode());
             }
-            else if ((rootNode instanceof IntensionalDataNode)
-                    && (((IntensionalDataNode)rootNode).getProjectionAtom().getPredicate() instanceof NodeInGraphPredicate)) {
-
+            else if (isNodeGraphPredicateNode(tree)) {
                 return pushedIntensionalNode;
             }
 
             // Other children: join with the pushed down intentional node
-            return iqFactory.createNaryIQTree(
-                    iqFactory.createInnerJoinNode(),
+            return iqTreeTools.createInnerJoinTree(
                     ImmutableList.of(tree, pushedIntensionalNode));
         }
 
@@ -277,14 +256,11 @@ public class NodeInGraphOptimizerImpl implements NodeInGraphOptimizer {
             var intensionalVariables = pushedIntensionalNode.getVariables();
             var treeVariables = tree.getVariables();
             if (intensionalVariables.containsAll(treeVariables)) {
-                var filterCondition = termFactory.getConjunction(
-                        rootNode.getSubstitution().stream()
-                                .map(e -> termFactory.getStrictEquality(e.getKey(), e.getValue())));
-                return filterCondition
-                        .map(c -> (IQTree) iqFactory.createUnaryIQTree(
-                                iqFactory.createFilterNode(c),
-                                pushedIntensionalNode))
-                        .orElse(pushedIntensionalNode);
+                var optionalFilter = iqTreeTools.createOptionalFilterNode(termFactory.getConjunction(
+                        rootNode.getSubstitution().builder().toStream(termFactory::getStrictEquality)));
+                return iqTreeTools.unaryIQTreeBuilder()
+                        .append(optionalFilter)
+                        .build(pushedIntensionalNode);
             }
 
             var commonTerm = pushedIntensionalNode.getProjectionAtom().getArguments().stream()
@@ -298,8 +274,7 @@ public class NodeInGraphOptimizerImpl implements NodeInGraphOptimizer {
                     .collect(substitutionFactory.toSubstitution(v -> commonTerm));
 
             return iqFactory.createUnaryIQTree(
-                    iqFactory.createConstructionNode(Sets.union(intensionalVariables, treeVariables).immutableCopy(),
-                            newSubstitution),
+                    iqTreeTools.createExtendingConstructionNode(intensionalVariables, newSubstitution),
                     pushedIntensionalNode);
         }
     }
@@ -339,5 +314,4 @@ public class NodeInGraphOptimizerImpl implements NodeInGraphOptimizer {
             return graphArguments.isEmpty();
         }
     }
-
 }

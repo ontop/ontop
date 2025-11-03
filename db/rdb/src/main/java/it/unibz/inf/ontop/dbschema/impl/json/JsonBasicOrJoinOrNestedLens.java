@@ -12,8 +12,8 @@ import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.iq.type.NotYetTypedEqualityTransformer;
-import it.unibz.inf.ontop.iq.type.impl.AbstractExpressionTransformer;
-import it.unibz.inf.ontop.iq.visit.impl.RelationExtractor;
+import it.unibz.inf.ontop.iq.type.impl.AbstractTermTransformer;
+import it.unibz.inf.ontop.iq.visit.impl.ExtensionalDataNodeExtractor;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.term.*;
@@ -331,7 +331,7 @@ public abstract class JsonBasicOrJoinOrNestedLens extends JsonLens {
             Lens lens, ImmutableList<Attribute> parentAttributes, CoreSingletons coreSingletons) {
         IQ lensIQ = lens.getIQ();
 
-        IQTree simplifiedTree = new IRISafeFunctionRemover(coreSingletons)
+        IQTree simplifiedTree = new IRISafeFunctionRemover(coreSingletons).treeTransformer()
                 .transform(lensIQ.getTree())
                 .normalizeForOptimization(lensIQ.getVariableGenerator());
 
@@ -352,7 +352,7 @@ public abstract class JsonBasicOrJoinOrNestedLens extends JsonLens {
         }
 
         Optional<ExtensionalDataNode> optionalParentNode = simplifiedTree
-                .acceptVisitor(new RelationExtractor())
+                .acceptVisitor(new ExtensionalDataNodeExtractor())
                 .filter(n -> n.getRelationDefinition().equals(parentRelation))
                 .findAny();
 
@@ -388,24 +388,22 @@ public abstract class JsonBasicOrJoinOrNestedLens extends JsonLens {
                         .collect(ImmutableCollectors.toList()));
     }
 
-    protected static class IRISafeFunctionRemover extends AbstractExpressionTransformer {
+    private static class IRISafeFunctionRemover extends AbstractTermTransformer {
 
-        protected IRISafeFunctionRemover(CoreSingletons coreSingletons) {
-            super(coreSingletons.getIQFactory(), coreSingletons.getUniqueTermTypeExtractor(), coreSingletons.getTermFactory());
+        IRISafeFunctionRemover(CoreSingletons coreSingletons) {
+            super(coreSingletons.getIQFactory(), coreSingletons.getTermFactory());
         }
 
         @Override
-        protected boolean isFunctionSymbolToReplace(FunctionSymbol functionSymbol) {
-            return functionSymbol instanceof IRISafenessDeclarationFunctionSymbol;
-        }
-
-        @Override
-        protected ImmutableFunctionalTerm replaceFunctionSymbol(FunctionSymbol functionSymbol,
+        protected Optional<ImmutableFunctionalTerm> replaceFunctionSymbol(FunctionSymbol functionSymbol,
                                                                 ImmutableList<ImmutableTerm> newTerms, IQTree tree) {
-            if (newTerms.size() != 1)
-                throw new MinorOntopInternalBugException("Was expecting the IRISafe function to be unary");
+            if (functionSymbol instanceof IRISafenessDeclarationFunctionSymbol) {
+                if (newTerms.size() != 1)
+                    throw new MinorOntopInternalBugException("Was expecting the IRISafe function to be unary");
 
-            return termFactory.getIdentityFunctionalTerm(newTerms.get(0));
+                return Optional.of(termFactory.getIdentityFunctionalTerm(newTerms.get(0)));
+            }
+            return Optional.empty();
         }
     }
 }

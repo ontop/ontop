@@ -1,8 +1,11 @@
 package it.unibz.inf.ontop.iq.node;
 
 import it.unibz.inf.ontop.iq.IQTree;
-import it.unibz.inf.ontop.iq.visit.IQVisitor;
+import it.unibz.inf.ontop.iq.UnaryIQTree;
+import it.unibz.inf.ontop.iq.visit.IQTreeVisitor;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
+import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.substitution.InjectiveSubstitution;
 
 /**
  * TODO: explain
@@ -16,13 +19,11 @@ public interface FilterNode extends CommutativeJoinOrFilterNode, UnaryOperatorNo
      */
     ImmutableExpression getFilterCondition();
 
-    /**
-     * Returns a new FilterNode (immutable).
-     */
-    FilterNode changeFilterCondition(ImmutableExpression newFilterCondition);
+    @Override
+    FilterNode applyFreshRenaming(InjectiveSubstitution<Variable> renamingSubstitution);
 
     @Override
-    default <T> T acceptVisitor(IQTree tree, IQVisitor<T> visitor, IQTree child) {
+    default <T> T acceptVisitor(UnaryIQTree tree, IQTreeVisitor<T> visitor, IQTree child) {
         return visitor.transformFilter(tree, this, child);
     }
 }

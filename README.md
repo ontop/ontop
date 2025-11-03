@@ -69,4 +69,4 @@ All documentation is licensed under the
 Organizations
 -------------
 Ontop is backed by the [Free University of Bozen-Bolzano](https://www.inf.unibz.it/krdb/) and [Ontopic s.r.l.](https://ontopic.ai). 
-It also receives regular important contributions from [Birkbeck, University of London](http://www.bbk.ac.uk/) and the [University of Bergen](https://www.uib.no).
+It also receives regular important contributions from [Birkbeck, University of London](http://www.bbk.ac.uk/) and [Southeast University](https://www.seu.edu.cn).

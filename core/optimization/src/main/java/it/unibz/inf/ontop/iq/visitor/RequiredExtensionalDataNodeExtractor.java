@@ -1,7 +1,7 @@
 package it.unibz.inf.ontop.iq.visitor;
 
+import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
-import it.unibz.inf.ontop.iq.visit.IQVisitor;
 
 import java.util.stream.Stream;
 
@@ -13,5 +13,9 @@ import java.util.stream.Stream;
  * MAY BE INCOMPLETE
  *
  */
-public interface RequiredExtensionalDataNodeExtractor extends IQVisitor<Stream<ExtensionalDataNode>> {
+
+public interface RequiredExtensionalDataNodeExtractor  {
+
+    Stream<ExtensionalDataNode> transform(IQTree tree);
+
 }

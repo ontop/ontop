@@ -1,26 +1,24 @@
 package it.unibz.inf.ontop.spec.rule.impl;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
-import it.unibz.inf.ontop.injection.QueryTransformerFactory;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
+import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.IntensionalDataNode;
-import it.unibz.inf.ontop.iq.optimizer.impl.AbstractIntensionalQueryMerger;
+import it.unibz.inf.ontop.iq.optimizer.impl.AbstractIQOptimizer;
 import it.unibz.inf.ontop.iq.optimizer.impl.AbstractQueryMergingTransformer;
-import it.unibz.inf.ontop.model.atom.AtomFactory;
+import it.unibz.inf.ontop.iq.transform.IQTreeVariableGeneratorTransformer;
+import it.unibz.inf.ontop.iq.transform.QueryRenamer;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
-import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
 import it.unibz.inf.ontop.model.vocabulary.RDF;
 import it.unibz.inf.ontop.spec.mapping.MappingAssertion;
 import it.unibz.inf.ontop.spec.mapping.MappingAssertionIndex;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
-import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 import org.apache.commons.rdf.api.IRI;
 
@@ -30,35 +28,39 @@ import java.util.Optional;
 /**
  * Operates over a mutable mapping. Does not modify itself.
  */
-public class MutableQueryUnfolder extends AbstractIntensionalQueryMerger {
+public class MutableQueryUnfolder extends AbstractIQOptimizer {
 
     private final Map<MappingAssertionIndex, MappingAssertion> mutableMapping;
     private final SubstitutionFactory substitutionFactory;
-    private final QueryTransformerFactory transformerFactory;
-    private final CoreUtilsFactory coreUtilsFactory;
-    private final AtomFactory atomFactory;
+    private final IQTreeTools iqTreeTools;
+
+    private final IQTreeVariableGeneratorTransformer transformer;
 
     public MutableQueryUnfolder(Map<MappingAssertionIndex, MappingAssertion> mutableMapping,
                                 IntermediateQueryFactory iqFactory,
-                                SubstitutionFactory substitutionFactory, QueryTransformerFactory transformerFactory,
-                                CoreUtilsFactory coreUtilsFactory, AtomFactory atomFactory) {
+                                SubstitutionFactory substitutionFactory,
+                                QueryRenamer queryRenamer,
+                                IQTreeTools iqTreeTools) {
         super(iqFactory);
         this.mutableMapping = mutableMapping;
         this.substitutionFactory = substitutionFactory;
-        this.transformerFactory = transformerFactory;
-        this.coreUtilsFactory = coreUtilsFactory;
-        this.atomFactory = atomFactory;
+        this.iqTreeTools = iqTreeTools;
+
+        this.transformer = IQTreeVariableGeneratorTransformer.of(MutableQueryUnfoldingTransformer::new);
     }
 
     @Override
-    protected AbstractQueryMergingTransformer createTransformer(ImmutableSet<Variable> knownVariables) {
-        return new MutableQueryUnfoldingTransformer(coreUtilsFactory.createVariableGenerator(knownVariables), iqFactory);
+    protected IQTreeVariableGeneratorTransformer getTransformer() {
+        return transformer;
     }
 
-    protected class MutableQueryUnfoldingTransformer extends AbstractQueryMergingTransformer {
+    private class MutableQueryUnfoldingTransformer extends AbstractQueryMergingTransformer {
 
-        protected MutableQueryUnfoldingTransformer(VariableGenerator variableGenerator, IntermediateQueryFactory iqFactory) {
-            super(variableGenerator, iqFactory, substitutionFactory, atomFactory, transformerFactory);
+        MutableQueryUnfoldingTransformer(VariableGenerator variableGenerator) {
+            super(variableGenerator,
+                    MutableQueryUnfolder.this.iqFactory,
+                    MutableQueryUnfolder.this.substitutionFactory,
+                    MutableQueryUnfolder.this.iqTreeTools);
         }
 
         @Override
@@ -114,6 +116,4 @@ public class MutableQueryUnfolder extends AbstractIntensionalQueryMerger {
             return iqFactory.createEmptyNode(dataNode.getVariables());
         }
     }
-
-
 }

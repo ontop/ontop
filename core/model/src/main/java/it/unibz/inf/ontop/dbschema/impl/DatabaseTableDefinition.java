@@ -25,5 +25,4 @@ public class DatabaseTableDefinition extends AbstractNamedRelationDefinition {
                         .collect(Collectors.joining(",\n   ")) +
                 "\n)";
     }
-
 }

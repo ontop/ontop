@@ -23,7 +23,7 @@ public interface DefinitionPushDownRequest {
 
     ImmutableSet<Variable> getDefinitionAndConditionVariables();
 
-    DefinitionPushDownRequest newRequest(Substitution<? extends ImmutableTerm> substitution);
+    DefinitionPushDownRequest newRequest(Substitution<?> substitution);
 
     static DefinitionPushDownRequest create(Variable newVariable, ImmutableTerm definition, ImmutableExpression condition) {
         return new DefPushDownRequestImpl(newVariable, definition, condition);

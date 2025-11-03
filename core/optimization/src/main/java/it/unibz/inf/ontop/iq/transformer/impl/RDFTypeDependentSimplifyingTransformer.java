@@ -3,10 +3,10 @@ package it.unibz.inf.ontop.iq.transformer.impl;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.OptimizationSingletons;
-import it.unibz.inf.ontop.injection.OptimizerFactory;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.request.DefinitionPushDownRequest;
-import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
+import it.unibz.inf.ontop.iq.transformer.DefinitionPushDownTransformer;
+import it.unibz.inf.ontop.iq.visit.impl.DefaultRecursiveIQTreeVisitingTransformerWithVariableGenerator;
 import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.RDFTermTypeConstant;
@@ -14,6 +14,7 @@ import it.unibz.inf.ontop.model.term.functionsymbol.db.DBIfElseNullFunctionSymbo
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBIfThenFunctionSymbol;
 import it.unibz.inf.ontop.model.type.RDFTermType;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
+import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -21,13 +22,13 @@ import java.util.stream.Stream;
 /**
  * TODO: find a better name
  */
-public abstract class RDFTypeDependentSimplifyingTransformer extends DefaultRecursiveIQTreeVisitingTransformer {
+public abstract class RDFTypeDependentSimplifyingTransformer extends DefaultRecursiveIQTreeVisitingTransformerWithVariableGenerator {
 
-    private final OptimizerFactory optimizerFactory;
+    private final DefinitionPushDownTransformer definitionPushDownTransformer;
 
-    protected RDFTypeDependentSimplifyingTransformer(OptimizationSingletons optimizationSingletons) {
-        super(optimizationSingletons.getCoreSingletons());
-        this.optimizerFactory = optimizationSingletons.getOptimizerFactory();
+    protected RDFTypeDependentSimplifyingTransformer(OptimizationSingletons optimizationSingletons, VariableGenerator variableGenerator) {
+        super(optimizationSingletons.getCoreSingletons().getIQFactory(), variableGenerator);
+        this.definitionPushDownTransformer = optimizationSingletons.getDefinitionPushDownTransformer();
     }
 
     protected ImmutableTerm unwrapIfElseNull(ImmutableTerm term) {
@@ -42,9 +43,9 @@ public abstract class RDFTypeDependentSimplifyingTransformer extends DefaultRecu
     protected Optional<ImmutableSet<RDFTermType>> extractPossibleTypes(ImmutableTerm rdfTypeTerm, IQTree childTree) {
         if (rdfTypeTerm.isNull())
             return Optional.empty();
-        else if (rdfTypeTerm instanceof RDFTermTypeConstant) {
+
+        if (rdfTypeTerm instanceof RDFTermTypeConstant)
             return Optional.of(ImmutableSet.of(((RDFTermTypeConstant) rdfTypeTerm).getRDFTermType()));
-        }
 
         ImmutableSet<ImmutableTerm> possibleValues = childTree.getPossibleVariableDefinitions().stream()
                 .map(s -> s.applyToTerm(rdfTypeTerm))
@@ -77,7 +78,7 @@ public abstract class RDFTypeDependentSimplifyingTransformer extends DefaultRecu
     protected IQTree pushDownDefinitions(IQTree initialChild, Stream<DefinitionPushDownRequest> definitionsToPushDown) {
         return definitionsToPushDown
                 .reduce(initialChild,
-                        (c, r) -> optimizerFactory.createDefinitionPushDownTransformer(r).transform(c),
+                        definitionPushDownTransformer::transform,
                         (c1, c2) -> { throw new MinorOntopInternalBugException("Merging must not happen") ; });
     }
 

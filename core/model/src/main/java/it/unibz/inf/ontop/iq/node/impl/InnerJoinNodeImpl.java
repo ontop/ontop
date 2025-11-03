@@ -8,8 +8,8 @@ import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
+import it.unibz.inf.ontop.iq.impl.NaryIQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
-import it.unibz.inf.ontop.iq.node.normalization.ConditionSimplifier.ExpressionAndSubstitution;
 import it.unibz.inf.ontop.iq.node.normalization.ConditionSimplifier;
 import it.unibz.inf.ontop.iq.node.normalization.InnerJoinNormalizer;
 import it.unibz.inf.ontop.iq.request.FunctionalDependencies;
@@ -26,6 +26,8 @@ import it.unibz.inf.ontop.utils.VariableGenerator;
 import java.util.*;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
+
+import static it.unibz.inf.ontop.iq.impl.NaryIQTreeTools.replaceChild;
 
 
 @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
@@ -97,11 +99,6 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
 
 
     @Override
-    public InnerJoinNode changeOptionalFilterCondition(Optional<ImmutableExpression> newOptionalFilterCondition) {
-        return iqFactory.createInnerJoinNode(newOptionalFilterCondition);
-    }
-
-    @Override
     public int hashCode() {
         return getOptionalFilterCondition().hashCode();
     }
@@ -121,87 +118,48 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
         return JOIN_NODE_STR + getOptionalFilterString();
     }
 
-    /**
-     * TODO: refactor
-     */
     @Override
     public IQTree normalizeForOptimization(ImmutableList<IQTree> children, VariableGenerator variableGenerator, IQTreeCache treeCache) {
         return normalizer.normalizeForOptimization(this, children, variableGenerator, treeCache);
     }
 
     @Override
-    public IQTree applyDescendingSubstitution(Substitution<? extends VariableOrGroundTerm> descendingSubstitution,
-                                              Optional<ImmutableExpression> constraint, ImmutableList<IQTree> children,
-                                              VariableGenerator variableGenerator) {
+    public InnerJoinNode applyFreshRenaming(InjectiveSubstitution<Variable> renamingSubstitution) {
+        return iqFactory.createInnerJoinNode(getOptionalFilterCondition().map(renamingSubstitution::apply));
+    }
 
-        Optional<ImmutableExpression> unoptimizedExpression = getOptionalFilterCondition()
-                .map(descendingSubstitution::apply);
-
+    @Override
+    public IQTree applyDescendingSubstitution(DownPropagation dp, ImmutableList<IQTree> children) {
         VariableNullability simplifiedChildFutureVariableNullability = variableNullabilityTools.getSimplifiedVariableNullability(
-                iqTreeTools.computeNewProjectedVariables(descendingSubstitution, iqTreeTools.getChildrenVariables(children)));
+                dp.getResultingProjectedVariables());
+        return propagateDown(dp, children, simplifiedChildFutureVariableNullability);
+    }
 
-        VariableNullability extendedVariableNullability = constraint
-                .map(c -> simplifiedChildFutureVariableNullability.extendToExternalVariables(c.getVariableStream()))
-                .orElse(simplifiedChildFutureVariableNullability);
+    @Override
+    public IQTree propagateDownConstraint(DownPropagation dp, ImmutableList<IQTree> children) {
+        VariableNullability extendedChildrenVariableNullability = dp.extendVariableNullability(variableNullabilityTools.getChildrenVariableNullability(children));
+        return propagateDown(dp, children, extendedChildrenVariableNullability);
+    }
 
+    private IQTree propagateDown(DownPropagation dp, ImmutableList<IQTree> children, VariableNullability variableNullability) {
         try {
-            ExpressionAndSubstitution expressionAndSubstitution = conditionSimplifier.simplifyCondition(
-                    unoptimizedExpression, ImmutableSet.of(), children, simplifiedChildFutureVariableNullability);
+            var simplification = conditionSimplifier.simplifyCondition(
+                    dp.applyDescendingSubstitution(getOptionalFilterCondition()),
+                    ImmutableSet.of(),
+                    children,
+                    variableNullability);
 
-            Optional<ImmutableExpression> downConstraint = conditionSimplifier.computeDownConstraint(constraint,
-                    expressionAndSubstitution, extendedVariableNullability);
+            var extendedDownConstraint = conditionSimplifier.getCombinedDownPropagation(dp, simplification, variableNullability);
 
-            Substitution<? extends VariableOrGroundTerm> downSubstitution =
-                    substitutionFactory.onVariableOrGroundTerms().compose(descendingSubstitution, expressionAndSubstitution.getSubstitution());
-
-            ImmutableList<IQTree> newChildren = children.stream()
-                    .map(c -> c.applyDescendingSubstitution(downSubstitution, downConstraint, variableGenerator))
-                    .collect(ImmutableCollectors.toList());
-
-            IQTree joinTree = iqFactory.createNaryIQTree(
-                    iqFactory.createInnerJoinNode(expressionAndSubstitution.getOptionalExpression()),
-                    newChildren);
-
-            return iqTreeTools.createConstructionNodeTreeIfNontrivial(joinTree, expressionAndSubstitution.getSubstitution(),
-                    () -> iqTreeTools.computeNewProjectedVariables(descendingSubstitution, iqTreeTools.getChildrenVariables(children)));
+            return iqTreeTools.unaryIQTreeBuilder()
+                    .append(iqTreeTools.createOptionalConstructionNode(dp::getResultingProjectedVariables, simplification.getSubstitution()))
+                    .build(iqTreeTools.createInnerJoinTree(
+                            simplification.getOptionalExpression(),
+                            NaryIQTreeTools.transformChildren(children, extendedDownConstraint::propagateWithRestrictedScope)));
         }
-        catch (UnsatisfiableConditionException e) {
-            return iqFactory.createEmptyNode(
-                    iqTreeTools.computeNewProjectedVariables(descendingSubstitution, iqTreeTools.getChildrenVariables(children)));
+        catch (DownPropagation.InconsistentDownPropagationException e) {
+            return iqFactory.createEmptyNode(dp.getResultingProjectedVariables());
         }
-    }
-
-    @Override
-    public IQTree applyDescendingSubstitutionWithoutOptimizing(
-            Substitution<? extends VariableOrGroundTerm> descendingSubstitution, ImmutableList<IQTree> children,
-            VariableGenerator variableGenerator) {
-
-        InnerJoinNode newJoinNode = iqTreeTools.createInnerJoinNode(
-                getOptionalFilterCondition().map(descendingSubstitution::apply));
-
-        ImmutableList<IQTree> newChildren = children.stream()
-                .map(c -> c.applyDescendingSubstitutionWithoutOptimizing(descendingSubstitution, variableGenerator))
-                .collect(ImmutableCollectors.toList());
-
-        return iqFactory.createNaryIQTree(newJoinNode, newChildren);
-    }
-
-    @Override
-    public IQTree applyFreshRenaming(InjectiveSubstitution<Variable> renamingSubstitution, ImmutableList<IQTree> children,
-                                     IQTreeCache treeCache) {
-        ImmutableList<IQTree> newChildren = children.stream()
-                .map(c -> c.applyFreshRenaming(renamingSubstitution))
-                .collect(ImmutableCollectors.toList());
-
-        Optional<ImmutableExpression> newCondition = getOptionalFilterCondition()
-                .map(renamingSubstitution::apply);
-
-        InnerJoinNode newJoinNode = newCondition.equals(getOptionalFilterCondition())
-                ? this
-                : iqFactory.createInnerJoinNode(newCondition);
-
-        IQTreeCache newTreeCache = treeCache.applyFreshRenaming(renamingSubstitution);
-        return iqFactory.createNaryIQTree(newJoinNode, newChildren, newTreeCache);
     }
 
     @Override
@@ -223,20 +181,30 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
     @Override
     public IQTree liftIncompatibleDefinitions(Variable variable, ImmutableList<IQTree> children, VariableGenerator variableGenerator) {
         return IntStream.range(0, children.size())
-                .mapToObj(i -> Maps.immutableEntry(i, children.get(i)))
-                .filter(e -> e.getValue().isConstructed(variable))
-                // index -> new child
-                .map(e -> Maps.immutableEntry(e.getKey(), e.getValue().liftIncompatibleDefinitions(variable, variableGenerator)))
-                .filter(e -> {
-                            QueryNode newRootNode = e.getValue().getRootNode();
-                            return (newRootNode instanceof UnionNode)
-                                    && ((UnionNode) newRootNode).hasAChildWithLiftableDefinition(variable,
-                                    e.getValue().getChildren());
-                })
+                .mapToObj(i -> liftUnionChild(i, children, variable, variableGenerator))
+                .flatMap(Optional::stream)
                 .findFirst()
-                .map(e -> liftUnionChild(e.getKey(), (NaryIQTree) e.getValue(), children, variableGenerator))
+                .map(t -> t.normalizeForOptimization(variableGenerator))
                 .orElseGet(() -> iqFactory.createNaryIQTree(this, children));
     }
+
+    private Optional<IQTree> liftUnionChild(int childIndex, ImmutableList<IQTree> children, Variable variable, VariableGenerator variableGenerator) {
+        IQTree child = children.get(childIndex);
+        if (!child.isConstructed(variable))
+            return Optional.empty();
+
+        IQTree liftedChild = child.liftIncompatibleDefinitions(variable, variableGenerator);
+        var union = NaryIQTreeTools.UnionDecomposition.of(liftedChild)
+                .filter(d -> d.getNode().hasAChildWithLiftableDefinition(variable, d.getChildren()));
+        if (!union.isPresent())
+            return Optional.empty();
+
+        return Optional.of(iqTreeTools.createUnionTree(NaryIQTreeTools.projectedVariables(children),
+                union.transformChildren(c ->
+                        iqFactory.createNaryIQTree(this,
+                                replaceChild(children, childIndex, c)))));
+    }
+
 
     @Override
     public void validateNode(ImmutableList<IQTree> children) throws InvalidIntermediateQueryException {
@@ -253,9 +221,8 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
 
     @Override
     public IQTree removeDistincts(ImmutableList<IQTree> children, IQTreeCache treeCache) {
-        ImmutableList<IQTree> newChildren = children.stream()
-                .map(IQTree::removeDistincts)
-                .collect(ImmutableCollectors.toList());
+        ImmutableList<IQTree> newChildren = NaryIQTreeTools.transformChildren(children,
+                IQTree::removeDistincts);
 
         IQTreeCache newTreeCache = treeCache.declareDistinctRemoval(newChildren.equals(children));
         return iqFactory.createNaryIQTree(this, newChildren, newTreeCache);
@@ -373,7 +340,8 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
 
     @Override
     public VariableNonRequirement computeVariableNonRequirement(ImmutableList<IQTree> children) {
-        return super.computeVariableNonRequirement(children);
+        var nonRequirementBeforeFilter = computeVariableNonRequirementForChildren(children);
+        return nonRequirementBeforeFilter.withRequiredVariables(getLocallyRequiredVariables());
     }
 
     @Override
@@ -415,68 +383,6 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
             }
         } while (!hasConverged);
         return mutableMultimap;
-    }
-
-
-    @Override
-    public IQTree propagateDownConstraint(ImmutableExpression constraint, ImmutableList<IQTree> children,
-                                          VariableGenerator variableGenerator) {
-        VariableNullability extendedChildrenVariableNullability = variableNullabilityTools.getChildrenVariableNullability(children)
-                .extendToExternalVariables(constraint.getVariableStream());
-
-        try {
-            ExpressionAndSubstitution conditionSimplificationResults = conditionSimplifier.simplifyCondition(
-                    getOptionalFilterCondition(), ImmutableSet.of(), children, extendedChildrenVariableNullability);
-
-            Optional<ImmutableExpression> downConstraint = conditionSimplifier.computeDownConstraint(Optional.of(constraint),
-                    conditionSimplificationResults, extendedChildrenVariableNullability);
-
-            //TODO: propagate different constraints to different children
-
-            ImmutableList<IQTree> newChildren = Optional.of(conditionSimplificationResults.getSubstitution())
-                    .filter(s -> !s.isEmpty())
-                    .map(s -> children.stream()
-                            .map(child -> child.applyDescendingSubstitution(s, downConstraint, variableGenerator))
-                            .collect(ImmutableCollectors.toList()))
-                    .orElseGet(() -> downConstraint
-                            .map(s -> children.stream()
-                                    .map(child -> child.propagateDownConstraint(s, variableGenerator))
-                                    .collect(ImmutableCollectors.toList()))
-                            .orElse(children));
-
-            InnerJoinNode newJoin = conditionSimplificationResults.getOptionalExpression().equals(getOptionalFilterCondition())
-                    ? this
-                    : iqTreeTools.createInnerJoinNode(conditionSimplificationResults.getOptionalExpression());
-
-            NaryIQTree joinTree = iqFactory.createNaryIQTree(newJoin, newChildren);
-
-            return iqTreeTools.createConstructionNodeTreeIfNontrivial(joinTree, conditionSimplificationResults.getSubstitution(),
-                    () -> iqTreeTools.getChildrenVariables(children));
-        }
-        catch (UnsatisfiableConditionException e) {
-            return iqFactory.createEmptyNode(iqTreeTools.getChildrenVariables(children));
-        }
-    }
-
-    private IQTree liftUnionChild(int childIndex, NaryIQTree newUnionChild, ImmutableList<IQTree> initialChildren,
-                                  VariableGenerator variableGenerator) {
-
-        UnionNode newUnionNode = iqFactory.createUnionNode(iqTreeTools.getChildrenVariables(initialChildren));
-
-        return iqFactory.createNaryIQTree(newUnionNode,
-                newUnionChild.getChildren().stream()
-                        .map(unionGrandChild -> createJoinSubtree(childIndex, unionGrandChild, initialChildren))
-                        .collect(ImmutableCollectors.toList()))
-                .normalizeForOptimization(variableGenerator);
-    }
-
-    private IQTree createJoinSubtree(int childIndex, IQTree unionGrandChild, ImmutableList<IQTree> initialChildren) {
-        return iqFactory.createNaryIQTree(this,
-                IntStream.range(0, initialChildren.size())
-                        .mapToObj(i -> i == childIndex
-                                ? unionGrandChild
-                                : initialChildren.get(i))
-                        .collect(ImmutableCollectors.toList()));
     }
 
 }

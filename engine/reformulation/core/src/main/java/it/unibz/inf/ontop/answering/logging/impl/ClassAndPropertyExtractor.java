@@ -5,9 +5,8 @@ import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import it.unibz.inf.ontop.iq.IQ;
-import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.iq.node.IntensionalDataNode;
-import it.unibz.inf.ontop.iq.visit.impl.AbstractPredicateExtractor;
+import it.unibz.inf.ontop.iq.visit.impl.IntensionalDataNodeExtractor;
 import it.unibz.inf.ontop.model.atom.DataAtom;
 import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
 import it.unibz.inf.ontop.model.vocabulary.RDF;
@@ -15,17 +14,16 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.apache.commons.rdf.api.IRI;
 
 import java.util.Optional;
-import java.util.stream.Stream;
 
 @Singleton
-public class ClassAndPropertyExtractor extends AbstractPredicateExtractor<IntensionalDataNode> {
+public class ClassAndPropertyExtractor {
 
     @Inject
     protected ClassAndPropertyExtractor() {
     }
 
     public ClassesAndProperties extractClassesAndProperties(IQ iq) {
-        ImmutableList<DataAtom<RDFAtomPredicate>> atoms = iq.getTree().acceptVisitor(this)
+        ImmutableList<DataAtom<RDFAtomPredicate>> atoms = iq.getTree().acceptVisitor(new IntensionalDataNodeExtractor())
                 .map(IntensionalDataNode::getProjectionAtom)
                 .filter(a -> a.getPredicate() instanceof RDFAtomPredicate)
                 .map(a -> (DataAtom<RDFAtomPredicate>)(DataAtom<?>) a)
@@ -43,16 +41,6 @@ public class ClassAndPropertyExtractor extends AbstractPredicateExtractor<Intens
                 .collect(ImmutableCollectors.toSet());
 
         return new ClassesAndProperties(classes, properties);
-    }
-
-    @Override
-    public Stream<IntensionalDataNode> transformIntensionalData(IntensionalDataNode dataNode) {
-        return Stream.of(dataNode);
-    }
-
-    @Override
-    public Stream<IntensionalDataNode> transformExtensionalData(ExtensionalDataNode dataNode) {
-        return Stream.empty();
     }
 
     public static class ClassesAndProperties {

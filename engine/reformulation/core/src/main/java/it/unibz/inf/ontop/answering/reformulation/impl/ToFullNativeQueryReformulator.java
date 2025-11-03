@@ -14,10 +14,9 @@ import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.TranslationFactory;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
-import it.unibz.inf.ontop.iq.UnaryIQTree;
+import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.NativeNode;
-import it.unibz.inf.ontop.iq.node.QueryNode;
 import it.unibz.inf.ontop.iq.node.SliceNode;
 import it.unibz.inf.ontop.iq.optimizer.GeneralStructuralAndSemanticIQOptimizer;
 import it.unibz.inf.ontop.iq.optimizer.NodeInGraphOptimizer;
@@ -38,6 +37,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Optional;
+import java.util.Set;
+
+import static it.unibz.inf.ontop.iq.impl.UnaryIQTreeTools.UnaryIQTreeDecomposition;
 
 /**
  * Transforms the SPARQL query into a native (e.g. SQL) query without post-processing.
@@ -51,6 +53,7 @@ public class ToFullNativeQueryReformulator extends QuestQueryProcessor {
     private final IntermediateQueryFactory iqFactory;
     private final TermFactory termFactory;
     private final SubstitutionFactory substitutionFactory;
+    private final IQTreeTools iqTreeTools;
 
     @AssistedInject
     private ToFullNativeQueryReformulator(@Assisted OBDASpecification obdaSpecification,
@@ -67,12 +70,13 @@ public class ToFullNativeQueryReformulator extends QuestQueryProcessor {
                                           QueryContext.Factory queryContextFactory,
                                           IntermediateQueryFactory iqFactory,
                                           TermFactory termFactory,
-                                          SubstitutionFactory substitutionFactory) {
+                                          SubstitutionFactory substitutionFactory, IQTreeTools iqTreeTools) {
         super(obdaSpecification, queryCache, queryUnfolderFactory, translationFactory, queryRewriter, kgQueryFactory,
                 inputQueryTranslator, generalOptimizer, nodeInGraphOptimizer, queryPlanner, queryLoggerFactory, queryContextFactory);
         this.iqFactory = iqFactory;
         this.termFactory = termFactory;
         this.substitutionFactory = substitutionFactory;
+        this.iqTreeTools = iqTreeTools;
     }
 
 
@@ -111,8 +115,8 @@ public class ToFullNativeQueryReformulator extends QuestQueryProcessor {
          * TODO: find an alternative to that hack while preserving good variable names in the native query.
          *
          */
-        ConstructionNode postProcessingToRDFNode = iqFactory.createConstructionNode(
-                nativeTree.getVariables(),
+
+        ConstructionNode postProcessingToRDFNode = iqFactory.createConstructionNodeForNativeQuery(
                 nativeTree.getVariables().stream()
                         .collect(substitutionFactory.toSubstitution(
                                 v -> termFactory.getRDFFunctionalTerm(
@@ -138,49 +142,44 @@ public class ToFullNativeQueryReformulator extends QuestQueryProcessor {
     private IQTree replaceRDFByDBTerms(IQTree tree, ImmutableMap<Variable, RDFTermType> rdfTypes) {
         if (rdfTypes.isEmpty())
             return tree;
-        QueryNode rootNode = tree.getRootNode();
-        if (rootNode instanceof SliceNode) {
-            // recursive
-            return iqFactory.createUnaryIQTree((SliceNode) rootNode, replaceRDFByDBTerms(tree, rdfTypes));
-        }
-        else if (rootNode instanceof ConstructionNode) {
-            ConstructionNode constructionNode = (ConstructionNode) rootNode;
-            Substitution<ImmutableTerm> newSubstitution = constructionNode.getSubstitution().builder()
-                    .transform(rdfTypes::get, this::replaceRDFByDBTerm)
-                    .build();
 
-            return iqFactory.createUnaryIQTree(
-                    iqFactory.createConstructionNode(constructionNode.getVariables(), newSubstitution),
-                    ((UnaryIQTree)tree).getChild());
-        }
-        else
-            throw new MinorOntopInternalBugException("Unexpected tree shape " +
-                    "(proper exception should have already been thrown)");
+        var slice = UnaryIQTreeDecomposition.of(tree, SliceNode.class);
+        var construction = UnaryIQTreeDecomposition.of(slice, ConstructionNode.class);
+        if (!construction.isPresent())
+            throw new MinorOntopInternalBugException("Unexpected tree shape (proper exception should have already been thrown)");
+
+        ConstructionNode newConstructionNode = iqTreeTools.replaceSubstitution(
+                construction.getNode(),
+                s -> s.builder()
+                        .transform(rdfTypes::get, this::replaceRDFByDBTerm)
+                        .build());
+
+        return iqTreeTools.unaryIQTreeBuilder()
+                .append(slice.getOptionalNode())
+                .append(newConstructionNode)
+                .build(construction.getTail());
     }
 
     private Substitution<ImmutableTerm> extractDefinitions(IQTree rdfTree) throws NotFullyTranslatableToNativeQueryException {
-        QueryNode rootNode = rdfTree.getRootNode();
-        if (rootNode instanceof ConstructionNode) {
-            // NB: should not include any non-projected variable (illegal IQ)
-            Substitution<ImmutableTerm> substitution = ((ConstructionNode) rootNode).getSubstitution();
-            Sets.SetView<Variable> missingVariables = Sets.difference(rdfTree.getVariables(), substitution.getDomain());
-            if (missingVariables.isEmpty())
-                return substitution;
+        if (rdfTree.getVariables().isEmpty())
+            return substitutionFactory.getSubstitution();
+
+        var slice = UnaryIQTreeDecomposition.of(rdfTree, SliceNode.class);
+        var construction = UnaryIQTreeDecomposition.of(slice, ConstructionNode.class);
+        if (!construction.isPresent())
+            throw new NotFullyTranslatableToNativeQueryException("was expected to have an extended projection at the top. IQ: " + rdfTree);
+
+        Substitution<ImmutableTerm> substitution = construction.getNode().getSubstitution();
+        // NB: should not include any non-projected variable (illegal IQ)
+        Set<Variable> missingVariables = Sets.difference(rdfTree.getVariables(), substitution.getDomain());
+        if (!missingVariables.isEmpty())
             throw new NotFullyTranslatableToNativeQueryException(String.format(
                     "its variables %s are missing an independent definition",
                     missingVariables));
-        }
-        else if (rootNode instanceof SliceNode) {
-            // Recursive
-            return extractDefinitions(((UnaryIQTree)rootNode).getChild());
-        }
-        else if (rdfTree.getVariables().isEmpty()) {
-            return substitutionFactory.getSubstitution();
-        }
-        else {
-            throw new NotFullyTranslatableToNativeQueryException("was expected to have an extended projection at the top. IQ: " + rdfTree);
-        }
+
+        return substitution;
     }
+
 
     private ImmutableTerm replaceRDFByDBTerm(ImmutableTerm definition,
                                                RDFTermType rdfType) {

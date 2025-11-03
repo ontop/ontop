@@ -1,30 +1,35 @@
 package it.unibz.inf.ontop.generation.normalization.impl;
 
-import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.generation.normalization.DialectExtraNormalizer;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
+import it.unibz.inf.ontop.iq.BinaryNonCommutativeIQTree;
 import it.unibz.inf.ontop.iq.IQTree;
+import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.node.*;
+import it.unibz.inf.ontop.iq.transform.IQTreeTransformer;
+import it.unibz.inf.ontop.iq.transform.IQTreeVariableGeneratorTransformer;
+import it.unibz.inf.ontop.iq.transform.impl.AbstractDelegatingIQTreeVariableGeneratorTransformer;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
-import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import javax.inject.Inject;
 
 /**
 Used to get rid of limits in sub-queries that are not necessary, for dialects like Denodo, that don't allow limits in sub-queries.
  */
-public class EliminateLimitsFromSubQueriesNormalizer implements DialectExtraNormalizer {
+public class EliminateLimitsFromSubQueriesNormalizer extends AbstractDelegatingIQTreeVariableGeneratorTransformer implements DialectExtraNormalizer {
 
     private final IntermediateQueryFactory iqFactory;
+    private final IQTreeTransformer parentTransformer;
 
     @Inject
     protected EliminateLimitsFromSubQueriesNormalizer(IntermediateQueryFactory iqFactory) {
         this.iqFactory = iqFactory;
+        this.parentTransformer = IQTreeTransformer.of(new Transformer());
     }
 
     @Override
-    public IQTree transform(IQTree tree, VariableGenerator variableGenerator) {
-        return tree.acceptTransformer(new Transformer());
+    protected IQTreeVariableGeneratorTransformer getTransformer() {
+        return IQTreeVariableGeneratorTransformer.of2(parentTransformer);
     }
 
     private class Transformer extends DefaultRecursiveIQTreeVisitingTransformer {
@@ -33,88 +38,70 @@ public class EliminateLimitsFromSubQueriesNormalizer implements DialectExtraNorm
         }
 
         @Override
-        public IQTree transformSlice(IQTree tree, SliceNode sliceNode, IQTree child) {
+        public IQTree transformSlice(UnaryIQTree tree, SliceNode sliceNode, IQTree child) {
             //We only perform this normalization if there is no OFFSET
             if (sliceNode.getOffset() != 0 || sliceNode.getLimit().isEmpty())
                 return super.transformSlice(tree, sliceNode, child);
 
-            var subLimitTransformer = new SubLimitTransformer(sliceNode.getLimit().get(), this);
-
-            return iqFactory.createUnaryIQTree(sliceNode, child.acceptTransformer(subLimitTransformer));
+            var subLimitTransformer = new SubLimitTransformer(sliceNode.getLimit().getAsLong());
+            return iqFactory.createUnaryIQTree(sliceNode, subLimitTransformer.transform(child));
         }
     }
 
-    /**
-     * Calling super.transform[...] continues in this transformer, normal transform calls are redirected to the parent transformer.
-     */
     private class SubLimitTransformer extends DefaultRecursiveIQTreeVisitingTransformer {
 
-        private final DefaultRecursiveIQTreeVisitingTransformer eliminateLimitsFromSubQueriesNormalizer;
         private final long currentBounds;
 
-        protected SubLimitTransformer(long currentBounds, DefaultRecursiveIQTreeVisitingTransformer eliminateLimitsFromSubQueriesNormalizer) {
+        SubLimitTransformer(long currentBounds) {
             super(EliminateLimitsFromSubQueriesNormalizer.this.iqFactory);
-            this.eliminateLimitsFromSubQueriesNormalizer = eliminateLimitsFromSubQueriesNormalizer;
             this.currentBounds = currentBounds;
-        }
-
-        /**If the child slice has a lower limit than the parent, we cannot drop it
-        *We once again only perform this normalization if there is no OFFSET
-         * */
-        @Override
-        public IQTree transformSlice(IQTree tree, SliceNode sliceNode, IQTree child) {
-            if (sliceNode.getOffset() != 0 || sliceNode.getLimit().isEmpty() || sliceNode.getLimit().get() < currentBounds)
-                return eliminateLimitsFromSubQueriesNormalizer.transform(tree);
-            return transform(tree.getChildren().get(0));
         }
 
         /**
          * On left joins, we only apply the transformation to the left child
-        */
+         */
         @Override
-        public IQTree transformLeftJoin(IQTree tree, LeftJoinNode rootNode, IQTree leftChild, IQTree rightChild) {
-            var leftSubTree = transform(tree.getChildren().get(0));
-            var rightSubTree = eliminateLimitsFromSubQueriesNormalizer.transform(tree.getChildren().get(1));
-            if (leftSubTree.equals(tree.getChildren().get(0)) && rightSubTree.equals(tree.getChildren().get(1)))
-                return tree;
-            return iqFactory.createBinaryNonCommutativeIQTree((LeftJoinNode)tree.getRootNode(), leftSubTree, rightSubTree);
+        public IQTree transformLeftJoin(BinaryNonCommutativeIQTree tree, LeftJoinNode rootNode, IQTree leftChild, IQTree rightChild) {
+            return withTransformedChildren(tree,
+                    transform(leftChild),
+                    parentTransformer.transform(rightChild));
         }
 
         /**
-         * On inner joins, unions and constructions, we keep going inside this normalizer.
-        */
+         * If the child slice has a lower limit than the parent, we cannot drop it
+         * We once again only perform this normalization if there is no OFFSET
+         */
         @Override
-        public IQTree transformInnerJoin(IQTree tree, InnerJoinNode rootNode, ImmutableList<IQTree> children) {
-            return super.transformNaryCommutativeNode(tree, rootNode, children);
+        public IQTree transformSlice(UnaryIQTree tree, SliceNode sliceNode, IQTree child) {
+            if (sliceNode.getOffset() != 0 || sliceNode.getLimit().isEmpty() || sliceNode.getLimit().getAsLong() < currentBounds)
+                return parentTransformer.transform(tree);
+
+            return transform(child);
         }
 
         @Override
-        public IQTree transformUnion(IQTree tree, UnionNode rootNode, ImmutableList<IQTree> children) {
-            return super.transformNaryCommutativeNode(tree, rootNode, children);
+        public IQTree transformOrderBy(UnaryIQTree tree, OrderByNode rootNode, IQTree child) {
+            return parentTransformer.transform(tree);
         }
 
         @Override
-        public IQTree transformConstruction(IQTree tree, ConstructionNode rootNode, IQTree child) {
-            return super.transformUnaryNode(tree, rootNode, child);
-        }
-
-        /**
-         * All other nodes are not modified and passed back to the original normalizer to continue.
-         * This includes ORDER BY, DISTINCT, FILTER and more
-        */
-        @Override
-        protected IQTree transformUnaryNode(IQTree tree, UnaryOperatorNode rootNode, IQTree child) {
-            return eliminateLimitsFromSubQueriesNormalizer.transform(tree);
+        public IQTree transformDistinct(UnaryIQTree tree, DistinctNode rootNode, IQTree child) {
+            return parentTransformer.transform(tree);
         }
 
         @Override
-        protected IQTree transformBinaryNonCommutativeNode(IQTree tree, BinaryNonCommutativeOperatorNode rootNode, IQTree leftChild, IQTree rightChild) {
-            return eliminateLimitsFromSubQueriesNormalizer.transform(tree);
+        public IQTree transformFilter(UnaryIQTree tree, FilterNode rootNode, IQTree child) {
+            return parentTransformer.transform(tree);
         }
 
         @Override
-        protected IQTree transformNaryCommutativeNode(IQTree tree, NaryOperatorNode rootNode, ImmutableList<IQTree> children) {
-            return eliminateLimitsFromSubQueriesNormalizer.transform(tree);
+        public IQTree transformFlatten(UnaryIQTree tree, FlattenNode rootNode, IQTree child) {
+            return parentTransformer.transform(tree);
+        }
+
+        @Override
+        public IQTree transformAggregation(UnaryIQTree tree, AggregationNode rootNode, IQTree child) {
+            return parentTransformer.transform(tree);
         }
     }
 }

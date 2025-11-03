@@ -9,24 +9,20 @@ import it.unibz.inf.ontop.evaluator.TermNullabilityEvaluator;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
-import it.unibz.inf.ontop.iq.IQ;
-import it.unibz.inf.ontop.iq.IQTree;
-import it.unibz.inf.ontop.iq.UnaryIQTree;
+import it.unibz.inf.ontop.iq.*;
+import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.tools.UnionBasedQueryMerger;
+import it.unibz.inf.ontop.iq.visit.impl.DefaultIQTreeOptionalVisitingTransformer;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
 import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbolFactory;
-import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbolFactory;
 import it.unibz.inf.ontop.model.vocabulary.RDF;
 import it.unibz.inf.ontop.spec.mapping.MappingAssertion;
 import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
-import org.apache.commons.rdf.api.IRI;
 
-import javax.lang.model.element.VariableElement;
 import java.util.*;
 import java.util.stream.Collector;
 import java.util.stream.IntStream;
@@ -42,6 +38,7 @@ public class MappingAssertionUnion {
     private final HomomorphismFactory homomorphismFactory;
     private final CoreSingletons coreSingletons;
     private final UnionBasedQueryMerger queryMerger;
+    private final IQTreeTools iqTreeTools;
     private final TermNullabilityEvaluator termNullabilityEvaluator;
 
     public MappingAssertionUnion(ExtensionalDataNodeListContainmentCheck cqc, CoreSingletons coreSingletons, UnionBasedQueryMerger queryMerger, TermNullabilityEvaluator termNullabilityEvaluator) {
@@ -51,6 +48,7 @@ public class MappingAssertionUnion {
         this.homomorphismFactory = coreSingletons.getHomomorphismFactory();
         this.coreSingletons = coreSingletons;
         this.queryMerger = queryMerger;
+        this.iqTreeTools = coreSingletons.getIQTreeTools();
         this.termNullabilityEvaluator = termNullabilityEvaluator;
     }
 
@@ -189,28 +187,19 @@ public class MappingAssertionUnion {
         }
 
         IQ asIQ() {
-            return iqFactory.createIQ(projectionAtom,
-                    iqFactory.createUnaryIQTree(
-                            iqFactory.createConstructionNode(projectionAtom.getVariables(), substitution), getTree()));
+            return iqTreeTools.createMappingIQ(projectionAtom, substitution, getTree());
         }
 
         IQTree getTree() {
             // assumes that filter is a possibly empty list of non-empty lists
             Optional<ImmutableExpression> mergedConditions = translate(filter);
 
-            if (extensionalDataNodes.isEmpty() && valuesNode.isEmpty())
-                    return iqFactory.createTrueNode();
-            else if (valuesNode.isEmpty() && extensionalDataNodes.size() == 1)
-                    return mergedConditions
-                            .<IQTree>map(c -> iqFactory.createUnaryIQTree(iqFactory.createFilterNode(c), extensionalDataNodes.get(0)))
-                            .orElseGet(() -> extensionalDataNodes.get(0));
-            else if (valuesNode.isPresent() && extensionalDataNodes.isEmpty())
-                return mergedConditions
-                        .<IQTree>map(c -> iqFactory.createUnaryIQTree(iqFactory.createFilterNode(c), valuesNode.get()))
-                        .orElseGet(valuesNode::get);
-            else return iqFactory.createNaryIQTree(
-                            iqFactory.createInnerJoinNode(mergedConditions),
-                            Stream.concat(extensionalDataNodes.stream(), valuesNode.stream()).collect(ImmutableCollectors.toList()));
+            ImmutableList<IQTree> children = Stream.concat(
+                            extensionalDataNodes.stream(), valuesNode.stream())
+                    .collect(ImmutableCollectors.toList());
+
+            return iqTreeTools.createOptionalInnerJoinTree(mergedConditions, children)
+                    .orElseGet(iqFactory::createTrueNode);
         }
 
         ImmutableSet<Variable> getNonNullableVariables() {
@@ -272,52 +261,71 @@ public class MappingAssertionUnion {
 
     }
 
-    private Optional<ConjunctiveIQ> extractConjunctiveIQ(MappingAssertion assertion) {
-        DistinctVariableOnlyDataAtom projectionAtom = assertion.getProjectionAtom();
-        ConstructionNode constructionNode = (ConstructionNode) assertion.getQuery().getTree().getRootNode();
-        IQTree topTree = assertion.getTopChild();
-        if (topTree instanceof TrueNode) {
-            return Optional.of(new ConjunctiveIQ(projectionAtom, constructionNode, ImmutableList.of(), Optional.empty(), DisjunctionOfConjunctions.getTrue()));
-        }
-        if (topTree instanceof ExtensionalDataNode) {
-            return Optional.of(new ConjunctiveIQ(projectionAtom, constructionNode, ImmutableList.of((ExtensionalDataNode) topTree), Optional.empty(), DisjunctionOfConjunctions.getTrue()));
-        }
-        if (topTree instanceof ValuesNode) {
-            return Optional.of(new ConjunctiveIQ(projectionAtom, constructionNode, ImmutableList.of(), Optional.of((ValuesNode) topTree), DisjunctionOfConjunctions.getTrue()));
+    private class ConjunctiveIQExtractor extends DefaultIQTreeOptionalVisitingTransformer<ConjunctiveIQ> {
+        private final DistinctVariableOnlyDataAtom projectionAtom;
+        private final ConstructionNode constructionNode;
+
+        ConjunctiveIQExtractor(DistinctVariableOnlyDataAtom projectionAtom, ConstructionNode constructionNode) {
+            this.projectionAtom = projectionAtom;
+            this.constructionNode = constructionNode;
         }
 
-        QueryNode topNode = topTree.getRootNode();
-        if (topNode instanceof FilterNode) {
-            ImmutableExpression filter = ((FilterNode)topNode).getFilterCondition();
-            IQTree childTree = ((UnaryIQTree)topTree).getChild();
-            if (childTree instanceof ExtensionalDataNode)
-                return Optional.of(new ConjunctiveIQ(projectionAtom, constructionNode, ImmutableList.of((ExtensionalDataNode) childTree), Optional.empty(), DisjunctionOfConjunctions.of(filter)));
-            if (childTree instanceof ValuesNode)
-                return Optional.of(new ConjunctiveIQ(projectionAtom, constructionNode, ImmutableList.of(), Optional.of((ValuesNode) childTree), DisjunctionOfConjunctions.of(filter)));
+        private Optional<ConjunctiveIQ> newConjunctiveIQ(ImmutableList<ExtensionalDataNode> extensionalDataNodes, Optional<ValuesNode> valuesNode, DisjunctionOfConjunctions filter) {
+            return Optional.of(new ConjunctiveIQ(projectionAtom, constructionNode, extensionalDataNodes, valuesNode, filter));
         }
 
-        if (topNode instanceof InnerJoinNode) {
-            ImmutableList<IQTree> childrenTrees = topTree.getChildren();
-            ImmutableList<ExtensionalDataNode> extensionalDataNodes = childrenTrees.stream()
+        @Override
+        public Optional<ConjunctiveIQ> transformExtensionalData(ExtensionalDataNode dataNode) {
+            return newConjunctiveIQ(ImmutableList.of(dataNode), Optional.empty(), DisjunctionOfConjunctions.getTrue());
+        }
+
+        @Override
+        public Optional<ConjunctiveIQ> transformTrue(TrueNode node) {
+            return newConjunctiveIQ(ImmutableList.of(), Optional.empty(), DisjunctionOfConjunctions.getTrue());
+        }
+
+        @Override
+        public Optional<ConjunctiveIQ> transformValues(ValuesNode valuesNode) {
+            return newConjunctiveIQ(ImmutableList.of(), Optional.of(valuesNode), DisjunctionOfConjunctions.getTrue());
+        }
+
+        @Override
+        public Optional<ConjunctiveIQ> transformFilter(UnaryIQTree tree, FilterNode rootNode, IQTree child) {
+            ImmutableExpression filter = rootNode.getFilterCondition();
+            if (child instanceof ExtensionalDataNode)
+                return newConjunctiveIQ(ImmutableList.of((ExtensionalDataNode) child), Optional.empty(), DisjunctionOfConjunctions.of(filter));
+            if (child instanceof ValuesNode)
+                return newConjunctiveIQ(ImmutableList.of(), Optional.of((ValuesNode) child), DisjunctionOfConjunctions.of(filter));
+            return Optional.empty();
+        }
+
+        @Override
+        public Optional<ConjunctiveIQ> transformInnerJoin(NaryIQTree tree, InnerJoinNode rootNode, ImmutableList<IQTree> children) {
+            ImmutableList<ExtensionalDataNode> extensionalDataNodes = children.stream()
                     .filter(n -> n instanceof ExtensionalDataNode)
                     .map(n -> (ExtensionalDataNode)n)
                     .collect(ImmutableCollectors.toList());
 
-            ImmutableList<ValuesNode> valuesNodes = childrenTrees.stream()
+            ImmutableList<ValuesNode> valuesNodes = children.stream()
                     .filter(n -> n instanceof ValuesNode)
                     .map(n -> (ValuesNode)n)
                     .collect(ImmutableCollectors.toList());
 
-            if (extensionalDataNodes.size() + valuesNodes.size() == childrenTrees.size() && valuesNodes.size() <= 1) {
-                DisjunctionOfConjunctions filter = ((InnerJoinNode) topNode).getOptionalFilterCondition()
+            if (extensionalDataNodes.size() + valuesNodes.size() == children.size() && valuesNodes.size() <= 1) {
+                DisjunctionOfConjunctions filter = rootNode.getOptionalFilterCondition()
                         .map(DisjunctionOfConjunctions::of)
                         .orElseGet(DisjunctionOfConjunctions::getTrue);
 
-                return Optional.of(new ConjunctiveIQ(projectionAtom, constructionNode, extensionalDataNodes, valuesNodes.stream().findFirst(), filter));
+                return newConjunctiveIQ(extensionalDataNodes, valuesNodes.stream().findFirst(), filter);
             }
+            return Optional.empty();
         }
+    }
 
-        return Optional.empty();
+    private Optional<ConjunctiveIQ> extractConjunctiveIQ(MappingAssertion assertion) {
+        DistinctVariableOnlyDataAtom projectionAtom = assertion.getProjectionAtom();
+        ConstructionNode constructionNode = (ConstructionNode) assertion.getQuery().getTree().getRootNode();
+        return assertion.getTopChild().acceptVisitor(new ConjunctiveIQExtractor(projectionAtom, constructionNode));
     }
 
     public Optional<MappingAssertion> build() {

@@ -5,61 +5,47 @@ import it.unibz.inf.ontop.iq.lens.LensUnfolder;
 import it.unibz.inf.ontop.dbschema.Lens;
 import it.unibz.inf.ontop.dbschema.RelationDefinition;
 import it.unibz.inf.ontop.injection.CoreSingletons;
-import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.iq.node.impl.ExtensionalDataNodeImpl;
-import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
-import it.unibz.inf.ontop.iq.visit.impl.RelationExtractor;
+import it.unibz.inf.ontop.iq.optimizer.impl.AbstractIQOptimizer;
+import it.unibz.inf.ontop.iq.transform.IQTreeVariableGeneratorTransformer;
+import it.unibz.inf.ontop.iq.visit.impl.DefaultRecursiveIQTreeVisitingTransformerWithVariableGenerator;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
-public class LensUnfolderImpl implements LensUnfolder {
+public class LensUnfolderImpl extends AbstractIQOptimizer implements LensUnfolder {
 
-    protected final CoreSingletons coreSingletons;
-    protected final IntermediateQueryFactory iqFactory;
+    private final CoreSingletons coreSingletons;
 
     @Inject
     protected LensUnfolderImpl(CoreSingletons coreSingletons) {
+        super(coreSingletons.getIQFactory());
         this.coreSingletons = coreSingletons;
-        this.iqFactory = coreSingletons.getIQFactory();
     }
 
     @Override
-    public IQ optimize(IQ query) {
-        IQTree initialTree = query.getTree();
-        int maxLevel = extractMaxLevel(initialTree);
+    protected IQTreeVariableGeneratorTransformer getTransformer() {
+        return this::transformTree;
+    }
+
+    private IQTree transformTree(IQTree tree, VariableGenerator variableGenerator) {
+        int maxLevel = Lens.getMaxLevel(tree);
         if (maxLevel < 1)
-            return query;
+            return tree;
 
-        IQTree newTree = new MaxLevelLensUnfoldingTransformer(maxLevel, query.getVariableGenerator())
-                .transform(initialTree);
-
-        return newTree.equals(initialTree)
-                ? query
-                : iqFactory.createIQ(query.getProjectionAtom(), newTree)
-                .normalizeForOptimization();
+        var transformer = new MaxLevelLensUnfoldingTransformer(maxLevel, variableGenerator);
+        return transformer.transform(tree)
+                .normalizeForOptimization(variableGenerator);
     }
 
-    private int extractMaxLevel(IQTree tree) {
-        return tree.acceptVisitor(new RelationExtractor())
-                .map(ExtensionalDataNode::getRelationDefinition)
-                .filter(r -> r instanceof Lens)
-                .map(r -> (Lens) r)
-                .mapToInt(Lens::getLevel)
-                .max()
-                .orElse(0);
-    }
+    private class MaxLevelLensUnfoldingTransformer extends DefaultRecursiveIQTreeVisitingTransformerWithVariableGenerator {
 
-    protected class MaxLevelLensUnfoldingTransformer extends DefaultRecursiveIQTreeVisitingTransformer {
+        private final int maxLevel;
 
-        protected final int maxLevel;
-        protected final VariableGenerator variableGenerator;
-
-        protected MaxLevelLensUnfoldingTransformer(int maxLevel, VariableGenerator variableGenerator) {
-            super(coreSingletons);
+        MaxLevelLensUnfoldingTransformer(int maxLevel, VariableGenerator variableGenerator) {
+            super(LensUnfolderImpl.this.iqFactory,  variableGenerator);
             this.maxLevel = maxLevel;
-            this.variableGenerator = variableGenerator;
         }
 
         @Override
@@ -71,15 +57,15 @@ public class LensUnfolderImpl implements LensUnfolder {
                         ? dataNode
                         : merge(dataNode, lens.getIQ());
             }
-            else
-                return dataNode;
+
+            return dataNode;
         }
 
-        protected IQTree merge(ExtensionalDataNode dataNode, IQ definition) {
+        private IQTree merge(ExtensionalDataNode dataNode, IQ definition) {
             return ExtensionalDataNodeImpl.merge(dataNode, definition, variableGenerator,
                     coreSingletons.getSubstitutionFactory(),
-                    coreSingletons.getQueryTransformerFactory(),
-                    iqFactory);
+                    iqFactory,
+                    coreSingletons.getIQTreeTools());
         }
     }
 }

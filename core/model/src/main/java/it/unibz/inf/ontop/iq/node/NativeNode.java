@@ -5,7 +5,7 @@ import com.google.common.collect.ImmutableSortedSet;
 import it.unibz.inf.ontop.dbschema.QuotedID;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.LeafIQTree;
-import it.unibz.inf.ontop.iq.visit.IQVisitor;
+import it.unibz.inf.ontop.iq.visit.IQTreeVisitor;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.type.DBTermType;
 
@@ -36,7 +36,7 @@ public interface NativeNode extends LeafIQTree {
     String getNativeQueryString();
 
     @Override
-    default <T> T acceptVisitor(IQVisitor<T> visitor) {
+    default <T> T acceptVisitor(IQTreeVisitor<T> visitor) {
         return visitor.transformNative(this);
     }
 

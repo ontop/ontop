@@ -1,43 +1,48 @@
 package it.unibz.inf.ontop.generation.normalization.impl;
 
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
+import it.unibz.inf.ontop.generation.normalization.DialectExtraNormalizer;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.iq.IQTree;
+import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
-import it.unibz.inf.ontop.model.term.ImmutableFunctionalTerm;
+import it.unibz.inf.ontop.iq.transform.impl.DefaultDelegatingIQTreeVariableGeneratorTransformer;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.type.DBTermType;
-import it.unibz.inf.ontop.utils.ImmutableCollectors;
+
+import java.util.Optional;
 
 /**
  * To be called AFTER the TypingNullsInUnionDialectExtraNormalizer (if relevant), NEVER BEFORE
  */
-public class TypingNullsInConstructionNodeDialectExtraNormalizer extends AbstractTypingNullsDialectExtraNormalizer {
-
-    private final DBTermType defaultType;
+public class TypingNullsInConstructionNodeDialectExtraNormalizer extends DefaultDelegatingIQTreeVariableGeneratorTransformer implements DialectExtraNormalizer {
 
     @Inject
     protected TypingNullsInConstructionNodeDialectExtraNormalizer(CoreSingletons coreSingletons) {
-        super(coreSingletons);
-        defaultType = coreSingletons.getTypeFactory().getDBTypeFactory().getDBStringType();
+        super(new Transformer(coreSingletons)::transform);
     }
 
-    @Override
-    public IQTree transformConstruction(IQTree tree, ConstructionNode rootNode, IQTree child) {
-        IQTree newChild = child.acceptTransformer(this);
+    private static class Transformer extends AbstractTypingNullsTransformer {
+        private final DBTermType defaultType;
 
-        ImmutableSet<Variable> nullVariables = extractNullVariables(rootNode);
+        Transformer(CoreSingletons coreSingletons) {
+            super(coreSingletons);
+            this.defaultType = coreSingletons.getTypeFactory().getDBTypeFactory().getDBStringType();
+        }
 
-        if (nullVariables.isEmpty())
-            return newChild.equals(child) ? tree : iqFactory.createUnaryIQTree(rootNode, newChild);
+        @Override
+        public IQTree transformConstruction(UnaryIQTree tree, ConstructionNode rootNode, IQTree child) {
+            ImmutableSet<Variable> nullVariables = extractNullVariables(rootNode);
 
-        ImmutableMap<Variable, ImmutableFunctionalTerm> typedNullMap = nullVariables.stream()
-                .collect(ImmutableCollectors.toMap(
-                        v -> v,
-                        v -> termFactory.getTypedNull(defaultType)));
+            if (nullVariables.isEmpty())
+                return super.transformConstruction(tree, rootNode, child);
 
-        return updateSubQuery(iqFactory.createUnaryIQTree(rootNode, newChild), typedNullMap);
+            var typedNullMap = extractTypedNullMap(nullVariables,
+                    v -> Optional.of(defaultType));
+
+            IQTree newChild = transform(child);
+            return updateSubTree(iqFactory.createUnaryIQTree(rootNode, newChild), typedNullMap);
+        }
     }
 }

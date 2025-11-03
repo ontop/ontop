@@ -11,7 +11,7 @@ import it.unibz.inf.ontop.utils.VariableGenerator;
 public class IdentityDialectExtraNormalizer implements DialectExtraNormalizer {
 
     @Inject
-    private IdentityDialectExtraNormalizer() {
+    protected IdentityDialectExtraNormalizer() {
     }
 
     @Override

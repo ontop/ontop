@@ -19,23 +19,32 @@ import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.InjectiveSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.CoreUtilsFactory;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
+import javax.annotation.Nullable;
 
-public class IntensionalDataNodeImpl extends DataNodeImpl<AtomPredicate> implements IntensionalDataNode {
+
+public class IntensionalDataNodeImpl extends LeafIQTreeImpl implements IntensionalDataNode {
 
     private static final String INTENSIONAL_DATA_NODE_STR = "INTENSIONAL";
 
     private final AtomFactory atomFactory;
-    private final SubstitutionFactory substitutionFactory;
+
+    private final DataAtom<AtomPredicate> atom;
+    // LAZY
+    @Nullable
+    private ImmutableSet<Variable> variables;
 
     @AssistedInject
     private IntensionalDataNodeImpl(@Assisted DataAtom<AtomPredicate> atom,
                                     IQTreeTools iqTreeTools, IntermediateQueryFactory iqFactory,
                                     CoreUtilsFactory coreUtilsFactory, AtomFactory atomFactory, SubstitutionFactory substitutionFactory) {
-        super(atom, iqTreeTools, iqFactory, coreUtilsFactory);
+        super(iqTreeTools, iqFactory, substitutionFactory, coreUtilsFactory);
         this.atomFactory = atomFactory;
-        this.substitutionFactory = substitutionFactory;
+
+        this.atom = atom;
+        this.variables = null;
     }
 
     /**
@@ -44,11 +53,6 @@ public class IntensionalDataNodeImpl extends DataNodeImpl<AtomPredicate> impleme
     @Override
     public boolean isDistinct() {
         return true;
-    }
-
-    @Override
-    public IQTree applyFreshRenaming(InjectiveSubstitution<Variable> freshRenamingSubstitution) {
-        return applyDescendingSubstitutionWithoutOptimizing(freshRenamingSubstitution);
     }
 
     @Override
@@ -90,29 +94,50 @@ public class IntensionalDataNodeImpl extends DataNodeImpl<AtomPredicate> impleme
         return INTENSIONAL_DATA_NODE_STR + " " + getProjectionAtom();
     }
 
+
     @Override
-    public IntensionalDataNode newAtom(DataAtom<AtomPredicate> newAtom) {
-        return iqFactory.createIntensionalDataNode(newAtom);
+    public IntensionalDataNode applyFreshRenaming(InjectiveSubstitution<Variable> renamingSubstitution) {
+        return applyDescendingSubstitution(renamingSubstitution);
     }
 
     @Override
-    public IQTree applyDescendingSubstitutionWithoutOptimizing(
-            Substitution<? extends VariableOrGroundTerm> descendingSubstitution, VariableGenerator variableGenerator) {
-        return applyDescendingSubstitutionWithoutOptimizing(descendingSubstitution);
+    public IQTree applyDescendingSubstitution(DownPropagation dp) {
+        return applyDescendingSubstitution(dp.getDescendingSubstitution());
     }
 
-    private IQTree applyDescendingSubstitutionWithoutOptimizing(
-            Substitution<? extends VariableOrGroundTerm> descendingSubstitution) {
+    private IntensionalDataNode applyDescendingSubstitution(Substitution<? extends VariableOrGroundTerm> descendingSubstitution) {
         DataAtom<AtomPredicate> atom = getProjectionAtom();
         DataAtom<AtomPredicate> newAtom = atomFactory.getDataAtom(atom.getPredicate(), substitutionFactory.onVariableOrGroundTerms().applyToTerms(descendingSubstitution, atom.getArguments()));
-        return newAtom(newAtom);
+        return iqFactory.createIntensionalDataNode(newAtom);
     }
 
     /**
      * All the variables are required, because an intensional data node cannot be sparse.
      */
     @Override
-    public synchronized VariableNonRequirement getVariableNonRequirement() {
+    public VariableNonRequirement getVariableNonRequirement() {
         return VariableNonRequirement.empty();
+    }
+
+    public DataAtom<AtomPredicate> getProjectionAtom() {
+        return atom;
+    }
+
+    @Override
+    public ImmutableSet<Variable> getVariables() {
+        return getCachedValue(() -> variables, this::computeVariables, v -> variables = v);
+    }
+
+    private ImmutableSet<Variable> computeVariables() {
+        return atom.getArguments()
+                .stream()
+                .filter(t -> t instanceof Variable)
+                .map(t -> (Variable)t)
+                .collect(ImmutableCollectors.toSet());
+    }
+
+    @Override
+    public boolean isDeclaredAsEmpty() {
+        return false;
     }
 }

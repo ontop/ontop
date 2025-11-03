@@ -6,17 +6,16 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
-import it.unibz.inf.ontop.injection.QueryTransformerFactory;
 import it.unibz.inf.ontop.iq.IQ;
+import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.optimizer.GeneralStructuralAndSemanticIQOptimizer;
 import it.unibz.inf.ontop.iq.optimizer.IQOptimizer;
 import it.unibz.inf.ontop.iq.tools.UnionBasedQueryMerger;
-import it.unibz.inf.ontop.model.atom.AtomFactory;
+import it.unibz.inf.ontop.iq.transform.QueryRenamer;
 import it.unibz.inf.ontop.spec.mapping.MappingAssertion;
 import it.unibz.inf.ontop.spec.mapping.MappingAssertionIndex;
 import it.unibz.inf.ontop.spec.rule.RuleExecutor;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
-import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,27 +28,25 @@ public class RuleExecutorImpl implements RuleExecutor {
 
     private final IntermediateQueryFactory iqFactory;
     private final SubstitutionFactory substitutionFactory;
-    private final QueryTransformerFactory transformerFactory;
-    private final CoreUtilsFactory coreUtilsFactory;
-    private final AtomFactory atomFactory;
+    private final QueryRenamer queryRenamer;
     private final UnionBasedQueryMerger queryMerger;
     private final GeneralStructuralAndSemanticIQOptimizer generalStructuralAndSemanticIQOptimizer;
+    private final IQTreeTools iqTreeTools;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RuleExecutorImpl.class);
 
     @Inject
     protected RuleExecutorImpl(IntermediateQueryFactory iqFactory,
-                               SubstitutionFactory substitutionFactory, QueryTransformerFactory transformerFactory,
-                               CoreUtilsFactory coreUtilsFactory, AtomFactory atomFactory,
+                               SubstitutionFactory substitutionFactory, QueryRenamer queryRenamer,
                                UnionBasedQueryMerger queryMerger,
-                               GeneralStructuralAndSemanticIQOptimizer generalStructuralAndSemanticIQOptimizer) {
+                               GeneralStructuralAndSemanticIQOptimizer generalStructuralAndSemanticIQOptimizer,
+                               IQTreeTools iqTreeTools) {
         this.iqFactory = iqFactory;
         this.substitutionFactory = substitutionFactory;
-        this.transformerFactory = transformerFactory;
-        this.coreUtilsFactory = coreUtilsFactory;
-        this.atomFactory = atomFactory;
+        this.queryRenamer = queryRenamer;
         this.queryMerger = queryMerger;
         this.generalStructuralAndSemanticIQOptimizer = generalStructuralAndSemanticIQOptimizer;
+        this.iqTreeTools = iqTreeTools;
     }
 
     @Override
@@ -63,8 +60,7 @@ public class RuleExecutorImpl implements RuleExecutor {
                         MappingAssertion::getIndex,
                         a -> a));
 
-        IQOptimizer mappingUnfolder = new MutableQueryUnfolder(mutableMappingMap, iqFactory, substitutionFactory,
-                transformerFactory, coreUtilsFactory, atomFactory);
+        IQOptimizer mappingUnfolder = new MutableQueryUnfolder(mutableMappingMap, iqFactory, substitutionFactory, queryRenamer, iqTreeTools);
 
         for (IQ rule : rules) {
             Optional<IQ> additionalDefinition = optimize(mappingUnfolder.optimize(rule));

@@ -25,9 +25,9 @@ public abstract class AbstractMultiPhaseQueryMergingTransformer extends Abstract
 
     protected final TermFactory termFactory;
     protected final Mapping mapping;
+
     private final ImmutableSet<ObjectStringTemplateFunctionSymbol> iriTemplates;
     private final ImmutableSet<ObjectStringTemplateFunctionSymbol> bnodeTemplates;
-    protected final VariableGenerator variableGenerator;
 
     protected AbstractMultiPhaseQueryMergingTransformer(Mapping mapping, VariableGenerator variableGenerator, CoreSingletons coreSingletons) {
         super(variableGenerator, coreSingletons);
@@ -42,7 +42,6 @@ public abstract class AbstractMultiPhaseQueryMergingTransformer extends Abstract
                 .filter(t -> t instanceof BnodeStringTemplateFunctionSymbol)
                 .map(t -> (BnodeStringTemplateFunctionSymbol)t)
                 .collect(ImmutableSet.toImmutableSet());
-        this.variableGenerator = variableGenerator;
     }
 
     protected boolean isTemplateCompatibleWithConstant(ObjectStringTemplateFunctionSymbol template, ObjectConstant objectConstant) {
@@ -55,6 +54,7 @@ public abstract class AbstractMultiPhaseQueryMergingTransformer extends Abstract
                                         .mapToObj(i -> variableGenerator.generateNewVariable())
                                         .collect(ImmutableCollectors.toList())),
                         termFactory.getRDFTermTypeConstant(objectConstant.getType())));
+
         return strictEquality.evaluate2VL(termFactory.createDummyVariableNullability(strictEquality))
                 .getValue()
                 .filter(v -> v.equals(ImmutableExpression.Evaluation.BooleanValue.FALSE))

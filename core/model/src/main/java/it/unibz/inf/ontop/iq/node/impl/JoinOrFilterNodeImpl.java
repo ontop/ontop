@@ -7,9 +7,9 @@ import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
+import it.unibz.inf.ontop.iq.impl.NaryIQTreeTools;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.iq.node.normalization.ConditionSimplifier;
-import it.unibz.inf.ontop.iq.request.VariableNonRequirement;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.iq.node.JoinOrFilterNode;
@@ -54,12 +54,6 @@ public abstract class JoinOrFilterNodeImpl extends CompositeQueryNodeImpl implem
                 .orElse("");
     }
 
-    @Override
-    public ImmutableSet<Variable> getLocalVariables() {
-        return getOptionalFilterCondition()
-                .map(ImmutableFunctionalTerm::getVariables)
-                .orElse(ImmutableSet.of());
-    }
 
     protected boolean isFilteringNullValue(Variable variable) {
         return getOptionalFilterCondition()
@@ -69,7 +63,9 @@ public abstract class JoinOrFilterNodeImpl extends CompositeQueryNodeImpl implem
 
     @Override
     public ImmutableSet<Variable> getLocallyRequiredVariables() {
-        return getLocalVariables();
+        return getOptionalFilterCondition()
+                .map(ImmutableFunctionalTerm::getVariables)
+                .orElseGet(ImmutableSet::of);
     }
 
     @Override
@@ -80,7 +76,7 @@ public abstract class JoinOrFilterNodeImpl extends CompositeQueryNodeImpl implem
     protected void checkExpression(ImmutableExpression expression, ImmutableList<IQTree> children)
             throws InvalidIntermediateQueryException {
 
-        ImmutableSet<Variable> childrenVariables = iqTreeTools.getChildrenVariables(children);
+        ImmutableSet<Variable> childrenVariables = NaryIQTreeTools.projectedVariables(children);
 
         ImmutableSet<Variable> unboundVariables = expression.getVariableStream()
                 .filter(v -> !childrenVariables.contains(v))
@@ -89,18 +85,6 @@ public abstract class JoinOrFilterNodeImpl extends CompositeQueryNodeImpl implem
             throw new InvalidIntermediateQueryException("Expression " + expression + " of "
                     + expression + " uses unbound variables (" + unboundVariables +  ").\n" + this);
         }
-    }
-
-    protected VariableNonRequirement applyFilterToVariableNonRequirement(VariableNonRequirement nonRequirementBeforeFilter,
-                                                                         ImmutableList<IQTree> children) {
-        return applyFilterToVariableNonRequirement(nonRequirementBeforeFilter);
-    }
-
-    protected VariableNonRequirement applyFilterToVariableNonRequirement(VariableNonRequirement nonRequirementBeforeFilter) {
-        ImmutableSet<Variable> filterVariables = getLocallyRequiredVariables();
-
-        return nonRequirementBeforeFilter
-                .filter((v, conds) -> !filterVariables.contains(v));
     }
 
     protected boolean isDistinct(IQTree tree, ImmutableList<IQTree> children) {

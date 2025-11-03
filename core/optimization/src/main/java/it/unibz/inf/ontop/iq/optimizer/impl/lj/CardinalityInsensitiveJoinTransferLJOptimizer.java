@@ -6,19 +6,20 @@ import com.google.inject.Singleton;
 import it.unibz.inf.ontop.dbschema.FunctionalDependency;
 import it.unibz.inf.ontop.dbschema.RelationDefinition;
 import it.unibz.inf.ontop.injection.CoreSingletons;
-import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
-import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
+import it.unibz.inf.ontop.iq.NaryIQTree;
+import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.iq.node.UnionNode;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.iq.node.impl.JoinOrFilterVariableNullabilityTools;
 import it.unibz.inf.ontop.iq.node.normalization.impl.RightProvenanceNormalizer;
-import it.unibz.inf.ontop.iq.optimizer.LeftJoinIQOptimizer;
-import it.unibz.inf.ontop.iq.optimizer.impl.LookForDistinctOrLimit1TransformerImpl;
+import it.unibz.inf.ontop.iq.optimizer.impl.CaseInsensitiveIQTreeTransformerAdapter;
 import it.unibz.inf.ontop.iq.transform.IQTreeTransformer;
-import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
+import it.unibz.inf.ontop.iq.transform.IQTreeVariableGeneratorTransformer;
+import it.unibz.inf.ontop.iq.transform.impl.AbstractDelegatingIQTreeVariableGeneratorTransformer;
+import it.unibz.inf.ontop.iq.visit.IQTreeVisitor;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
@@ -31,13 +32,14 @@ import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 @Singleton
-public class CardinalityInsensitiveJoinTransferLJOptimizer implements LeftJoinIQOptimizer {
+public class CardinalityInsensitiveJoinTransferLJOptimizer extends AbstractDelegatingIQTreeVariableGeneratorTransformer implements IQTreeVariableGeneratorTransformer {
 
     private final RequiredExtensionalDataNodeExtractor requiredDataNodeExtractor;
     private final RightProvenanceNormalizer rightProvenanceNormalizer;
     private final JoinOrFilterVariableNullabilityTools variableNullabilityTools;
     private final CoreSingletons coreSingletons;
-    private final IntermediateQueryFactory iqFactory;
+
+    private final IQTreeVariableGeneratorTransformer transformer;
 
     @Inject
     protected CardinalityInsensitiveJoinTransferLJOptimizer(RequiredExtensionalDataNodeExtractor requiredDataNodeExtractor,
@@ -48,44 +50,37 @@ public class CardinalityInsensitiveJoinTransferLJOptimizer implements LeftJoinIQ
         this.rightProvenanceNormalizer = rightProvenanceNormalizer;
         this.variableNullabilityTools = variableNullabilityTools;
         this.coreSingletons = coreSingletons;
-        this.iqFactory = coreSingletons.getIQFactory();
+
+        this.transformer = IQTreeVariableGeneratorTransformer.of(vg ->
+                new CaseInsensitiveIQTreeTransformerAdapter(coreSingletons.getIQFactory()) {
+                    @Override
+                    protected IQTree transformCardinalityInsensitiveTree(IQTree tree) {
+                        IQTreeVisitor<IQTree> transformer = new CardinalityInsensitiveTransformer(
+                                IQTreeTransformer.of(this),
+                                tree::getVariableNullability,
+                                vg);
+                        return tree.acceptVisitor(transformer);
+                    }
+                });
     }
 
     @Override
-    public IQ optimize(IQ query) {
-        IQTree initialTree = query.getTree();
-
-        IQTreeVisitingTransformer transformer = new LookForDistinctOrLimit1TransformerImpl(
-                (childTree, parentTransformer) -> new CardinalityInsensitiveTransformer(
-                        parentTransformer,
-                        childTree::getVariableNullability,
-                        query.getVariableGenerator(),
-                        requiredDataNodeExtractor,
-                        rightProvenanceNormalizer,
-                        variableNullabilityTools,
-                        coreSingletons),
-                coreSingletons);
-
-        IQTree newTree = initialTree.acceptTransformer(transformer);
-
-        return newTree.equals(initialTree)
-                ? query
-                : iqFactory.createIQ(query.getProjectionAtom(), newTree);
+    protected IQTreeVariableGeneratorTransformer getTransformer() {
+        return transformer;
     }
 
-    protected static class CardinalityInsensitiveTransformer extends AbstractJoinTransferLJTransformer {
+    private class CardinalityInsensitiveTransformer extends AbstractJoinTransferLJTransformer {
 
-        private final IQTreeTransformer lookForDistinctTransformer;
-
-        protected CardinalityInsensitiveTransformer(IQTreeTransformer lookForDistinctTransformer,
-                                                    Supplier<VariableNullability> variableNullabilitySupplier,
-                                                    VariableGenerator variableGenerator, RequiredExtensionalDataNodeExtractor requiredDataNodeExtractor,
-                                                    RightProvenanceNormalizer rightProvenanceNormalizer,
-                                                    JoinOrFilterVariableNullabilityTools variableNullabilityTools,
-                                                    CoreSingletons coreSingletons) {
-            super(variableNullabilitySupplier, variableGenerator, requiredDataNodeExtractor, rightProvenanceNormalizer,
-                    variableNullabilityTools, coreSingletons);
-            this.lookForDistinctTransformer = lookForDistinctTransformer;
+        CardinalityInsensitiveTransformer(IQTreeTransformer searchingFromScratchTransformer,
+                                          Supplier<VariableNullability> variableNullabilitySupplier,
+                                          VariableGenerator variableGenerator) {
+            super(searchingFromScratchTransformer,
+                    variableNullabilitySupplier,
+                    variableGenerator,
+                    CardinalityInsensitiveJoinTransferLJOptimizer.this.requiredDataNodeExtractor,
+                    CardinalityInsensitiveJoinTransferLJOptimizer.this.rightProvenanceNormalizer,
+                    CardinalityInsensitiveJoinTransferLJOptimizer.this.variableNullabilityTools,
+                    CardinalityInsensitiveJoinTransferLJOptimizer.this.coreSingletons);
         }
 
 
@@ -108,8 +103,7 @@ public class CardinalityInsensitiveJoinTransferLJOptimizer implements LeftJoinIQ
             if (!functionalDependencies.isEmpty()) {
                 Optional<ImmutableList<Integer>> matchingIndexes = functionalDependencies.stream()
                         .map(fd -> matchFunctionalDependency(fd, sameRelationLeftNodes, rightArgumentMap))
-                        .filter(Optional::isPresent)
-                        .map(Optional::get)
+                        .flatMap(Optional::stream)
                         .findAny();
 
                 if (matchingIndexes.isPresent())
@@ -130,20 +124,9 @@ public class CardinalityInsensitiveJoinTransferLJOptimizer implements LeftJoinIQ
             return true;
         }
 
-        @Override
-        protected IQTree transformBySearchingFromScratch(IQTree tree) {
-            return lookForDistinctTransformer.transform(tree);
-        }
 
-        protected IQTree transformBySearchingFromScratchFromDistinctTree(IQTree tree) {
-            return transformBySearchingFromScratchFromDistinctTree(tree, tree::getVariableNullability);
-        }
-
-        protected IQTree transformBySearchingFromScratchFromDistinctTree(IQTree tree, Supplier<VariableNullability> variableNullabilitySupplier) {
-            CardinalityInsensitiveTransformer newTransformer = new CardinalityInsensitiveTransformer(lookForDistinctTransformer,
-                    variableNullabilitySupplier, variableGenerator, requiredDataNodeExtractor,
-                    rightProvenanceNormalizer, variableNullabilityTools, coreSingletons);
-            return tree.acceptTransformer(newTransformer);
+        private IQTreeTransformer searchingFromScratchFromDistinctTreeTransformer(Supplier<VariableNullability> variableNullabilitySupplier) {
+            return IQTreeTransformer.of(new CardinalityInsensitiveTransformer(searchingFromScratchTransformer, variableNullabilitySupplier, variableGenerator));
         }
 
         @Override
@@ -155,28 +138,21 @@ public class CardinalityInsensitiveJoinTransferLJOptimizer implements LeftJoinIQ
 
             var condition = termFactory.getConjunction(Stream.concat(ljCondition.stream(), isNotNullFromImplicitEqualities));
 
-            return transformBySearchingFromScratchFromDistinctTree(rightChild,
-                    () -> condition
-                            .map(c -> variableNullabilityTools.updateWithFilter(
-                                            c,
-                                            rightChild.getVariableNullability().getNullableGroups(),
-                                            rightChild.getVariables()))
-                            .orElseGet(rightChild::getVariableNullability));
+            return searchingFromScratchFromDistinctTreeTransformer(
+                    () -> getVariableNullability(condition, rightChild.getVariableNullability(), rightChild.getVariables()))
+                    .transform(rightChild);
         }
 
         @Override
-        public IQTree transformConstruction(IQTree tree, ConstructionNode rootNode, IQTree child) {
-            var childVariableNullabilitySupplier = computeChildVariableNullabilityFromConstructionParent(tree, rootNode, child);
-
+        public IQTree transformConstruction(UnaryIQTree tree, ConstructionNode rootNode, IQTree child) {
             return transformUnaryNode(tree, rootNode, child,
-                    t -> transformBySearchingFromScratchFromDistinctTree(t, childVariableNullabilitySupplier));
+                    searchingFromScratchFromDistinctTreeTransformer(
+                            () -> computeChildVariableNullabilityFromConstructionParent(tree, rootNode, child))::transform);
         }
 
         @Override
-        public IQTree transformUnion(IQTree tree, UnionNode rootNode, ImmutableList<IQTree> children) {
-            return transformNaryCommutativeNode(tree, rootNode, children, this::transformBySearchingFromScratchFromDistinctTree);
+        public IQTree transformUnion(NaryIQTree tree, UnionNode rootNode, ImmutableList<IQTree> children) {
+            return transformNaryCommutativeNode(tree, rootNode, children, searchingFromScratchFromDistinctTreeTransformer(tree::getVariableNullability)::transform);
         }
     }
-
-
 }

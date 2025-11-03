@@ -2,8 +2,10 @@ package it.unibz.inf.ontop.iq.node;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.iq.IQTree;
-import it.unibz.inf.ontop.iq.visit.IQVisitor;
+import it.unibz.inf.ontop.iq.NaryIQTree;
+import it.unibz.inf.ontop.iq.visit.IQTreeVisitor;
 import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.substitution.InjectiveSubstitution;
 
 /**
  * All its children are expected to project its projected variables
@@ -25,7 +27,10 @@ public interface UnionNode extends ExplicitVariableProjectionNode, NaryOperatorN
     IQTree makeDistinct(ImmutableList<IQTree> children);
 
     @Override
-    default <T> T acceptVisitor(IQTree tree, IQVisitor<T> visitor, ImmutableList<IQTree> children) {
+    UnionNode applyFreshRenaming(InjectiveSubstitution<Variable> renamingSubstitution);
+
+    @Override
+    default <T> T acceptVisitor(NaryIQTree tree, IQTreeVisitor<T> visitor, ImmutableList<IQTree> children) {
         return visitor.transformUnion(tree, this, children);
     }
 }

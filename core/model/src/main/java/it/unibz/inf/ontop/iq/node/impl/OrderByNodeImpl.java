@@ -4,12 +4,12 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
-import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.IQTreeCache;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
+import it.unibz.inf.ontop.iq.DownPropagation;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.request.FunctionalDependencies;
@@ -18,29 +18,31 @@ import it.unibz.inf.ontop.iq.node.normalization.OrderByNormalizer;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.InjectiveSubstitution;
+import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Stream;
 
 public class OrderByNodeImpl extends QueryModifierNodeImpl implements OrderByNode {
 
     private static final String ORDER_BY_NODE_STR = "ORDER BY";
 
     private final ImmutableList<OrderComparator> comparators;
+
     private final OrderByNormalizer normalizer;
     private final IQTreeTools iqTreeTools;
-
+    private final SubstitutionFactory substitutionFactory;
 
     @AssistedInject
     private OrderByNodeImpl(@Assisted ImmutableList<OrderComparator> comparators, IntermediateQueryFactory iqFactory,
-                            OrderByNormalizer normalizer, IQTreeTools iqTreeTools) {
-        super(iqFactory);
+                            OrderByNormalizer normalizer, IQTreeTools iqTreeTools, SubstitutionFactory substitutionFactory, TermFactory termFactory) {
+        super(iqFactory, termFactory);
         this.comparators = comparators;
         this.normalizer = normalizer;
         this.iqTreeTools = iqTreeTools;
+        this.substitutionFactory = substitutionFactory;
     }
 
     @Override
@@ -50,15 +52,8 @@ public class OrderByNodeImpl extends QueryModifierNodeImpl implements OrderByNod
 
     @Override
     public Optional<OrderByNode> applySubstitution(Substitution<? extends ImmutableTerm> substitution) {
-        ImmutableList<OrderComparator> newComparators = comparators.stream()
-                .flatMap(c -> Stream.of(substitution.applyToTerm(c.getTerm()))
-                        .filter(t -> t instanceof NonGroundTerm)
-                        .map(t -> iqFactory.createOrderComparator((NonGroundTerm) t, c.isAscending())))
-                .collect(ImmutableCollectors.toList());
-
-        return Optional.of(newComparators)
-                .filter(cs -> !cs.isEmpty())
-                .map(iqFactory::createOrderByNode);
+        return iqTreeTools.createOptionalOrderByNode(
+                iqTreeTools.transformComparators(comparators, substitution::applyToTerm));
     }
 
     @Override
@@ -72,33 +67,22 @@ public class OrderByNodeImpl extends QueryModifierNodeImpl implements OrderByNod
     }
 
     @Override
-    public IQTree applyDescendingSubstitution(Substitution<? extends VariableOrGroundTerm> descendingSubstitution,
-                                              Optional<ImmutableExpression> constraint, IQTree child, VariableGenerator variableGenerator) {
-
-        Optional<OrderByNode> newOrderByNode = applySubstitution(descendingSubstitution);
-        IQTree newChild = child.applyDescendingSubstitution(descendingSubstitution, constraint, variableGenerator);
-
-        return iqTreeTools.createOptionalUnaryIQTree(newOrderByNode, newChild);
+    public OrderByNode applyFreshRenaming(InjectiveSubstitution<Variable> renamingSubstitution) {
+        var newComparators = iqTreeTools.transformComparators(
+                comparators, t -> substitutionFactory.onNonGroundTerms().rename(renamingSubstitution, t));
+        return iqFactory.createOrderByNode(newComparators);
     }
 
     @Override
-    public IQTree applyDescendingSubstitutionWithoutOptimizing(
-            Substitution<? extends VariableOrGroundTerm> descendingSubstitution, IQTree child, VariableGenerator variableGenerator) {
-
-        Optional<OrderByNode> newOrderByNode = applySubstitution(descendingSubstitution);
-        IQTree newChild = child.applyDescendingSubstitutionWithoutOptimizing(descendingSubstitution, variableGenerator);
-
-        return iqTreeTools.createOptionalUnaryIQTree(newOrderByNode, newChild);
+    public IQTree propagateDownConstraint(DownPropagation dp, IQTree child) {
+        return iqFactory.createUnaryIQTree(this, dp.propagate(child));
     }
 
     @Override
-    public IQTree applyFreshRenaming(InjectiveSubstitution<Variable> renamingSubstitution, IQTree child, IQTreeCache treeCache) {
-        IQTree newChild = child.applyFreshRenaming(renamingSubstitution);
-
-        OrderByNode newOrderByNode = applySubstitution(renamingSubstitution)
-                .orElseThrow(() -> new MinorOntopInternalBugException("The order by was expected to be kept"));
-
-        return iqFactory.createUnaryIQTree(newOrderByNode, newChild, treeCache.applyFreshRenaming(renamingSubstitution));
+    public IQTree applyDescendingSubstitution(DownPropagation dp, IQTree child) {
+        return iqTreeTools.unaryIQTreeBuilder()
+                .append(applySubstitution(dp.getDescendingSubstitution()))
+                .build(dp.propagate(child));
     }
 
     @Override
@@ -136,10 +120,7 @@ public class OrderByNodeImpl extends QueryModifierNodeImpl implements OrderByNod
      */
     @Override
     public VariableNonRequirement computeVariableNonRequirement(IQTree child) {
-        ImmutableSet<Variable> localVariables = getLocalVariables();
-
-        return child.getVariableNonRequirement()
-                .filter((v, conds) -> !localVariables.contains(v));
+        return child.getVariableNonRequirement().withRequiredVariables(getLocallyRequiredVariables());
     }
 
     @Override
@@ -148,15 +129,11 @@ public class OrderByNodeImpl extends QueryModifierNodeImpl implements OrderByNod
     }
 
     @Override
-    public ImmutableSet<Variable> getLocalVariables() {
-        return comparators.stream()
-                .flatMap(c -> c.getTerm().getVariableStream())
-                .collect(ImmutableCollectors.toSet());
-    }
-
-    @Override
     public ImmutableSet<Variable> getLocallyRequiredVariables() {
-        return getLocalVariables();
+        return comparators.stream()
+                .map(OrderComparator::getTerm)
+                .flatMap(ImmutableTerm::getVariableStream)
+                .collect(ImmutableCollectors.toSet());
     }
 
     @Override

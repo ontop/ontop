@@ -5,6 +5,8 @@ import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
+import it.unibz.inf.ontop.iq.DownPropagation;
+import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.tools.UnionBasedQueryMerger;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
@@ -29,9 +31,12 @@ public class MappingImpl implements Mapping {
     private final Map<RDFAtomPredicate, Map<ObjectStringTemplateFunctionSymbol, IQ>> compatibleDefinitionsFromSubjSAC;
     private final Map<RDFAtomPredicate, Map<ObjectStringTemplateFunctionSymbol, IQ>> compatibleDefinitionsFromSubjSPO;
     private final Map<RDFAtomPredicate, Map<ObjectStringTemplateFunctionSymbol, IQ>> compatibleDefinitionsFromObjSPO;
+
     private final TermFactory termFactory;
     private final UnionBasedQueryMerger queryMerger;
     private final IntermediateQueryFactory iqFactory;
+    private final IQTreeTools iqTreeTools;
+
     private final Map<RDFAtomPredicate, IQ> allDefinitionMergedMap;
     private final Map<RDFAtomPredicate, IQ> allClassMergedMap;
 
@@ -39,12 +44,16 @@ public class MappingImpl implements Mapping {
                        ImmutableTable<RDFAtomPredicate, IRI, IQ> classTable,
                        TermFactory termFactory,
                        UnionBasedQueryMerger queryMerger,
-                       IntermediateQueryFactory iqFactory) {
+                       IntermediateQueryFactory iqFactory,
+                       IQTreeTools iqTreeTools) {
         this.propertyDefinitions = propertyTable;
         this.classDefinitions = classTable;
+
         this.termFactory = termFactory;
         this.queryMerger = queryMerger;
         this.iqFactory = iqFactory;
+        this.iqTreeTools = iqTreeTools;
+
         this.compatibleDefinitionsFromSubjSPO = Maps.newConcurrentMap();
         this.compatibleDefinitionsFromObjSPO = Maps.newConcurrentMap();
         this.compatibleDefinitionsFromSubjSAC = Maps.newConcurrentMap();
@@ -132,8 +141,10 @@ public class MappingImpl implements Mapping {
                         ? termFactory.getIRIFunctionalTerm(lexicalTerm)
                         : termFactory.getBnodeFunctionalTerm(lexicalTerm));
 
-        IQTree prunedIQTree = mergedDefinition.getTree().propagateDownConstraint(strictEquality, variableGenerator);
-        return iqFactory.createIQ(projectionAtom, prunedIQTree)
+        IQTree mergedTree = mergedDefinition.getTree();
+        DownPropagation dp = iqTreeTools.createDownPropagation(Optional.of(strictEquality), mergedTree.getVariables(), variableGenerator);
+        IQTree prunedTree = dp.propagate(mergedTree);
+        return iqFactory.createIQ(projectionAtom, prunedTree)
                 .normalizeForOptimization();
     }
 

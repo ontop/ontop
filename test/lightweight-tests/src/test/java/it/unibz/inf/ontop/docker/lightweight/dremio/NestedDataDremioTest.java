@@ -32,7 +32,7 @@ public class NestedDataDremioTest extends AbstractNestedDataTest {
     }
 
     @Override
-    protected ImmutableMultiset getFlattenTimestampExpectedValues() {
+    protected ImmutableMultiset<String> getFlattenTimestampExpectedValues() {
         return ImmutableMultiset.of( "\"2023-01-01T18:00:00+00:00\"^^xsd:dateTime", "\"2023-01-15T18:00:00+00:00\"^^xsd:dateTime", "\"2023-01-29T12:00:00+00:00\"^^xsd:dateTime",
                 "\"2023-02-12T18:00:00+00:00\"^^xsd:dateTime", "\"2023-02-26T18:00:00+00:00\"^^xsd:dateTime",
                 "\"2023-03-12T18:00:00+00:00\"^^xsd:dateTime", "\"2023-03-26T18:00:00+00:00\"^^xsd:dateTime");
@@ -40,14 +40,14 @@ public class NestedDataDremioTest extends AbstractNestedDataTest {
 
     //Since we don't have access to index values, some individuals are treated as equals even though they should not normally be equal.
     @Override
-    protected ImmutableMultiset getFlattenWithAggregateExpectedValues() {
+    protected ImmutableMultiset<String> getFlattenWithAggregateExpectedValues() {
         return ImmutableMultiset.of("\"Carl: 17500.0\"^^xsd:string", "\"Jim: 12857.142857142857\"^^xsd:string",
                 "\"Cynthia: 12857.142857142857\"^^xsd:string", "\"Sam: 13666.666666666666\"^^xsd:string",
                 "\"Bob: 15200.0\"^^xsd:string");
     }
 
     //Since we don't have access to index values, some individuals are treated as equals even though they should not normally be equal.
-    protected ImmutableMultiset getFlatten2DArrayExpectedValues() {
+    protected ImmutableMultiset<String> getFlatten2DArrayExpectedValues() {
         return ImmutableMultiset.of( "\"Sam\"^^xsd:string", "\"Cynthia\"^^xsd:string", "\"Cynthia\"^^xsd:string", "\"Cynthia\"^^xsd:string", "\"Bob\"^^xsd:string",
                 "\"Bob\"^^xsd:string", "\"Jim\"^^xsd:string", "\"Jim\"^^xsd:string", "\"Jim\"^^xsd:string", "\"Carl\"^^xsd:string");
     }

@@ -39,6 +39,8 @@ import java.io.Reader;
 import java.net.URL;
 import java.util.*;
 
+import static it.unibz.inf.ontop.iq.impl.UnaryIQTreeTools.UnaryIQTreeDecomposition;
+
 public class OntopRepositoryConnectionImpl implements OntopRepositoryConnection {
 
     private static final String READ_ONLY_MESSAGE = "Ontop is a read-only system";
@@ -625,8 +627,9 @@ public class OntopRepositoryConnectionImpl implements OntopRepositoryConnection 
             IQTree executableTree = ontopConnection.createStatement().getExecutableQuery(sparqlQuery, httpHeaders)
                     .getTree();
 
-            if (executableTree.getRootNode() instanceof ConstructionNode) {
-                IQTree child = executableTree.getChildren().get(0);
+            var construction = UnaryIQTreeDecomposition.of(executableTree, ConstructionNode.class);
+            if (construction.isPresent()) {
+                IQTree child = construction.getChild();
                 if (child instanceof NativeNode)
                     return ((NativeNode) child).getNativeQueryString();
             }

@@ -2,21 +2,19 @@ package it.unibz.inf.ontop.iq.node;
 
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.iq.BinaryNonCommutativeIQTree;
+import it.unibz.inf.ontop.iq.DownPropagation;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.IQTreeCache;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
 import it.unibz.inf.ontop.iq.request.FunctionalDependencies;
 import it.unibz.inf.ontop.iq.request.VariableNonRequirement;
-import it.unibz.inf.ontop.iq.visit.IQVisitor;
-import it.unibz.inf.ontop.model.term.ImmutableExpression;
+import it.unibz.inf.ontop.iq.visit.IQTreeVisitor;
 import it.unibz.inf.ontop.model.term.NonVariableTerm;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
 import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.InjectiveSubstitution;
 import it.unibz.inf.ontop.utils.VariableGenerator;
-
-import java.util.Optional;
 
 /**
  * The ordering of the operands is meaningful procedurally,
@@ -32,29 +30,23 @@ public interface BinaryOrderedOperatorNode extends QueryNode {
 
     ImmutableSet<Substitution<NonVariableTerm>> getPossibleVariableDefinitions(IQTree leftChild, IQTree rightChild);
 
-    <T> T acceptVisitor(IQTree tree, IQVisitor<T> visitor, IQTree leftChild, IQTree rightChild);
+    <T> T acceptVisitor(BinaryNonCommutativeIQTree tree, IQTreeVisitor<T> visitor, IQTree leftChild, IQTree rightChild);
 
     IQTree normalizeForOptimization(IQTree leftChild, IQTree rightChild, VariableGenerator variableGenerator,
                                     IQTreeCache treeCache);
 
     IQTree liftIncompatibleDefinitions(Variable variable, IQTree leftChild, IQTree rightChild, VariableGenerator variableGenerator);
 
-    IQTree applyDescendingSubstitution(
-            Substitution<? extends VariableOrGroundTerm> descendingSubstitution,
-            Optional<ImmutableExpression> constraint, IQTree leftChild, IQTree rightChild, VariableGenerator variableGenerator);
+    BinaryNonCommutativeOperatorNode applyFreshRenaming(InjectiveSubstitution<Variable> renamingSubstitution);
 
-    IQTree applyDescendingSubstitutionWithoutOptimizing(
-            Substitution<? extends VariableOrGroundTerm> descendingSubstitution,
-            IQTree leftChild, IQTree rightChild, VariableGenerator variableGenerator);
+    IQTree propagateDownConstraint(DownPropagation dp, IQTree leftChild, IQTree rightChild);
 
-    IQTree applyFreshRenaming(InjectiveSubstitution<Variable> renamingSubstitution, IQTree leftChild, IQTree rightChild,
-                              IQTreeCache treeCache);
+    IQTree applyDescendingSubstitution(DownPropagation dp, IQTree leftChild, IQTree rightChild);
 
     boolean isConstructed(Variable variable, IQTree leftChild, IQTree rightChild);
 
     boolean isDistinct(IQTree tree, IQTree leftChild, IQTree rightChild);
 
-    IQTree propagateDownConstraint(ImmutableExpression constraint, IQTree leftChild, IQTree rightChild, VariableGenerator variableGenerator);
 
     /**
      * Only validates the node, not its children
@@ -68,5 +60,5 @@ public interface BinaryOrderedOperatorNode extends QueryNode {
 
     ImmutableSet<Variable> inferStrictDependents(BinaryNonCommutativeIQTree tree, IQTree leftChild, IQTree rightChild);
 
-    VariableNonRequirement computeNotInternallyRequiredVariables(IQTree leftChild, IQTree rightChild);
+    VariableNonRequirement computeVariableNonRequirement(IQTree leftChild, IQTree rightChild);
 }

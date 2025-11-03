@@ -9,6 +9,7 @@ import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.IQTreeCache;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
+import it.unibz.inf.ontop.iq.DownPropagation;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.node.normalization.AggregationNormalizer;
@@ -20,7 +21,6 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.*;
-import java.util.function.Function;
 import java.util.stream.Stream;
 
 public class AggregationNodeImpl extends ExtendedProjectionNodeImpl implements AggregationNode {
@@ -37,7 +37,8 @@ public class AggregationNodeImpl extends ExtendedProjectionNodeImpl implements A
     @AssistedInject
     protected AggregationNodeImpl(@Assisted ImmutableSet<Variable> groupingVariables,
                                   @Assisted Substitution<ImmutableFunctionalTerm> substitution,
-                                  SubstitutionFactory substitutionFactory, IntermediateQueryFactory iqFactory,
+                                  SubstitutionFactory substitutionFactory,
+                                  IntermediateQueryFactory iqFactory,
                                   AggregationNormalizer aggregationNormalizer,
                                   IQTreeTools iqTreeTools,
                                   TermFactory termFactory,
@@ -47,73 +48,61 @@ public class AggregationNodeImpl extends ExtendedProjectionNodeImpl implements A
         this.substitution = substitution;
         this.aggregationNormalizer = aggregationNormalizer;
         this.projectedVariables = Sets.union(groupingVariables, substitution.getDomain()).immutableCopy();
-        this.childVariables = iqTreeTools.extractChildVariables(groupingVariables, substitution);
+        this.childVariables = Sets.union(groupingVariables, substitution.getRangeVariables()).immutableCopy();
 
         if (settings.isTestModeEnabled())
             validateNode();
     }
 
-
     @Override
-    public IQTree applyDescendingSubstitution(Substitution<? extends VariableOrGroundTerm> descendingSubstitution,
-                                              Optional<ImmutableExpression> constraint, IQTree child,
-                                              VariableGenerator variableGenerator) {
-        return applyDescendingSubstitutionOrBlock(descendingSubstitution,
-                s -> super.applyDescendingSubstitution(s, constraint, child, variableGenerator), variableGenerator);
+    public AggregationNode applyFreshRenaming(InjectiveSubstitution<Variable> renamingSubstitution) {
+        return iqFactory.createAggregationNode(
+                substitutionFactory.apply(renamingSubstitution, groupingVariables),
+                substitutionFactory.onImmutableFunctionalTerms().rename(renamingSubstitution, substitution));
     }
 
     @Override
-    public IQTree applyDescendingSubstitutionWithoutOptimizing(Substitution<? extends VariableOrGroundTerm> descendingSubstitution,
-                                                               IQTree child, VariableGenerator variableGenerator) {
-        return applyDescendingSubstitutionOrBlock(descendingSubstitution,
-                s -> super.applyDescendingSubstitutionWithoutOptimizing(s, child, variableGenerator), variableGenerator);
-    }
+    public IQTree applyDescendingSubstitution(DownPropagation dp, IQTree child) {
 
-    private IQTree applyDescendingSubstitutionOrBlock(Substitution<? extends VariableOrGroundTerm> descendingSubstitution,
-                                                      Function<Substitution<? extends VariableOrGroundTerm>, IQTree> applyNonBlockedSubstitutionFct,
-                                                      VariableGenerator variableGenerator) {
-
-        ImmutableSet<Variable> aggregationVariables = substitution.getDomain();
-
-        Substitution<GroundTerm> blockedGroundTermSubstitution = descendingSubstitution.builder()
-                .restrictDomainTo(aggregationVariables)
+        Substitution<GroundTerm> blockedGroundTermSubstitution = dp.getDescendingSubstitution().builder()
                 .restrictRangeTo(GroundTerm.class)
+                .restrictDomainTo(getLocallyDefinedVariables())
                 .build();
 
-        Substitution<Variable> descendingVar2Var = descendingSubstitution.restrictRangeTo(Variable.class);
+        ImmutableSet<Variable> aggregationVariables = substitution.getDomain();
+        Substitution<Variable> descendingVar2Var = dp.getDescendingSubstitution().restrictRangeTo(Variable.class);
         // Variables whose entries are blocked
         ImmutableSet<Variable> blockedVariables = descendingVar2Var.getRangeSet().stream()
-                .flatMap(v -> extractBlockedDomainVars(v, descendingVar2Var.getPreImage(t -> t.equals(v)), aggregationVariables).stream())
+                .map(v -> extractBlockedDomainVars(v, descendingVar2Var.getPreImage(t -> t.equals(v)), aggregationVariables))
+                .flatMap(Collection::stream)
                 .collect(ImmutableCollectors.toSet());
-
         Substitution<Variable> blockedVariableSubstitution = descendingVar2Var.restrictDomainTo(blockedVariables);
 
         Substitution<? extends VariableOrGroundTerm> blockedSubstitution =
                 substitutionFactory.union(blockedGroundTermSubstitution, blockedVariableSubstitution);
 
-        Substitution<? extends VariableOrGroundTerm> nonBlockedSubstitution = descendingSubstitution.removeFromDomain(blockedSubstitution.getDomain());
+        var newDp = dp.withRestrictedSubstitution(blockedSubstitution.getDomain());
 
-        IQTree newSubTree = applyNonBlockedSubstitutionFct.apply(nonBlockedSubstitution);
+        try {
+            PropagationResults result = propagateTau(newDp, child.getVariables(), child::getVariableNullability);
 
-        if (blockedSubstitution.isEmpty())
-            return newSubTree;
+            IQTree newChild = result.getDownPropagation().propagate(child);
 
-        // Blocked entries -> reconverted into a filter
-        ImmutableExpression condition = termFactory.getConjunction(
-                blockedSubstitution.builder().toStream(termFactory::getStrictEquality).collect(ImmutableCollectors.toList()));
+            Substitution<ImmutableTerm> newSubstitution = result.getSubstitution();
+            AggregationNode projectionNode = iqFactory.createAggregationNode(
+                    Sets.difference(dp.getResultingProjectedVariables(), newSubstitution.getDomain()).immutableCopy(),
+                    newSubstitution.transform(t -> (ImmutableFunctionalTerm) t));
 
-        FilterNode filterNode = iqFactory.createFilterNode(condition);
+            IQTree newSubTree = iqTreeTools.unaryIQTreeBuilder()
+                    .append(projectionNode)
+                    .append(iqTreeTools.createOptionalFilterNode(result.getOptionalFilter()))
+                    .build(newChild);
 
-        InjectiveSubstitution<Variable> renamingSubstitution = filterNode.getLocalVariables().stream()
-                .collect(substitutionFactory.toFreshRenamingSubstitution(variableGenerator));
-
-        IQTree filterTree = iqFactory.createUnaryIQTree(filterNode, newSubTree)
-                .applyFreshRenaming(renamingSubstitution);
-
-        return iqFactory.createUnaryIQTree(
-                iqFactory.createConstructionNode(
-                        iqTreeTools.computeNewProjectedVariables(descendingSubstitution, getVariables())),
-                filterTree);
+            return iqTreeTools.createFilterTreeForBlockedSubstitution(blockedSubstitution, newSubTree, dp.getResultingProjectedVariables(), dp.getVariableGenerator());
+        }
+        catch (DownPropagation.InconsistentDownPropagationException e) {
+            return iqFactory.createEmptyNode(dp.getResultingProjectedVariables());
+        }
     }
 
     private Set<Variable> extractBlockedDomainVars(Variable rangeVariable, ImmutableSet<Variable> domainVariables,
@@ -137,29 +126,10 @@ public class AggregationNodeImpl extends ExtendedProjectionNodeImpl implements A
         return Sets.difference(aggregationDomainVariables, ImmutableSet.of(dominantVariable));
     }
 
-    @Override
-    protected Optional<ExtendedProjectionNode> computeNewProjectionNode(ImmutableSet<Variable> newProjectedVariables,
-                                                                        Substitution<ImmutableTerm> theta, IQTree newChild) {
-        return Optional.of(iqFactory.createAggregationNode(
-                Sets.difference(newProjectedVariables, theta.getDomain()).immutableCopy(),
-                theta.transform(t -> (ImmutableFunctionalTerm)t)));
-    }
 
     @Override
     public IQTree normalizeForOptimization(IQTree child, VariableGenerator variableGenerator, IQTreeCache treeCache) {
         return aggregationNormalizer.normalizeForOptimization(this, child, variableGenerator, treeCache);
-    }
-
-    @Override
-    public IQTree applyFreshRenaming(InjectiveSubstitution<Variable> renamingSubstitution, IQTree child, IQTreeCache treeCache) {
-        IQTree newChild = child.applyFreshRenaming(renamingSubstitution);
-
-        ImmutableSet<Variable> newGroupingVariables = substitutionFactory.apply(renamingSubstitution, groupingVariables);
-
-        AggregationNode newNode = iqFactory.createAggregationNode(newGroupingVariables,
-                substitutionFactory.onImmutableFunctionalTerms().rename(renamingSubstitution, substitution));
-
-        return iqFactory.createUnaryIQTree(newNode, newChild, treeCache.applyFreshRenaming(renamingSubstitution));
     }
 
 
@@ -175,22 +145,6 @@ public class AggregationNodeImpl extends ExtendedProjectionNodeImpl implements A
     @Override
     public IQTree liftIncompatibleDefinitions(Variable variable, IQTree child, VariableGenerator variableGenerator) {
         return iqFactory.createUnaryIQTree(this, child);
-    }
-
-    @Override
-    public ImmutableSet<Variable> getLocalVariables() {
-        return Sets.union(getChildVariables(), substitution.getDomain()).immutableCopy();
-    }
-
-    @Override
-    public ImmutableSet<Variable> getLocallyRequiredVariables() {
-        return getChildVariables();
-    }
-
-
-    @Override
-    public ImmutableSet<Variable> getLocallyDefinedVariables() {
-        return substitution.getDomain();
     }
 
     @Override
@@ -215,16 +169,19 @@ public class AggregationNodeImpl extends ExtendedProjectionNodeImpl implements A
 
     @Override
     public void validateNode(IQTree child) throws InvalidIntermediateQueryException {
-        validateNode();
-
-        Set<Variable> missingVariables = Sets.difference(getLocallyRequiredVariables(), child.getVariables());
-        if (!missingVariables.isEmpty()) {
+        if (!(child instanceof TrueNode)
+                && !child.getVariables().containsAll(getLocallyRequiredVariables())) {
             throw new InvalidIntermediateQueryException("The child of the aggregation node is missing some variables: "
-                    + missingVariables);
+                    + Sets.difference(child.getVariables(), getLocallyRequiredVariables()));
         }
     }
 
-    protected void validateNode() throws InvalidIntermediateQueryException {
+    private void validateNode() throws InvalidIntermediateQueryException {
+
+        if (!Sets.intersection(substitution.getDomain(), substitution.getRangeVariables()).isEmpty()) {
+            throw new InvalidIntermediateQueryException("AggregationNode: substitution redefines variables it is using: " + this);
+        }
+
         if (!Sets.intersection(groupingVariables, substitution.getDomain()).isEmpty()) {
             throw new InvalidIntermediateQueryException(String.format(
                     "AggregationNode: the grouping variables (%s) and the substitution domain (%s) must be disjoint",

@@ -13,5 +13,4 @@ public class AuthorizationFunctionEvaluatorImpl extends AbstractQueryContextEval
     protected AuthorizationFunctionEvaluatorImpl(CoreSingletons coreSingletons) {
         super(coreSingletons, fs -> (fs instanceof AuthorizationFunctionSymbol));
     }
-
 }

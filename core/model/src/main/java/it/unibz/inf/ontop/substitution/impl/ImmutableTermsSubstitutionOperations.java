@@ -4,6 +4,8 @@ import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.UnifierBuilder;
 
+import java.util.Map;
+
 public class ImmutableTermsSubstitutionOperations extends AbstractSubstitutionOperations<ImmutableTerm> {
 
     ImmutableTermsSubstitutionOperations(TermFactory termFactory) {
@@ -25,8 +27,8 @@ public class ImmutableTermsSubstitutionOperations extends AbstractSubstitutionOp
     }
 
     @Override
-    public AbstractUnifierBuilder<ImmutableTerm> unifierBuilder(Substitution<ImmutableTerm> substitution) {
-        return new AbstractUnifierBuilder<>(termFactory, this, substitution) {
+    public AbstractUnifierBuilder<ImmutableTerm> unifierBuilder() {
+        return new AbstractUnifierBuilder<ImmutableTerm>(termFactory, this) {
             @Override
             protected UnifierBuilder<ImmutableTerm> unifyUnequalTerms(ImmutableTerm term1, ImmutableTerm term2) {
                 // Special case: unification of two functional terms (possibly recursive)
@@ -44,7 +46,10 @@ public class ImmutableTermsSubstitutionOperations extends AbstractSubstitutionOp
                             .orElseGet(this::empty);
                 }
             }
-
+            @Override
+            protected UnifierBuilder<ImmutableTerm> unifySubstitution(Substitution<ImmutableTerm> substitution) {
+                return unify(substitution.stream(), Map.Entry::getKey, Map.Entry::getValue);
+            }
             @Override
             protected boolean doesNotContainVariable(Variable variable, ImmutableTerm term) {
                 return term.getVariableStream().noneMatch(variable::equals);

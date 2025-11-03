@@ -12,7 +12,7 @@ import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
-import it.unibz.inf.ontop.iq.node.ConstructionNode;
+import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.normalization.ConstructionSubstitutionNormalizer;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
@@ -129,6 +129,7 @@ public abstract class JsonBasicOrJoinLens extends JsonBasicOrJoinOrNestedLens {
         IntermediateQueryFactory iqFactory = coreSingletons.getIQFactory();
         AtomFactory atomFactory = coreSingletons.getAtomFactory();
         SubstitutionFactory substitutionFactory = coreSingletons.getSubstitutionFactory();
+        IQTreeTools iqTreeTools = coreSingletons.getIQTreeTools();
 
         // cannot use the keySet of substitutionMap because need to createAttributeVariableMap first
         ImmutableSet<Variable> addedVariables = columns.added.stream()
@@ -152,33 +153,29 @@ public abstract class JsonBasicOrJoinLens extends JsonBasicOrJoinOrNestedLens {
                 .map(a -> getVariable(a, idFactory, termFactory))
                 .collect(ImmutableCollectors.toSet());
 
-        ImmutableList<Variable> projectedVariables = extractRelationVariables(addedVariables, hiddenVariables, parentDefinitions, termFactory);
+        ImmutableList<Variable> projectedVariablesList = extractRelationVariables(addedVariables, hiddenVariables, parentDefinitions, termFactory);
+        ImmutableSet<Variable> projectedVariables = ImmutableSet.copyOf(projectedVariablesList);
 
-        ConstructionSubstitutionNormalizer.ConstructionSubstitutionNormalization normalization =
-                substitutionNormalizer.normalizeSubstitution(substitution,
-                        ImmutableSet.copyOf(projectedVariables));
+        ImmutableList<IQTree> parents = parentDefinitions.stream()
+                .map(p -> iqFactory.createExtensionalDataNode(p.relation, p.getArgumentMap()))
+                .collect(ImmutableCollectors.toList());
 
-        IQTree parentTree = createParentTree(parentDefinitions, iqFactory);
+        IQTree parentTree = iqTreeTools.createOptionalInnerJoinTree(Optional.empty(), parents)
+                .orElseThrow(() -> new MetadataExtractionException("At least one base relation was expected"));
 
-        ConstructionNode constructionNode = normalization.generateTopConstructionNode()
-                // In case, we reintroduce a ConstructionNode to get rid of unnecessary variables from the parent relation
-                // It may be eliminated by the IQ normalization
-                .orElseGet(() -> iqFactory.createConstructionNode(ImmutableSet.copyOf(projectedVariables)));
+        Optional<ImmutableExpression> optionalFilterCondition = extractFilter(parentAttributeMap, idFactory, coreSingletons).stream()
+                .reduce(termFactory::getConjunction);
 
-        ImmutableList<ImmutableExpression> filterConditions = extractFilter(parentAttributeMap, idFactory, coreSingletons);
+        IQTree filterTree = iqTreeTools.unaryIQTreeBuilder()
+                .append(iqTreeTools.createOptionalFilterNode(optionalFilterCondition))
+                .build(parentTree);
 
-        IQTree updatedParentDataNode = filterConditions.stream()
-                .reduce(termFactory::getConjunction)
-                .map(iqFactory::createFilterNode)
-                .map(f -> normalization.updateChild(iqFactory.createUnaryIQTree(f, parentTree), variableGenerator))
-                .orElse(normalization.updateChild(parentTree, variableGenerator));
-
-        IQTree iqTreeBeforeIRISafeConstraints = iqFactory.createUnaryIQTree(constructionNode, updatedParentDataNode);
+        IQTree iqTreeBeforeIRISafeConstraints = substitutionNormalizer.createNormalizedConstructionTree(substitution, projectedVariables, filterTree);
 
         IQTree iqTree = addIRISafeConstraints(iqTreeBeforeIRISafeConstraints, dbParameters);
 
-        AtomPredicate tmpPredicate = createTemporaryPredicate(relationId, projectedVariables.size(), coreSingletons);
-        DistinctVariableOnlyDataAtom projectionAtom = atomFactory.getDistinctVariableOnlyDataAtom(tmpPredicate, projectedVariables);
+        AtomPredicate tmpPredicate = createTemporaryPredicate(relationId, projectedVariablesList.size(), coreSingletons);
+        DistinctVariableOnlyDataAtom projectionAtom = atomFactory.getDistinctVariableOnlyDataAtom(tmpPredicate, projectedVariablesList);
 
         return iqFactory.createIQ(projectionAtom, iqTree)
                 .normalizeForOptimization();
@@ -216,24 +213,6 @@ public abstract class JsonBasicOrJoinLens extends JsonBasicOrJoinOrNestedLens {
     abstract protected ImmutableList<ParentDefinition> extractParentDefinitions(DBParameters dbParameters,
                                                                                               MetadataLookup parentCacheMetadataLookup)
             throws MetadataExtractionException;
-
-    private IQTree createParentTree(Collection<ParentDefinition> parentArgumentTable,
-                                    IntermediateQueryFactory iqFactory) throws MetadataExtractionException {
-        ImmutableList<IQTree> parents = parentArgumentTable.stream()
-                .map(p -> iqFactory.createExtensionalDataNode(p.relation, p.getArgumentMap()))
-                .collect(ImmutableCollectors.toList());
-
-        switch (parents.size()) {
-            case 0:
-                throw new MetadataExtractionException("At least one base relation was expected");
-            case 1:
-                return parents.get(0);
-            default:
-                return iqFactory.createNaryIQTree(
-                        iqFactory.createInnerJoinNode(),
-                        parents);
-        }
-    }
 
     private ImmutableList<Variable> extractRelationVariables(ImmutableSet<Variable> addedVariables, ImmutableSet<Variable> hiddenVariables,
                                                              ImmutableList<ParentDefinition> parentDefinitions, TermFactory termFactory) {

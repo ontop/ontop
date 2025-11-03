@@ -8,10 +8,12 @@ import it.unibz.inf.ontop.exception.OntopInternalBugException;
 import it.unibz.inf.ontop.injection.*;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
+import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.IntensionalDataNode;
-import it.unibz.inf.ontop.iq.optimizer.impl.AbstractIntensionalQueryMerger;
+import it.unibz.inf.ontop.iq.optimizer.impl.AbstractIQOptimizer;
 import it.unibz.inf.ontop.iq.optimizer.impl.AbstractQueryMergingTransformer;
 import it.unibz.inf.ontop.iq.tools.UnionBasedQueryMerger;
+import it.unibz.inf.ontop.iq.transform.IQTreeVariableGeneratorTransformer;
 import it.unibz.inf.ontop.model.atom.*;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.vocabulary.Ontop;
@@ -27,24 +29,23 @@ import java.util.Optional;
 public class MappingCanonicalTransformerImpl implements MappingCanonicalTransformer {
 
     private final IntermediateQueryFactory iqFactory;
-    private final QueryTransformerFactory transformerFactory;
     private final SubstitutionFactory substitutionFactory;
     private final AtomFactory atomFactory;
     private final UnionBasedQueryMerger queryMerger;
     private final CoreUtilsFactory coreUtilsFactory;
     private final OntopMappingSettings settings;
+    private final IQTreeTools iqTreeTools;
 
     @Inject
     private MappingCanonicalTransformerImpl(CoreSingletons coreSingletons,
-                                            QueryTransformerFactory transformerFactory,
                                             UnionBasedQueryMerger queryMerger,
                                             OntopMappingSettings settings) {
-        this.coreUtilsFactory = coreSingletons.getCoreUtilsFactory();
         this.settings = settings;
+        this.coreUtilsFactory = coreSingletons.getCoreUtilsFactory();
         this.iqFactory = coreSingletons.getIQFactory();
-        this.transformerFactory = transformerFactory;
         this.substitutionFactory = coreSingletons.getSubstitutionFactory();
         this.atomFactory = coreSingletons.getAtomFactory();
+        this.iqTreeTools = coreSingletons.getIQTreeTools();
         this.queryMerger = queryMerger;
     }
 
@@ -130,26 +131,26 @@ public class MappingCanonicalTransformerImpl implements MappingCanonicalTransfor
     private IQTree getIntensionalCanonizedTree(IQ assertion, DistinctVariableOnlyDataAtom projAtom, IntensionalDataNode intensionalDataNode) {
         return iqFactory.createUnaryIQTree(
                 iqFactory.createConstructionNode(projAtom.getVariables()),
-                iqFactory.createNaryIQTree(
-                        iqFactory.createInnerJoinNode(),
-                        ImmutableList.of(
-                                assertion.getTree(),
-                                intensionalDataNode)));
+                iqTreeTools.createInnerJoinTree(
+                        ImmutableList.of(assertion.getTree(), intensionalDataNode)));
     }
 
-    private class IntensionalQueryMerger extends AbstractIntensionalQueryMerger {
+    private class IntensionalQueryMerger extends AbstractIQOptimizer {
 
         private final IQ definition;
+
+        private final IQTreeVariableGeneratorTransformer transformer;
 
         IntensionalQueryMerger(IQ definition) {
             super(MappingCanonicalTransformerImpl.this.iqFactory);
             this.definition = definition;
+
+            this.transformer = IQTreeVariableGeneratorTransformer.of(QueryMergingTransformer::new);
         }
 
         @Override
-        protected AbstractQueryMergingTransformer createTransformer(ImmutableSet<Variable> knownVariables) {
-            VariableGenerator variableGenerator = coreUtilsFactory.createVariableGenerator(knownVariables);
-            return new QueryMergingTransformer(variableGenerator);
+        protected IQTreeVariableGeneratorTransformer getTransformer() {
+            return transformer;
         }
 
         public ImmutableSet<Variable> getKnownVariables() {
@@ -159,7 +160,10 @@ public class MappingCanonicalTransformerImpl implements MappingCanonicalTransfor
         private class QueryMergingTransformer extends AbstractQueryMergingTransformer {
 
             QueryMergingTransformer(VariableGenerator variableGenerator) {
-                super(variableGenerator, MappingCanonicalTransformerImpl.this.iqFactory, substitutionFactory, atomFactory, transformerFactory);
+                super(variableGenerator,
+                        MappingCanonicalTransformerImpl.this.iqFactory,
+                        MappingCanonicalTransformerImpl.this.substitutionFactory,
+                        MappingCanonicalTransformerImpl.this.iqTreeTools);
             }
 
             @Override
