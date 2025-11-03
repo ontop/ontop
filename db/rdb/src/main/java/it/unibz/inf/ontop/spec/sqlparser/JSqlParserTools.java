@@ -10,7 +10,6 @@ import it.unibz.inf.ontop.spec.sqlparser.exception.QueryParseException;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
 import net.sf.jsqlparser.parser.ParseException;
-import net.sf.jsqlparser.parser.TokenMgrException;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.Statement;
 import net.sf.jsqlparser.statement.select.Select;

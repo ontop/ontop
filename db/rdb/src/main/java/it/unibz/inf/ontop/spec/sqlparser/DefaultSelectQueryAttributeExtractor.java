@@ -12,7 +12,7 @@ import net.sf.jsqlparser.statement.select.*;
 import java.util.List;
 
 
-public class DefaultSelectQueryAttributeExtractor extends BasicSelectQueryParser<RAExpressionAttributes, RAExpressionAttributesOperations> {
+public class DefaultSelectQueryAttributeExtractor extends BasicSelectQueryParser<RAExpressionAttributes> {
 
     public DefaultSelectQueryAttributeExtractor(MetadataLookup metadata, CoreSingletons coreSingletons) {
         super(metadata, coreSingletons, new RAExpressionAttributesOperations());

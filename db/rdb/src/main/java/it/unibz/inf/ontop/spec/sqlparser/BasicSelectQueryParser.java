@@ -11,7 +11,6 @@ import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.spec.sqlparser.exception.*;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
-import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.expression.Alias;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.select.*;
@@ -20,21 +19,21 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 
-public abstract class BasicSelectQueryParser<T, O extends RAOperations<T>> {
+public abstract class BasicSelectQueryParser<T> {
 
     protected final ExpressionParser expressionParser;
     protected final TermFactory termFactory;
 
     protected final QuotedIDFactory idfac;
-    private final MetadataLookup metadata;
+    protected final MetadataLookup metadata;
 
-    protected final O operations;
+    protected final RAOperations<T> operations;
 
     private int relationIndex = 0;
 
     protected abstract T create(NamedRelationDefinition relation);
 
-    protected BasicSelectQueryParser(MetadataLookup metadata, CoreSingletons coreSingletons, O operations) {
+    protected BasicSelectQueryParser(MetadataLookup metadata, CoreSingletons coreSingletons, RAOperations<T> operations) {
         this.expressionParser = new ExpressionParser(metadata.getQuotedIDFactory(), coreSingletons);
         this.idfac = metadata.getQuotedIDFactory();
         this.metadata = metadata;

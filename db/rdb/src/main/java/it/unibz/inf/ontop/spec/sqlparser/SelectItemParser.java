@@ -1,13 +1,11 @@
 package it.unibz.inf.ontop.spec.sqlparser;
 
-import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Maps;
 import it.unibz.inf.ontop.dbschema.QuotedID;
 import it.unibz.inf.ontop.dbschema.QuotedIDFactory;
 import it.unibz.inf.ontop.dbschema.RelationID;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.spec.sqlparser.exception.InvalidSelectQueryRuntimeException;
-import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import net.sf.jsqlparser.expression.Alias;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.schema.Column;
@@ -32,13 +30,9 @@ public class SelectItemParser {
     }
 
     public RAExpressionAttributes parseSelectItems(List<SelectItem> selectItems) {
-
         try {
-            ImmutableMultimap<QuotedID, ImmutableTerm> multimap = selectItems.stream()
-                    .flatMap(si -> new SelectItemProcessor().getAttributes(si))
-                    .collect(ImmutableCollectors.toMultimap());
-
-            return RAExpressionAttributes.of(multimap);
+            return RAExpressionAttributes.of(selectItems.stream()
+                    .flatMap(si -> new SelectItemProcessor().getAttributes(si)));
         }
         catch (RAExpressionAttributes.DuplicateAttrbuteEntriesException e) {
             throw new InvalidSelectQueryRuntimeException(e.getDuplicates().stream()

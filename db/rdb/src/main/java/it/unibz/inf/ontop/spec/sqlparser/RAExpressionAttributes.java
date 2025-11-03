@@ -14,6 +14,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class RAExpressionAttributes  {
@@ -48,7 +49,9 @@ public class RAExpressionAttributes  {
         public ImmutableSet<QuotedID> getDuplicates() { return duplicates; }
     }
 
-    public static RAExpressionAttributes of(ImmutableMultimap<QuotedID, ? extends ImmutableTerm> multimap) throws DuplicateAttrbuteEntriesException {
+    public static RAExpressionAttributes of(Stream<? extends Map.Entry<QuotedID, ? extends ImmutableTerm>> stream) throws DuplicateAttrbuteEntriesException {
+
+        var multimap = stream.collect(ImmutableCollectors.toMultimap(Map.Entry::getKey, Map.Entry::getValue));
 
         ImmutableSet<QuotedID> duplicateAttributeIds = multimap.asMap().entrySet().stream()
                 .filter(e -> e.getValue().size() > 1)
@@ -117,7 +120,7 @@ public class RAExpressionAttributes  {
         }
 
         ImmutableTerm getTerm() {
-            if (map.size() != 1)
+            if (!isUnambiguous())
                 throw new MinorOntopInternalBugException("Occurrences map is ambiguous");
 
             return map.entrySet().iterator().next().getValue();
@@ -182,7 +185,7 @@ public class RAExpressionAttributes  {
 
     static RAExpressionAttributes join(RAExpressionAttributes re1, RAExpressionAttributes re2, Function<QuotedID, Occurrences> joinFunction) throws IllegalJoinException {
 
-        ImmutableSet<RelationID> intersection = RAExpressionAttributes.getSharedAttributeNames(re1, re2).stream()
+        ImmutableSet<RelationID> intersection = getSharedAttributeNames(re1, re2).stream()
                 .map(id -> Sets.intersection(re1.getOccurrences(id).getRelationIDs(), re2.getOccurrences(id).getRelationIDs()))
                 .flatMap(Collection::stream)
                 .collect(ImmutableCollectors.toSet());

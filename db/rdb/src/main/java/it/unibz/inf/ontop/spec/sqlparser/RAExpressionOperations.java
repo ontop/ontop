@@ -18,7 +18,7 @@ import java.util.stream.IntStream;
 
 public class RAExpressionOperations implements RAOperations<RAExpression> {
 
-    private final RAExpressionAttributesOperations aops = new RAExpressionAttributesOperations();
+    private final RAOperations<RAExpressionAttributes> aops = new RAExpressionAttributesOperations();
     private final TermFactory termFactory;
     private final IntermediateQueryFactory iqFactory;
 

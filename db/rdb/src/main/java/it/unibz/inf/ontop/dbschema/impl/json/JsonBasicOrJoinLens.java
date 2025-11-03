@@ -19,18 +19,12 @@ import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.spec.sqlparser.ExpressionParser;
-import it.unibz.inf.ontop.spec.sqlparser.JSqlParserTools;
 import it.unibz.inf.ontop.spec.sqlparser.RAExpressionAttributes;
 import it.unibz.inf.ontop.spec.sqlparser.exception.UnsupportedSelectQueryException;
 import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
-import net.sf.jsqlparser.JSQLParserException;
-import net.sf.jsqlparser.statement.select.PlainSelect;
-import net.sf.jsqlparser.statement.select.Select;
-import net.sf.jsqlparser.statement.select.SelectExpressionItem;
-import net.sf.jsqlparser.statement.select.SelectItem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -236,15 +230,12 @@ public abstract class JsonBasicOrJoinLens extends JsonBasicOrJoinOrNestedLens {
 
         RawQuotedIDFactory idFactory = new RawQuotedIDFactory(quotedIdFactory);
 
-        ImmutableMultimap<QuotedID, Variable> multimap = parentDefinitionMap.stream()
-                .flatMap(p -> p.attributeVariableMap.entrySet().stream()
-                        .map(e -> Maps.immutableEntry(
-                                idFactory.createAttributeID(p.getPrefixedAttributeName(e.getKey())),
-                                e.getValue())))
-                .collect(ImmutableCollectors.toMultimap());
-
         try {
-            return RAExpressionAttributes.of(multimap);
+            return RAExpressionAttributes.of(parentDefinitionMap.stream()
+                    .flatMap(p -> p.attributeVariableMap.entrySet().stream()
+                            .map(e -> Maps.immutableEntry(
+                                    idFactory.createAttributeID(p.getPrefixedAttributeName(e.getKey())),
+                                    e.getValue()))));
         }
         catch (RAExpressionAttributes.DuplicateAttrbuteEntriesException e) {
             throw new ConflictingVariableInJoinViewException(e.getDuplicates());
@@ -260,6 +251,7 @@ public abstract class JsonBasicOrJoinLens extends JsonBasicOrJoinOrNestedLens {
             ExpressionParser parser = new ExpressionParser(quotedIdFactory, coreSingletons);
             return parser.parseTerm(column.expression, parentAttributeMap);
         }
+        // TODO: why all exceptions?
         catch (Exception e) {
             throw new MetadataExtractionException("Unsupported expression for " + column.name + " in " + name + ":\n" + e, e);
         }
@@ -304,7 +296,6 @@ public abstract class JsonBasicOrJoinLens extends JsonBasicOrJoinOrNestedLens {
         public final String name;
         @Nonnull
         public final String expression;
-
 
         @JsonCreator
         public AddColumns(@JsonProperty("name") String name,

@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.spec.sqlparser;
 
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.exception.InvalidQueryException;
+import it.unibz.inf.ontop.exception.MetadataExtractionException;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.spec.sqlparser.exception.*;
@@ -11,7 +12,7 @@ import net.sf.jsqlparser.statement.select.*;
 import java.util.List;
 import java.util.Optional;
 
-public class SelectQueryParser extends BasicSelectQueryParser<RAExpression, RAExpressionOperations> {
+public class SelectQueryParser extends BasicSelectQueryParser<RAExpression> {
 
     public SelectQueryParser(MetadataLookup metadata, CoreSingletons coreSingletons) {
         super(metadata, coreSingletons, new RAExpressionOperations(coreSingletons.getTermFactory(), coreSingletons.getIQFactory()));
@@ -19,6 +20,16 @@ public class SelectQueryParser extends BasicSelectQueryParser<RAExpression, RAEx
 
     public RAExpression parse(String sql) throws QueryParseException, InvalidQueryException, UnsupportedSelectQueryException {
         return parseJSqlSelectQuery(sql);
+    }
+
+    public RAExpression getRAExpression(String sourceQuery) throws InvalidQueryException, MetadataExtractionException {
+        try {
+            return parse(sourceQuery);
+        }
+        catch (UnsupportedSelectQueryException | QueryParseException e) {
+            RelationDefinition view = metadata.getBlackBoxView(sourceQuery);
+            return operations.createWithoutName(view, createAttributeVariables(view));
+        }
     }
 
 
@@ -88,8 +99,7 @@ public class SelectQueryParser extends BasicSelectQueryParser<RAExpression, RAEx
         }
 
         SelectItemParser sip = new SelectItemParser(rae.getAttributes(), expressionParser::parseTerm, idfac);
-        RAExpressionAttributes attributes =
-                sip.parseSelectItems(plainSelect.getSelectItems());
+        RAExpressionAttributes attributes = sip.parseSelectItems(plainSelect.getSelectItems());
 
         return new RAExpression(rae.getIQTree(), attributes);
     }
@@ -129,9 +139,5 @@ public class SelectQueryParser extends BasicSelectQueryParser<RAExpression, RAEx
     @Override
     protected RAExpression create(NamedRelationDefinition relation) {
         return operations.create(relation, createAttributeVariables(relation));
-    }
-
-    public RAExpression translateParserView(RelationDefinition view) {
-        return operations.createWithoutName(view, createAttributeVariables(view));
     }
 }
