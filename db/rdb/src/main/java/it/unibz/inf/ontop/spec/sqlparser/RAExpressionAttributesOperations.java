@@ -96,7 +96,9 @@ public class RAExpressionAttributesOperations implements RAOperations<RAExpressi
 
         return RAExpressionAttributes.join(left, right,
                 id -> using.contains(id)
-                        ? Occurrences.of(ImmutableSet.of(), left.getOccurrences(id).getTerm())
+                        ? Occurrences.of(
+                                Sets.union(left.getOccurrences(id).getRelationIDs(), right.getOccurrences(id).getRelationIDs()).immutableCopy(),
+                                left.getOccurrences(id).getTerm())
                         : Occurrences.merge(left.getOccurrences(id), right.getOccurrences(id)));
     }
 

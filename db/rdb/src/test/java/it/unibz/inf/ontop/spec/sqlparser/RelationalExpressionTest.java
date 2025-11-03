@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.spec.sqlparser;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Sets;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.dbschema.impl.OfflineMetadataProviderBuilder;
 import it.unibz.inf.ontop.model.term.*;
@@ -120,7 +121,7 @@ public class RelationalExpressionTest {
                         ImmutableList.of(re1.getIQTree(), re2.getIQTree()))), relationalExpression.getIQTree());
 
         assertEquals(RAExpressionAttributes.of(ImmutableMap.of(
-                        TABLE_P.getAttribute(1).getID(), RAExpressionAttributes.Occurrences.of(ImmutableSet.of(), x),
+                        TABLE_P.getAttribute(1).getID(), RAExpressionAttributes.Occurrences.of(Sets.union(TABLE_P.getAllIDs(), TABLE_T.getAllIDs()).immutableCopy(), x),
                         TABLE_P.getAttribute(2).getID(), RAExpressionAttributes.Occurrences.of(TABLE_P.getAllIDs(), y),
                         TABLE_T.getAttribute(2).getID(), RAExpressionAttributes.Occurrences.of(TABLE_T.getAllIDs(), v))),
                 relationalExpression.getAttributes());
@@ -156,7 +157,7 @@ public class RelationalExpressionTest {
                         ImmutableList.of(re1.getIQTree(), re2.getIQTree()))), relationalExpression.getIQTree());
 
         assertEquals(RAExpressionAttributes.of(ImmutableMap.of(
-                        TABLE_P.getAttribute(1).getID(), RAExpressionAttributes.Occurrences.of(ImmutableSet.of(), x),
+                        TABLE_P.getAttribute(1).getID(), RAExpressionAttributes.Occurrences.of(Sets.union(TABLE_P.getAllIDs(), TABLE_T.getAllIDs()).immutableCopy(), x),
                         TABLE_P.getAttribute(2).getID(), RAExpressionAttributes.Occurrences.of(TABLE_P.getAllIDs(), y),
                         TABLE_T.getAttribute(2).getID(), RAExpressionAttributes.Occurrences.of(TABLE_T.getAllIDs(), v))),
                 relationalExpression.getAttributes());

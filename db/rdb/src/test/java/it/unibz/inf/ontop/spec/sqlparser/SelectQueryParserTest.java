@@ -104,18 +104,28 @@ public class SelectQueryParserTest {
     public void inner_join_on_inner_join_ambiguity2_test() throws Exception {
         // column reference "a" is ambiguous
         var ex = assertThrows(InvalidQueryException.class, () ->
-                parse("SELECT A, P.B, R.C, D FROM P NATURAL JOIN Q INNER JOIN R on Q.C =  R.C"));
+                parse("SELECT A, P.B, R.C, D FROM P NATURAL JOIN Q INNER JOIN R on Q.C = R.C"));
 
-        assertEquals("Unable to find attribute A (available attributes are [R.A, P.B, R.B, Q.C, R.C, D, R.D]) (from A)", ex.getMessage());
+        assertEquals("Unable to find attribute A (available attributes are [P.A, Q.A, R.A, P.B, R.B, Q.C, R.C, D, R.D]) (from A)", ex.getMessage());
     }
 
     @Test
     public void inner_join_on_inner_join_test() throws Exception {
-        RAExpression re = parse("SELECT P.B, R.C, D FROM P NATURAL JOIN Q INNER JOIN R on Q.C =  R.C");
+        RAExpression re = parse("SELECT P.A, P.B, R.C, D FROM P NATURAL JOIN Q INNER JOIN R on Q.C = R.C");
 
         assertEquals(join(eqOf(C2, C3),
                         join(eqOf(A1, A2), dataAtomOf(TABLE_P, A1, B1), dataAtomOf(TABLE_Q, A2, C2)),
                 dataAtomOf(TABLE_R, A3, B3, C3, D3)),
+                re.getIQTree());
+    }
+
+    @Test
+    public void inner_join_on_inner_join_test2() throws Exception {
+        RAExpression re = parse("SELECT Q.A, P.B, R.C, D FROM P NATURAL JOIN Q INNER JOIN R on Q.C = R.C");
+
+        assertEquals(join(eqOf(C2, C3),
+                        join(eqOf(A1, A2), dataAtomOf(TABLE_P, A1, B1), dataAtomOf(TABLE_Q, A2, C2)),
+                        dataAtomOf(TABLE_R, A3, B3, C3, D3)),
                 re.getIQTree());
     }
 
