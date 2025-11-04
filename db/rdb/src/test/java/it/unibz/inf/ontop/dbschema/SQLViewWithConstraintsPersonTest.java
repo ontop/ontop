@@ -2,12 +2,12 @@ package it.unibz.inf.ontop.dbschema;
 
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.Collection;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class SQLViewWithConstraintsPersonTest {
     private static final String VIEW_FILE = "src/test/resources/person/sql_views_with_constraints.json";
@@ -80,5 +80,4 @@ public class SQLViewWithConstraintsPersonTest {
 
         assertTrue(nonNullColumns.contains("country"));
     }
-
 }

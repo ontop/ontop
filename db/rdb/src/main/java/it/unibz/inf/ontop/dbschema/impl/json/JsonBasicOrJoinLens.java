@@ -19,17 +19,12 @@ import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.spec.sqlparser.ExpressionParser;
-import it.unibz.inf.ontop.spec.sqlparser.JSqlParserTools;
 import it.unibz.inf.ontop.spec.sqlparser.RAExpressionAttributes;
+import it.unibz.inf.ontop.spec.sqlparser.exception.UnsupportedSelectQueryException;
 import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
-import net.sf.jsqlparser.JSQLParserException;
-import net.sf.jsqlparser.statement.select.PlainSelect;
-import net.sf.jsqlparser.statement.select.Select;
-import net.sf.jsqlparser.statement.select.SelectExpressionItem;
-import net.sf.jsqlparser.statement.select.SelectItem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,12 +45,14 @@ public abstract class JsonBasicOrJoinLens extends JsonBasicOrJoinOrNestedLens {
 
     protected JsonBasicOrJoinLens(List<String> name, @Nullable UniqueConstraints uniqueConstraints,
                                   @Nullable OtherFunctionalDependencies otherFunctionalDependencies,
-                                  @Nullable ForeignKeys foreignKeys, @Nullable NonNullConstraints nonNullConstraints,
+                                  @Nullable ForeignKeys foreignKeys,
+                                  @Nullable NonNullConstraints nonNullConstraints,
                                   @Nullable IRISafeConstraints iriSafeConstraints,
-                                  @Nullable Columns columns, @Nonnull String filterExpression) {
+                                  @Nullable Columns columns,
+                                  @Nullable String filterExpression) {
         super(name, uniqueConstraints, otherFunctionalDependencies, foreignKeys, nonNullConstraints, iriSafeConstraints);
         this.columns = columns == null ? new Columns(new ArrayList<>(), new ArrayList<>()) : columns;
-        this.filterExpression = filterExpression;
+        this.filterExpression = filterExpression == null ? "" : filterExpression;
     }
 
     @Override
@@ -233,25 +230,16 @@ public abstract class JsonBasicOrJoinLens extends JsonBasicOrJoinOrNestedLens {
 
         RawQuotedIDFactory idFactory = new RawQuotedIDFactory(quotedIdFactory);
 
-        ImmutableMap<QuotedID, Collection<Variable>> map = parentDefinitionMap.stream()
-                .flatMap(p -> p.attributeVariableMap.entrySet().stream()
-                        .map(e -> Maps.immutableEntry(
-                                idFactory.createAttributeID(p.getPrefixedAttributeName(e.getKey())),
-                                e.getValue())))
-                .collect(ImmutableCollectors.toMultimap()).asMap();
-
-        ImmutableSet<QuotedID> conflictingAttributeIds = map.entrySet().stream()
-                .filter(e -> e.getValue().size() > 1)
-                .map(Map.Entry::getKey)
-                .collect(ImmutableCollectors.toSet());
-
-        if (!conflictingAttributeIds.isEmpty())
-            throw new ConflictingVariableInJoinViewException(conflictingAttributeIds);
-
-        return new RAExpressionAttributes(map.entrySet().stream()
-                .collect(ImmutableCollectors.toMap(
-                        e -> new QualifiedAttributeID(null, e.getKey()),
-                        e -> e.getValue().iterator().next())), null);
+        try {
+            return RAExpressionAttributes.of(parentDefinitionMap.stream()
+                    .flatMap(p -> p.attributeVariableMap.entrySet().stream()
+                            .map(e -> Maps.immutableEntry(
+                                    idFactory.createAttributeID(p.getPrefixedAttributeName(e.getKey())),
+                                    e.getValue()))));
+        }
+        catch (RAExpressionAttributes.DuplicateAttrbuteEntriesException e) {
+            throw new ConflictingVariableInJoinViewException(e.getDuplicates());
+        }
     }
 
     private ImmutableTerm extractExpression(AddColumns column,
@@ -261,34 +249,25 @@ public abstract class JsonBasicOrJoinLens extends JsonBasicOrJoinOrNestedLens {
 
         try {
             ExpressionParser parser = new ExpressionParser(quotedIdFactory, coreSingletons);
-            net.sf.jsqlparser.expression.Expression exp;
-            String sqlQuery = "SELECT " + column.expression + " FROM fakeTable";
-            Select statement = JSqlParserTools.parse(sqlQuery, !quotedIdFactory.supportsSquareBracketQuotation());
-            SelectItem si = ((PlainSelect) statement.getSelectBody()).getSelectItems().get(0);
-            exp = ((SelectExpressionItem) si).getExpression();
-            return parser.parseTerm(exp, parentAttributeMap);
+            return parser.parseTerm(column.expression, parentAttributeMap);
         }
+        // TODO: why all exceptions?
         catch (Exception e) {
             throw new MetadataExtractionException("Unsupported expression for " + column.name + " in " + name + ":\n" + e, e);
         }
     }
 
-    private ImmutableList<ImmutableExpression> extractFilter(RAExpressionAttributes parentAttributeMap,
+    private Optional<ImmutableExpression> extractFilter(RAExpressionAttributes parentAttributeMap,
                                                              QuotedIDFactory quotedIdFactory,
                                                              CoreSingletons coreSingletons) throws MetadataExtractionException {
-        if (filterExpression == null || filterExpression.isEmpty())
-            return ImmutableList.of();
+        if (filterExpression.isEmpty())
+            return Optional.empty();
 
         try {
-            String sqlQuery = "SELECT * FROM fakeTable WHERE " + filterExpression;
             ExpressionParser parser = new ExpressionParser(quotedIdFactory, coreSingletons);
-            Select statement = JSqlParserTools.parse(sqlQuery, !quotedIdFactory.supportsSquareBracketQuotation());
-            PlainSelect plainSelect = (PlainSelect) statement.getSelectBody();
-            return plainSelect.getWhere() == null
-                    ? ImmutableList.of()
-                    : parser.parseBooleanExpression(plainSelect.getWhere(), parentAttributeMap);
+            return Optional.of(parser.parseBooleanExpression(filterExpression, parentAttributeMap));
         }
-        catch (InvalidQueryException | JSQLParserException e) {
+        catch (InvalidQueryException | UnsupportedSelectQueryException e) {
             throw new MetadataExtractionException("Unsupported filter expression for " + ":\n" + e);
         }
     }
@@ -317,7 +296,6 @@ public abstract class JsonBasicOrJoinLens extends JsonBasicOrJoinOrNestedLens {
         public final String name;
         @Nonnull
         public final String expression;
-
 
         @JsonCreator
         public AddColumns(@JsonProperty("name") String name,

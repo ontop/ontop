@@ -53,12 +53,14 @@ public class SQLPPMappingConverterImpl implements SQLPPMappingConverter {
         this.substitutionFactory = coreSingletons.getSubstitutionFactory();
         this.sqlQueryParser = sqlQueryParser;
 
-        ignoreInvalidMappingEntries = ((OntopOBDASettings)coreSingletons.getSettings()).ignoreInvalidMappingEntries();
-
+        this.ignoreInvalidMappingEntries = ((OntopOBDASettings)coreSingletons.getSettings()).ignoreInvalidMappingEntries();
     }
 
     @Override
     public ImmutableList<MappingAssertion> convert(ImmutableList<SQLPPTriplesMap> mapping, MetadataLookup metadataLookup) throws InvalidMappingSourceQueriesException, MetadataExtractionException {
+        QuotedIDFactory idFactory = metadataLookup.getQuotedIDFactory();
+        QuotedIDFactory rawIdFactory = new RawQuotedIDFactory(idFactory);
+
         ImmutableList.Builder<MappingAssertion> builder = ImmutableList.builder();
         for (SQLPPTriplesMap assertion : mapping) {
             IQTree tree;
@@ -66,12 +68,17 @@ public class SQLPPMappingConverterImpl implements SQLPPMappingConverter {
 
             try {
                 RAExpression re = getRAExpression(assertion, metadataLookup);
-                tree = sqlQueryParser.convert(re);
+                tree = re.getIQTree();
 
-                lookup = placeholderLookup(assertion, metadataLookup.getQuotedIDFactory(), re.getUnqualifiedAttributes());
+                ImmutableMap<QuotedID, ImmutableTerm> attributesMap = re.getUnqualifiedAttributesMap();
+                Function<Variable, Optional<ImmutableTerm>> standard = v -> getTermForVariable(attributesMap, idFactory, v);
+
+                lookup = (assertion instanceof OntopNativeSQLPPTriplesMap)
+                    ? v -> standard.apply(v).or(() -> getTermForVariable(attributesMap, rawIdFactory, v))
+                    : standard;
             }
             /*
-             * NB: runtime exceptions are also caught due to some JDBC drivers throwing them instead of SQLException-s
+             * NB: RuntimeExceptions are also caught due to some JDBC drivers throwing them instead of SQLException-s
              */
             catch (InvalidMappingSourceQueriesException | MetadataExtractionException | RuntimeException e) {
                 if(!ignoreInvalidMappingEntries)
@@ -98,20 +105,9 @@ public class SQLPPMappingConverterImpl implements SQLPPMappingConverter {
         return result;
     }
 
-
-    private static <T> Function<Variable, Optional<T>> placeholderLookup(SQLPPTriplesMap mappingAssertion, QuotedIDFactory idFactory, ImmutableMap<QuotedID, T> lookup) {
-        Function<Variable, Optional<T>> standard =
-                v -> Optional.ofNullable(lookup.get(idFactory.createAttributeID(v.getName())));
-
-        if (mappingAssertion instanceof OntopNativeSQLPPTriplesMap) {
-            QuotedIDFactory rawIdFactory = new RawQuotedIDFactory(idFactory);
-            return v -> Optional.ofNullable(standard.apply(v)
-                            .orElseGet(() -> lookup.get(rawIdFactory.createAttributeID(v.getName()))));
-        }
-        else
-            return standard;
+    private static Optional<ImmutableTerm> getTermForVariable(ImmutableMap<QuotedID, ImmutableTerm> attributesMap, QuotedIDFactory idfac, Variable v) {
+        return  Optional.ofNullable(attributesMap.get(idfac.createAttributeID(v.getName())));
     }
-
 
     private MappingAssertion convert(TargetAtom target, Function<Variable, Optional<ImmutableTerm>> lookup, PPMappingAssertionProvenance provenance, IQTree tree) throws InvalidMappingSourceQueriesException {
 

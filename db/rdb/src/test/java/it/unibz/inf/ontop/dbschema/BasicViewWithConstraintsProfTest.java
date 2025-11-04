@@ -2,11 +2,11 @@ package it.unibz.inf.ontop.dbschema;
 
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.*;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class BasicViewWithConstraintsProfTest {
     private static final String VIEW_FILE = "src/test/resources/prof/prof-basic-views-with-constraints.json";
@@ -32,5 +32,4 @@ public class BasicViewWithConstraintsProfTest {
 
         assertEquals(ImmutableSet.of("position", "a_id"), constraints);
     }
-
 }

@@ -2,11 +2,11 @@ package it.unibz.inf.ontop.dbschema;
 
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.Collection;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class NestedViewsPersonTest {
 
@@ -28,7 +28,7 @@ public class NestedViewsPersonTest {
                 .map(v -> v.getID().getName())
                 .collect(ImmutableCollectors.toSet());
 
-        assertEquals(constraints, ImmutableSet.of("id", "pos"));
+        assertEquals(ImmutableSet.of("id", "pos"), constraints);
     }
 
     @Test
@@ -44,7 +44,7 @@ public class NestedViewsPersonTest {
                 .map(v -> v.getID().getName())
                 .collect(ImmutableCollectors.toSet());
 
-        assertEquals(determinants, ImmutableSet.of("id"));
+        assertEquals(ImmutableSet.of("id"), determinants);
 
         ImmutableSet<String> dependents = fd.getDependents().stream()
                 .map(v -> v.getID().getName())

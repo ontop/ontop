@@ -219,7 +219,7 @@ public class OntopOBDAToR2RML implements OntopCommand {
         private SQLPPTriplesMap normalize(SQLPPTriplesMap triplesMap) {
             try {
                 RAExpression re = converter.getRAExpression(triplesMap, metadataLookup);
-                ImmutableMap<QuotedID, ImmutableTerm> attributeMap = re.getUnqualifiedAttributes();
+                ImmutableMap<QuotedID, ImmutableTerm> attributeMap = re.getUnqualifiedAttributesMap();
                 Function<Variable, Optional<QuotedID>> lookup = var -> {
                     QuotedID standardId = idFactory.createAttributeID(var.getName());
                     if (attributeMap.containsKey(standardId))

@@ -1,37 +1,34 @@
 package it.unibz.inf.ontop.spec.sqlparser;
 
-import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.exception.InvalidQueryException;
+import it.unibz.inf.ontop.exception.MetadataExtractionException;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.spec.sqlparser.exception.*;
-import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.select.*;
 
 import java.util.List;
+import java.util.Optional;
 
-/**
- * Created by Roman Kontchakov on 01/11/2016.
- *
- */
-public class SelectQueryParser extends BasicSelectQueryParser<RAExpression, RAExpressionOperations> {
+public class SelectQueryParser extends BasicSelectQueryParser<RAExpression> {
 
     public SelectQueryParser(MetadataLookup metadata, CoreSingletons coreSingletons) {
         super(metadata, coreSingletons, new RAExpressionOperations(coreSingletons.getTermFactory(), coreSingletons.getIQFactory()));
     }
 
-    public RAExpression parse(String sql) throws JSQLParserException, InvalidQueryException, UnsupportedSelectQueryException {
+    public RAExpression parse(String sql) throws QueryParseException, InvalidQueryException, UnsupportedSelectQueryException {
+        return parseJSqlSelectQuery(sql);
+    }
+
+    public RAExpression getRAExpression(String sourceQuery) throws InvalidQueryException, MetadataExtractionException {
         try {
-            Select select = JSqlParserTools.parse(sql);
-            return translateSelect(select.getSelectBody(), select.getWithItemsList());
+            return parse(sourceQuery);
         }
-        catch (InvalidSelectQueryRuntimeException e) {
-            throw new InvalidQueryException(e.getMessage(), e.getObject());
-        }
-        catch (UnsupportedSelectQueryRuntimeException e) {
-            throw new UnsupportedSelectQueryException(e.getMessage(), e.getObject());
+        catch (UnsupportedSelectQueryException | QueryParseException e) {
+            RelationDefinition view = metadata.getBlackBoxView(sourceQuery);
+            return operations.createWithoutName(view, createAttributeVariables(view));
         }
     }
 
@@ -92,21 +89,19 @@ public class SelectQueryParser extends BasicSelectQueryParser<RAExpression, RAEx
         try {
             RAExpression base = translateJoins(plainSelect.getFromItem(), plainSelect.getJoins());
 
-            ImmutableList<ImmutableExpression> filter = plainSelect.getWhere() == null
-                    ? ImmutableList.of()
-                    : expressionParser.parseBooleanExpression(plainSelect.getWhere(), base.getAttributes());
+            Optional<ImmutableExpression> filter = Optional.ofNullable(plainSelect.getWhere())
+                    .map(w -> expressionParser.parseBooleanExpression(w, base.getAttributes()));
 
             rae = operations.filter(base, filter);
         }
         catch (IllegalJoinException e) {
-            throw new InvalidSelectQueryRuntimeException(e.toString(), plainSelect);
+            throw new InvalidSelectQueryRuntimeException(e.getMessage(), plainSelect);
         }
 
         SelectItemParser sip = new SelectItemParser(rae.getAttributes(), expressionParser::parseTerm, idfac);
-        RAExpressionAttributes attributes =
-                sip.parseSelectItems(plainSelect.getSelectItems());
+        RAExpressionAttributes attributes = sip.parseSelectItems(plainSelect.getSelectItems());
 
-        return new RAExpression(rae.getDataAtoms(), rae.getFilterAtoms(), attributes);
+        return new RAExpression(rae.getIQTree(), attributes);
     }
 
 
@@ -144,9 +139,5 @@ public class SelectQueryParser extends BasicSelectQueryParser<RAExpression, RAEx
     @Override
     protected RAExpression create(NamedRelationDefinition relation) {
         return operations.create(relation, createAttributeVariables(relation));
-    }
-
-    public RAExpression translateParserView(RelationDefinition view) {
-        return operations.createWithoutName(view, createAttributeVariables(view));
     }
 }
