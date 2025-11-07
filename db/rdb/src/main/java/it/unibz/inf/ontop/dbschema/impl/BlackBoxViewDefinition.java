@@ -1,4 +1,4 @@
-package it.unibz.inf.ontop.spec.sqlparser;
+package it.unibz.inf.ontop.dbschema.impl;
 
 /*
  * #%L
@@ -22,8 +22,6 @@ package it.unibz.inf.ontop.spec.sqlparser;
 
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.dbschema.*;
-import it.unibz.inf.ontop.dbschema.impl.AbstractRelationDefinition;
-import it.unibz.inf.ontop.model.type.DBTypeFactory;
 
 import java.util.stream.Collectors;
 
@@ -33,24 +31,11 @@ import java.util.stream.Collectors;
  * @author Roman Kontchakov
 */
 
-public class ParserViewDefinition extends AbstractRelationDefinition {
+public class BlackBoxViewDefinition extends AbstractRelationDefinition {
 	
-	public ParserViewDefinition(ImmutableList<QuotedID> attrs, String statement, DBTypeFactory dbTypeFactory) {
-		this(attributeListBuilder(attrs, dbTypeFactory), statement);
-	}
-
-	public ParserViewDefinition(AttributeListBuilder attributeListBuilder, String statement) {
+	BlackBoxViewDefinition(AttributeListBuilder attributeListBuilder, String statement) {
 		super("(" + statement + ")", attributeListBuilder);
 	}
-
-	private static AttributeListBuilder attributeListBuilder(ImmutableList<QuotedID> attrs, DBTypeFactory dbTypeFactory) {
-		AttributeListBuilder builder = attributeListBuilder();
-		for (QuotedID id : attrs) {
-			builder.addAttribute(id, dbTypeFactory.getAbstractRootDBType(), null, true);
-		}
-		return builder;
-	}
-
 
 	@Override
 	public ImmutableList<UniqueConstraint> getUniqueConstraints() {

@@ -103,16 +103,19 @@ public abstract class AbstractRelationDefinition implements RelationDefinition  
     private static class AttributeListBuilderImpl implements AttributeListBuilder {
         private final List<AttributeInfo> list = new ArrayList<>();
 
+        @Override
         public AttributeListBuilder addAttribute(QuotedID id, DBTermType termType, String typeName, boolean isNullable) {
             list.add(new AttributeInfo(id, list.size() + 1, termType, typeName, isNullable));
             return this;
         }
 
+        @Override
         public AttributeListBuilder addAttribute(QuotedID id, DBTermType termType, boolean isNullable) {
             list.add(new AttributeInfo(id, list.size() + 1, termType, termType.getName(), isNullable));
             return this;
         }
 
+        @Override
         public ImmutableList<Attribute> build(RelationDefinition relation) {
             return list.stream()
                     .map(a -> new AttributeImpl(relation, a.id, a.index, a.typeName, a.termType, a.isNullable))

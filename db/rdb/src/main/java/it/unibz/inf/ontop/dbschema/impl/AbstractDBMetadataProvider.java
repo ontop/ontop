@@ -13,7 +13,6 @@ import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.DBTypeFactory;
 import it.unibz.inf.ontop.spec.sqlparser.ApproximateSelectQueryAttributeExtractor;
 import it.unibz.inf.ontop.spec.sqlparser.DefaultSelectQueryAttributeExtractor;
-import it.unibz.inf.ontop.spec.sqlparser.ParserViewDefinition;
 import it.unibz.inf.ontop.spec.sqlparser.exception.QueryParseException;
 import it.unibz.inf.ontop.spec.sqlparser.exception.UnsupportedSelectQueryException;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -25,8 +24,6 @@ import java.sql.*;
 import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.BiPredicate;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.IntStream;
 
 public abstract class AbstractDBMetadataProvider implements DBMetadataProvider {
@@ -567,10 +564,10 @@ public abstract class AbstractDBMetadataProvider implements DBMetadataProvider {
                 : extractBlackBoxViewWithoutConnectingToDB(query);
     }
 
-    protected final RelationDefinition extractBlackBoxViewByConnectingToDB(String query) throws MetadataExtractionException {
+    protected final BlackBoxViewDefinition extractBlackBoxViewByConnectingToDB(String query) throws MetadataExtractionException {
         try {
             RelationDefinition.AttributeListBuilder builder = retrieveAttributeListByConnectingToDB("(" + query + ")");
-            return new ParserViewDefinition(builder, query);
+            return new BlackBoxViewDefinition(builder, query);
         }
         catch (SQLException e) {
             throw new MetadataExtractionException("Cannot extract metadata for a black-box view. " + e.getMessage(), e);
@@ -598,7 +595,7 @@ public abstract class AbstractDBMetadataProvider implements DBMetadataProvider {
 
             RelationDefinition.AttributeListBuilder builder = AbstractRelationDefinition.attributeListBuilder();
 
-            for (int i=1; i <= columnCount; i++) {
+            for (int i = 1; i <= columnCount; i++) {
                 final int index = i;
 
                 QuotedID attributeId = rawIdFactory.createAttributeID(resultSetMetadata.getColumnName(index));
@@ -623,7 +620,7 @@ public abstract class AbstractDBMetadataProvider implements DBMetadataProvider {
         return String.format("SELECT * FROM %s subQ LIMIT 1", query);
     }
 
-    protected final RelationDefinition extractBlackBoxViewWithoutConnectingToDB(String query) throws InvalidQueryException {
+    protected final BlackBoxViewDefinition extractBlackBoxViewWithoutConnectingToDB(String query) throws InvalidQueryException {
         ImmutableList<QuotedID> attributes;
         try {
             DefaultSelectQueryAttributeExtractor sqae = new DefaultSelectQueryAttributeExtractor(this, coreSingletons);
@@ -639,7 +636,13 @@ public abstract class AbstractDBMetadataProvider implements DBMetadataProvider {
             ApproximateSelectQueryAttributeExtractor sqae = new ApproximateSelectQueryAttributeExtractor(getQuotedIDFactory());
             attributes = sqae.getAttributes(query);
         }
-        return new ParserViewDefinition(attributes, query, dbTypeFactory);
+
+        RelationDefinition.AttributeListBuilder builder = AbstractRelationDefinition.attributeListBuilder();
+        for (QuotedID id : attributes) {
+            builder.addAttribute(id, dbTypeFactory.getAbstractRootDBType(), null, true);
+        }
+
+        return new BlackBoxViewDefinition(builder, query);
     }
 
 

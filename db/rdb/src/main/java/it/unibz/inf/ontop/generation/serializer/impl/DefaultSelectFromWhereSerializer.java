@@ -213,6 +213,8 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
 
         @Override
         public QuerySerialization visit(SQLSerializedQuery sqlSerializedQuery) {
+            if (1 == 1)
+                throw new IllegalArgumentException("GOT IT!");
             RelationID alias = generateFreshViewAlias();
             String sql = String.format("(%s) %s",sqlSerializedQuery.getSQLString(), alias.getSQLRendering());
             return new QuerySerializationImpl(sql, attachRelationAlias(alias, sqlSerializedQuery.getColumnNames()));
@@ -299,7 +301,7 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
          * is the right child of the left join.
          *
          */
-        protected QuerySerialization visit(BinaryJoinExpression binaryJoinExpression, String operatorString) {
+        protected QuerySerialization visit(SQLBinaryJoinExpression binaryJoinExpression, String operatorString) {
             QuerySerialization left = getSQLSerializationForChild(binaryJoinExpression.getLeft());
             QuerySerialization right = getSQLSerializationForChild(binaryJoinExpression.getRight());
 
