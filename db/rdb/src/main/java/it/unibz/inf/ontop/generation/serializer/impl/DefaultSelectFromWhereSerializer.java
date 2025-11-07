@@ -213,8 +213,6 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
 
         @Override
         public QuerySerialization visit(SQLSerializedQuery sqlSerializedQuery) {
-            if (1 == 1)
-                throw new IllegalArgumentException("GOT IT!");
             RelationID alias = generateFreshViewAlias();
             String sql = String.format("(%s) %s",sqlSerializedQuery.getSQLString(), alias.getSQLRendering());
             return new QuerySerializationImpl(sql, attachRelationAlias(alias, sqlSerializedQuery.getColumnNames()));
