@@ -26,8 +26,6 @@ public interface SQLAlgebraFactory {
                                                        @Assisted("offset") Optional<Long> offset,
                                                        @Assisted("sortConditions") ImmutableList<SQLOrderComparator> sortConditions);
 
-    SQLSerializedQuery createSQLSerializedQuery(String sqlString, ImmutableMap<Variable, QuotedID> columnNames);
-
     SQLTable createSQLTable(RelationDefinition relationDefinition, ImmutableMap<Integer, ? extends VariableOrGroundTerm> argumentMap);
 
     SQLInnerJoinExpression createSQLInnerJoinExpression(@Assisted("leftExpression") SQLExpression left, @Assisted("rightExpression") SQLExpression right, Optional<ImmutableExpression> joinCondition);

@@ -11,7 +11,10 @@ import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.type.DBTermType;
 
 /**
- * Represents a serialized query that can be executed by the DB engine
+ * Represents a serialized query that can be executed by the DB engine.
+ *
+ * Instances of NativeNode are used only in IQTrees used for post-processing
+ * and cannot occur in IQTrees during normalization, optimization, etc.
  *
  * See {@link IntermediateQueryFactory#createNativeNode} for creating a new instance.
  */
