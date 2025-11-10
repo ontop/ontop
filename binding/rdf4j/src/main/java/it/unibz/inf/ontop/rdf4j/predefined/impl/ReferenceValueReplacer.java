@@ -65,14 +65,6 @@ public class ReferenceValueReplacer {
             }
 
             @Override
-            public IQTree transformNative(NativeNode node) {
-                String newQueryString = replaceString(node.getNativeQueryString());
-
-                return iqFactory.createNativeNode(node.getVariables(),
-                        node.getTypeMap(), node.getColumnNames(), newQueryString, node.getVariableNullability());
-            }
-
-            @Override
             public IQTree transformEmpty(EmptyNode node) {
                 return node;
             }

@@ -23,11 +23,6 @@ public abstract class DefaultIQTreeVisitingTransformer implements IQTreeVisitor<
     }
 
     @Override
-    public final IQTree transformNative(NativeNode nativeNode) {
-        throw new UnsupportedOperationException("NativeNode does not support transformer (too late)");
-    }
-
-    @Override
     public IQTree transformIntensionalData(IntensionalDataNode node) {
         return transformLeaf(node);
     }

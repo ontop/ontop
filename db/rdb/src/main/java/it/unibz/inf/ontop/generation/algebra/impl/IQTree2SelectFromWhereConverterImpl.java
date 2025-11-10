@@ -153,12 +153,6 @@ public class IQTree2SelectFromWhereConverterImpl implements IQTree2SelectFromWhe
             }
 
             @Override
-            public SQLExpression transformNative(NativeNode nativeNode) {
-                String sqlQuery = nativeNode.getNativeQueryString();
-                return sqlAlgebraFactory.createSQLSerializedQuery(sqlQuery, nativeNode.getColumnNames());
-            }
-
-            @Override
             public SQLExpression transformValues(ValuesNode valuesNode) {
                 return sqlAlgebraFactory.createSQLValues(valuesNode.getOrderedVariables(), valuesNode.getValues());
             }

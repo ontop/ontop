@@ -47,11 +47,6 @@ public abstract class AbstractIQTreeGenericVisitingTransformer<T> implements IQT
     }
 
     @Override
-    public T transformNative(NativeNode tree) {
-        return done();
-    }
-
-    @Override
     public T transformValues(ValuesNode tree) {
         return done();
     }

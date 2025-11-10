@@ -19,7 +19,6 @@ public interface IQTreeVisitor<T> {
     T transformExtensionalData(ExtensionalDataNode dataNode);
     T transformEmpty(EmptyNode node);
     T transformTrue(TrueNode node);
-    T transformNative(NativeNode nativeNode);
     T transformValues(ValuesNode valuesNode);
 
     T transformConstruction(UnaryIQTree tree, ConstructionNode rootNode, IQTree child);
