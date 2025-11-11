@@ -9,5 +9,6 @@ public interface LeafIQTree extends IQTree, ExplicitVariableProjectionNode {
     @Override
     LeafIQTree getRootNode();
 
+    @Override
     LeafIQTree applyFreshRenaming(InjectiveSubstitution<Variable> renamingSubstitution);
 }

@@ -50,7 +50,7 @@ public interface QueryNode {
 
     QueryNode applyFreshRenaming(InjectiveSubstitution<Variable> renamingSubstitution);
 
-        @Override
+    @Override
     int hashCode();
 
     @Override

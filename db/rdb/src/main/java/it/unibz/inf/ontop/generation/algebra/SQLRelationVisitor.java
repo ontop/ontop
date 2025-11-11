@@ -5,8 +5,6 @@ public interface SQLRelationVisitor<T> {
 
     T visit(SelectFromWhereWithModifiers selectFromWhere);
 
-    T visit(SQLSerializedQuery sqlSerializedQuery);
-
     T visit(SQLTable sqlTable);
 
     T visit(SQLNaryJoinExpression sqlNaryJoinExpression);

@@ -95,11 +95,6 @@ public class BasicSingleTermTypeExtractor implements SingleTermTypeExtractor {
         }
 
         @Override
-        public Optional<TermType> transformNative(NativeNode nativeNode) {
-            return Optional.ofNullable(nativeNode.getTypeMap().get(variable));
-        }
-
-        @Override
         public Optional<TermType> transformValues(ValuesNode valuesNode) {
             return valuesNode.getValueStream(variable)
                     .map(Constant::getOptionalType)
