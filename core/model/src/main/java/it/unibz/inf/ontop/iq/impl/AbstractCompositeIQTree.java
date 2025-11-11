@@ -83,7 +83,7 @@ public abstract class AbstractCompositeIQTree<N extends QueryNode> extends Abstr
     }
 
     @Override
-    public ImmutableSet<Variable> getKnownVariables() {
+    public synchronized ImmutableSet<Variable> getKnownVariables() {
         return getCachedValue(() -> knownVariables, this::computeKnownVariables, v -> knownVariables = v);
     }
 
@@ -193,8 +193,7 @@ public abstract class AbstractCompositeIQTree<N extends QueryNode> extends Abstr
 
 
     @Override
-    public boolean isDistinct() {
-        // TODO: why not synchronized?
+    public synchronized boolean isDistinct() {
         return getCachedValue(treeCache::isDistinct, this::computeIsDistinct, treeCache::setIsDistinct);
     }
 
