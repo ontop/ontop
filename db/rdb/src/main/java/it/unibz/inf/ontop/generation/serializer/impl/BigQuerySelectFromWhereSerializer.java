@@ -54,17 +54,16 @@ public class BigQuerySelectFromWhereSerializer extends DefaultSelectFromWhereSer
 
                     @Override
                     protected QuerySerialization serializeFlatten(SQLFlattenExpression sqlFlattenExpression, Variable flattenedVar, Variable outputVar, Optional<Variable> indexVar, DBTermType flattenedType, ImmutableMap<Variable, QualifiedAttributeID> allColumnIDs, QuerySerialization subQuerySerialization) {
-                        //We build the query string of the form SELECT <variables> FROM <subquery> CROSS JOIN UNNEST(<flattenedVariable>) WITH OFFSET <names>
-                        StringBuilder builder = new StringBuilder();
-                        builder.append(String.format(
-                                "%s CROSS JOIN UNNEST(%s) %s ",
+                        // SELECT <variables> FROM <subquery> CROSS JOIN UNNEST(<flattenedVariable>) [WITH OFFSET <names>]
+                        String builder = String.format(
+                                "%s CROSS JOIN UNNEST(%s) %s %s ",
                                 subQuerySerialization.getString(),
                                 getSQLRendering(flattenedVar, allColumnIDs),
-                                getSQLRendering(outputVar, allColumnIDs)));
-                        indexVar.ifPresent( v -> builder.append(String.format(" WITH OFFSET %s ", getSQLRendering(indexVar.get(), allColumnIDs))));
+                                getSQLRendering(outputVar, allColumnIDs),
+                                getSQLRendering("WITH OFFSET %s", indexVar, allColumnIDs));
 
                         return new QuerySerializationImpl(
-                                builder.toString(),
+                                builder,
                                 getFlattenAllColumnIDs(flattenedVar, allColumnIDs));
                     }
                 });

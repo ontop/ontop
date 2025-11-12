@@ -161,6 +161,7 @@ public class PostgresSelectFromWhereSerializer extends DefaultSelectFromWhereSer
                                             outerViewAlias),
                                     variableAliases);
                         }
+
                         builder.append(String.format(
                                         "AS %s ON TRUE",
                                         getOutputVarsRendering(outputVar, indexVar, allColumnIDs)));

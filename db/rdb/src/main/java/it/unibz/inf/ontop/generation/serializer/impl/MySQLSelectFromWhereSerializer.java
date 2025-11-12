@@ -100,18 +100,16 @@ public class MySQLSelectFromWhereSerializer extends DefaultSelectFromWhereSerial
                         /  SELECT <variables> FROM <subquery> CROSS JOIN JSON_TABLE(<flattenedVariable>, '$[*]',
                         /       COLUMNS (<outputVar> JSON path '$' [, <indexVar> for ordinality]))
                         */
-                        StringBuilder builder = new StringBuilder();
-                        builder.append(String.format(
-                                        getFlattenFunctionFormat(),
-                                        subQuerySerialization.getString(),
-                                        getSQLRendering(flattenedVar, allColumnIDs),
-                                        getSQLRendering(outputVar, allColumnIDs)));
-                        builder.append(getSQLRendering(", %s for ordinality", indexVar, allColumnIDs));
-                        builder.append(")) ");
-                        builder.append(generateFreshViewAlias().getSQLRendering());
+                        String builder = String.format(
+                                getFlattenFunctionFormat(),
+                                subQuerySerialization.getString(),
+                                getSQLRendering(flattenedVar, allColumnIDs),
+                                getSQLRendering(outputVar, allColumnIDs),
+                                getSQLRendering(", %s for ordinality", indexVar, allColumnIDs),
+                                generateFreshViewAlias().getSQLRendering());
 
                         return new QuerySerializationImpl(
-                                builder.toString(),
+                                builder,
                                 getFlattenAllColumnIDs(flattenedVar, allColumnIDs));
                     }
                 });
@@ -123,6 +121,6 @@ public class MySQLSelectFromWhereSerializer extends DefaultSelectFromWhereSerial
         *   will return an empty list. We can circumvent this, by putting another array around it (calling
         *   `JSON_ARRAY`) and then de-referencing it again in the path selector ($[0][*]).
          */
-        return "%s CROSS JOIN JSON_TABLE(JSON_ARRAY(%s), '$[0][*]' columns(%s JSON path '$'";
+        return "%s CROSS JOIN JSON_TABLE(JSON_ARRAY(%s), '$[0][*]' columns(%s JSON path '$' %)) %s";
     }
 }

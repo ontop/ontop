@@ -160,8 +160,7 @@ public class SparkSQLSelectFromWhereSerializer extends DefaultSelectFromWhereSer
                 }
                 else {
                     flattenCall = String.format("EXPLODE_OUTER(%s)", expression);
-                    aliasFormat = String.format("%s",
-                            getSQLRendering(outputVar, allColumnIDs));
+                    aliasFormat = getSQLRendering(outputVar, allColumnIDs);
                 }
                 return serializeFlattenAsFunction(flattenedVar, allColumnIDs, subQuerySerialization, flattenCall, aliasFormat);
             }

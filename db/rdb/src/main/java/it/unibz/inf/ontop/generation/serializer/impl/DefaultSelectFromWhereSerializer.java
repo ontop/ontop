@@ -428,8 +428,7 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
                             v -> new QualifiedAttributeID(alias, v.getValue().getAttribute())));
         }
 
-
-        protected QuerySerialization serializeFlattenAsFunction(Variable flattenedVar, ImmutableMap<Variable, QualifiedAttributeID> allColumnIDs,
+        protected final QuerySerialization serializeFlattenAsFunction(Variable flattenedVar, ImmutableMap<Variable, QualifiedAttributeID> allColumnIDs,
                                                                 QuerySerialization subQuerySerialization, String flattenFunctionCallWithAlias) {
             RelationID alias = generateFreshViewAlias();
             var variableAliases = getFlattenAllColumnIDs(flattenedVar, alias, allColumnIDs);
@@ -438,7 +437,7 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
 
             var subProjection = subQuerySerialization.getColumnIDs().keySet().stream()
                     .filter(variableAliases::containsKey)
-                    .map(v -> subQuerySerialization.getColumnIDs().get(v).getSQLRendering() + " AS " + aliasFactory.createAttributeAlias(v.getName()).getSQLRendering())
+                    .map(v -> getSQLRendering(v, subQuerySerialization.getColumnIDs()) + " AS " + aliasFactory.createAttributeAlias(v.getName()).getSQLRendering())
                     .collect(Collectors.joining(", "));
 
             if (subProjection.length() > 0)
@@ -456,7 +455,7 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
                     variableAliases);
         }
 
-        protected QuerySerialization serializeFlattenAsFunction(Variable flattenedVar, ImmutableMap<Variable, QualifiedAttributeID> allColumnIDs,
+        protected final QuerySerialization serializeFlattenAsFunction(Variable flattenedVar, ImmutableMap<Variable, QualifiedAttributeID> allColumnIDs,
                                                                 QuerySerialization subQuerySerialization, String flattenFunctionCall, String aliasFormat) {
             var flattenFunctionCallWithAlias = String.format("%s AS %s", flattenFunctionCall, aliasFormat);
             return serializeFlattenAsFunction(flattenedVar, allColumnIDs, subQuerySerialization, flattenFunctionCallWithAlias);
