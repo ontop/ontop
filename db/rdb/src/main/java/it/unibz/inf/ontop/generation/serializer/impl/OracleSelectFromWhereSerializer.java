@@ -73,20 +73,18 @@ public class OracleSelectFromWhereSerializer extends DefaultSelectFromWhereSeria
 
             @Override
             protected QuerySerialization serializeFlatten(SQLFlattenExpression sqlFlattenExpression, Variable flattenedVar, Variable outputVar, Optional<Variable> indexVar, DBTermType flattenedType, ImmutableMap<Variable, QualifiedAttributeID> allColumnIDs, QuerySerialization subQuerySerialization) {
-                /* We build the query string of the form
-                *  `SELECT <variables> FROM <subquery> CROSS JOIN JSON_TABLE(<flattenedVar>, '$[*]' COLUMNS (<outputVar> VARCHAR2(1000) FORMAT JSON PATH '$' [, <indexVar> FOR ORDINALITY]))
-                */
-                StringBuilder builder = new StringBuilder();
-                builder.append(String.format(
-                        "%s CROSS JOIN JSON_TABLE(%s, '$[*]' COLUMNS(%s VARCHAR2(1000) FORMAT JSON PATH '$'",
+                // We build the query string of the form
+                // `SELECT <variables> FROM <subquery> CROSS JOIN JSON_TABLE(<flattenedVar>, '$[*]' COLUMNS (<outputVar> VARCHAR2(1000) FORMAT JSON PATH '$' [, <indexVar> FOR ORDINALITY]))
+                String builder = String.format(
+                        "%s CROSS JOIN JSON_TABLE(%s, '$[*]' COLUMNS(%s VARCHAR2(1000) FORMAT JSON PATH '$'%s)) %s",
                         subQuerySerialization.getString(),
                         getSQLRendering(flattenedVar, allColumnIDs),
-                        getSQLRendering(outputVar, allColumnIDs)));
-                indexVar.ifPresent( v -> builder.append(String.format(", %s FOR ORDINALITY", getSQLRendering(v, allColumnIDs))));
-                builder.append(String.format(")) %s", generateFreshViewAlias().getSQLRendering()));
+                        getSQLRendering(outputVar, allColumnIDs),
+                        getSQLRendering(", %s FOR ORDINALITY", indexVar, allColumnIDs),
+                        generateFreshViewAlias().getSQLRendering());
 
                 return new QuerySerializationImpl(
-                        builder.toString(),
+                        builder,
                         getFlattenAllColumnIDs(flattenedVar, allColumnIDs));
             }
         });

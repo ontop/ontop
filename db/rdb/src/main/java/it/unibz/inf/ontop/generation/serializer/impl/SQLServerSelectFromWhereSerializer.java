@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import it.unibz.inf.ontop.dbschema.QualifiedAttributeID;
+import it.unibz.inf.ontop.dbschema.QuotedID;
 import it.unibz.inf.ontop.generation.algebra.SQLFlattenExpression;
 import it.unibz.inf.ontop.generation.algebra.SQLOneTupleDummyQueryExpression;
 import it.unibz.inf.ontop.generation.algebra.SQLOrderComparator;
@@ -97,19 +98,19 @@ public class SQLServerSelectFromWhereSerializer extends IgnoreNullFirstSelectFro
                  * one to the output variable.
                  */
                 var attributeAliasFactory = createAttributeAliasFactory();
-                String jsonVariable = attributeAliasFactory.createAttributeAlias(outputVar.getName() + "json").getSQLRendering();
-                String scalarVariable = attributeAliasFactory.createAttributeAlias(outputVar.getName() + "scalar").getSQLRendering();
+                QuotedID jsonVariable = attributeAliasFactory.createAttributeAlias(outputVar.getName() + "json");
+                QuotedID scalarVariable = attributeAliasFactory.createAttributeAlias(outputVar.getName() + "scalar");
 
                 String builder = String.format(
                         "%s CROSS APPLY (SELECT (CASE WHEN %s IS NOT NULL THEN %S ELSE %S END) as %s FROM OPENJSON(%s) WITH (%s NVARCHAR(MAX) '$', %s NVARCHAR(MAX) '$' AS JSON)) %s",
                         subQuerySerialization.getString(),
-                        jsonVariable,
-                        jsonVariable,
-                        scalarVariable,
+                        jsonVariable.getSQLRendering(),
+                        jsonVariable.getSQLRendering(),
+                        scalarVariable.getSQLRendering(),
                         getSQLRendering(outputVar, allColumnIDs),
                         getSQLRendering(flattenedVar, allColumnIDs),
-                        scalarVariable,
-                        jsonVariable,
+                        scalarVariable.getSQLRendering(),
+                        jsonVariable.getSQLRendering(),
                         generateFreshViewAlias().getSQLRendering());
 
                 return new QuerySerializationImpl(

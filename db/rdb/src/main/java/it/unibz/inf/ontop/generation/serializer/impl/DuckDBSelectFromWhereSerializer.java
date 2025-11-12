@@ -53,7 +53,7 @@ public class DuckDBSelectFromWhereSerializer extends DefaultSelectFromWhereSeria
                         var expression = getSQLRendering(flattenedVar, allColumnIDs);
 
                         //If an index is required, we use create a second list which is an integer range from 1 to len(list) and unnset it, too.
-                        String flattenCall = (indexVar.isPresent())
+                        String flattenCall = indexVar.isPresent()
                             ? String.format("UNNEST(%s) AS %s, UNNEST(RANGE(1, len(%s) + 1)) as %s",
                                     expression,
                                     getSQLRendering(outputVar, allColumnIDs),

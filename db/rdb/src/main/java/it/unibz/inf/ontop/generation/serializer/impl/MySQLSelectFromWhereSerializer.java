@@ -106,7 +106,7 @@ public class MySQLSelectFromWhereSerializer extends DefaultSelectFromWhereSerial
                                         subQuerySerialization.getString(),
                                         getSQLRendering(flattenedVar, allColumnIDs),
                                         getSQLRendering(outputVar, allColumnIDs)));
-                        indexVar.ifPresent(v -> builder.append(String.format(", %s for ordinality", getSQLRendering(v, allColumnIDs))));
+                        builder.append(getSQLRendering(", %s for ordinality", indexVar, allColumnIDs));
                         builder.append(")) ");
                         builder.append(generateFreshViewAlias().getSQLRendering());
 

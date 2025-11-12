@@ -110,7 +110,7 @@ public class DremioSelectFromWhereSerializer extends DefaultSelectFromWhereSeria
                                 : String.format("CONVERT_FROM(%s, 'json')", getSQLRendering(flattenedVar, allColumnIDs));
 
                         //We compute an alias for the sub-query, and new aliases for each projected variable.
-                        RelationID alias = this.generateFreshViewAlias();
+                        RelationID alias = generateFreshViewAlias();
                         var variableAliases = getFlattenAllColumnIDs(flattenedVar, alias, allColumnIDs);
 
                         var subProjection = subQuerySerialization.getColumnIDs().keySet().stream()

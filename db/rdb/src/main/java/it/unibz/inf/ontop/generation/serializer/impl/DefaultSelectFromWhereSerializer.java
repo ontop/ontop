@@ -386,8 +386,26 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
             return allColumnIDs.get(variable).getSQLRendering();
         }
 
+        protected final String getSQLRendering(Variable variable, Optional<Variable> optionalVariable, ImmutableMap<Variable, QualifiedAttributeID> allColumnIDs) {
+            return optionalVariable
+                    .map(value -> getSQLRendering(variable, allColumnIDs) + ", " + getSQLRendering(value, allColumnIDs))
+                    .orElseGet(() -> getSQLRendering(variable, allColumnIDs));
+        }
+
         protected final String getSQLRendering(Variable variable) {
             return idFactory.createAttributeID(variable.getName()).getSQLRendering();
+        }
+
+        protected final String getSQLRendering(String format, Optional<Variable> optionalVariable, ImmutableMap<Variable, QualifiedAttributeID> allColumnIDs) {
+            return optionalVariable
+                    .map(variable -> String.format(format, getSQLRendering(variable, allColumnIDs)))
+                    .orElse("");
+        }
+
+        protected final String getSQLRendering(String string, Optional<Variable> optionalVariable) {
+            return optionalVariable
+                    .map(variable -> string)
+                    .orElse("");
         }
 
         protected QuerySerialization serializeFlatten(SQLFlattenExpression sqlFlattenExpression, Variable flattenedVar,
