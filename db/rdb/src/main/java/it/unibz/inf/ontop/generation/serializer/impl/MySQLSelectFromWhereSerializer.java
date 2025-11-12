@@ -121,6 +121,6 @@ public class MySQLSelectFromWhereSerializer extends DefaultSelectFromWhereSerial
         *   will return an empty list. We can circumvent this, by putting another array around it (calling
         *   `JSON_ARRAY`) and then de-referencing it again in the path selector ($[0][*]).
          */
-        return "%s CROSS JOIN JSON_TABLE(JSON_ARRAY(%s), '$[0][*]' columns(%s JSON path '$' %)) %s";
+        return "%s CROSS JOIN JSON_TABLE(JSON_ARRAY(%s), '$[0][*]' columns(%s JSON path '$' %s)) %s";
     }
 }
