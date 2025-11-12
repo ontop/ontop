@@ -78,11 +78,11 @@ public class OracleSelectFromWhereSerializer extends DefaultSelectFromWhereSeria
                 */
                 StringBuilder builder = new StringBuilder();
                 builder.append(String.format(
-                                "%s CROSS JOIN JSON_TABLE(%s, '$[*]' COLUMNS(%s VARCHAR2(1000) FORMAT JSON PATH '$'",
-                                subQuerySerialization.getString(),
-                                allColumnIDs.get(flattenedVar).getSQLRendering(),
-                                allColumnIDs.get(outputVar).getSQLRendering()));
-                indexVar.ifPresent( v -> builder.append(String.format(", %s FOR ORDINALITY", allColumnIDs.get(v).getSQLRendering())));
+                        "%s CROSS JOIN JSON_TABLE(%s, '$[*]' COLUMNS(%s VARCHAR2(1000) FORMAT JSON PATH '$'",
+                        subQuerySerialization.getString(),
+                        getSQLRendering(flattenedVar, allColumnIDs),
+                        getSQLRendering(outputVar, allColumnIDs)));
+                indexVar.ifPresent( v -> builder.append(String.format(", %s FOR ORDINALITY", getSQLRendering(v, allColumnIDs))));
                 builder.append(String.format(")) %s", generateFreshViewAlias().getSQLRendering()));
 
                 return new QuerySerializationImpl(

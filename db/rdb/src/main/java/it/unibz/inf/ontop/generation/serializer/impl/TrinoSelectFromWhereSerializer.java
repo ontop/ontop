@@ -71,7 +71,7 @@ public class TrinoSelectFromWhereSerializer extends DefaultSelectFromWhereSerial
                         builder.append(String.format(
                                         "%s CROSS JOIN UNNEST(%s) ",
                                         subQuerySerialization.getString(),
-                                        allColumnIDs.get(flattenedVar).getSQLRendering()));
+                                        getSQLRendering(flattenedVar, allColumnIDs)));
                         indexVar.ifPresent( v -> builder.append(" WITH ORDINALITY "));
 
                         builder.append(String.format(
@@ -84,14 +84,14 @@ public class TrinoSelectFromWhereSerializer extends DefaultSelectFromWhereSerial
                     }
 
                     private String getOutputVarsRendering(Variable outputVar, Optional<Variable> indexVar, ImmutableMap<Variable, QualifiedAttributeID> allColumnIDs) {
-                        String outputVarString = allColumnIDs.get(outputVar).getSQLRendering();
+                        String outputVarString = getSQLRendering(outputVar, allColumnIDs);
                         RelationID viewAlias = generateFreshViewAlias();
 
                         return String.format(
                                         "%s(%s%s)",
                                         viewAlias.getSQLRendering(),
                                         outputVarString,
-                                        indexVar.isPresent() ? ", " + allColumnIDs.get(indexVar.get()).getSQLRendering() : "");
+                                        indexVar.isPresent() ? ", " + getSQLRendering(indexVar.get(), allColumnIDs) : "");
                     }
                 });
     }

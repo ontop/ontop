@@ -101,7 +101,7 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
             return idFactory.createRelationID(VIEW_PREFIX + viewCounter.incrementAndGet());
         }
 
-        ImmutableMap<Variable, QualifiedAttributeID> attachRelationAlias(RelationID alias, ImmutableMap<Variable, QuotedID> variableAliases) {
+        protected ImmutableMap<Variable, QualifiedAttributeID> attachRelationAlias(RelationID alias, ImmutableMap<Variable, QuotedID> variableAliases) {
             return variableAliases.entrySet().stream()
                     .collect(ImmutableCollectors.toMap(
                             Map.Entry::getKey,
@@ -115,7 +115,7 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
                             e -> new QualifiedAttributeID(alias, e.getValue().getAttribute())));
         }
 
-        protected ImmutableMap<Variable, QuotedID> createVariableAliases(ImmutableSet<Variable> variables) {
+        protected final ImmutableMap<Variable, QuotedID> createVariableAliases(ImmutableSet<Variable> variables) {
             AttributeAliasFactory aliasFactory = createAttributeAliasFactory();
             return variables.stream()
                     .collect(ImmutableCollectors.toMap(
@@ -353,8 +353,7 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
             QuerySerialization subQuerySerialization = getSQLSerializationForChild(sqlFlattenExpression.getSubExpression());
             ImmutableMap<Variable, QualifiedAttributeID> allColumnIDs = buildFlattenColumIDMap(
                     sqlFlattenExpression,
-                    subQuerySerialization
-            );
+                    subQuerySerialization);
 
             Variable flattenedVar = sqlFlattenExpression.getFlattenedVar();
             Variable outputVar = sqlFlattenExpression.getOutputVar();
@@ -369,8 +368,8 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
             ImmutableMap<Variable, QualifiedAttributeID> freshVariableAliases = createVariableAliases(getFreshVariables(sqlFlattenExpression)).entrySet().stream()
                     .collect(ImmutableCollectors.toMap(
                             Map.Entry::getKey,
-                            e -> new QualifiedAttributeID(null, e.getValue())
-                    ));
+                            e -> new QualifiedAttributeID(null, e.getValue())));
+
             return ImmutableMap.<Variable, QualifiedAttributeID>builder()
                     .putAll(freshVariableAliases)
                     .putAll(subQuerySerialization.getColumnIDs())
@@ -378,10 +377,17 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
         }
 
         private ImmutableSet<Variable> getFreshVariables(SQLFlattenExpression sqlFlattenExpression) {
-            ImmutableSet.Builder<Variable> builder = ImmutableSet.builder();
-            builder.add(sqlFlattenExpression.getOutputVar());
-            sqlFlattenExpression.getIndexVar().ifPresent(builder::add);
-            return builder.build();
+            return sqlFlattenExpression.getIndexVar().isPresent()
+                    ? ImmutableSet.of(sqlFlattenExpression.getOutputVar(), sqlFlattenExpression.getIndexVar().get())
+                    : ImmutableSet.of(sqlFlattenExpression.getOutputVar());
+        }
+
+        protected final String getSQLRendering(Variable variable, ImmutableMap<Variable, QualifiedAttributeID> allColumnIDs) {
+            return allColumnIDs.get(variable).getSQLRendering();
+        }
+
+        protected final String getSQLRendering(Variable variable) {
+            return idFactory.createAttributeID(variable.getName()).getSQLRendering();
         }
 
         protected QuerySerialization serializeFlatten(SQLFlattenExpression sqlFlattenExpression, Variable flattenedVar,
@@ -407,7 +413,7 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
 
         protected QuerySerialization serializeFlattenAsFunction(Variable flattenedVar, ImmutableMap<Variable, QualifiedAttributeID> allColumnIDs,
                                                                 QuerySerialization subQuerySerialization, String flattenFunctionCallWithAlias) {
-            RelationID alias = this.generateFreshViewAlias();
+            RelationID alias = generateFreshViewAlias();
             var variableAliases = getFlattenAllColumnIDs(flattenedVar, alias, allColumnIDs);
 
             var aliasFactory = createAttributeAliasFactory();
@@ -420,24 +426,21 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
             if (subProjection.length() > 0)
                 subProjection += ",";
 
-            StringBuilder builder = new StringBuilder();
-
-            builder.append(String.format(
+            String builder = String.format(
                     "(SELECT %s %s FROM %s) %s",
                     subProjection,
                     flattenFunctionCallWithAlias,
                     subQuerySerialization.getString(),
-                    alias.getSQLRendering()));
+                    alias.getSQLRendering());
 
             return new QuerySerializationImpl(
-                    builder.toString(),
+                    builder,
                     variableAliases);
         }
 
         protected QuerySerialization serializeFlattenAsFunction(Variable flattenedVar, ImmutableMap<Variable, QualifiedAttributeID> allColumnIDs,
                                                                 QuerySerialization subQuerySerialization, String flattenFunctionCall, String aliasFormat) {
-            var flattenFunctionCallWithAlias = String.format("%s AS %s",
-                    flattenFunctionCall, aliasFormat);
+            var flattenFunctionCallWithAlias = String.format("%s AS %s", flattenFunctionCall, aliasFormat);
             return serializeFlattenAsFunction(flattenedVar, allColumnIDs, subQuerySerialization, flattenFunctionCallWithAlias);
         }
     }

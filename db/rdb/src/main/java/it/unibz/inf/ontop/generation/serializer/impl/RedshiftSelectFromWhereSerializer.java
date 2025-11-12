@@ -56,10 +56,9 @@ public class RedshiftSelectFromWhereSerializer extends PostgresSelectFromWhereSe
                         String builder = String.format(
                                 "%s, %s AS %s %s",
                                 subQuerySerialization.getString(),
-                                allColumnIDs.get(flattenedVar).getSQLRendering(),
-                                allColumnIDs.get(outputVar).getSQLRendering(),
-                                indexVar.map(v -> String.format(" AT %s",
-                                                allColumnIDs.get(v).getSQLRendering()))
+                                getSQLRendering(flattenedVar, allColumnIDs),
+                                getSQLRendering(outputVar, allColumnIDs),
+                                indexVar.map(v -> String.format(" AT %s", getSQLRendering(v, allColumnIDs)))
                                         .orElse(""));
 
                         return new QuerySerializationImpl(

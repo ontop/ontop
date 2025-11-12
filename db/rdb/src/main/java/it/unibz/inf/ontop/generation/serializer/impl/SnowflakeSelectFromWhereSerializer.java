@@ -105,7 +105,7 @@ public class SnowflakeSelectFromWhereSerializer extends DefaultSelectFromWhereSe
                         String builder = String.format(
                                 "%s, LATERAL FLATTEN(%s) AS %s(%s, %s, %s, %s, %s, %s)",
                                 subQuerySerialization.getString(),
-                                allColumnIDs.get(flattenedVar).getSQLRendering(),
+                                getSQLRendering(flattenedVar, allColumnIDs),
                                 generateFreshViewAlias().getSQLRendering(),
                                 dummy,
                                 dummy,

@@ -146,8 +146,8 @@ public class SparkSQLSelectFromWhereSerializer extends DefaultSelectFromWhereSer
 
                 //EXPLODE only works on ARRAY<T> types, so we first transform the JSON-array into an ARRAY<STRING> if it is not already one
                 var expression = flattenedType.getCategory() == DBTermType.Category.ARRAY
-                        ? allColumnIDs.get(flattenedVar).getSQLRendering()
-                        : String.format("FROM_JSON(%s, 'ARRAY<STRING>')", allColumnIDs.get(flattenedVar).getSQLRendering());
+                        ? getSQLRendering(flattenedVar, allColumnIDs)
+                        : String.format("FROM_JSON(%s, 'ARRAY<STRING>')", getSQLRendering(flattenedVar, allColumnIDs));
 
                 //If an index is required, we use POSEXPLODE instead of EXPLODE
                 String flattenCall;
@@ -155,13 +155,13 @@ public class SparkSQLSelectFromWhereSerializer extends DefaultSelectFromWhereSer
                 if (indexVar.isPresent()) {
                     flattenCall = String.format("POSEXPLODE_OUTER(%s)", expression);
                     aliasFormat = String.format("(%s, %s)",
-                            allColumnIDs.get(indexVar.get()).getSQLRendering(),
-                            allColumnIDs.get(outputVar).getSQLRendering());
+                            getSQLRendering(indexVar.get(), allColumnIDs),
+                            getSQLRendering(outputVar, allColumnIDs));
                 }
                 else {
                     flattenCall = String.format("EXPLODE_OUTER(%s)", expression);
                     aliasFormat = String.format("%s",
-                            allColumnIDs.get(outputVar).getSQLRendering());
+                            getSQLRendering(outputVar, allColumnIDs));
                 }
                 return serializeFlattenAsFunction(flattenedVar, allColumnIDs, subQuerySerialization, flattenCall, aliasFormat);
             }

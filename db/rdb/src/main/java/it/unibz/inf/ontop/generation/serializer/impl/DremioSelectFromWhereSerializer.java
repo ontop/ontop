@@ -106,8 +106,8 @@ public class DremioSelectFromWhereSerializer extends DefaultSelectFromWhereSeria
 
                         //FLATTEN only works on ARRAY<T> types, so we first transform the JSON-array into an ARRAY<STRING> if it is not already one
                         var expression = flattenedType.getCategory() == DBTermType.Category.ARRAY
-                                ? allColumnIDs.get(flattenedVar).getSQLRendering()
-                                : String.format("CONVERT_FROM(%s, 'json')", allColumnIDs.get(flattenedVar).getSQLRendering());
+                                ? getSQLRendering(flattenedVar, allColumnIDs)
+                                : String.format("CONVERT_FROM(%s, 'json')", getSQLRendering(flattenedVar, allColumnIDs));
 
                         //We compute an alias for the sub-query, and new aliases for each projected variable.
                         RelationID alias = this.generateFreshViewAlias();
@@ -115,7 +115,7 @@ public class DremioSelectFromWhereSerializer extends DefaultSelectFromWhereSeria
 
                         var subProjection = subQuerySerialization.getColumnIDs().keySet().stream()
                                 .filter(variableAliases::containsKey)
-                                .map(v -> subQuerySerialization.getColumnIDs().get(v).getSQLRendering() + " AS " + idFactory.createAttributeID(v.getName()).getSQLRendering())
+                                .map(v -> getSQLRendering(v, subQuerySerialization.getColumnIDs()) + " AS " + getSQLRendering(v))
                                 .collect(Collectors.joining(", "));
 
                         if (subProjection.length() > 0)
@@ -130,7 +130,7 @@ public class DremioSelectFromWhereSerializer extends DefaultSelectFromWhereSeria
                                 "(SELECT %s CASE WHEN RAND() > 1 THEN NULL ELSE FLATTEN(%s) END AS %s FROM %s LIMIT 999999999) %s",
                                 subProjection,
                                 expression,
-                                allColumnIDs.get(outputVar).getSQLRendering(),
+                                getSQLRendering(outputVar, allColumnIDs),
                                 subQuerySerialization.getString(),
                                 alias.getSQLRendering());
 

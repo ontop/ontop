@@ -89,7 +89,6 @@ public class SQLServerSelectFromWhereSerializer extends IgnoreNullFirstSelectFro
                 }
 
                 //We build the query string of the form SELECT <variables> FROM <subquery> CROSS APPLY OPENJSON(<flattenedVariable>) WITH (<names> NVARCHAR(MAX) '$')
-                StringBuilder builder = new StringBuilder();
 
                 /*
                  * When flattening an array, we have to indicate if the children are either a SCALAR value or a NESTED value.
@@ -101,21 +100,20 @@ public class SQLServerSelectFromWhereSerializer extends IgnoreNullFirstSelectFro
                 String jsonVariable = attributeAliasFactory.createAttributeAlias(outputVar.getName() + "json").getSQLRendering();
                 String scalarVariable = attributeAliasFactory.createAttributeAlias(outputVar.getName() + "scalar").getSQLRendering();
 
-                builder.append(
-                        String.format(
-                                "%s CROSS APPLY (SELECT (CASE WHEN %s IS NOT NULL THEN %S ELSE %S END) as %s FROM OPENJSON(%s) WITH (%s NVARCHAR(MAX) '$', %s NVARCHAR(MAX) '$' AS JSON)) %s",
-                                subQuerySerialization.getString(),
-                                jsonVariable,
-                                jsonVariable,
-                                scalarVariable,
-                                allColumnIDs.get(outputVar).getSQLRendering(),
-                                allColumnIDs.get(flattenedVar).getSQLRendering(),
-                                scalarVariable,
-                                jsonVariable,
-                                generateFreshViewAlias().getSQLRendering()));
+                String builder = String.format(
+                        "%s CROSS APPLY (SELECT (CASE WHEN %s IS NOT NULL THEN %S ELSE %S END) as %s FROM OPENJSON(%s) WITH (%s NVARCHAR(MAX) '$', %s NVARCHAR(MAX) '$' AS JSON)) %s",
+                        subQuerySerialization.getString(),
+                        jsonVariable,
+                        jsonVariable,
+                        scalarVariable,
+                        getSQLRendering(outputVar, allColumnIDs),
+                        getSQLRendering(flattenedVar, allColumnIDs),
+                        scalarVariable,
+                        jsonVariable,
+                        generateFreshViewAlias().getSQLRendering());
 
                 return new QuerySerializationImpl(
-                        builder.toString(),
+                        builder,
                         getFlattenAllColumnIDs(flattenedVar, allColumnIDs));
             }
         });

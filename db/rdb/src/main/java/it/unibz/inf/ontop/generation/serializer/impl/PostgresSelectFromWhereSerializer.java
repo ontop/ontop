@@ -115,7 +115,7 @@ public class PostgresSelectFromWhereSerializer extends DefaultSelectFromWhereSer
                                                 "%%s JOIN LATERAL %s ",
                                                 getFlattenFunctionSymbolString(sqlFlattenExpression.getFlattenedType())),
                                         subQuerySerialization.getString(),
-                                        allColumnIDs.get(flattenedVar).getSQLRendering()));
+                                        getSQLRendering(flattenedVar, allColumnIDs)));
                         indexVar.ifPresent( v -> builder.append(" WITH ORDINALITY "));
 
                         /*
@@ -136,7 +136,7 @@ public class PostgresSelectFromWhereSerializer extends DefaultSelectFromWhereSer
                             //Explicitly include all variables used in the subQuery in the SELECT part.
                             var subProjection = subQuerySerialization.getColumnIDs().keySet().stream()
                                     .filter(variableAliases::containsKey)
-                                    .map(v -> subQuerySerialization.getColumnIDs().get(v).getSQLRendering() + " AS " + idFactory.createAttributeID(v.getName()).getSQLRendering())
+                                    .map(v -> getSQLRendering(v, subQuerySerialization.getColumnIDs()) + " AS " + getSQLRendering(v))
                                     .collect(Collectors.joining(", "));
 
                             if (subProjection.length() > 0)
@@ -156,7 +156,7 @@ public class PostgresSelectFromWhereSerializer extends DefaultSelectFromWhereSer
                                             indexProjection,
                                             intermediateOutputVar.getSQLRendering(),
                                             ((ArrayDBTermType) sqlFlattenExpression.getFlattenedType()).getGenericArguments().get(0).getCastName(),
-                                            allColumnIDs.get(outputVar).getSQLRendering(),
+                                            getSQLRendering(outputVar, allColumnIDs),
                                             builder,
                                             outerViewAlias),
                                     variableAliases);
@@ -170,19 +170,19 @@ public class PostgresSelectFromWhereSerializer extends DefaultSelectFromWhereSer
                                 getFlattenAllColumnIDs(flattenedVar, allColumnIDs));
                     }
 
-                    private Object getOutputVarsRendering(Variable outputVar, Optional<Variable> indexVar, ImmutableMap<Variable, QualifiedAttributeID> allColumnIDs) {
-                        String outputVarString = allColumnIDs.get(outputVar).getSQLRendering();
+                    private String getOutputVarsRendering(Variable outputVar, Optional<Variable> indexVar, ImmutableMap<Variable, QualifiedAttributeID> allColumnIDs) {
+                        String outputVarString = getSQLRendering(outputVar, allColumnIDs);
                         return getOutputVarsRendering(outputVarString, indexVar, allColumnIDs, generateFreshViewAlias());
                     }
 
-                    private Object getOutputVarsRendering(String outputVarString, Optional<Variable> indexVar, ImmutableMap<Variable, QualifiedAttributeID> allColumnIDs, RelationID viewAlias) {
-                        return indexVar.isPresent()?
-                                String.format(
+                    private String getOutputVarsRendering(String outputVarString, Optional<Variable> indexVar, ImmutableMap<Variable, QualifiedAttributeID> allColumnIDs, RelationID viewAlias) {
+                        return indexVar.isPresent()
+                                ? String.format(
                                         "%s(%s, %s)",
                                         viewAlias.getSQLRendering(),
                                         outputVarString,
-                                        allColumnIDs.get(indexVar.get()).getSQLRendering()):
-                                outputVarString;
+                                        getSQLRendering(indexVar.get(), allColumnIDs))
+                                : outputVarString;
                     }
 
                     private String getFlattenFunctionSymbolString(DBTermType dbType) {
