@@ -393,7 +393,7 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
         }
 
         protected final String getSQLRendering(Variable variable, ImmutableMap<Variable, QualifiedAttributeID> allColumnIDs) {
-            return allColumnIDs.get(variable).getSQLRendering();
+            return sqlTermSerializer.serialize(variable, allColumnIDs);
         }
 
         protected final String getSQLRendering(String format, Optional<Variable> optionalVariable, ImmutableMap<Variable, QualifiedAttributeID> allColumnIDs) {

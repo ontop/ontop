@@ -109,14 +109,6 @@ public class PostgresSelectFromWhereSerializer extends DefaultSelectFromWhereSer
                                 && ((GenericDBTermType) sqlFlattenExpression.getFlattenedType()).getGenericArguments().get(0).getCategory() == DBTermType.Category.ARRAY);
 
                         //We now build the query string of the form SELECT <variables> FROM <subquery> JOIN LATERAL <flatten_function>(<flattenedVariable>) WITH ORDINALITY AS <name>
-                        StringBuilder builder = new StringBuilder();
-
-                        builder.append(String.format(String.format(
-                                                "%%s JOIN LATERAL %s ",
-                                                getFlattenFunctionSymbolString(sqlFlattenExpression.getFlattenedType())),
-                                        subQuerySerialization.getString(),
-                                        getSQLRendering(flattenedVar, allColumnIDs)));
-                        indexVar.ifPresent( v -> builder.append(" WITH ORDINALITY "));
 
                         /*
                          * If we are flattening an ND-Array, we need to first transform it into a JSONB array,
@@ -124,12 +116,16 @@ public class PostgresSelectFromWhereSerializer extends DefaultSelectFromWhereSer
                          */
                         if (flatteningNDArray) {
                             RelationID castAlias = generateFreshViewAlias();
-                            QuotedID intermediateOutputVar = generateIntermediateVariable(outputVar.getName(), allColumnIDs.keySet());
-                            builder.append(String.format(
-                                    "AS %s ON TRUE",
-                                    getOutputVarsRendering(intermediateOutputVar.getSQLRendering(), indexVar, allColumnIDs, castAlias)));
 
-                            QuerySerialization qs = new QuerySerializationImpl(builder.toString(), subQuerySerialization.getColumnIDs());
+                            QuotedID intermediateOutputVar = generateIntermediateVariable(outputVar.getName(), allColumnIDs.keySet());
+                            String string = String.format("%s JOIN LATERAL %s %s AS %s ON TRUE",
+                                    subQuerySerialization.getString(),
+                                    String.format(getFlattenFunctionSymbolString(sqlFlattenExpression.getFlattenedType()),
+                                            getSQLRendering(flattenedVar, allColumnIDs)),
+                                    getSQLRendering("WITH ORDINALITY", indexVar, allColumnIDs),
+                                    getOutputVarsRendering(intermediateOutputVar.getSQLRendering(), indexVar, allColumnIDs, castAlias));
+
+                            QuerySerialization qs = new QuerySerializationImpl(string, subQuerySerialization.getColumnIDs());
 
                             return serializeFlattenAsSubQuery(flattenedVar, allColumnIDs, qs,
                                     Stream.concat(
@@ -143,20 +139,21 @@ public class PostgresSelectFromWhereSerializer extends DefaultSelectFromWhereSer
                                                     getSQLRendering(outputVar, allColumnIDs)))));
                         }
 
-                        String outputVarString = getSQLRendering(outputVar, allColumnIDs);
-                        builder.append(String.format(
-                                "AS %s ON TRUE",
-                                getOutputVarsRendering(outputVarString, indexVar, allColumnIDs, generateFreshViewAlias())));
+                        String string = String.format("%s JOIN LATERAL %s %s AS %s ON TRUE",
+                                subQuerySerialization.getString(),
+                                String.format(getFlattenFunctionSymbolString(sqlFlattenExpression.getFlattenedType()),
+                                        getSQLRendering(flattenedVar, allColumnIDs)),
+                                getSQLRendering("WITH ORDINALITY", indexVar, allColumnIDs),
+                                getOutputVarsRendering(getSQLRendering(outputVar, allColumnIDs), indexVar, allColumnIDs, generateFreshViewAlias()));
 
                         return new QuerySerializationImpl(
-                                builder.toString(),
+                                string,
                                 getFlattenAllColumnIDs(flattenedVar, allColumnIDs));
                     }
 
                     private String getOutputVarsRendering(String outputVarString, Optional<Variable> indexVar, ImmutableMap<Variable, QualifiedAttributeID> allColumnIDs, RelationID viewAlias) {
                         return indexVar.isPresent()
-                                ? String.format(
-                                        "%s(%s, %s)",
+                                ? String.format("%s(%s, %s)",
                                         viewAlias.getSQLRendering(),
                                         outputVarString,
                                         getSQLRendering(indexVar.get(), allColumnIDs))
@@ -174,11 +171,10 @@ public class PostgresSelectFromWhereSerializer extends DefaultSelectFromWhereSer
                         }
                         if (dbType.getCategory() == DBTermType.Category.ARRAY) {
                             GenericDBTermType genericDbType = (GenericDBTermType) dbType;
-                            //When it is a multi-dimensional array, we cannot use unnest, because it would flatten all levels at once.
-                            if(genericDbType.getGenericArguments().get(0).getCategory() == DBTermType.Category.ARRAY) {
-                                return "jsonb_array_elements(to_jsonb(%s))";
-                            } else
-                                return "unnest(%s)";
+                            //When it is a multidimensional array, we cannot use unnest, because it would flatten all levels at once.
+                            return (genericDbType.getGenericArguments().get(0).getCategory() == DBTermType.Category.ARRAY)
+                                ? "jsonb_array_elements(to_jsonb(%s))"
+                                : "unnest(%s)";
                         }
 
                         throw new SQLSerializationException("Unsupported nested type for flattening: " + dbType.getName());
