@@ -134,13 +134,7 @@ public class PostgresSelectFromWhereSerializer extends DefaultSelectFromWhereSer
                             var variableAliases = getFlattenAllColumnIDs(flattenedVar, outerViewAlias, allColumnIDs);
 
                             //Explicitly include all variables used in the subQuery in the SELECT part.
-                            var subProjection = subQuerySerialization.getColumnIDs().keySet().stream()
-                                    .filter(variableAliases::containsKey)
-                                    .map(v -> getSQLRendering(v, subQuerySerialization.getColumnIDs()) + " AS " + getSQLRendering(v))
-                                    .collect(Collectors.joining(", "));
-
-                            if (subProjection.length() > 0)
-                                subProjection += ",";
+                            var subProjection = getFlattenSubProjection(subQuerySerialization.getColumnIDs(), variableAliases.keySet());
 
                             //Add the index variable to the SELECT of the super-query
                             var indexProjection = indexVar.isPresent()

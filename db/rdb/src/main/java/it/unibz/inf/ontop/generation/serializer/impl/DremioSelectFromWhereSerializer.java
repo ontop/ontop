@@ -113,13 +113,7 @@ public class DremioSelectFromWhereSerializer extends DefaultSelectFromWhereSeria
                         RelationID alias = generateFreshViewAlias();
                         var variableAliases = getFlattenAllColumnIDs(flattenedVar, alias, allColumnIDs);
 
-                        var subProjection = subQuerySerialization.getColumnIDs().keySet().stream()
-                                .filter(variableAliases::containsKey)
-                                .map(v -> getSQLRendering(v, subQuerySerialization.getColumnIDs()) + " AS " + getSQLRendering(v))
-                                .collect(Collectors.joining(", "));
-
-                        if (subProjection.length() > 0)
-                            subProjection += ",";
+                        var subProjection = getFlattenSubProjection(subQuerySerialization.getColumnIDs(), variableAliases.keySet());
 
                         /*We need to run `CASE WHEN RAND() > 1...` here, because otherwise, casting the resulting column to
                          * a different datatype will make the query fail.
