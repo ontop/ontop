@@ -55,12 +55,13 @@ public class TrinoSelectFromWhereSerializer extends DefaultSelectFromWhereSerial
                         //We build the query string of the form SELECT <variables> FROM <subquery> CROSS JOIN UNNEST(<flattenedVariable>) WITH ORDINALITY AS <names>
                         RelationID viewAlias = generateFreshViewAlias();
                         String builder = String.format(
-                                "%s CROSS JOIN UNNEST(%s) %s AS %s(%s)",
+                                "%s CROSS JOIN UNNEST(%s) %s AS %s(%s%s)",
                                 subQuerySerialization.getString(),
                                 getSQLRendering(flattenedVar, allColumnIDs),
                                 getSQLRendering("WITH ORDINALITY", indexVar),
                                 viewAlias.getSQLRendering(),
-                                getSQLRendering(outputVar, indexVar, allColumnIDs));
+                                getSQLRendering(outputVar, allColumnIDs),
+                                getSQLRendering(", %s", indexVar, allColumnIDs));
 
                         return new QuerySerializationImpl(
                                 builder,

@@ -139,7 +139,5 @@ public class DremioSelectFromWhereSerializer extends DefaultSelectFromWhereSeria
                                 variableAliases);
                     }
                 });
-
-
     }
 }
