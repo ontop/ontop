@@ -80,7 +80,7 @@ public class SQLServerSelectFromWhereSerializer extends IgnoreNullFirstSelectFro
 
             @Override
             protected QuerySerialization serializeFlatten(SQLFlattenExpression sqlFlattenExpression, Variable flattenedVar, Variable outputVar, Optional<Variable> indexVar, DBTermType flattenedType, ImmutableMap<Variable, QualifiedAttributeID> allColumnIDs, QuerySerialization subQuerySerialization) {
-                if(indexVar.isPresent()) {
+                if (indexVar.isPresent()) {
                     /*
                     * adding `<indexVar> int '$.sql:identity()'` to the `WITH` clause can create a position argument, but
                     * this feature is only supported in the "serverless SQL pool in Synapse Analytics".
@@ -112,15 +112,11 @@ public class SQLServerSelectFromWhereSerializer extends IgnoreNullFirstSelectFro
                                 allColumnIDs.get(flattenedVar).getSQLRendering(),
                                 scalarVariable,
                                 jsonVariable,
-                                generateFreshViewAlias().getSQLRendering()
-                        ));
+                                generateFreshViewAlias().getSQLRendering()));
 
                 return new QuerySerializationImpl(
                         builder.toString(),
-                        allColumnIDs.entrySet().stream()
-                                .filter(e -> e.getKey() != flattenedVar)
-                                .collect(ImmutableCollectors.toMap())
-                );
+                        getFlattenAllColumnIDs(flattenedVar, allColumnIDs));
             }
         });
     }

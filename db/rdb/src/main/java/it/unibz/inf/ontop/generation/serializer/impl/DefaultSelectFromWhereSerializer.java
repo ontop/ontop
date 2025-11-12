@@ -390,25 +390,34 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
             throw new UnsupportedOperationException("Nested data support unavailable for this DBMS");
         }
 
-        protected QuerySerialization serializeFlattenAsFunction(Variable flattenedVar, ImmutableMap<Variable, QualifiedAttributeID> allColumnIDs,
-                                                                QuerySerialization subQuerySerialization, String flattenFunctionCallWithAlias) {
-            var alias = this.generateFreshViewAlias().getSQLRendering();
-            var variableAliases = allColumnIDs.entrySet().stream()
+        protected final ImmutableMap<Variable, QualifiedAttributeID> getFlattenAllColumnIDs(Variable flattenedVar, ImmutableMap<Variable, QualifiedAttributeID> allColumnIDs) {
+            return allColumnIDs.entrySet().stream()
+                    .filter(e -> e.getKey() != flattenedVar)
+                    .collect(ImmutableCollectors.toMap());
+        }
+
+        protected final ImmutableMap<Variable, QualifiedAttributeID> getFlattenAllColumnIDs(Variable flattenedVar, RelationID alias, ImmutableMap<Variable, QualifiedAttributeID> allColumnIDs) {
+            return allColumnIDs.entrySet().stream()
                     .filter(e -> e.getKey() != flattenedVar)
                     .collect(ImmutableCollectors.toMap(
-                            v -> v.getKey(),
-                            v -> new QualifiedAttributeID(idFactory.createRelationID(alias), v.getValue().getAttribute())
-                    ));
+                            Map.Entry::getKey,
+                            v -> new QualifiedAttributeID(alias, v.getValue().getAttribute())));
+        }
+
+
+        protected QuerySerialization serializeFlattenAsFunction(Variable flattenedVar, ImmutableMap<Variable, QualifiedAttributeID> allColumnIDs,
+                                                                QuerySerialization subQuerySerialization, String flattenFunctionCallWithAlias) {
+            RelationID alias = this.generateFreshViewAlias();
+            var variableAliases = getFlattenAllColumnIDs(flattenedVar, alias, allColumnIDs);
 
             var aliasFactory = createAttributeAliasFactory();
 
             var subProjection = subQuerySerialization.getColumnIDs().keySet().stream()
-                    .filter(v -> variableAliases.containsKey(v))
-                    .map(
-                            v -> subQuerySerialization.getColumnIDs().get(v).getSQLRendering() + " AS " + aliasFactory.createAttributeAlias(v.getName()).getSQLRendering()
-                    )
+                    .filter(variableAliases::containsKey)
+                    .map(v -> subQuerySerialization.getColumnIDs().get(v).getSQLRendering() + " AS " + aliasFactory.createAttributeAlias(v.getName()).getSQLRendering())
                     .collect(Collectors.joining(", "));
-            if(subProjection.length() > 0)
+
+            if (subProjection.length() > 0)
                 subProjection += ",";
 
             StringBuilder builder = new StringBuilder();
@@ -418,13 +427,11 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
                     subProjection,
                     flattenFunctionCallWithAlias,
                     subQuerySerialization.getString(),
-                    alias
-            ));
+                    alias.getSQLRendering()));
 
             return new QuerySerializationImpl(
                     builder.toString(),
-                    variableAliases
-            );
+                    variableAliases);
         }
 
         protected QuerySerialization serializeFlattenAsFunction(Variable flattenedVar, ImmutableMap<Variable, QualifiedAttributeID> allColumnIDs,

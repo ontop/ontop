@@ -53,25 +53,18 @@ public class RedshiftSelectFromWhereSerializer extends PostgresSelectFromWhereSe
                                                                   ImmutableMap<Variable, QualifiedAttributeID> allColumnIDs,
                                                                   QuerySerialization subQuerySerialization) {
                         //We build the query string of the form SELECT <outputVar> FROM <subquery>, <flattenedVar> AS <outputVar> [AT <indexVar>
-                        StringBuilder builder = new StringBuilder();
-
-                        builder.append(
-                                String.format(
-                                        "%s, %s AS %s %s",
-                                        subQuerySerialization.getString(),
-                                        allColumnIDs.get(flattenedVar).getSQLRendering(),
-                                        allColumnIDs.get(outputVar).getSQLRendering(),
-                                        indexVar.map(v -> String.format(" AT %s",
-                                                        allColumnIDs.get(v).getSQLRendering()))
-                                                .orElse("")
-                                ));
+                        String builder = String.format(
+                                "%s, %s AS %s %s",
+                                subQuerySerialization.getString(),
+                                allColumnIDs.get(flattenedVar).getSQLRendering(),
+                                allColumnIDs.get(outputVar).getSQLRendering(),
+                                indexVar.map(v -> String.format(" AT %s",
+                                                allColumnIDs.get(v).getSQLRendering()))
+                                        .orElse(""));
 
                         return new QuerySerializationImpl(
-                                builder.toString(),
-                                allColumnIDs.entrySet().stream()
-                                        .filter(e -> e.getKey() != flattenedVar)
-                                        .collect(ImmutableCollectors.toMap())
-                        );
+                                builder,
+                                getFlattenAllColumnIDs(flattenedVar, allColumnIDs));
                     }
                 });
     }

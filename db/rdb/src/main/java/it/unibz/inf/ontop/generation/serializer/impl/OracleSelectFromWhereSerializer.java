@@ -77,23 +77,17 @@ public class OracleSelectFromWhereSerializer extends DefaultSelectFromWhereSeria
                 *  `SELECT <variables> FROM <subquery> CROSS JOIN JSON_TABLE(<flattenedVar>, '$[*]' COLUMNS (<outputVar> VARCHAR2(1000) FORMAT JSON PATH '$' [, <indexVar> FOR ORDINALITY]))
                 */
                 StringBuilder builder = new StringBuilder();
-
-                builder.append(
-                        String.format(
+                builder.append(String.format(
                                 "%s CROSS JOIN JSON_TABLE(%s, '$[*]' COLUMNS(%s VARCHAR2(1000) FORMAT JSON PATH '$'",
                                 subQuerySerialization.getString(),
                                 allColumnIDs.get(flattenedVar).getSQLRendering(),
-                                allColumnIDs.get(outputVar).getSQLRendering()
-                        ));
+                                allColumnIDs.get(outputVar).getSQLRendering()));
                 indexVar.ifPresent( v -> builder.append(String.format(", %s FOR ORDINALITY", allColumnIDs.get(v).getSQLRendering())));
                 builder.append(String.format(")) %s", generateFreshViewAlias().getSQLRendering()));
 
                 return new QuerySerializationImpl(
                         builder.toString(),
-                        allColumnIDs.entrySet().stream()
-                                .filter(e -> e.getKey() != flattenedVar)
-                                .collect(ImmutableCollectors.toMap())
-                );
+                        getFlattenAllColumnIDs(flattenedVar, allColumnIDs));
             }
         });
     }

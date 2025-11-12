@@ -111,56 +111,43 @@ public class PostgresSelectFromWhereSerializer extends DefaultSelectFromWhereSer
                         //We now build the query string of the form SELECT <variables> FROM <subquery> JOIN LATERAL <flatten_function>(<flattenedVariable>) WITH ORDINALITY AS <name>
                         StringBuilder builder = new StringBuilder();
 
-                        builder.append(
-                                String.format(
-                                        String.format(
+                        builder.append(String.format(String.format(
                                                 "%%s JOIN LATERAL %s ",
-                                                getFlattenFunctionSymbolString(sqlFlattenExpression.getFlattenedType())
-                                        ),
+                                                getFlattenFunctionSymbolString(sqlFlattenExpression.getFlattenedType())),
                                         subQuerySerialization.getString(),
-                                        allColumnIDs.get(flattenedVar).getSQLRendering()
-                                ));
+                                        allColumnIDs.get(flattenedVar).getSQLRendering()));
                         indexVar.ifPresent( v -> builder.append(" WITH ORDINALITY "));
 
                         /*
                          * If we are flattening an ND-Array, we need to first transform it into a JSONB array,
                          * call jsonb_array_elements on it, then transform it back into an Array in a further subquery.
                          */
-                        if(flatteningNDArray) {
+                        if (flatteningNDArray) {
                             RelationID castAlias = generateFreshViewAlias();
                             RelationID outerViewAlias = generateFreshViewAlias();
                             QuotedID intermediateOutputVar = generateIntermediateVariable(outputVar.getName(), allColumnIDs.keySet());
-                            builder.append(
-                                    String.format(
+                            builder.append(String.format(
                                             "AS %s ON TRUE",
-                                            getOutputVarsRendering(intermediateOutputVar.getSQLRendering(), indexVar, allColumnIDs, castAlias)
-                                    )
-                            );
+                                            getOutputVarsRendering(intermediateOutputVar.getSQLRendering(), indexVar, allColumnIDs, castAlias)));
 
                             //Create new variable aliases for super-query.
-                            var variableAliases = allColumnIDs.entrySet().stream()
-                                    .filter(e -> e.getKey() != flattenedVar)
-                                    .collect(ImmutableCollectors.toMap(
-                                            v -> v.getKey(),
-                                            v -> new QualifiedAttributeID(idFactory.createRelationID(outerViewAlias.getSQLRendering()), v.getValue().getAttribute())
-                                    ));
+                            var variableAliases = getFlattenAllColumnIDs(flattenedVar, outerViewAlias, allColumnIDs);
 
                             //Explicitly include all variables used in the subQuery in the SELECT part.
                             var subProjection = subQuerySerialization.getColumnIDs().keySet().stream()
-                                    .filter(v -> variableAliases.containsKey(v))
-                                    .map(
-                                            v -> subQuerySerialization.getColumnIDs().get(v).getSQLRendering() + " AS " + idFactory.createAttributeID(v.getName()).getSQLRendering()
-                                    )
+                                    .filter(variableAliases::containsKey)
+                                    .map(v -> subQuerySerialization.getColumnIDs().get(v).getSQLRendering() + " AS " + idFactory.createAttributeID(v.getName()).getSQLRendering())
                                     .collect(Collectors.joining(", "));
+
                             if (subProjection.length() > 0)
                                 subProjection += ",";
 
                             //Add the index variable to the SELECT of the super-query
-                            var indexProjection = indexVar.isPresent() ?
-                                    String.format("%s AS %s, ",
+                            var indexProjection = indexVar.isPresent()
+                                    ? String.format("%s AS %s, ",
                                             new QualifiedAttributeID(castAlias, allColumnIDs.get(indexVar.get()).getAttribute()),
-                                            indexVar.get().getName()) :
-                                    "";
+                                            indexVar.get().getName())
+                                    : "";
 
                             return new QuerySerializationImpl(
                                     String.format(
@@ -171,23 +158,16 @@ public class PostgresSelectFromWhereSerializer extends DefaultSelectFromWhereSer
                                             ((ArrayDBTermType) sqlFlattenExpression.getFlattenedType()).getGenericArguments().get(0).getCastName(),
                                             allColumnIDs.get(outputVar).getSQLRendering(),
                                             builder,
-                                            outerViewAlias
-                                    ),
+                                            outerViewAlias),
                                     variableAliases);
                         }
-                        builder.append(
-                                String.format(
+                        builder.append(String.format(
                                         "AS %s ON TRUE",
-                                        getOutputVarsRendering(outputVar, indexVar, allColumnIDs)
-                                )
-                        );
+                                        getOutputVarsRendering(outputVar, indexVar, allColumnIDs)));
 
                         return new QuerySerializationImpl(
                                 builder.toString(),
-                                allColumnIDs.entrySet().stream()
-                                        .filter(e -> e.getKey() != flattenedVar)
-                                        .collect(ImmutableCollectors.toMap())
-                        );
+                                getFlattenAllColumnIDs(flattenedVar, allColumnIDs));
                     }
 
                     private Object getOutputVarsRendering(Variable outputVar, Optional<Variable> indexVar, ImmutableMap<Variable, QualifiedAttributeID> allColumnIDs) {

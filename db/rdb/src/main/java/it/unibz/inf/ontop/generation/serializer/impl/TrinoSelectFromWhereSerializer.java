@@ -68,29 +68,19 @@ public class TrinoSelectFromWhereSerializer extends DefaultSelectFromWhereSerial
                     protected QuerySerialization serializeFlatten(SQLFlattenExpression sqlFlattenExpression, Variable flattenedVar, Variable outputVar, Optional<Variable> indexVar, DBTermType flattenedType, ImmutableMap<Variable, QualifiedAttributeID> allColumnIDs, QuerySerialization subQuerySerialization) {
                         //We build the query string of the form SELECT <variables> FROM <subquery> CROSS JOIN UNNEST(<flattenedVariable>) WITH ORDINALITY AS <names>
                         StringBuilder builder = new StringBuilder();
-
-                        builder.append(
-                                String.format(
+                        builder.append(String.format(
                                         "%s CROSS JOIN UNNEST(%s) ",
                                         subQuerySerialization.getString(),
-                                        allColumnIDs.get(flattenedVar).getSQLRendering()
-                                ));
+                                        allColumnIDs.get(flattenedVar).getSQLRendering()));
                         indexVar.ifPresent( v -> builder.append(" WITH ORDINALITY "));
 
-
-                        builder.append(
-                                String.format(
+                        builder.append(String.format(
                                         "AS %s",
-                                        getOutputVarsRendering(outputVar, indexVar, allColumnIDs)
-                                )
-                        );
+                                        getOutputVarsRendering(outputVar, indexVar, allColumnIDs)));
 
                         return new QuerySerializationImpl(
                                 builder.toString(),
-                                allColumnIDs.entrySet().stream()
-                                        .filter(e -> e.getKey() != flattenedVar)
-                                        .collect(ImmutableCollectors.toMap())
-                        );
+                                getFlattenAllColumnIDs(flattenedVar, allColumnIDs));
                     }
 
                     private String getOutputVarsRendering(Variable outputVar, Optional<Variable> indexVar, ImmutableMap<Variable, QualifiedAttributeID> allColumnIDs) {

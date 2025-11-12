@@ -101,25 +101,19 @@ public class MySQLSelectFromWhereSerializer extends DefaultSelectFromWhereSerial
                         /       COLUMNS (<outputVar> JSON path '$' [, <indexVar> for ordinality]))
                         */
                         StringBuilder builder = new StringBuilder();
-
                         builder.append(
                                 String.format(
                                         getFlattenFunctionFormat(),
                                         subQuerySerialization.getString(),
                                         allColumnIDs.get(flattenedVar).getSQLRendering(),
-                                        allColumnIDs.get(outputVar).getSQLRendering()
-
-                                ));
+                                        allColumnIDs.get(outputVar).getSQLRendering()));
                         indexVar.ifPresent(v -> builder.append(String.format(", %s for ordinality", allColumnIDs.get(v).getSQLRendering())));
                         builder.append(")) ");
                         builder.append(generateFreshViewAlias().getSQLRendering());
 
                         return new QuerySerializationImpl(
                                 builder.toString(),
-                                allColumnIDs.entrySet().stream()
-                                        .filter(e -> e.getKey() != flattenedVar)
-                                        .collect(ImmutableCollectors.toMap())
-                        );
+                                getFlattenAllColumnIDs(flattenedVar, allColumnIDs));
                     }
                 });
     }

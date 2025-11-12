@@ -152,12 +152,13 @@ public class SparkSQLSelectFromWhereSerializer extends DefaultSelectFromWhereSer
                 //If an index is required, we use POSEXPLODE instead of EXPLODE
                 String flattenCall;
                 String aliasFormat;
-                if(indexVar.isPresent()) {
+                if (indexVar.isPresent()) {
                     flattenCall = String.format("POSEXPLODE_OUTER(%s)", expression);
                     aliasFormat = String.format("(%s, %s)",
                             allColumnIDs.get(indexVar.get()).getSQLRendering(),
                             allColumnIDs.get(outputVar).getSQLRendering());
-                } else {
+                }
+                else {
                     flattenCall = String.format("EXPLODE_OUTER(%s)", expression);
                     aliasFormat = String.format("%s",
                             allColumnIDs.get(outputVar).getSQLRendering());
