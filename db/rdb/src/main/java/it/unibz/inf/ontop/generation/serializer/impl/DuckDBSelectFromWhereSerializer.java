@@ -1,23 +1,19 @@
 package it.unibz.inf.ontop.generation.serializer.impl;
 
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import it.unibz.inf.ontop.dbschema.DBParameters;
 import it.unibz.inf.ontop.dbschema.QualifiedAttributeID;
-import it.unibz.inf.ontop.dbschema.RelationID;
 import it.unibz.inf.ontop.generation.algebra.SQLFlattenExpression;
 import it.unibz.inf.ontop.generation.algebra.SelectFromWhereWithModifiers;
 import it.unibz.inf.ontop.generation.serializer.SelectFromWhereSerializer;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.type.DBTermType;
-import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
-import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Singleton
 public class DuckDBSelectFromWhereSerializer extends DefaultSelectFromWhereSerializer implements SelectFromWhereSerializer {
@@ -53,15 +49,15 @@ public class DuckDBSelectFromWhereSerializer extends DefaultSelectFromWhereSeria
 
                         //If an index is required, we use create a second list which is an integer range from 1 to len(list) and unnset it, too.
                         String flattenCall = indexVar.isPresent()
-                            ? String.format("UNNEST(%1$s) AS %2$s, UNNEST(RANGE(1, len(%1$s) + 1)) AS %3$s",
+                           ? String.format("UNNEST(%1$s) AS %2$s, UNNEST(RANGE(1, len(%1$s) + 1)) AS %3$s",
                                     getSQLRendering(flattenedVar, allColumnIDs),
                                     getSQLRendering(outputVar, allColumnIDs),
                                     getSQLRendering(indexVar.get(), allColumnIDs))
-                            :  String.format("(UNNEST(%s)) AS %s",
-                                    getSQLRendering(flattenedVar, allColumnIDs),
+                           :  serializeAlias(
+                                    String.format("(UNNEST(%s))", getSQLRendering(flattenedVar, allColumnIDs)),
                                     getSQLRendering(outputVar, allColumnIDs));
 
-                        return serializeFlattenAsFunction(flattenedVar, allColumnIDs, subQuerySerialization, flattenCall);
+                        return serializeFlattenAsSubQuery(flattenedVar, allColumnIDs, subQuerySerialization, Stream.of(flattenCall));
                     }
                 });
     }

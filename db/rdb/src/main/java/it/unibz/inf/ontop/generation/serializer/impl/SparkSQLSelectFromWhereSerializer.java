@@ -20,6 +20,7 @@ import it.unibz.inf.ontop.utils.StringUtils;
 
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Singleton
 public class SparkSQLSelectFromWhereSerializer extends DefaultSelectFromWhereSerializer implements SelectFromWhereSerializer {
@@ -157,7 +158,7 @@ public class SparkSQLSelectFromWhereSerializer extends DefaultSelectFromWhereSer
                                 String.format("EXPLODE_OUTER(%s)", expression),
                                 getSQLRendering(outputVar, allColumnIDs));
 
-                return serializeFlattenAsFunction(flattenedVar, allColumnIDs, subQuerySerialization, flattenFunctionCallWithAlias);
+                return serializeFlattenAsSubQuery(flattenedVar, allColumnIDs, subQuerySerialization, Stream.of(flattenFunctionCallWithAlias));
             }
         });
     }

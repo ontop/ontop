@@ -369,6 +369,12 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
             return serializeFlatten(sqlFlattenExpression, flattenedVar, outputVar, indexVar, flattenedType, allColumnIDs, subQuerySerialization);
         }
 
+        protected QuerySerialization serializeFlatten(SQLFlattenExpression sqlFlattenExpression, Variable flattenedVar,
+                                                      Variable outputVar, Optional<Variable> indexVar, DBTermType flattenedType,
+                                                      ImmutableMap<Variable, QualifiedAttributeID> allColumnIDs, QuerySerialization subQuerySerialization) {
+            throw new UnsupportedOperationException("Nested data support unavailable for this DBMS");
+        }
+
         protected final ImmutableMap<Variable, QualifiedAttributeID> buildFlattenColumIDMap(SQLFlattenExpression sqlFlattenExpression,
                                                                                     QuerySerialization subQuerySerialization) {
             ImmutableSet<Variable> freshVariables = sqlFlattenExpression.getIndexVar().isPresent()
@@ -396,42 +402,24 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
                     .orElse("");
         }
 
-        protected QuerySerialization serializeFlatten(SQLFlattenExpression sqlFlattenExpression, Variable flattenedVar,
-                                                      Variable outputVar, Optional<Variable> indexVar, DBTermType flattenedType,
-                                                      ImmutableMap<Variable, QualifiedAttributeID> allColumnIDs, QuerySerialization subQuerySerialization) {
-            throw new UnsupportedOperationException("Nested data support unavailable for this DBMS");
-        }
-
         protected final ImmutableMap<Variable, QualifiedAttributeID> getFlattenAllColumnIDs(Variable flattenedVar, ImmutableMap<Variable, QualifiedAttributeID> allColumnIDs) {
             return allColumnIDs.entrySet().stream()
                     .filter(e -> e.getKey() != flattenedVar)
                     .collect(ImmutableCollectors.toMap());
         }
 
-        protected final ImmutableMap<Variable, QualifiedAttributeID> getFlattenAllColumnIDs(Variable flattenedVar, RelationID alias, ImmutableMap<Variable, QualifiedAttributeID> allColumnIDs) {
-            return replaceRelationAlias(alias, getFlattenAllColumnIDs(flattenedVar, allColumnIDs));
-        }
-
-        protected final Stream<Map.Entry<String, String>> getFlattenSubProjection(ImmutableMap<Variable, QualifiedAttributeID> allColumnIDs, ImmutableSet<Variable> aliases) {
-            var aliasFactory = createAttributeAliasFactory();
-            return allColumnIDs.keySet().stream()
-                    .filter(aliases::contains)
-                    .map(v -> Maps.immutableEntry(getSQLRendering(v, allColumnIDs), aliasFactory.createAttributeAlias(v.getName()).getSQLRendering()));
-        }
-
-        protected final QuerySerialization serializeFlattenAsFunction(Variable flattenedVar, ImmutableMap<Variable, QualifiedAttributeID> allColumnIDs,
-                                                                QuerySerialization subQuerySerialization, String flattenFunctionCallWithAlias) {
-            return serializeFlattenAsSubQuery(flattenedVar, allColumnIDs, subQuerySerialization, Stream.of(flattenFunctionCallWithAlias));
-        }
-
         protected final QuerySerialization serializeFlattenAsSubQuery(Variable flattenedVar, ImmutableMap<Variable, QualifiedAttributeID> allColumnIDs,
                                                                       QuerySerialization subQuerySerialization, Stream<String> projectionExtensions) {
             RelationID alias = generateFreshViewAlias();
-            var variableAliases = getFlattenAllColumnIDs(flattenedVar, alias, allColumnIDs);
-            Stream<Map.Entry<String, String>> subProjection = getFlattenSubProjection(subQuerySerialization.getColumnIDs(), variableAliases.keySet());
+            var variableAliases = replaceRelationAlias(alias, getFlattenAllColumnIDs(flattenedVar, allColumnIDs));
 
-            String projection = Stream.concat(subProjection
-                                    .map(e -> serializeAlias(e.getKey(), e.getValue())),
+            var aliasFactory = createAttributeAliasFactory();
+            String projection = Stream.concat(
+                            subQuerySerialization.getColumnIDs().keySet().stream()
+                                    .filter(variableAliases.keySet()::contains)
+                                    .map(v -> serializeAlias(
+                                            getSQLRendering(v, subQuerySerialization.getColumnIDs()),
+                                            aliasFactory.createAttributeAlias(v.getName()).getSQLRendering())),
                             projectionExtensions)
                     .collect(Collectors.joining(", "));
 
