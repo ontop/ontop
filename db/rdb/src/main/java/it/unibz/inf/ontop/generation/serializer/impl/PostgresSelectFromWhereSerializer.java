@@ -129,7 +129,9 @@ public class PostgresSelectFromWhereSerializer extends DefaultSelectFromWhereSer
                                     "AS %s ON TRUE",
                                     getOutputVarsRendering(intermediateOutputVar.getSQLRendering(), indexVar, allColumnIDs, castAlias)));
 
-                            return serializeFlattenAsSubQuery(flattenedVar, allColumnIDs, subQuerySerialization,
+                            QuerySerialization qs = new QuerySerializationImpl(builder.toString(), allColumnIDs);
+                            
+                            return serializeFlattenAsSubQuery(flattenedVar, allColumnIDs, qs,
                                     Stream.concat(
                                             indexVar.stream().map(ind -> serializeAlias(
                                                     new QualifiedAttributeID(castAlias, allColumnIDs.get(ind).getAttribute()).toString(),
