@@ -20,7 +20,10 @@ import it.unibz.inf.ontop.model.type.DBTypeFactory;
 import it.unibz.inf.ontop.model.type.GenericDBTermType;
 import it.unibz.inf.ontop.model.type.impl.ArrayDBTermType;
 
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static it.unibz.inf.ontop.model.type.impl.PostgreSQLDBTypeFactory.*;
 
@@ -129,24 +132,24 @@ public class PostgresSelectFromWhereSerializer extends DefaultSelectFromWhereSer
 
                             //Explicitly include all variables used in the subQuery in the SELECT part.
                             var variableAliases = getFlattenAllColumnIDs(flattenedVar, outerViewAlias, allColumnIDs);
-                            var subProjection = getFlattenSubProjection(subQuerySerialization.getColumnIDs(), variableAliases.keySet());
+                            Stream<Map.Entry<String, String>> subProjection = getFlattenSubProjection(subQuerySerialization.getColumnIDs(), variableAliases.keySet());
 
-                            //Add the index variable to the SELECT of the super-query
-                            var indexProjection = indexVar.isPresent()
-                                    ? serializeAlias(
-                                            new QualifiedAttributeID(castAlias, allColumnIDs.get(indexVar.get()).getAttribute()).toString(),
-                                            indexVar.get().getName()) + ", "
-                                    : "";
-
-                            return new QuerySerializationImpl(
-                                    String.format("(SELECT %s%s%s FROM %s) %s",
-                                            subProjection,
-                                            indexProjection,
-                                            serializeAlias(
+                            String projection = Stream.concat(Stream.concat(
+                                                    subProjection
+                                                            .map(e -> serializeAlias(e.getKey(), e.getValue())),
+                                                    indexVar.stream().map(ind -> serializeAlias(
+                                                            new QualifiedAttributeID(castAlias, allColumnIDs.get(ind).getAttribute()).toString(),
+                                                            indexVar.get().getName()))),
+                                            Stream.of(serializeAlias(
                                                     String.format("ARRAY(SELECT jsonb_array_elements_text(%s))::%s",
                                                             intermediateOutputVar.getSQLRendering(),
                                                             ((ArrayDBTermType) sqlFlattenExpression.getFlattenedType()).getGenericArguments().get(0).getCastName()),
-                                                    getSQLRendering(outputVar, allColumnIDs)),
+                                                    getSQLRendering(outputVar, allColumnIDs))))
+                                    .collect(Collectors.joining(", "));
+
+                            return new QuerySerializationImpl(
+                                    String.format("(SELECT %s FROM %s) %s",
+                                            projection,
                                             builder,
                                             outerViewAlias),
                                     variableAliases);

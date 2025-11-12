@@ -18,6 +18,7 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Singleton
 public class DremioSelectFromWhereSerializer extends DefaultSelectFromWhereSerializer implements SelectFromWhereSerializer {
@@ -112,19 +113,25 @@ public class DremioSelectFromWhereSerializer extends DefaultSelectFromWhereSeria
                         //We compute an alias for the sub-query, and new aliases for each projected variable.
                         RelationID alias = generateFreshViewAlias();
                         var variableAliases = getFlattenAllColumnIDs(flattenedVar, alias, allColumnIDs);
-                        var subProjection = getFlattenSubProjection(subQuerySerialization.getColumnIDs(), variableAliases.keySet());
+                        Stream<Map.Entry<String, String>> subProjection = getFlattenSubProjection(subQuerySerialization.getColumnIDs(), variableAliases.keySet());
 
                         /*We need to run `CASE WHEN RAND() > 1...` here, because otherwise, casting the resulting column to
                          * a different datatype will make the query fail.
                          * We need to add a LIMIT to the end, because otherwise, when accessing a JSON object that is the
                          * result of flatten with square brackets, the access operation will be ignored.
                          * */
+
+                        String projection = Stream.concat(subProjection
+                                                .map(e -> serializeAlias(e.getKey(), e.getValue())),
+                                        Stream.of(serializeAlias(
+                                                        String.format("CASE WHEN RAND() > 1 THEN NULL ELSE FLATTEN(%s) END", expression),
+                                                        getSQLRendering(outputVar, allColumnIDs))))
+                                .collect(Collectors.joining(", "));
+
+
                         String string = String.format(
-                                "(SELECT %s%s FROM %s LIMIT 999999999) %s",
-                                subProjection,
-                                serializeAlias(
-                                        String.format("CASE WHEN RAND() > 1 THEN NULL ELSE FLATTEN(%s) END", expression),
-                                        getSQLRendering(outputVar, allColumnIDs)),
+                                "(SELECT %s FROM %s LIMIT 999999999) %s",
+                                projection,
                                 subQuerySerialization.getString(),
                                 alias.getSQLRendering());
 
