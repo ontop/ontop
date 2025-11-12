@@ -110,34 +110,21 @@ public class DremioSelectFromWhereSerializer extends DefaultSelectFromWhereSeria
                                 ? getSQLRendering(flattenedVar, allColumnIDs)
                                 : String.format("CONVERT_FROM(%s, 'json')", getSQLRendering(flattenedVar, allColumnIDs));
 
-                        //We compute an alias for the sub-query, and new aliases for each projected variable.
-                        RelationID alias = generateFreshViewAlias();
-                        var variableAliases = getFlattenAllColumnIDs(flattenedVar, alias, allColumnIDs);
-                        Stream<Map.Entry<String, String>> subProjection = getFlattenSubProjection(subQuerySerialization.getColumnIDs(), variableAliases.keySet());
+                        // We need to run `CASE WHEN RAND() > 1...` here, because otherwise, casting the resulting column to
+                        //a different datatype will make the query fail.
+                        return serializeFlattenAsSubQuery(flattenedVar, allColumnIDs, subQuerySerialization,
+                                Stream.of(serializeAlias(
+                                        String.format("CASE WHEN RAND() > 1 THEN NULL ELSE FLATTEN(%s) END", expression),
+                                        getSQLRendering(outputVar, allColumnIDs))));
+                    }
 
-                        /*We need to run `CASE WHEN RAND() > 1...` here, because otherwise, casting the resulting column to
-                         * a different datatype will make the query fail.
-                         * We need to add a LIMIT to the end, because otherwise, when accessing a JSON object that is the
-                         * result of flatten with square brackets, the access operation will be ignored.
-                         * */
-
-                        String projection = Stream.concat(subProjection
-                                                .map(e -> serializeAlias(e.getKey(), e.getValue())),
-                                        Stream.of(serializeAlias(
-                                                        String.format("CASE WHEN RAND() > 1 THEN NULL ELSE FLATTEN(%s) END", expression),
-                                                        getSQLRendering(outputVar, allColumnIDs))))
-                                .collect(Collectors.joining(", "));
-
-
-                        String string = String.format(
-                                "(SELECT %s FROM %s LIMIT 999999999) %s",
-                                projection,
-                                subQuerySerialization.getString(),
-                                alias.getSQLRendering());
-
-                        return new QuerySerializationImpl(
-                                string,
-                                variableAliases);
+                    /*
+                     * We need to add a LIMIT to the end, because otherwise, when accessing a JSON object that is the
+                     * result of flatten with square brackets, the access operation will be ignored.
+                     */
+                    @Override
+                    protected String getFlattenSubQueryTemplate() {
+                        return "(SELECT %s FROM %s LIMIT 999999999) %s";
                     }
                 });
     }

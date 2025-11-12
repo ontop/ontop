@@ -124,35 +124,21 @@ public class PostgresSelectFromWhereSerializer extends DefaultSelectFromWhereSer
                          */
                         if (flatteningNDArray) {
                             RelationID castAlias = generateFreshViewAlias();
-                            RelationID outerViewAlias = generateFreshViewAlias();
                             QuotedID intermediateOutputVar = generateIntermediateVariable(outputVar.getName(), allColumnIDs.keySet());
                             builder.append(String.format(
                                     "AS %s ON TRUE",
                                     getOutputVarsRendering(intermediateOutputVar.getSQLRendering(), indexVar, allColumnIDs, castAlias)));
 
-                            //Explicitly include all variables used in the subQuery in the SELECT part.
-                            var variableAliases = getFlattenAllColumnIDs(flattenedVar, outerViewAlias, allColumnIDs);
-                            Stream<Map.Entry<String, String>> subProjection = getFlattenSubProjection(subQuerySerialization.getColumnIDs(), variableAliases.keySet());
-
-                            String projection = Stream.concat(Stream.concat(
-                                                    subProjection
-                                                            .map(e -> serializeAlias(e.getKey(), e.getValue())),
-                                                    indexVar.stream().map(ind -> serializeAlias(
-                                                            new QualifiedAttributeID(castAlias, allColumnIDs.get(ind).getAttribute()).toString(),
-                                                            indexVar.get().getName()))),
+                            return serializeFlattenAsSubQuery(flattenedVar, allColumnIDs, subQuerySerialization,
+                                    Stream.concat(
+                                            indexVar.stream().map(ind -> serializeAlias(
+                                                    new QualifiedAttributeID(castAlias, allColumnIDs.get(ind).getAttribute()).toString(),
+                                                    indexVar.get().getName())),
                                             Stream.of(serializeAlias(
                                                     String.format("ARRAY(SELECT jsonb_array_elements_text(%s))::%s",
                                                             intermediateOutputVar.getSQLRendering(),
                                                             ((ArrayDBTermType) sqlFlattenExpression.getFlattenedType()).getGenericArguments().get(0).getCastName()),
-                                                    getSQLRendering(outputVar, allColumnIDs))))
-                                    .collect(Collectors.joining(", "));
-
-                            return new QuerySerializationImpl(
-                                    String.format("(SELECT %s FROM %s) %s",
-                                            projection,
-                                            builder,
-                                            outerViewAlias),
-                                    variableAliases);
+                                                    getSQLRendering(outputVar, allColumnIDs)))));
                         }
 
                         String outputVarString = getSQLRendering(outputVar, allColumnIDs);
