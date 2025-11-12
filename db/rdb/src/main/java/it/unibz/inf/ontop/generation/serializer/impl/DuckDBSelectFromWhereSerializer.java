@@ -50,17 +50,15 @@ public class DuckDBSelectFromWhereSerializer extends DefaultSelectFromWhereSeria
                     @Override
                     protected QuerySerialization serializeFlatten(SQLFlattenExpression sqlFlattenExpression, Variable flattenedVar, Variable outputVar, Optional<Variable> indexVar, DBTermType flattenedType, ImmutableMap<Variable, QualifiedAttributeID> allColumnIDs, QuerySerialization subQuerySerialization) {
                         //We express the flatten call as a `SELECT *, UNNEST({array}) FROM child.
-                        var expression = getSQLRendering(flattenedVar, allColumnIDs);
 
                         //If an index is required, we use create a second list which is an integer range from 1 to len(list) and unnset it, too.
                         String flattenCall = indexVar.isPresent()
-                            ? String.format("UNNEST(%s) AS %s, UNNEST(RANGE(1, len(%s) + 1)) as %s",
-                                    expression,
+                            ? String.format("UNNEST(%1$s) AS %2$s, UNNEST(RANGE(1, len(%1$s) + 1)) AS %3$s",
+                                    getSQLRendering(flattenedVar, allColumnIDs),
                                     getSQLRendering(outputVar, allColumnIDs),
-                                    expression,
                                     getSQLRendering(indexVar.get(), allColumnIDs))
                             :  String.format("(UNNEST(%s)) AS %s",
-                                    expression,
+                                    getSQLRendering(flattenedVar, allColumnIDs),
                                     getSQLRendering(outputVar, allColumnIDs));
 
                         return serializeFlattenAsFunction(flattenedVar, allColumnIDs, subQuerySerialization, flattenCall);

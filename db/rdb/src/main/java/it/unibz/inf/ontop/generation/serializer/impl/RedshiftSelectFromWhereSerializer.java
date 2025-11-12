@@ -52,8 +52,8 @@ public class RedshiftSelectFromWhereSerializer extends PostgresSelectFromWhereSe
                                                                   Optional<Variable> indexVar, DBTermType flattenedType,
                                                                   ImmutableMap<Variable, QualifiedAttributeID> allColumnIDs,
                                                                   QuerySerialization subQuerySerialization) {
-                        //We build the query string of the form SELECT <outputVar> FROM <subquery>, <flattenedVar> AS <outputVar> [AT <indexVar>
-                        String builder = String.format(
+                        // SELECT <outputVar> FROM <subquery>, <flattenedVar> AS <outputVar> [AT <indexVar>
+                        String string = String.format(
                                 "%s, %s AS %s %s",
                                 subQuerySerialization.getString(),
                                 getSQLRendering(flattenedVar, allColumnIDs),
@@ -61,7 +61,7 @@ public class RedshiftSelectFromWhereSerializer extends PostgresSelectFromWhereSe
                                 getSQLRendering("AT %s", indexVar, allColumnIDs));
 
                         return new QuerySerializationImpl(
-                                builder,
+                                string,
                                 getFlattenAllColumnIDs(flattenedVar, allColumnIDs));
                     }
                 });

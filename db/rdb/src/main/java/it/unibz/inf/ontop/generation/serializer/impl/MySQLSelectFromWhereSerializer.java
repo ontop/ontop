@@ -96,11 +96,9 @@ public class MySQLSelectFromWhereSerializer extends DefaultSelectFromWhereSerial
 
                     @Override
                     protected QuerySerialization serializeFlatten(SQLFlattenExpression sqlFlattenExpression, Variable flattenedVar, Variable outputVar, Optional<Variable> indexVar, DBTermType flattenedType, ImmutableMap<Variable, QualifiedAttributeID> allColumnIDs, QuerySerialization subQuerySerialization) {
-                        /* We build the query string of the form
-                        /  SELECT <variables> FROM <subquery> CROSS JOIN JSON_TABLE(<flattenedVariable>, '$[*]',
-                        /       COLUMNS (<outputVar> JSON path '$' [, <indexVar> for ordinality]))
-                        */
-                        String builder = String.format(
+                        //  SELECT <variables> FROM <subquery> CROSS JOIN JSON_TABLE(<flattenedVariable>, '$[*]',
+                        //       COLUMNS (<outputVar> JSON path '$' [, <indexVar> for ordinality]))
+                        String string = String.format(
                                 getFlattenFunctionFormat(),
                                 subQuerySerialization.getString(),
                                 getSQLRendering(flattenedVar, allColumnIDs),
@@ -109,7 +107,7 @@ public class MySQLSelectFromWhereSerializer extends DefaultSelectFromWhereSerial
                                 generateFreshViewAlias().getSQLRendering());
 
                         return new QuerySerializationImpl(
-                                builder,
+                                string,
                                 getFlattenAllColumnIDs(flattenedVar, allColumnIDs));
                     }
                 });

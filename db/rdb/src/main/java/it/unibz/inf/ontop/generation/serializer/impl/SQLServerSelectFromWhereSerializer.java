@@ -89,7 +89,7 @@ public class SQLServerSelectFromWhereSerializer extends IgnoreNullFirstSelectFro
                     throw new SQLSerializationException("SQLServer currently does not support FLATTEN with position arguments.");
                 }
 
-                //We build the query string of the form SELECT <variables> FROM <subquery> CROSS APPLY OPENJSON(<flattenedVariable>) WITH (<names> NVARCHAR(MAX) '$')
+                // SELECT <variables> FROM <subquery> CROSS APPLY OPENJSON(<flattenedVariable>) WITH (<names> NVARCHAR(MAX) '$')
 
                 /*
                  * When flattening an array, we have to indicate if the children are either a SCALAR value or a NESTED value.
@@ -101,7 +101,7 @@ public class SQLServerSelectFromWhereSerializer extends IgnoreNullFirstSelectFro
                 QuotedID jsonVariable = attributeAliasFactory.createAttributeAlias(outputVar.getName() + "json");
                 QuotedID scalarVariable = attributeAliasFactory.createAttributeAlias(outputVar.getName() + "scalar");
 
-                String builder = String.format(
+                String string = String.format(
                         "%s CROSS APPLY (SELECT (CASE WHEN %s IS NOT NULL THEN %S ELSE %S END) as %s FROM OPENJSON(%s) WITH (%s NVARCHAR(MAX) '$', %s NVARCHAR(MAX) '$' AS JSON)) %s",
                         subQuerySerialization.getString(),
                         jsonVariable.getSQLRendering(),
@@ -114,7 +114,7 @@ public class SQLServerSelectFromWhereSerializer extends IgnoreNullFirstSelectFro
                         generateFreshViewAlias().getSQLRendering());
 
                 return new QuerySerializationImpl(
-                        builder,
+                        string,
                         getFlattenAllColumnIDs(flattenedVar, allColumnIDs));
             }
         });

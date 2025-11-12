@@ -19,11 +19,8 @@ import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.DBTypeFactory;
 import it.unibz.inf.ontop.model.type.GenericDBTermType;
 import it.unibz.inf.ontop.model.type.impl.ArrayDBTermType;
-import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
-import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static it.unibz.inf.ontop.model.type.impl.PostgreSQLDBTypeFactory.*;
 
@@ -127,8 +124,8 @@ public class PostgresSelectFromWhereSerializer extends DefaultSelectFromWhereSer
                             RelationID outerViewAlias = generateFreshViewAlias();
                             QuotedID intermediateOutputVar = generateIntermediateVariable(outputVar.getName(), allColumnIDs.keySet());
                             builder.append(String.format(
-                                            "AS %s ON TRUE",
-                                            getOutputVarsRendering(intermediateOutputVar.getSQLRendering(), indexVar, allColumnIDs, castAlias)));
+                                    "AS %s ON TRUE",
+                                    getOutputVarsRendering(intermediateOutputVar.getSQLRendering(), indexVar, allColumnIDs, castAlias)));
 
                             //Create new variable aliases for super-query.
                             var variableAliases = getFlattenAllColumnIDs(flattenedVar, outerViewAlias, allColumnIDs);
@@ -156,18 +153,14 @@ public class PostgresSelectFromWhereSerializer extends DefaultSelectFromWhereSer
                                     variableAliases);
                         }
 
+                        String outputVarString = getSQLRendering(outputVar, allColumnIDs);
                         builder.append(String.format(
-                                        "AS %s ON TRUE",
-                                        getOutputVarsRendering(outputVar, indexVar, allColumnIDs)));
+                                "AS %s ON TRUE",
+                                getOutputVarsRendering(outputVarString, indexVar, allColumnIDs, generateFreshViewAlias())));
 
                         return new QuerySerializationImpl(
                                 builder.toString(),
                                 getFlattenAllColumnIDs(flattenedVar, allColumnIDs));
-                    }
-
-                    private String getOutputVarsRendering(Variable outputVar, Optional<Variable> indexVar, ImmutableMap<Variable, QualifiedAttributeID> allColumnIDs) {
-                        String outputVarString = getSQLRendering(outputVar, allColumnIDs);
-                        return getOutputVarsRendering(outputVarString, indexVar, allColumnIDs, generateFreshViewAlias());
                     }
 
                     private String getOutputVarsRendering(String outputVarString, Optional<Variable> indexVar, ImmutableMap<Variable, QualifiedAttributeID> allColumnIDs, RelationID viewAlias) {

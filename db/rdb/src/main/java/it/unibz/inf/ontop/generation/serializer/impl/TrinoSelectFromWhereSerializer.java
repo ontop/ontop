@@ -52,19 +52,19 @@ public class TrinoSelectFromWhereSerializer extends DefaultSelectFromWhereSerial
 
                     @Override
                     protected QuerySerialization serializeFlatten(SQLFlattenExpression sqlFlattenExpression, Variable flattenedVar, Variable outputVar, Optional<Variable> indexVar, DBTermType flattenedType, ImmutableMap<Variable, QualifiedAttributeID> allColumnIDs, QuerySerialization subQuerySerialization) {
-                        //We build the query string of the form SELECT <variables> FROM <subquery> CROSS JOIN UNNEST(<flattenedVariable>) WITH ORDINALITY AS <names>
+                        // SELECT <variables> FROM <subquery> CROSS JOIN UNNEST(<flattenedVariable>) WITH ORDINALITY AS <names>
                         RelationID viewAlias = generateFreshViewAlias();
-                        String builder = String.format(
+                        String string = String.format(
                                 "%s CROSS JOIN UNNEST(%s) %s AS %s(%s%s)",
                                 subQuerySerialization.getString(),
                                 getSQLRendering(flattenedVar, allColumnIDs),
-                                getSQLRendering("WITH ORDINALITY", indexVar),
+                                getSQLRendering("WITH ORDINALITY", indexVar, allColumnIDs),
                                 viewAlias.getSQLRendering(),
                                 getSQLRendering(outputVar, allColumnIDs),
                                 getSQLRendering(", %s", indexVar, allColumnIDs));
 
                         return new QuerySerializationImpl(
-                                builder,
+                                string,
                                 getFlattenAllColumnIDs(flattenedVar, allColumnIDs));
                     }
                 });

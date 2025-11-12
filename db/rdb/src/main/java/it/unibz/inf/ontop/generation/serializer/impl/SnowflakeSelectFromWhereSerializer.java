@@ -97,12 +97,12 @@ public class SnowflakeSelectFromWhereSerializer extends DefaultSelectFromWhereSe
                         while (true) {
                             dummy = "_" + dummy;
                             String dummyTemp = dummy;
-                            if(allColumnIDs.values().stream().noneMatch(a -> a.getAttribute().getName().startsWith(dummyTemp)))
+                            if (allColumnIDs.values().stream().noneMatch(a -> a.getAttribute().getName().startsWith(dummyTemp)))
                                 break;
                         }
 
                         //Quotation marks are not supported in these aliases, so we use `getName()` instead of `getSQLRendering()`.
-                        String builder = String.format(
+                        String string = String.format(
                                 "%s, LATERAL FLATTEN(%s) AS %s(%s, %s, %s, %s, %s, %s)",
                                 subQuerySerialization.getString(),
                                 getSQLRendering(flattenedVar, allColumnIDs),
@@ -117,7 +117,7 @@ public class SnowflakeSelectFromWhereSerializer extends DefaultSelectFromWhereSe
 
                         //We have to convert the index and output variables to upper case, otherwise dropping the quotation marks will not work.
                         return new QuerySerializationImpl(
-                                builder,
+                                string,
                                 allColumnIDs.entrySet().stream()
                                         .filter(e -> e.getKey() != flattenedVar)
                                         .map(e -> (e.getKey() != outputVar && e.getKey() != indexVar.orElse(null))
@@ -125,10 +125,8 @@ public class SnowflakeSelectFromWhereSerializer extends DefaultSelectFromWhereSe
                                                 : Maps.immutableEntry(
                                                         e.getKey(),
                                                         new QualifiedAttributeID(e.getValue().getRelation(), idFactory.createAttributeID(e.getValue().getAttribute().getName().toUpperCase()))))
-                                        .collect(ImmutableCollectors.toMap())
-                        );
+                                        .collect(ImmutableCollectors.toMap()));
                     }
-
                 });
     }
 }

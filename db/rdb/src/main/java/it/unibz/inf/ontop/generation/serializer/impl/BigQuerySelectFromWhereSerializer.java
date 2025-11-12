@@ -12,7 +12,6 @@ import it.unibz.inf.ontop.generation.serializer.SelectFromWhereSerializer;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.type.DBTermType;
-import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Optional;
 
@@ -55,7 +54,7 @@ public class BigQuerySelectFromWhereSerializer extends DefaultSelectFromWhereSer
                     @Override
                     protected QuerySerialization serializeFlatten(SQLFlattenExpression sqlFlattenExpression, Variable flattenedVar, Variable outputVar, Optional<Variable> indexVar, DBTermType flattenedType, ImmutableMap<Variable, QualifiedAttributeID> allColumnIDs, QuerySerialization subQuerySerialization) {
                         // SELECT <variables> FROM <subquery> CROSS JOIN UNNEST(<flattenedVariable>) [WITH OFFSET <names>]
-                        String builder = String.format(
+                        String string = String.format(
                                 "%s CROSS JOIN UNNEST(%s) %s %s ",
                                 subQuerySerialization.getString(),
                                 getSQLRendering(flattenedVar, allColumnIDs),
@@ -63,7 +62,7 @@ public class BigQuerySelectFromWhereSerializer extends DefaultSelectFromWhereSer
                                 getSQLRendering("WITH OFFSET %s", indexVar, allColumnIDs));
 
                         return new QuerySerializationImpl(
-                                builder,
+                                string,
                                 getFlattenAllColumnIDs(flattenedVar, allColumnIDs));
                     }
                 });

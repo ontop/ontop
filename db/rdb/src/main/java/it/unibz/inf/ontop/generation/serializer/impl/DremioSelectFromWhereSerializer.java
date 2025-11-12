@@ -112,7 +112,6 @@ public class DremioSelectFromWhereSerializer extends DefaultSelectFromWhereSeria
                         //We compute an alias for the sub-query, and new aliases for each projected variable.
                         RelationID alias = generateFreshViewAlias();
                         var variableAliases = getFlattenAllColumnIDs(flattenedVar, alias, allColumnIDs);
-
                         var subProjection = getFlattenSubProjection(subQuerySerialization.getColumnIDs(), variableAliases.keySet());
 
                         /*We need to run `CASE WHEN RAND() > 1...` here, because otherwise, casting the resulting column to
@@ -120,7 +119,7 @@ public class DremioSelectFromWhereSerializer extends DefaultSelectFromWhereSeria
                          * We need to add a LIMIT to the end, because otherwise, when accessing a JSON object that is the
                          * result of flatten with square brackets, the access operation will be ignored.
                          * */
-                        String builder = String.format(
+                        String string = String.format(
                                 "(SELECT %s CASE WHEN RAND() > 1 THEN NULL ELSE FLATTEN(%s) END AS %s FROM %s LIMIT 999999999) %s",
                                 subProjection,
                                 expression,
@@ -129,7 +128,7 @@ public class DremioSelectFromWhereSerializer extends DefaultSelectFromWhereSeria
                                 alias.getSQLRendering());
 
                         return new QuerySerializationImpl(
-                                builder,
+                                string,
                                 variableAliases);
                     }
                 });

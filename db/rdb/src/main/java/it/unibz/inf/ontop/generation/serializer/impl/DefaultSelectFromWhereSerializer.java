@@ -384,19 +384,9 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
             return allColumnIDs.get(variable).getSQLRendering();
         }
 
-        protected final String getSQLRendering(Variable variable) {
-            return idFactory.createAttributeID(variable.getName()).getSQLRendering();
-        }
-
         protected final String getSQLRendering(String format, Optional<Variable> optionalVariable, ImmutableMap<Variable, QualifiedAttributeID> allColumnIDs) {
             return optionalVariable
                     .map(variable -> String.format(format, getSQLRendering(variable, allColumnIDs)))
-                    .orElse("");
-        }
-
-        protected final String getSQLRendering(String string, Optional<Variable> optionalVariable) {
-            return optionalVariable
-                    .map(variable -> string)
                     .orElse("");
         }
 
@@ -422,26 +412,23 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
 
         protected final String getFlattenSubProjection(ImmutableMap<Variable, QualifiedAttributeID> allColumnIDs, ImmutableSet<Variable> aliases) {
             var aliasFactory = createAttributeAliasFactory();
-
             var subProjection = allColumnIDs.keySet().stream()
                     .filter(aliases::contains)
                     .map(v -> getSQLRendering(v, allColumnIDs) + " AS " + aliasFactory.createAttributeAlias(v.getName()).getSQLRendering())
                     .collect(Collectors.joining(", "));
 
-            if (subProjection.length() > 0)
-                subProjection += ",";
-
-            return subProjection;
+            return subProjection.isEmpty()
+                    ? ""
+                    : subProjection + ",";
         }
 
         protected final QuerySerialization serializeFlattenAsFunction(Variable flattenedVar, ImmutableMap<Variable, QualifiedAttributeID> allColumnIDs,
                                                                 QuerySerialization subQuerySerialization, String flattenFunctionCallWithAlias) {
             RelationID alias = generateFreshViewAlias();
             var variableAliases = getFlattenAllColumnIDs(flattenedVar, alias, allColumnIDs);
-
             var subProjection = getFlattenSubProjection(subQuerySerialization.getColumnIDs(), variableAliases.keySet());
 
-            String builder = String.format(
+            String string = String.format(
                     "(SELECT %s %s FROM %s) %s",
                     subProjection,
                     flattenFunctionCallWithAlias,
@@ -449,7 +436,7 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
                     alias.getSQLRendering());
 
             return new QuerySerializationImpl(
-                    builder,
+                    string,
                     variableAliases);
         }
 
