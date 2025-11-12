@@ -102,12 +102,13 @@ public class SQLServerSelectFromWhereSerializer extends IgnoreNullFirstSelectFro
                 QuotedID scalarVariable = attributeAliasFactory.createAttributeAlias(outputVar.getName() + "scalar");
 
                 String string = String.format(
-                        "%s CROSS APPLY (SELECT (CASE WHEN %s IS NOT NULL THEN %S ELSE %S END) as %s FROM OPENJSON(%s) WITH (%s NVARCHAR(MAX) '$', %s NVARCHAR(MAX) '$' AS JSON)) %s",
+                        "%s CROSS APPLY (SELECT %s FROM OPENJSON(%s) WITH (%s NVARCHAR(MAX) '$', %s NVARCHAR(MAX) '$' AS JSON)) %s",
                         subQuerySerialization.getString(),
-                        jsonVariable.getSQLRendering(),
-                        jsonVariable.getSQLRendering(),
-                        scalarVariable.getSQLRendering(),
-                        getSQLRendering(outputVar, allColumnIDs),
+                        serializeAlias(String.format("(CASE WHEN %s IS NOT NULL THEN %S ELSE %S END)",
+                                jsonVariable.getSQLRendering(),
+                                jsonVariable.getSQLRendering(),
+                                scalarVariable.getSQLRendering()),
+                                getSQLRendering(outputVar, allColumnIDs)),
                         getSQLRendering(flattenedVar, allColumnIDs),
                         scalarVariable.getSQLRendering(),
                         jsonVariable.getSQLRendering(),

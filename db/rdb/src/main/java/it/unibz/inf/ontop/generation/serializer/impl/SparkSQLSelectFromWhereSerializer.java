@@ -2,7 +2,6 @@ package it.unibz.inf.ontop.generation.serializer.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import it.unibz.inf.ontop.dbschema.DBParameters;
@@ -12,16 +11,13 @@ import it.unibz.inf.ontop.dbschema.RelationID;
 import it.unibz.inf.ontop.generation.algebra.SQLFlattenExpression;
 import it.unibz.inf.ontop.generation.algebra.SQLOrderComparator;
 import it.unibz.inf.ontop.generation.algebra.SelectFromWhereWithModifiers;
-import it.unibz.inf.ontop.generation.algebra.impl.SelectFromWhereWithModifiersImpl;
 import it.unibz.inf.ontop.generation.serializer.SQLSerializationException;
 import it.unibz.inf.ontop.generation.serializer.SelectFromWhereSerializer;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.substitution.Substitution;
-import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.StringUtils;
 
-import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -150,19 +146,18 @@ public class SparkSQLSelectFromWhereSerializer extends DefaultSelectFromWhereSer
                         : String.format("FROM_JSON(%s, 'ARRAY<STRING>')", getSQLRendering(flattenedVar, allColumnIDs));
 
                 //If an index is required, we use POSEXPLODE instead of EXPLODE
-                String flattenCall;
-                String aliasFormat;
-                if (indexVar.isPresent()) {
-                    flattenCall = String.format("POSEXPLODE_OUTER(%s)", expression);
-                    aliasFormat = String.format("(%s, %s)",
-                            getSQLRendering(indexVar.get(), allColumnIDs),
-                            getSQLRendering(outputVar, allColumnIDs));
-                }
-                else {
-                    flattenCall = String.format("EXPLODE_OUTER(%s)", expression);
-                    aliasFormat = getSQLRendering(outputVar, allColumnIDs);
-                }
-                return serializeFlattenAsFunction(flattenedVar, allColumnIDs, subQuerySerialization, flattenCall, aliasFormat);
+                String flattenFunctionCallWithAlias = indexVar.isPresent()
+                    ? serializeAlias(
+                            String.format("POSEXPLODE_OUTER(%s)", expression),
+                            String.format("(%s, %s)",
+                                    getSQLRendering(indexVar.get(), allColumnIDs),
+                                    getSQLRendering(outputVar, allColumnIDs)))
+
+                    : serializeAlias(
+                                String.format("EXPLODE_OUTER(%s)", expression),
+                                getSQLRendering(outputVar, allColumnIDs));
+
+                return serializeFlattenAsFunction(flattenedVar, allColumnIDs, subQuerySerialization, flattenFunctionCallWithAlias);
             }
         });
     }

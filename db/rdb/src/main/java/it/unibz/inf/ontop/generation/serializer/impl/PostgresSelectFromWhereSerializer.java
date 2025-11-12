@@ -127,27 +127,26 @@ public class PostgresSelectFromWhereSerializer extends DefaultSelectFromWhereSer
                                     "AS %s ON TRUE",
                                     getOutputVarsRendering(intermediateOutputVar.getSQLRendering(), indexVar, allColumnIDs, castAlias)));
 
-                            //Create new variable aliases for super-query.
-                            var variableAliases = getFlattenAllColumnIDs(flattenedVar, outerViewAlias, allColumnIDs);
-
                             //Explicitly include all variables used in the subQuery in the SELECT part.
+                            var variableAliases = getFlattenAllColumnIDs(flattenedVar, outerViewAlias, allColumnIDs);
                             var subProjection = getFlattenSubProjection(subQuerySerialization.getColumnIDs(), variableAliases.keySet());
 
                             //Add the index variable to the SELECT of the super-query
                             var indexProjection = indexVar.isPresent()
-                                    ? String.format("%s AS %s, ",
-                                            new QualifiedAttributeID(castAlias, allColumnIDs.get(indexVar.get()).getAttribute()),
-                                            indexVar.get().getName())
+                                    ? serializeAlias(
+                                            new QualifiedAttributeID(castAlias, allColumnIDs.get(indexVar.get()).getAttribute()).toString(),
+                                            indexVar.get().getName()) + ", "
                                     : "";
 
                             return new QuerySerializationImpl(
-                                    String.format(
-                                            "(SELECT %s %s ARRAY(SELECT jsonb_array_elements_text(%s))::%s AS %s FROM %s) %s",
+                                    String.format("(SELECT %s%s%s FROM %s) %s",
                                             subProjection,
                                             indexProjection,
-                                            intermediateOutputVar.getSQLRendering(),
-                                            ((ArrayDBTermType) sqlFlattenExpression.getFlattenedType()).getGenericArguments().get(0).getCastName(),
-                                            getSQLRendering(outputVar, allColumnIDs),
+                                            serializeAlias(
+                                                    String.format("ARRAY(SELECT jsonb_array_elements_text(%s))::%s",
+                                                            intermediateOutputVar.getSQLRendering(),
+                                                            ((ArrayDBTermType) sqlFlattenExpression.getFlattenedType()).getGenericArguments().get(0).getCastName()),
+                                                    getSQLRendering(outputVar, allColumnIDs)),
                                             builder,
                                             outerViewAlias),
                                     variableAliases);
