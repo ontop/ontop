@@ -74,17 +74,14 @@ public class OracleSelectFromWhereSerializer extends DefaultSelectFromWhereSeria
             @Override
             protected QuerySerialization serializeFlatten(SQLFlattenExpression sqlFlattenExpression, Variable flattenedVar, Variable outputVar, Optional<Variable> indexVar, DBTermType flattenedType, ImmutableMap<Variable, QualifiedAttributeID> allColumnIDs, QuerySerialization subQuerySerialization) {
                 // `SELECT <variables> FROM <subquery> CROSS JOIN JSON_TABLE(<flattenedVar>, '$[*]' COLUMNS (<outputVar> VARCHAR2(1000) FORMAT JSON PATH '$' [, <indexVar> FOR ORDINALITY]))
-                String string = String.format(
-                        "%s CROSS JOIN JSON_TABLE(%s, '$[*]' COLUMNS(%s VARCHAR2(1000) FORMAT JSON PATH '$'%s)) %s",
-                        subQuerySerialization.getString(),
-                        getSQLRendering(flattenedVar, allColumnIDs),
-                        getSQLRendering(outputVar, allColumnIDs),
-                        getSQLRendering(", %s FOR ORDINALITY", indexVar, allColumnIDs),
-                        generateFreshViewAlias().getSQLRendering());
-
-                return new QuerySerializationImpl(
-                        string,
-                        getFlattenAllColumnIDs(flattenedVar, allColumnIDs));
+                return serializeFlattenAsJoin(
+                        flattenedVar,
+                        String.format("JSON_TABLE(%s, '$[*]' COLUMNS(%s VARCHAR2(1000) FORMAT JSON PATH '$'%s))",
+                                getSQLRendering(flattenedVar, allColumnIDs),
+                                getSQLRendering(outputVar, allColumnIDs),
+                                getSQLRendering(", %s FOR ORDINALITY", indexVar, allColumnIDs)),
+                        allColumnIDs,
+                        subQuerySerialization);
             }
         });
     }

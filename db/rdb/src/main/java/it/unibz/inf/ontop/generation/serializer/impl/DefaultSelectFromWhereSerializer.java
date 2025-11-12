@@ -408,6 +408,21 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
                     .collect(ImmutableCollectors.toMap());
         }
 
+        protected final QuerySerialization serializeFlattenAsJoin(Variable flattenedVar, String expression, ImmutableMap<Variable, QualifiedAttributeID> allColumnIDs, QuerySerialization subQuerySerialization) {
+            String string = String.format(getFlattenJoinTemplate(),
+                    subQuerySerialization.getString(),
+                    expression,
+                    generateFreshViewAlias().getSQLRendering());
+
+            return new QuerySerializationImpl(
+                    string,
+                    getFlattenAllColumnIDs(flattenedVar, allColumnIDs));
+        }
+
+        protected String getFlattenJoinTemplate() {
+            return "%s CROSS JOIN %s %s";
+        }
+
         protected final QuerySerialization serializeFlattenAsSubQuery(Variable flattenedVar, ImmutableMap<Variable, QualifiedAttributeID> allColumnIDs,
                                                                       QuerySerialization subQuerySerialization, Stream<String> projectionExtensions) {
             RelationID alias = generateFreshViewAlias();
