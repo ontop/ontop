@@ -19,7 +19,6 @@ import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
-import java.util.AbstractMap;
 import java.util.Optional;
 import java.util.stream.Collectors;
 

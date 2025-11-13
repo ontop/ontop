@@ -10,7 +10,6 @@ import it.unibz.inf.ontop.generation.serializer.SelectFromWhereSerializer;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.type.DBTermType;
-import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Optional;
 
@@ -53,8 +52,7 @@ public class RedshiftSelectFromWhereSerializer extends PostgresSelectFromWhereSe
                                                                   ImmutableMap<Variable, QualifiedAttributeID> allColumnIDs,
                                                                   QuerySerialization subQuerySerialization) {
                         // SELECT <outputVar> FROM <subquery>, <flattenedVar> AS <outputVar> [AT <indexVar>
-                        String string = String.format(
-                                "%s, %s AS %s %s",
+                        String string = String.format("%s, %s AS %s %s",
                                 subQuerySerialization.getString(),
                                 getSQLRendering(flattenedVar, allColumnIDs),
                                 getSQLRendering(outputVar, allColumnIDs),
