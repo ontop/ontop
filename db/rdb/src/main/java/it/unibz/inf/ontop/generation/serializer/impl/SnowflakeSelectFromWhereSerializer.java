@@ -46,8 +46,7 @@ public class SnowflakeSelectFromWhereSerializer extends DefaultSelectFromWhereSe
                     }
 
                     /**
-                     * Variables in the VALUES block needs to be without lower case!
-                     * (limitation of Snowflake)
+                     * Snowflake limitation: variables in the VALUES block needs to be without lower case!
                      */
                     @Override
                     public QuerySerialization visit(SQLValuesExpression sqlValuesExpression) {
@@ -55,30 +54,25 @@ public class SnowflakeSelectFromWhereSerializer extends DefaultSelectFromWhereSe
                         ImmutableMap<Variable, QuotedID> variableAliases = createVariableAliases(ImmutableSet.copyOf(orderedVariables));
 
                         RelationID valuesAlias = generateFreshViewAlias();
-                        // The values alias will be wrapped
-                        RelationID wrapperAlias = generateFreshViewAlias();
-
-                        String internalColumnNames = orderedVariables.stream()
-                                .map(variableAliases::get)
-                                // No quoting (lower-case are not tolerated here by Snowflake)
-                                .map(QuotedID::getName)
-                                .collect(Collectors.joining(",", " (", ")"));
-
-                        String tuplesSerialized = serializeValuesEntries(sqlValuesExpression.getValues());
-                        String valuesSql = String.format("(VALUES %s) AS %s%s", tuplesSerialized, valuesAlias, internalColumnNames);
 
                         String renamingProjection = orderedVariables.stream()
                                 .map(variableAliases::get)
-                                .map(quotedID -> String.format("%s.%s AS %s", valuesAlias.getSQLRendering(),
-                                        quotedID.getName(), quotedID.getSQLRendering()))
+                                .map(quotedID -> serializeColumnAlias(
+                                        String.format("%s.%s", valuesAlias.getSQLRendering(), quotedID.getName()),
+                                        quotedID.getSQLRendering()))
                                 .collect(Collectors.joining(","));
 
-                        String sql = "(SELECT " + renamingProjection + " FROM " + valuesSql + ") AS " + wrapperAlias;
+                        RelationID wrapperAlias = generateFreshViewAlias();
+                        String sql = String.format("(SELECT %s FROM (VALUES %s) AS %s%s) AS %s",
+                                renamingProjection,
+                                serializeValuesEntries(sqlValuesExpression.getValues()),
+                                valuesAlias,
+                                // No quoting (lower-case are not tolerated here by Snowflake)
+                                serializeValuesColumnNames(orderedVariables, variableAliases, QuotedID::getName),
+                                wrapperAlias);
 
                         ImmutableMap<Variable, QualifiedAttributeID> columnIDs = attachRelationAlias(wrapperAlias, variableAliases);
-
                         return new QuerySerializationImpl(sql, columnIDs);
-
                     }
 
                     @Override

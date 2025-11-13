@@ -341,7 +341,7 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
             return new QuerySerializationImpl(sqlSubString, ImmutableMap.of());
         }
 
-        protected final ImmutableMap<Variable, QualifiedAttributeID> emptyColumnIDs = ImmutableMap.of();
+        private final ImmutableMap<Variable, QualifiedAttributeID> emptyColumnIDs = ImmutableMap.of();
 
         protected String serializeValuesEntry(Constant constant) {
             return sqlTermSerializer.serialize(constant, emptyColumnIDs);
@@ -355,23 +355,25 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
                     .collect(Collectors.joining(","));
         }
 
+        protected final String serializeValuesColumnNames(ImmutableList<Variable> orderedVariables, ImmutableMap<Variable, QuotedID> variableAliases, Function<QuotedID, String> serializeId) {
+            return orderedVariables.stream()
+                    .map(variableAliases::get)
+                    .map(serializeId)
+                    .collect(Collectors.joining(",", " (", ")"));
+        }
+
         @Override
         public QuerySerialization visit(SQLValuesExpression sqlValuesExpression) {
             ImmutableList<Variable> orderedVariables = sqlValuesExpression.getOrderedVariables();
             ImmutableMap<Variable, QuotedID> variableAliases = createVariableAliases(ImmutableSet.copyOf(orderedVariables));
 
-            String tuplesSerialized = serializeValuesEntries(sqlValuesExpression.getValues());
-
             RelationID alias = generateFreshViewAlias();
-            String internalColumnNames = orderedVariables.stream()
-                    .map(variableAliases::get)
-                    .map(QuotedID::toString)
-                    .collect(Collectors.joining(",", " (", ")"));
-
-            String sql = String.format("(VALUES %s) AS %s%s", tuplesSerialized, alias, internalColumnNames);
+            String sql = String.format("(VALUES %s) AS %s%s",
+                    serializeValuesEntries(sqlValuesExpression.getValues()),
+                    alias,
+                    serializeValuesColumnNames(orderedVariables, variableAliases, QuotedID::getSQLRendering));
 
             ImmutableMap<Variable, QualifiedAttributeID> columnIDs = attachRelationAlias(alias, variableAliases);
-
             return new QuerySerializationImpl(sql, columnIDs);
         }
 

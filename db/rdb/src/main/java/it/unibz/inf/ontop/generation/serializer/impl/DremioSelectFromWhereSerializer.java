@@ -45,7 +45,7 @@ public class DremioSelectFromWhereSerializer extends DefaultSelectFromWhereSeria
                     //Due to a limitation of dremio, we need to cast integer constants in VALUES terms to integers, as they would be types as int64 otherwise.
                     @Override
                     protected String serializeValuesEntry(Constant constant) {
-                        String serialization = serializeTerm(constant, childColumnIDs);
+                        String serialization = super.serializeValuesEntry(constant);
                         if (constant instanceof DBConstant && ((DBConstant) constant).getType().getCategory() == DBTermType.Category.INTEGER) {
                             return String.format("CAST(%s as INTEGER)", serialization);
                         }
