@@ -60,7 +60,8 @@ public class RedshiftSelectFromWhereSerializer extends PostgresSelectFromWhereSe
 
                         return new QuerySerializationImpl(
                                 string,
-                                getFlattenAllColumnIDs(flattenedVar, allColumnIDs));
+                                getFlattenAllColumnIDs(flattenedVar, allColumnIDs),
+                                subQuerySerialization.getCTEMap());
                     }
                 });
     }

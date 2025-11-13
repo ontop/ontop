@@ -66,7 +66,7 @@ public class TeiidSelectFromWhereSerializer extends DefaultSelectFromWhereSerial
                                         variable -> new QualifiedAttributeID(null, idFactory.createAttributeID(
                                                 alias + ".expr" + (orderedVariables.indexOf(variable) + 1)))));
 
-                        return new QuerySerializationImpl(sql, columnIDs);
+                        return new QuerySerializationImpl(sql, columnIDs, ImmutableMap.of());
                     }
                 });
     }

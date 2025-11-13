@@ -123,7 +123,7 @@ public class PostgresSelectFromWhereSerializer extends DefaultSelectFromWhereSer
                                     serializeOptionalTerm("WITH ORDINALITY", indexVar, allColumnIDs),
                                     getOutputVarsRendering(intermediateOutputVar.getSQLRendering(), indexVar, allColumnIDs, castAlias));
 
-                            QuerySerialization qs = new QuerySerializationImpl(string, subQuerySerialization.getColumnIDs());
+                            QuerySerialization qs = new QuerySerializationImpl(string, subQuerySerialization.getColumnIDs(), subQuerySerialization.getCTEMap());
 
                             return serializeFlattenAsSubQuery(flattenedVar, allColumnIDs, qs,
                                     Stream.concat(
@@ -146,7 +146,8 @@ public class PostgresSelectFromWhereSerializer extends DefaultSelectFromWhereSer
 
                         return new QuerySerializationImpl(
                                 string,
-                                getFlattenAllColumnIDs(flattenedVar, allColumnIDs));
+                                getFlattenAllColumnIDs(flattenedVar, allColumnIDs),
+                                subQuerySerialization.getCTEMap());
                     }
 
                     private String getOutputVarsRendering(String outputVarString, Optional<Variable> indexVar, ImmutableMap<Variable, QualifiedAttributeID> allColumnIDs, RelationID viewAlias) {

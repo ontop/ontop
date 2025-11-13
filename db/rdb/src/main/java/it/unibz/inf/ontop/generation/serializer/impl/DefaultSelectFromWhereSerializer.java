@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.generation.serializer.impl;
 import com.google.common.collect.*;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.generation.algebra.*;
 import it.unibz.inf.ontop.generation.serializer.SQLSerializationException;
 import it.unibz.inf.ontop.generation.serializer.SelectFromWhereSerializer;
@@ -16,7 +17,9 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.BinaryOperator;
 import java.util.function.Function;
+import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -95,7 +98,7 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
 
             // Creates an alias for this SQLExpression and uses it for the projected columns
             RelationID alias = generateFreshViewAlias();
-            return new QuerySerializationImpl(sql, attachRelationAlias(alias, variableAliases));
+            return new QuerySerializationImpl(sql, attachRelationAlias(alias, variableAliases), fromQuerySerialization.getCTEMap());
         }
 
         protected RelationID generateFreshViewAlias() {
@@ -238,11 +241,12 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
             RelationDefinition relation = sqlTable.getRelationDefinition();
             String relationRendering = relation.getAtomPredicate().getName();
             String sql = String.format("%s %s", relationRendering, alias.getSQLRendering());
-            return new QuerySerializationImpl(sql, attachRelationAlias(alias, sqlTable.getArgumentMap().entrySet().stream()
-                            .collect(ImmutableCollectors.toMap(
-                                    // Ground terms must have been already removed from atoms
-                                    e -> (Variable) e.getValue(),
-                                    e -> relation.getAttribute(e.getKey() + 1).getID()))));
+            var tableColumnIDs = sqlTable.getArgumentMap().entrySet().stream()
+                    .collect(ImmutableCollectors.toMap(
+                            // Ground terms must have been already removed from atoms
+                            e -> (Variable) e.getValue(),
+                            e -> relation.getAttribute(e.getKey() + 1).getID()));
+            return new QuerySerializationImpl(sql, attachRelationAlias(alias, tableColumnIDs), ImmutableMap.of());
         }
 
         @Override
@@ -259,7 +263,7 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
                             .flatMap(m -> m.getColumnIDs().entrySet().stream())
                             .collect(ImmutableCollectors.toMap());
 
-            return new QuerySerializationImpl(sql, columnIDs);
+            return new QuerySerializationImpl(sql, columnIDs, combineCTEs(querySerializationList));
         }
 
         @Override
@@ -274,8 +278,10 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
                     .map(s -> "(" + s + ")")
                     .collect(Collectors.joining("UNION ALL \n")), alias.getSQLRendering());
 
-            return new QuerySerializationImpl(sql,
-                    replaceRelationAlias(alias, querySerializationList.get(0).getColumnIDs()));
+            return new QuerySerializationImpl(
+                    sql,
+                    replaceRelationAlias(alias, querySerializationList.get(0).getColumnIDs()),
+                    combineCTEs(querySerializationList));
         }
 
         //this function is required in case at least one of the children is
@@ -285,8 +291,10 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
                 QuerySerialization serialization = expression.acceptVisitor(this);
                 RelationID alias = generateFreshViewAlias();
                 String sql = String.format("(%s) %s", serialization.getString(), alias.getSQLRendering());
-                return new QuerySerializationImpl(sql,
-                        replaceRelationAlias(alias, serialization.getColumnIDs()));
+                return new QuerySerializationImpl(
+                        sql,
+                        replaceRelationAlias(alias, serialization.getColumnIDs()),
+                        serialization.getCTEMap());
             }
             return expression.acceptVisitor(this);
         }
@@ -316,8 +324,9 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
         protected QuerySerialization visit(SQLBinaryJoinExpression binaryJoinExpression, String operatorString) {
             QuerySerialization left = getSQLSerializationForChild(binaryJoinExpression.getLeft());
             QuerySerialization right = getSQLSerializationForChild(binaryJoinExpression.getRight());
+            ImmutableList<QuerySerialization> subQuerySerializations = ImmutableList.of(left, right);
 
-            ImmutableMap<Variable, QualifiedAttributeID> columnIDs = ImmutableList.of(left, right).stream()
+            ImmutableMap<Variable, QualifiedAttributeID> columnIDs = subQuerySerializations.stream()
                             .flatMap(m -> m.getColumnIDs().entrySet().stream())
                             .collect(ImmutableCollectors.toMap());
 
@@ -327,7 +336,7 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
                     .orElse("ON 1 = 1 ");
 
             String sql = formatBinaryJoin(operatorString, left, right, onString);
-            return new QuerySerializationImpl(sql, columnIDs);
+            return new QuerySerializationImpl(sql, columnIDs, combineCTEs(subQuerySerializations));
         }
 
         protected String formatBinaryJoin(String operatorString, QuerySerialization left, QuerySerialization right, String onString) {
@@ -338,7 +347,7 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
         public QuerySerialization visit(SQLOneTupleDummyQueryExpression sqlOneTupleDummyQueryExpression) {
             String fromString = serializeDummyTable();
             String sqlSubString = String.format("(SELECT 1 %s) tdummy", fromString);
-            return new QuerySerializationImpl(sqlSubString, ImmutableMap.of());
+            return new QuerySerializationImpl(sqlSubString, ImmutableMap.of(), ImmutableMap.of());
         }
 
         private final ImmutableMap<Variable, QualifiedAttributeID> emptyColumnIDs = ImmutableMap.of();
@@ -374,7 +383,7 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
                     serializeValuesColumnNames(orderedVariables, variableAliases, QuotedID::getSQLRendering));
 
             ImmutableMap<Variable, QualifiedAttributeID> columnIDs = attachRelationAlias(alias, variableAliases);
-            return new QuerySerializationImpl(sql, columnIDs);
+            return new QuerySerializationImpl(sql, columnIDs, ImmutableMap.of());
         }
 
         @Override
@@ -429,7 +438,8 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
 
             return new QuerySerializationImpl(
                     string,
-                    getFlattenAllColumnIDs(flattenedVar, allColumnIDs));
+                    getFlattenAllColumnIDs(flattenedVar, allColumnIDs),
+                    subQuerySerialization.getCTEMap());
         }
 
         protected String getFlattenJoinTemplate() {
@@ -458,7 +468,8 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
 
             return new QuerySerializationImpl(
                     string,
-                    variableAliases);
+                    variableAliases,
+                    subQuerySerialization.getCTEMap());
         }
 
         protected String getFlattenSubQueryTemplate() {
@@ -469,23 +480,76 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
 
     protected static class QuerySerializationImpl implements QuerySerialization {
 
-        private final String string;
+        private final String preambleFreeString;
         private final ImmutableMap<Variable, QualifiedAttributeID> columnIDs;
+        private final ImmutableMap<String, String> cteMap;
 
-        public QuerySerializationImpl(String string, ImmutableMap<Variable, QualifiedAttributeID> columnIDs) {
-            this.string = string;
+        protected QuerySerializationImpl(String preambleFreeString, ImmutableMap<Variable, QualifiedAttributeID> columnIDs, ImmutableMap<String, String> cteMap) {
+            this.preambleFreeString = preambleFreeString;
             this.columnIDs = columnIDs;
+            this.cteMap = cteMap;
+        }
+
+        @Override
+        public String getStringWithPreamble() {
+            return cteMap.isEmpty()
+                    ? preambleFreeString
+                    : cteMap.entrySet().stream()
+                        .map(e -> e.getKey() + " AS (" + e.getValue() + ")")
+                        .collect(Collectors.joining(",\n", "WITH\n", "\n"))
+                    + preambleFreeString;
+        }
+
+        @Override
+        public ImmutableMap<String, String> getCTEMap() {
+            return cteMap;
         }
 
         @Override
         public String getString() {
-            return string;
+            return preambleFreeString;
         }
 
         @Override
         public ImmutableMap<Variable, QualifiedAttributeID> getColumnIDs() {
             return columnIDs;
         }
+    }
+
+
+    protected ImmutableMap<String, String> combineCTEs(QuerySerialization subQuerySerialization, ImmutableMap<String, String> cteStrings) {
+        return combineCTEs(Stream.of(subQuerySerialization.getCTEMap(), cteStrings));
+    }
+
+    protected ImmutableMap<String, String> combineCTEs(ImmutableList<QuerySerialization> subQuerySerializations) {
+        return combineCTEs(subQuerySerializations.stream().map(QuerySerialization::getCTEMap));
+    }
+
+    private ImmutableMap<String, String> combineCTEs(Stream<ImmutableMap<String, String>> cteMapStream) {
+        return cteMapStream
+                .map(ImmutableMap::entrySet)
+                .flatMap(ImmutableSet::stream)
+                .collect(toOrderedImmutableMap());
+    }
+
+    private static <K, U> Collector<Map.Entry<K, U>, ? ,ImmutableMap<K,U>> toOrderedImmutableMap() {
+        BinaryOperator<U> mergeFunction = (v1, v2) -> {
+            if (!v1.equals(v2))
+                throw new MinorOntopInternalBugException("incompatible CTE definitions");
+            return v1;
+        };
+
+        BinaryOperator<Map<K,U>> mapMerger = (m1, m2) -> {
+            for (Map.Entry<K,U> e : m2.entrySet())
+                m1.merge(e.getKey(), e.getValue(), mergeFunction);
+            return m1;
+        };
+
+        return Collector.of(
+                Maps::newLinkedHashMap, // preserves the order!
+                (m, e) -> m.merge(e.getKey(), e.getValue(), mergeFunction),
+                mapMerger,
+                ImmutableMap::copyOf);
     }
 
 

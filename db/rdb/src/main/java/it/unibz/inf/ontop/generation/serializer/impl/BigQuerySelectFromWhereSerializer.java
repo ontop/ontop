@@ -62,7 +62,8 @@ public class BigQuerySelectFromWhereSerializer extends DefaultSelectFromWhereSer
 
                         return new QuerySerializationImpl(
                                 string,
-                                getFlattenAllColumnIDs(flattenedVar, allColumnIDs));
+                                getFlattenAllColumnIDs(flattenedVar, allColumnIDs),
+                                subQuerySerialization.getCTEMap());
                     }
                 });
     }

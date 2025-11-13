@@ -72,7 +72,7 @@ public class SnowflakeSelectFromWhereSerializer extends DefaultSelectFromWhereSe
                                 wrapperAlias);
 
                         ImmutableMap<Variable, QualifiedAttributeID> columnIDs = attachRelationAlias(wrapperAlias, variableAliases);
-                        return new QuerySerializationImpl(sql, columnIDs);
+                        return new QuerySerializationImpl(sql, columnIDs, ImmutableMap.of());
                     }
 
                     @Override
@@ -103,16 +103,16 @@ public class SnowflakeSelectFromWhereSerializer extends DefaultSelectFromWhereSe
                                 dummy);
 
                         //We have to convert the index and output variables to upper case, otherwise dropping the quotation marks will not work.
-                        return new QuerySerializationImpl(
-                                string,
-                                allColumnIDs.entrySet().stream()
-                                        .filter(e -> e.getKey() != flattenedVar)
-                                        .map(e -> (e.getKey() != outputVar && e.getKey() != indexVar.orElse(null))
-                                                ? e
-                                                : Maps.immutableEntry(
-                                                        e.getKey(),
-                                                        new QualifiedAttributeID(e.getValue().getRelation(), idFactory.createAttributeID(e.getValue().getAttribute().getName().toUpperCase()))))
-                                        .collect(ImmutableCollectors.toMap()));
+                        var newColumnIDs = allColumnIDs.entrySet().stream()
+                                .filter(e -> e.getKey() != flattenedVar)
+                                .map(e -> (e.getKey() != outputVar && e.getKey() != indexVar.orElse(null))
+                                        ? e
+                                        : Maps.immutableEntry(
+                                        e.getKey(),
+                                        new QualifiedAttributeID(e.getValue().getRelation(), idFactory.createAttributeID(e.getValue().getAttribute().getName().toUpperCase()))))
+                                .collect(ImmutableCollectors.toMap());
+
+                        return new QuerySerializationImpl(string, newColumnIDs, subQuerySerialization.getCTEMap());
                     }
                 });
     }

@@ -79,7 +79,7 @@ public class SparkSQLSelectFromWhereSerializer extends DefaultSelectFromWhereSer
 
                 // Creates an alias for this SQLExpression and uses it for the projected columns
                 RelationID alias = generateFreshViewAlias();
-                return new QuerySerializationImpl(sql, attachRelationAlias(alias, variableAliases));
+                return new QuerySerializationImpl(sql, attachRelationAlias(alias, variableAliases), fromQuerySerialization.getCTEMap());
             }
 
             /**

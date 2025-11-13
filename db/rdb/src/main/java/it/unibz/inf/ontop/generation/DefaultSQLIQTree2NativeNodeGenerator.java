@@ -59,7 +59,7 @@ public class DefaultSQLIQTree2NativeNodeGenerator implements IQTree2NativeNodeGe
                         e -> e.getValue().getAttribute()));
 
         return iqFactory.createNativeNode(signature, variableTypeMap, columnNames,
-                serializedQuery.getString(), iqTree.getVariableNullability());
+                serializedQuery.getStringWithPreamble(), iqTree.getVariableNullability());
     }
 
     private ImmutableMap<Variable, DBTermType> extractVariableTypeMap(IQTree tree, boolean tolerateUnknownTypes) {

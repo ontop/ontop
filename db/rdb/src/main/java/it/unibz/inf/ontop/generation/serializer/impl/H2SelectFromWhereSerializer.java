@@ -71,7 +71,7 @@ public class H2SelectFromWhereSerializer extends DefaultSelectFromWhereSerialize
                                             variable -> new QualifiedAttributeID(null, idFactory.createAttributeID(
                                                     alias + ".C" + (orderedVariables.indexOf(variable) + 1)))));
 
-                            return new QuerySerializationImpl(sql, columnIDs);
+                            return new QuerySerializationImpl(sql, columnIDs, ImmutableMap.of());
                         }
                         // H2 version 2+ and above aligned with other SQL dialects
                         return super.visit(sqlValuesExpression);

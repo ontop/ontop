@@ -63,7 +63,8 @@ public class TrinoSelectFromWhereSerializer extends DefaultSelectFromWhereSerial
 
                         return new QuerySerializationImpl(
                                 string,
-                                getFlattenAllColumnIDs(flattenedVar, allColumnIDs));
+                                getFlattenAllColumnIDs(flattenedVar, allColumnIDs),
+                                subQuerySerialization.getCTEMap());
                     }
                 });
     }

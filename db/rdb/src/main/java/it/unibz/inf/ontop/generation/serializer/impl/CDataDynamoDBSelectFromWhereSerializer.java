@@ -39,7 +39,7 @@ public class CDataDynamoDBSelectFromWhereSerializer extends DefaultSelectFromWhe
                     public QuerySerialization visit(SQLOneTupleDummyQueryExpression sqlOneTupleDummyQueryExpression) {
                         String fromString = serializeDummyTable();
                         String sqlSubString = String.format("(SELECT 1 %s) tdummy", fromString);
-                        return new QuerySerializationImpl(sqlSubString, ImmutableMap.of());
+                        return new QuerySerializationImpl(sqlSubString, ImmutableMap.of(), ImmutableMap.of());
                     }
 
                     @Override
