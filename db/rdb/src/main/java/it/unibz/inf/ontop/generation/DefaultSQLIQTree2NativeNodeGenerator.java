@@ -59,6 +59,7 @@ public class DefaultSQLIQTree2NativeNodeGenerator implements IQTree2NativeNodeGe
                         e -> e.getValue().getAttribute()));
 
         if (!serializedQuery.getCTEMap().isEmpty()) {
+            System.out.println(dbParameters.getDbmsProductName() + " " + dbParameters.getDbmsVersion() + " " + dbParameters.getDriverName() + " " + dbParameters.getDriverVersion());
             System.out.println("SQL-WITH:\n" + serializedQuery.getStringWithPreamble());
         }
 
