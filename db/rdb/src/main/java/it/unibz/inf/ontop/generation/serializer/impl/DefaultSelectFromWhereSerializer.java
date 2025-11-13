@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.generation.serializer.impl;
 import com.google.common.collect.*;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import it.unibz.inf.ontop.dbschema.impl.BlackBoxViewDefinition;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.generation.algebra.*;
 import it.unibz.inf.ontop.generation.serializer.SQLSerializationException;
@@ -234,19 +235,50 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
             return serializeOffset(offset.get(), noSortCondition);
         }
 
+        private final Map<String, RelationID> commonTableExpressions = Maps.newHashMap();
+        private final String CTE_PREFIX = "BBV";
 
         @Override
         public QuerySerialization visit(SQLTable sqlTable) {
-            RelationID alias = generateFreshViewAlias();
             RelationDefinition relation = sqlTable.getRelationDefinition();
+            if (relation instanceof BlackBoxViewDefinition) {
+                return serializeRelationAsCTE(relation, sqlTable.getArgumentMap());
+            }
+            return serializeRelation(relation, sqlTable.getArgumentMap());
+        }
+
+        protected final QuerySerialization serializeRelation(RelationDefinition relation, ImmutableMap<Integer, ? extends ImmutableTerm> argumentMap) {
+            RelationID alias = generateFreshViewAlias();
             String relationRendering = relation.getAtomPredicate().getName();
             String sql = String.format("%s %s", relationRendering, alias.getSQLRendering());
-            var tableColumnIDs = sqlTable.getArgumentMap().entrySet().stream()
+
+            return new QuerySerializationImpl(
+                    sql,
+                    attachRelationAlias(alias, getRelationColumnIDs(relation, argumentMap)),
+                    ImmutableMap.of());
+        }
+
+        protected final QuerySerialization serializeRelationAsCTE(RelationDefinition relation, ImmutableMap<Integer, ? extends ImmutableTerm> argumentMap) {
+            String relationDefinition = relation.getAtomPredicate().getName();
+            RelationID cteID = commonTableExpressions.computeIfAbsent(
+                    relationDefinition,
+                    k -> idFactory.createRelationID(CTE_PREFIX + commonTableExpressions.size()));
+
+            RelationID alias = generateFreshViewAlias();
+            String sql = String.format("%s %s", cteID.getSQLRendering(), alias.getSQLRendering());
+
+            return new QuerySerializationImpl(
+                    sql,
+                    attachRelationAlias(alias, getRelationColumnIDs(relation, argumentMap)),
+                    ImmutableMap.of(cteID.getSQLRendering(), relationDefinition));
+        }
+
+        protected final ImmutableMap<Variable, QuotedID> getRelationColumnIDs(RelationDefinition relation, ImmutableMap<Integer, ? extends ImmutableTerm> argumentMap) {
+            return argumentMap.entrySet().stream()
                     .collect(ImmutableCollectors.toMap(
                             // Ground terms must have been already removed from atoms
                             e -> (Variable) e.getValue(),
                             e -> relation.getAttribute(e.getKey() + 1).getID()));
-            return new QuerySerializationImpl(sql, attachRelationAlias(alias, tableColumnIDs), ImmutableMap.of());
         }
 
         @Override
