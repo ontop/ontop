@@ -11,7 +11,6 @@ import it.unibz.inf.ontop.model.term.DBConstant;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.type.DBTermType;
-import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Optional;
 
@@ -77,9 +76,9 @@ public class OracleSelectFromWhereSerializer extends DefaultSelectFromWhereSeria
                 return serializeFlattenAsJoin(
                         flattenedVar,
                         String.format("JSON_TABLE(%s, '$[*]' COLUMNS(%s VARCHAR2(1000) FORMAT JSON PATH '$'%s))",
-                                getSQLRendering(flattenedVar, allColumnIDs),
-                                getSQLRendering(outputVar, allColumnIDs),
-                                getSQLRendering(", %s FOR ORDINALITY", indexVar, allColumnIDs)),
+                                serializeTerm(flattenedVar, allColumnIDs),
+                                serializeTerm(outputVar, allColumnIDs),
+                                serializeOptionalTerm(", %s FOR ORDINALITY", indexVar, allColumnIDs)),
                         allColumnIDs,
                         subQuerySerialization);
             }

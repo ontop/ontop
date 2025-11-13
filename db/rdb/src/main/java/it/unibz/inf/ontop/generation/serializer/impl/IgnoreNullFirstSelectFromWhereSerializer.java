@@ -36,17 +36,10 @@ public class IgnoreNullFirstSelectFromWhereSerializer extends DefaultSelectFromW
         protected IgnoreNullFirstRelationVisitingSerializer(QuotedIDFactory idFactory) { super(idFactory); }
 
         @Override
-        protected String serializeOrderBy(ImmutableList<SQLOrderComparator> sortConditions,
-                ImmutableMap<Variable, QualifiedAttributeID> fromColumnMap) {
-            if (sortConditions.isEmpty())
-                return "";
-
-            String conditionString = sortConditions.stream()
-                    .map(c -> sqlTermSerializer.serialize(c.getTerm(), fromColumnMap)
-                            + (c.isAscending() ? "" : " DESC"))
-                    .collect(Collectors.joining(", "));
-
-            return String.format("ORDER BY %s\n", conditionString);
+        protected String serializeOrderByComparator(SQLOrderComparator c, ImmutableMap<Variable, QualifiedAttributeID> columnIDs) {
+            return serializeTerm(c.getTerm(), columnIDs)
+                    + (c.isAscending() ? "" : " DESC");
         }
+
     }
 }

@@ -53,14 +53,6 @@ public class SnowflakeSelectFromWhereSerializer extends DefaultSelectFromWhereSe
                     public QuerySerialization visit(SQLValuesExpression sqlValuesExpression) {
                         ImmutableList<Variable> orderedVariables = sqlValuesExpression.getOrderedVariables();
                         ImmutableMap<Variable, QuotedID> variableAliases = createVariableAliases(ImmutableSet.copyOf(orderedVariables));
-                        // Leaf node
-                        ImmutableMap<Variable, QualifiedAttributeID> childColumnIDs = ImmutableMap.of();
-
-                        String tuplesSerialized = sqlValuesExpression.getValues().stream()
-                                .map(tuple -> tuple.stream()
-                                        .map(constant -> sqlTermSerializer.serialize(constant, childColumnIDs))
-                                        .collect(Collectors.joining(",", " (", ")")))
-                                .collect(Collectors.joining(","));
 
                         RelationID valuesAlias = generateFreshViewAlias();
                         // The values alias will be wrapped
@@ -71,7 +63,9 @@ public class SnowflakeSelectFromWhereSerializer extends DefaultSelectFromWhereSe
                                 // No quoting (lower-case are not tolerated here by Snowflake)
                                 .map(QuotedID::getName)
                                 .collect(Collectors.joining(",", " (", ")"));
-                        String valuesSql = "(VALUES " + tuplesSerialized + ") AS " + valuesAlias + internalColumnNames;
+
+                        String tuplesSerialized = serializeValuesEntries(sqlValuesExpression.getValues());
+                        String valuesSql = String.format("(VALUES %s) AS %s%s", tuplesSerialized, valuesAlias, internalColumnNames);
 
                         String renamingProjection = orderedVariables.stream()
                                 .map(variableAliases::get)
@@ -104,7 +98,7 @@ public class SnowflakeSelectFromWhereSerializer extends DefaultSelectFromWhereSe
                         String string = String.format(
                                 "%s, LATERAL FLATTEN(%s) AS %s(%s, %s, %s, %s, %s, %s)",
                                 subQuerySerialization.getString(),
-                                getSQLRendering(flattenedVar, allColumnIDs),
+                                serializeTerm(flattenedVar, allColumnIDs),
                                 generateFreshViewAlias().getSQLRendering(),
                                 dummy,
                                 dummy,

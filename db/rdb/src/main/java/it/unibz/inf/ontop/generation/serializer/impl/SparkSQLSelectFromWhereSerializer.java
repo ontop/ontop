@@ -65,7 +65,7 @@ public class SparkSQLSelectFromWhereSerializer extends DefaultSelectFromWhereSer
 
                 // TODO: if selectFromWhere.getLimit is 0, then replace it with an additional filter 0 = 1
                 String whereString = selectFromWhere.getWhereExpression()
-                        .map(e -> sqlTermSerializer.serialize(e, columnIDs))
+                        .map(e -> serializeTerm(e, columnIDs))
                         .map(s -> String.format("WHERE %s\n", s))
                         .orElse("");
 
@@ -113,7 +113,7 @@ public class SparkSQLSelectFromWhereSerializer extends DefaultSelectFromWhereSer
                     throws SQLSerializationException {
 
                 if (term instanceof Constant) {
-                    return getTermSerializer().serialize(term, columnIDs);
+                    return serializeTerm(term, columnIDs);
                 }
                 else if (term instanceof Variable) {
                     Optional<QuotedID> alias = Optional.ofNullable(variableAliases.get(term));
@@ -143,20 +143,20 @@ public class SparkSQLSelectFromWhereSerializer extends DefaultSelectFromWhereSer
 
                 //EXPLODE only works on ARRAY<T> types, so we first transform the JSON-array into an ARRAY<STRING> if it is not already one
                 var expression = flattenedType.getCategory() == DBTermType.Category.ARRAY
-                        ? getSQLRendering(flattenedVar, allColumnIDs)
-                        : String.format("FROM_JSON(%s, 'ARRAY<STRING>')", getSQLRendering(flattenedVar, allColumnIDs));
+                        ? serializeTerm(flattenedVar, allColumnIDs)
+                        : String.format("FROM_JSON(%s, 'ARRAY<STRING>')", serializeTerm(flattenedVar, allColumnIDs));
 
                 //If an index is required, we use POSEXPLODE instead of EXPLODE
                 String flattenFunctionCallWithAlias = indexVar.isPresent()
-                    ? serializeAlias(
+                    ? serializeColumnAlias(
                             String.format("POSEXPLODE_OUTER(%s)", expression),
                             String.format("(%s, %s)",
-                                    getSQLRendering(indexVar.get(), allColumnIDs),
-                                    getSQLRendering(outputVar, allColumnIDs)))
+                                    serializeTerm(indexVar.get(), allColumnIDs),
+                                    serializeTerm(outputVar, allColumnIDs)))
 
-                    : serializeAlias(
+                    : serializeColumnAlias(
                                 String.format("EXPLODE_OUTER(%s)", expression),
-                                getSQLRendering(outputVar, allColumnIDs));
+                                serializeTerm(outputVar, allColumnIDs));
 
                 return serializeFlattenAsSubQuery(flattenedVar, allColumnIDs, subQuerySerialization, Stream.of(flattenFunctionCallWithAlias));
             }

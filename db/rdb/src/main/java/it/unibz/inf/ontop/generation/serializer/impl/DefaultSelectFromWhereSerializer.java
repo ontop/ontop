@@ -79,7 +79,7 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
 
             // TODO: if selectFromWhere.getLimit is 0, then replace it with an additional filter 0 = 1
             String whereString = selectFromWhere.getWhereExpression()
-                    .map(e -> sqlTermSerializer.serialize(e, columnIDs))
+                    .map(e -> serializeTerm(e, columnIDs))
                     .map(s -> String.format("WHERE %s\n", s))
                     .orElse("");
 
@@ -141,14 +141,25 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
                 return "1 AS uselessVariable";
 
             return projectedVariables.stream()
-                    .map(v -> serializeAlias(
-                            sqlTermSerializer.serialize(substitution.apply(v), columnIDs),
+                    .map(v -> serializeColumnAlias(
+                            serializeTerm(substitution.apply(v), columnIDs),
                             variableAliases.get(v).getSQLRendering()))
                     .collect(Collectors.joining(", "));
         }
 
-        protected final String serializeAlias(String expression, String alias) {
+        protected final String serializeColumnAlias(String expression, String alias) {
             return expression + " AS " + alias;
+        }
+
+        protected final String serializeTerm(ImmutableTerm term, ImmutableMap<Variable, QualifiedAttributeID> allColumnIDs) {
+            return sqlTermSerializer.serialize(term, allColumnIDs);
+        }
+
+        @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
+        protected final String serializeOptionalTerm(String format, Optional<? extends ImmutableTerm> optionalVariable, ImmutableMap<Variable, QualifiedAttributeID> allColumnIDs) {
+            return optionalVariable
+                    .map(variable -> String.format(format, serializeTerm(variable, allColumnIDs)))
+                    .orElse("");
         }
 
         protected String serializeGroupBy(ImmutableSet<Variable> groupByVariables,
@@ -157,7 +168,7 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
                 return "";
 
             String variableString = groupByVariables.stream()
-                    .map(v -> sqlTermSerializer.serialize(v, columnIDs))
+                    .map(v -> serializeTerm(v, columnIDs))
                     .collect(Collectors.joining(", "));
 
             return String.format("GROUP BY %s\n", variableString);
@@ -169,11 +180,15 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
                 return "";
 
             String conditionString = sortConditions.stream()
-                    .map(c -> sqlTermSerializer.serialize(c.getTerm(), columnIDs)
-                            + (c.isAscending() ? " NULLS FIRST" : " DESC NULLS LAST"))
+                    .map(c -> serializeOrderByComparator(c, columnIDs))
                     .collect(Collectors.joining(", "));
 
             return String.format("ORDER BY %s\n", conditionString);
+        }
+
+        protected String serializeOrderByComparator(SQLOrderComparator c, ImmutableMap<Variable, QualifiedAttributeID> columnIDs) {
+            return serializeTerm(c.getTerm(), columnIDs)
+                    + (c.isAscending() ? " NULLS FIRST" : " DESC NULLS LAST");
         }
 
         /**
@@ -307,7 +322,7 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
                             .collect(ImmutableCollectors.toMap());
 
             String onString = binaryJoinExpression.getFilterCondition()
-                    .map(e -> sqlTermSerializer.serialize(e, columnIDs))
+                    .map(e -> serializeTerm(e, columnIDs))
                     .map(s -> String.format("ON %s ", s))
                     .orElse("ON 1 = 1 ");
 
@@ -326,28 +341,34 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
             return new QuerySerializationImpl(sqlSubString, ImmutableMap.of());
         }
 
-        protected String serializeValuesEntry(Constant constant, ImmutableMap<Variable, QualifiedAttributeID> childColumnIDs) {
-            return sqlTermSerializer.serialize(constant, childColumnIDs);
+        protected final ImmutableMap<Variable, QualifiedAttributeID> emptyColumnIDs = ImmutableMap.of();
+
+        protected String serializeValuesEntry(Constant constant) {
+            return sqlTermSerializer.serialize(constant, emptyColumnIDs);
+        }
+
+        protected final String serializeValuesEntries(ImmutableList<ImmutableList<Constant>> values) {
+            return values.stream()
+                    .map(tuple -> tuple.stream()
+                            .map(this::serializeValuesEntry)
+                            .collect(Collectors.joining(",", " (", ")")))
+                    .collect(Collectors.joining(","));
         }
 
         @Override
         public QuerySerialization visit(SQLValuesExpression sqlValuesExpression) {
             ImmutableList<Variable> orderedVariables = sqlValuesExpression.getOrderedVariables();
             ImmutableMap<Variable, QuotedID> variableAliases = createVariableAliases(ImmutableSet.copyOf(orderedVariables));
-            // Leaf node
-            ImmutableMap<Variable, QualifiedAttributeID> childColumnIDs = ImmutableMap.of();
 
-            String tuplesSerialized = sqlValuesExpression.getValues().stream()
-                    .map(tuple -> tuple.stream()
-                            .map(constant -> serializeValuesEntry(constant, childColumnIDs))
-                            .collect(Collectors.joining(",", " (", ")")))
-                    .collect(Collectors.joining(","));
+            String tuplesSerialized = serializeValuesEntries(sqlValuesExpression.getValues());
+
             RelationID alias = generateFreshViewAlias();
             String internalColumnNames = orderedVariables.stream()
                     .map(variableAliases::get)
                     .map(QuotedID::toString)
                     .collect(Collectors.joining(",", " (", ")"));
-            String sql = "(VALUES " + tuplesSerialized + ") AS " + alias + internalColumnNames;
+
+            String sql = String.format("(VALUES %s) AS %s%s", tuplesSerialized, alias, internalColumnNames);
 
             ImmutableMap<Variable, QualifiedAttributeID> columnIDs = attachRelationAlias(alias, variableAliases);
 
@@ -392,16 +413,6 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
                     .build();
         }
 
-        protected final String getSQLRendering(Variable variable, ImmutableMap<Variable, QualifiedAttributeID> allColumnIDs) {
-            return sqlTermSerializer.serialize(variable, allColumnIDs);
-        }
-
-        protected final String getSQLRendering(String format, Optional<Variable> optionalVariable, ImmutableMap<Variable, QualifiedAttributeID> allColumnIDs) {
-            return optionalVariable
-                    .map(variable -> String.format(format, getSQLRendering(variable, allColumnIDs)))
-                    .orElse("");
-        }
-
         protected final ImmutableMap<Variable, QualifiedAttributeID> getFlattenAllColumnIDs(Variable flattenedVar, ImmutableMap<Variable, QualifiedAttributeID> allColumnIDs) {
             return allColumnIDs.entrySet().stream()
                     .filter(e -> e.getKey() != flattenedVar)
@@ -432,8 +443,8 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
             String projection = Stream.concat(
                             subQuerySerialization.getColumnIDs().keySet().stream()
                                     .filter(variableAliases.keySet()::contains)
-                                    .map(v -> serializeAlias(
-                                            getSQLRendering(v, subQuerySerialization.getColumnIDs()),
+                                    .map(v -> serializeColumnAlias(
+                                            serializeTerm(v, subQuerySerialization.getColumnIDs()),
                                             aliasFactory.createAttributeAlias(v.getName()).getSQLRendering())),
                             projectionExtensions)
                     .collect(Collectors.joining(", "));

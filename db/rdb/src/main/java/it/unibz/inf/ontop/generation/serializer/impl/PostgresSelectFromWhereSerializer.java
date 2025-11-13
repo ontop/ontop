@@ -20,9 +20,7 @@ import it.unibz.inf.ontop.model.type.DBTypeFactory;
 import it.unibz.inf.ontop.model.type.GenericDBTermType;
 import it.unibz.inf.ontop.model.type.impl.ArrayDBTermType;
 
-import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static it.unibz.inf.ontop.model.type.impl.PostgreSQLDBTypeFactory.*;
@@ -121,30 +119,30 @@ public class PostgresSelectFromWhereSerializer extends DefaultSelectFromWhereSer
                             String string = String.format("%s JOIN LATERAL %s %s AS %s ON TRUE",
                                     subQuerySerialization.getString(),
                                     String.format(getFlattenFunctionSymbolString(sqlFlattenExpression.getFlattenedType()),
-                                            getSQLRendering(flattenedVar, allColumnIDs)),
-                                    getSQLRendering("WITH ORDINALITY", indexVar, allColumnIDs),
+                                            serializeTerm(flattenedVar, allColumnIDs)),
+                                    serializeOptionalTerm("WITH ORDINALITY", indexVar, allColumnIDs),
                                     getOutputVarsRendering(intermediateOutputVar.getSQLRendering(), indexVar, allColumnIDs, castAlias));
 
                             QuerySerialization qs = new QuerySerializationImpl(string, subQuerySerialization.getColumnIDs());
 
                             return serializeFlattenAsSubQuery(flattenedVar, allColumnIDs, qs,
                                     Stream.concat(
-                                            indexVar.stream().map(ind -> serializeAlias(
+                                            indexVar.stream().map(ind -> serializeColumnAlias(
                                                     new QualifiedAttributeID(castAlias, allColumnIDs.get(ind).getAttribute()).toString(),
                                                     indexVar.get().getName())),
-                                            Stream.of(serializeAlias(
+                                            Stream.of(serializeColumnAlias(
                                                     String.format("ARRAY(SELECT jsonb_array_elements_text(%s))::%s",
                                                             intermediateOutputVar.getSQLRendering(),
                                                             ((ArrayDBTermType) sqlFlattenExpression.getFlattenedType()).getGenericArguments().get(0).getCastName()),
-                                                    getSQLRendering(outputVar, allColumnIDs)))));
+                                                    serializeTerm(outputVar, allColumnIDs)))));
                         }
 
                         String string = String.format("%s JOIN LATERAL %s %s AS %s ON TRUE",
                                 subQuerySerialization.getString(),
                                 String.format(getFlattenFunctionSymbolString(sqlFlattenExpression.getFlattenedType()),
-                                        getSQLRendering(flattenedVar, allColumnIDs)),
-                                getSQLRendering("WITH ORDINALITY", indexVar, allColumnIDs),
-                                getOutputVarsRendering(getSQLRendering(outputVar, allColumnIDs), indexVar, allColumnIDs, generateFreshViewAlias()));
+                                        serializeTerm(flattenedVar, allColumnIDs)),
+                                serializeOptionalTerm("WITH ORDINALITY", indexVar, allColumnIDs),
+                                getOutputVarsRendering(serializeTerm(outputVar, allColumnIDs), indexVar, allColumnIDs, generateFreshViewAlias()));
 
                         return new QuerySerializationImpl(
                                 string,
@@ -156,7 +154,7 @@ public class PostgresSelectFromWhereSerializer extends DefaultSelectFromWhereSer
                                 ? String.format("%s(%s, %s)",
                                         viewAlias.getSQLRendering(),
                                         outputVarString,
-                                        getSQLRendering(indexVar.get(), allColumnIDs))
+                                        serializeTerm(indexVar.get(), allColumnIDs))
                                 : outputVarString;
                     }
 

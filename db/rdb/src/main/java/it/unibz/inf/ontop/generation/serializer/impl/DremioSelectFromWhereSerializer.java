@@ -44,9 +44,9 @@ public class DremioSelectFromWhereSerializer extends DefaultSelectFromWhereSeria
 
                     //Due to a limitation of dremio, we need to cast integer constants in VALUES terms to integers, as they would be types as int64 otherwise.
                     @Override
-                    protected String serializeValuesEntry(Constant constant, ImmutableMap<Variable, QualifiedAttributeID> childColumnIDs) {
-                        String serialization = sqlTermSerializer.serialize(constant, childColumnIDs);
-                        if(constant instanceof DBConstant && ((DBConstant) constant).getType().getCategory() == DBTermType.Category.INTEGER) {
+                    protected String serializeValuesEntry(Constant constant) {
+                        String serialization = serializeTerm(constant, childColumnIDs);
+                        if (constant instanceof DBConstant && ((DBConstant) constant).getType().getCategory() == DBTermType.Category.INTEGER) {
                             return String.format("CAST(%s as INTEGER)", serialization);
                         }
                         return serialization;
@@ -102,15 +102,15 @@ public class DremioSelectFromWhereSerializer extends DefaultSelectFromWhereSeria
 
                         //FLATTEN only works on ARRAY<T> types, so we first transform the JSON-array into an ARRAY<STRING> if it is not already one
                         var expression = flattenedType.getCategory() == DBTermType.Category.ARRAY
-                                ? getSQLRendering(flattenedVar, allColumnIDs)
-                                : String.format("CONVERT_FROM(%s, 'json')", getSQLRendering(flattenedVar, allColumnIDs));
+                                ? serializeTerm(flattenedVar, allColumnIDs)
+                                : String.format("CONVERT_FROM(%s, 'json')", serializeTerm(flattenedVar, allColumnIDs));
 
                         // We need to run `CASE WHEN RAND() > 1...` here, because otherwise, casting the resulting column to
                         //a different datatype will make the query fail.
                         return serializeFlattenAsSubQuery(flattenedVar, allColumnIDs, subQuerySerialization,
-                                Stream.of(serializeAlias(
+                                Stream.of(serializeColumnAlias(
                                         String.format("CASE WHEN RAND() > 1 THEN NULL ELSE FLATTEN(%s) END", expression),
-                                        getSQLRendering(outputVar, allColumnIDs))));
+                                        serializeTerm(outputVar, allColumnIDs))));
                     }
 
                     /*

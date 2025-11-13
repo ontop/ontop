@@ -56,9 +56,9 @@ public class BigQuerySelectFromWhereSerializer extends DefaultSelectFromWhereSer
                         // SELECT <variables> FROM <subquery> CROSS JOIN UNNEST(<flattenedVariable>) [WITH OFFSET <names>]
                         String string = String.format("%s CROSS JOIN UNNEST(%s) %s %s ",
                                 subQuerySerialization.getString(),
-                                getSQLRendering(flattenedVar, allColumnIDs),
-                                getSQLRendering(outputVar, allColumnIDs),
-                                getSQLRendering("WITH OFFSET %s", indexVar, allColumnIDs));
+                                serializeTerm(flattenedVar, allColumnIDs),
+                                serializeTerm(outputVar, allColumnIDs),
+                                serializeOptionalTerm("WITH OFFSET %s", indexVar, allColumnIDs));
 
                         return new QuerySerializationImpl(
                                 string,

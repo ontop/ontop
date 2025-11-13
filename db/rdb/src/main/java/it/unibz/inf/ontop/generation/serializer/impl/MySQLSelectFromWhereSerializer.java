@@ -13,7 +13,6 @@ import it.unibz.inf.ontop.dbschema.QualifiedAttributeID;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.type.DBTermType;
-import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.StringUtils;
 
 import java.util.Optional;
@@ -47,37 +46,29 @@ public class MySQLSelectFromWhereSerializer extends DefaultSelectFromWhereSerial
                      * See http://sqlfiddle.com/#!9/255d2e/18
                      */
                     @Override
-                    protected String serializeOrderBy(ImmutableList<SQLOrderComparator> sortConditions,
-                                                      ImmutableMap<Variable, QualifiedAttributeID> fromColumnMap) {
-                        if (sortConditions.isEmpty())
-                            return "";
-
-                        String conditionString = sortConditions.stream()
-                                .map(c -> sqlTermSerializer.serialize(c.getTerm(), fromColumnMap) +
-                                        (c.isAscending() ? "" : " DESC"))
-                                .collect(Collectors.joining(", "));
-
-                        return String.format("ORDER BY %s\n", conditionString);
+                    protected String serializeOrderByComparator(SQLOrderComparator c, ImmutableMap<Variable, QualifiedAttributeID> columnIDs) {
+                        return serializeTerm(c.getTerm(), columnIDs) +
+                                (c.isAscending() ? "" : " DESC");
                     }
 
-                    /**
-                     *  http://dev.mysql.com/doc/refman/5.0/en/select.html
-                     *
-                     * With two arguments, the first argument specifies the offset of the first row to return,
-                     * and the second specifies the maximum number of rows to return. The offset of the initial
-                     * row is 0 (not 1):
-                     * SELECT * FROM tbl LIMIT 5,10;  # Retrieve rows 6-15
-                     *
-                     * To retrieve all rows from a certain offset up to the end of the result set, you can
-                     * use some large number for the second parameter. This statement retrieves all rows from
-                     * the 96th row to the last:
-                     * SELECT * FROM tbl LIMIT 95,18446744073709551615;
-                     *
-                     * With one argument, the value specifies the number of rows to return from the beginning
-                     * of the result set:
-                     * SELECT * FROM tbl LIMIT 5;     # Retrieve first 5 rows
-                     * In other words, LIMIT row_count is equivalent to LIMIT 0, row_count.
-                     */
+                        /**
+                         *  http://dev.mysql.com/doc/refman/5.0/en/select.html
+                         *
+                         * With two arguments, the first argument specifies the offset of the first row to return,
+                         * and the second specifies the maximum number of rows to return. The offset of the initial
+                         * row is 0 (not 1):
+                         * SELECT * FROM tbl LIMIT 5,10;  # Retrieve rows 6-15
+                         *
+                         * To retrieve all rows from a certain offset up to the end of the result set, you can
+                         * use some large number for the second parameter. This statement retrieves all rows from
+                         * the 96th row to the last:
+                         * SELECT * FROM tbl LIMIT 95,18446744073709551615;
+                         *
+                         * With one argument, the value specifies the number of rows to return from the beginning
+                         * of the result set:
+                         * SELECT * FROM tbl LIMIT 5;     # Retrieve first 5 rows
+                         * In other words, LIMIT row_count is equivalent to LIMIT 0, row_count.
+                         */
 
                     // serializeLimitOffset and serializeLimit are standard
 
@@ -102,9 +93,9 @@ public class MySQLSelectFromWhereSerializer extends DefaultSelectFromWhereSerial
                         return serializeFlattenAsJoin(
                                 flattenedVar,
                                 String.format(getFlattenFunctionFormat(),
-                                        getSQLRendering(flattenedVar, allColumnIDs),
-                                        getSQLRendering(outputVar, allColumnIDs),
-                                        getSQLRendering(", %s for ordinality", indexVar, allColumnIDs)),
+                                        serializeTerm(flattenedVar, allColumnIDs),
+                                        serializeTerm(outputVar, allColumnIDs),
+                                        serializeOptionalTerm(", %s for ordinality", indexVar, allColumnIDs)),
                                 allColumnIDs,
                                 subQuerySerialization);
                     }
