@@ -58,6 +58,10 @@ public class DefaultSQLIQTree2NativeNodeGenerator implements IQTree2NativeNodeGe
                         Map.Entry::getKey,
                         e -> e.getValue().getAttribute()));
 
+        if (!serializedQuery.getCTEMap().isEmpty()) {
+            System.out.println("SQL-WITH:\n" + serializedQuery.getStringWithPreamble());
+        }
+
         return iqFactory.createNativeNode(signature, variableTypeMap, columnNames,
                 serializedQuery.getStringWithPreamble(), iqTree.getVariableNullability());
     }
