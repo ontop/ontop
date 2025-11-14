@@ -1,6 +1,5 @@
 package it.unibz.inf.ontop.generation.serializer.impl;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -11,8 +10,6 @@ import it.unibz.inf.ontop.dbschema.DBParameters;
 import it.unibz.inf.ontop.dbschema.QualifiedAttributeID;
 import it.unibz.inf.ontop.dbschema.QuotedIDFactory;
 import it.unibz.inf.ontop.model.term.Variable;
-
-import java.util.stream.Collectors;
 
 /**
  * Useful for instead for SQL Server which already treats NULLs as the lowest values
@@ -40,6 +37,5 @@ public class IgnoreNullFirstSelectFromWhereSerializer extends DefaultSelectFromW
             return serializeTerm(c.getTerm(), columnIDs)
                     + (c.isAscending() ? "" : " DESC");
         }
-
     }
 }

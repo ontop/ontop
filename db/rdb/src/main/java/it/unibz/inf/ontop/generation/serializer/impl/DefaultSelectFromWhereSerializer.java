@@ -241,10 +241,15 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
         @Override
         public QuerySerialization visit(SQLTable sqlTable) {
             RelationDefinition relation = sqlTable.getRelationDefinition();
-            if (relation instanceof BlackBoxViewDefinition) {
+            if (isCTEExpansionOfBlackBoxViewsSupported()
+                    && relation instanceof BlackBoxViewDefinition) {
                 return serializeRelationAsCTE(relation, sqlTable.getArgumentMap());
             }
             return serializeRelation(relation, sqlTable.getArgumentMap());
+        }
+
+        protected boolean isCTEExpansionOfBlackBoxViewsSupported() {
+            return true;
         }
 
         protected final QuerySerialization serializeRelation(RelationDefinition relation, ImmutableMap<Integer, ? extends ImmutableTerm> argumentMap) {
@@ -596,6 +601,7 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
         @Override
         public String serialize(ImmutableTerm term, ImmutableMap<Variable, QualifiedAttributeID> columnIDs)
                 throws SQLSerializationException {
+
             if (term instanceof Constant) {
                 return serializeConstant((Constant)term);
             }
@@ -625,6 +631,7 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
         private String serializeConstant(Constant constant) {
             if (constant.isNull())
                 return constant.getValue();
+
             if (!(constant instanceof DBConstant)) {
                 throw new SQLSerializationException(
                         "Only DBConstants or NULLs are expected in sub-tree to be translated into SQL");
@@ -634,7 +641,6 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
 
         protected String serializeDBConstant(DBConstant constant) {
             DBTermType dbType = constant.getType();
-
             switch (dbType.getCategory()) {
                 case DECIMAL:
                 case FLOAT_DOUBLE:

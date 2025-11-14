@@ -1,6 +1,5 @@
 package it.unibz.inf.ontop.generation.serializer.impl;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -16,7 +15,6 @@ import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.utils.StringUtils;
 
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Singleton
 public class MySQLSelectFromWhereSerializer extends DefaultSelectFromWhereSerializer implements SelectFromWhereSerializer {
@@ -38,6 +36,12 @@ public class MySQLSelectFromWhereSerializer extends DefaultSelectFromWhereSerial
     public QuerySerialization serialize(SelectFromWhereWithModifiers selectFromWhere, DBParameters dbParameters) {
         return selectFromWhere.acceptVisitor(
                 new DefaultRelationVisitingSerializer(dbParameters.getQuotedIDFactory()) {
+                    private final boolean versionAbove5 = !dbParameters.getDbmsVersion().startsWith("5.");
+
+                    @Override
+                    protected boolean isCTEExpansionOfBlackBoxViewsSupported() {
+                        return versionAbove5;
+                    }
 
                     /**
                      * MySQL seems to already treat NULLs as the lowest values
@@ -51,24 +55,24 @@ public class MySQLSelectFromWhereSerializer extends DefaultSelectFromWhereSerial
                                 (c.isAscending() ? "" : " DESC");
                     }
 
-                        /**
-                         *  http://dev.mysql.com/doc/refman/5.0/en/select.html
-                         *
-                         * With two arguments, the first argument specifies the offset of the first row to return,
-                         * and the second specifies the maximum number of rows to return. The offset of the initial
-                         * row is 0 (not 1):
-                         * SELECT * FROM tbl LIMIT 5,10;  # Retrieve rows 6-15
-                         *
-                         * To retrieve all rows from a certain offset up to the end of the result set, you can
-                         * use some large number for the second parameter. This statement retrieves all rows from
-                         * the 96th row to the last:
-                         * SELECT * FROM tbl LIMIT 95,18446744073709551615;
-                         *
-                         * With one argument, the value specifies the number of rows to return from the beginning
-                         * of the result set:
-                         * SELECT * FROM tbl LIMIT 5;     # Retrieve first 5 rows
-                         * In other words, LIMIT row_count is equivalent to LIMIT 0, row_count.
-                         */
+                    /**
+                     *  http://dev.mysql.com/doc/refman/5.0/en/select.html
+                     *
+                     * With two arguments, the first argument specifies the offset of the first row to return,
+                     * and the second specifies the maximum number of rows to return. The offset of the initial
+                     * row is 0 (not 1):
+                     * SELECT * FROM tbl LIMIT 5,10;  # Retrieve rows 6-15
+                     *
+                     * To retrieve all rows from a certain offset up to the end of the result set, you can
+                     * use some large number for the second parameter. This statement retrieves all rows from
+                     * the 96th row to the last:
+                     * SELECT * FROM tbl LIMIT 95,18446744073709551615;
+                     *
+                     * With one argument, the value specifies the number of rows to return from the beginning
+                     * of the result set:
+                     * SELECT * FROM tbl LIMIT 5;     # Retrieve first 5 rows
+                     * In other words, LIMIT row_count is equivalent to LIMIT 0, row_count.
+                     */
 
                     // serializeLimitOffset and serializeLimit are standard
 
@@ -103,9 +107,9 @@ public class MySQLSelectFromWhereSerializer extends DefaultSelectFromWhereSerial
     }
 
     protected String getFlattenFunctionFormat() {
-        //   By default, running JSON_TABLE on a JSON-array that was created by a different JSON_TABLE call
-        //   will return an empty list. We can circumvent this, by putting another array around it (calling
-        //   `JSON_ARRAY`) and then de-referencing it again in the path selector ($[0][*]).
+        // By default, running JSON_TABLE on a JSON-array that was created by a different JSON_TABLE call
+        // will return an empty list. We can circumvent this, by putting another array around it (calling
+        // `JSON_ARRAY`) and then de-referencing it again in the path selector ($[0][*]).
         return "JSON_TABLE(JSON_ARRAY(%s), '$[0][*]' columns(%s JSON path '$' %s))";
     }
 }
