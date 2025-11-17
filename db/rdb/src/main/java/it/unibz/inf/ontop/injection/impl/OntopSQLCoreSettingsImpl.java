@@ -45,10 +45,8 @@ public class OntopSQLCoreSettingsImpl extends OntopOBDASettingsImpl implements O
 
         jdbcUrl = getRequiredProperty(OntopSQLCoreSettings.JDBC_URL);
         jdbcDriver = getRequiredProperty(OntopSQLCoreSettings.JDBC_DRIVER);
-        useCTEs = getBoolean(ONTOP_USE_COMMON_TABLE_EXPRESSIONS_FOR_BLACK_BOX_VIEWS_IF_SUPPORTED)
-                .orElse(true);
-        ctePrefix = getProperty(ONTOP_COMMON_TABLE_EXPRESSIONS_PREFIX)
-                .orElse("ontopCTE");
+        useCTEs = getRequiredBoolean(ONTOP_USE_COMMON_TABLE_EXPRESSIONS_FOR_BLACK_BOX_VIEWS_IF_SUPPORTED);
+        ctePrefix = getRequiredProperty(ONTOP_COMMON_TABLE_EXPRESSIONS_PREFIX);
     }
 
     static Properties loadSQLCoreProperties(Properties userProperties) {
