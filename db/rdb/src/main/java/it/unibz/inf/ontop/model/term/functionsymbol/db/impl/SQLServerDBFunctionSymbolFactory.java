@@ -704,8 +704,13 @@ public class SQLServerDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbo
         return new NullIgnoringDBVarianceFunctionSymbol(isPop ? "VARP" : "VAR", inputType, targetType, isPop, isDistinct);
     }
 
-    protected String serializeDurationAdd(ImmutableList<? extends ImmutableTerm> terms,
-                                          Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
-        throw new UnsupportedOperationException("Interval addition not yet implemented for SQL Server");
+    @Override
+    protected String serializeIntervalDenorm(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        throw new UnsupportedOperationException("SQL Server does not support INTERVAL as a type");
+    }
+
+    @Override
+    protected String serializeIntervalNorm(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        throw new UnsupportedOperationException("SQL Server does not support INTERVAL as a type");
     }
 }

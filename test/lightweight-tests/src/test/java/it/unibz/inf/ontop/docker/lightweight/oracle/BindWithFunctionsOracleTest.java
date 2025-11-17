@@ -135,4 +135,10 @@ public class BindWithFunctionsOracleTest extends AbstractBindTestWithFunctions {
         String query = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\nSELECT ?v WHERE { dc:switchCaseResult dc:value ?v } ";
         executeAndCompareValues(query, ImmutableSet.of("\"2\"^^xsd:integer", "\"1\"^^xsd:integer"));
     }
+
+    @Override
+    protected ImmutableSet<String> getDurationArithmeticExpectedResults() {
+        return ImmutableSet.of("\"1970-09-05T08:35:00.000000+02:00\"^^xsd:dateTime", "\"2011-10-08T12:15:00.000000+02:00\"^^xsd:dateTime",
+                "\"2014-04-05T16:32:52.000000+02:00\"^^xsd:dateTime", "\"2015-07-21T09:08:06.000000+02:00\"^^xsd:dateTime" );
+    }
 }

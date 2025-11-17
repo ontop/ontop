@@ -57,6 +57,12 @@ public class BindWithFunctionsAthenaTest extends AbstractBindTestWithFunctions {
         return ImmutableList.of("\"0.500000000000000000\"^^xsd:decimal");
     }
 
+    @Override
+    protected ImmutableSet<String> getDurationArithmeticExpectedResults() {
+        return ImmutableSet.of("\"1970-09-05T07:35:00.000\"^^xsd:dateTime", "\"2011-10-08T11:15:00.000\"^^xsd:dateTime",
+                "\"2014-04-05T16:32:52.000\"^^xsd:dateTime", "\"2015-07-21T09:08:06.000\"^^xsd:dateTime" );
+    }
+
     @Disabled("Athena counts one hour less on two results")
     @Test
     @Override

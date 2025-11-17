@@ -524,6 +524,10 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
         DBTermType defaultBinaryType = dbTypeFactory.getDBHexBinaryType();
         DBTypeConversionFunctionSymbol hexBinaryNormFunctionSymbol = createHexBinaryNormFunctionSymbol(defaultBinaryType);
         builder.put(defaultBinaryType, hexBinaryNormFunctionSymbol);
+        // Interval types
+        DBTermType defaultIntervalType = dbTypeFactory.getDBIntervalType();
+        DBTypeConversionFunctionSymbol intervalNormFunctionSymbol = createIntervalNormFunctionSymbol(defaultIntervalType);
+        builder.put(defaultIntervalType, intervalNormFunctionSymbol);
 
         return builder.build();
     }
@@ -538,6 +542,7 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
         DBTermType timestampType = dbTypeFactory.getDBDateTimestampType();
         DBTermType booleanType = dbTypeFactory.getDBBooleanType();
         DBTermType binaryType = dbTypeFactory.getDBHexBinaryType();
+        DBTermType intervalType = dbTypeFactory.getDBIntervalType();
 
         ImmutableMap.Builder<DBTermType, DBTypeConversionFunctionSymbol> builder = ImmutableMap.builder();
 
@@ -551,6 +556,10 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
         // Binary
         DBTypeConversionFunctionSymbol hexBinaryDenormFunctionSymbol = createHexBinaryDenormFunctionSymbol(binaryType);
         builder.put(binaryType, hexBinaryDenormFunctionSymbol);
+
+        // Interval
+        DBTypeConversionFunctionSymbol intervalDenormFunctionSymbol = createIntervalDenormFunctionSymbol(intervalType);
+        builder.put(intervalType, intervalDenormFunctionSymbol);
 
         return builder.build();
     }
@@ -1367,9 +1376,11 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
     protected abstract DBTypeConversionFunctionSymbol createDateTimeNormFunctionSymbol(DBTermType dbDateTimestampType);
     protected abstract DBTypeConversionFunctionSymbol createBooleanNormFunctionSymbol(DBTermType booleanType);
     protected abstract DBTypeConversionFunctionSymbol createHexBinaryNormFunctionSymbol(DBTermType binaryType);
+    protected abstract DBTypeConversionFunctionSymbol createIntervalNormFunctionSymbol(DBTermType intervalType);
     protected abstract DBTypeConversionFunctionSymbol createDateTimeDenormFunctionSymbol(DBTermType timestampType);
     protected abstract DBTypeConversionFunctionSymbol createBooleanDenormFunctionSymbol();
     protected abstract DBTypeConversionFunctionSymbol createHexBinaryDenormFunctionSymbol(DBTermType binaryType);
+    protected abstract DBTypeConversionFunctionSymbol createIntervalDenormFunctionSymbol(DBTermType intervalType);
 
     protected DBBooleanFunctionSymbol createLikeFunctionSymbol() {
         return new DBLikeFunctionSymbolImpl(dbBooleanType, rootDBType);
@@ -1843,12 +1854,7 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
      * Time extension - duration arithmetic
      */
 
-    @Override
-    public DBFunctionSymbol getDBBinaryTemporalOperationFunctionSymbol(String operator, DBTermType argType1, DBTermType argType2, DBTermType dbResultType) {
-        return new DefaultDBBinaryTemporalOperationFunctionSymbol(operator, argType1, argType2, dbResultType);
-    }
-
-protected DBFunctionSymbol createWeeksBetweenFromDateTimeFunctionSymbol() {
+    protected DBFunctionSymbol createWeeksBetweenFromDateTimeFunctionSymbol() {
         return new DBFunctionSymbolWithSerializerImpl("DB_WEEK_DIFF_FROM_DATETIME", ImmutableList.of(rootDBType, rootDBType), dbIntegerType, false,
                 this::serializeWeeksBetweenFromDateTime);
     }
@@ -2069,8 +2075,6 @@ protected DBFunctionSymbol createWeeksBetweenFromDateTimeFunctionSymbol() {
                                                                 Function<ImmutableTerm, String> converter,
                                                               TermFactory termFactory);
 
-
-
     @Override
     public DBTypeConversionFunctionSymbol getConversion2RDFLexicalFunctionSymbol(DBTermType inputType, RDFTermType rdfTermType) {
         return Optional.of(rdfTermType)
@@ -2098,5 +2102,19 @@ protected DBFunctionSymbol createWeeksBetweenFromDateTimeFunctionSymbol() {
                 // Fallback to simple cast
                 .orElseGet(() -> getDBCastFunctionSymbol(dbStringType, targetDBType));
     }
+
+    @Override
+    public DBFunctionSymbol getDBTemporalBinaryOperator(String operator, ImmutableList<DBTermType> argumentsTerms, DBTermType dbResultType) {
+        return new DBBinaryTemporalOperationFunctionSymbol(operator, argumentsTerms.get(0), argumentsTerms.get(1), dbResultType);
+    }
+
+    protected abstract String serializeIntervalNorm(ImmutableList<? extends ImmutableTerm> terms,
+                                                    Function<ImmutableTerm, String> termConverter, TermFactory termFactory);
+
+
+    protected abstract String serializeIntervalDenorm(ImmutableList<? extends ImmutableTerm> terms,
+                                                      Function<ImmutableTerm, String> termConverter, TermFactory termFactory);
+
+
 
 }

@@ -230,7 +230,7 @@ public interface DBFunctionSymbolFactory {
 
     DBMathBinaryOperator getDBMathBinaryOperator(String dbMathOperatorName, DBTermType arg1Type, DBTermType arg2Type);
 
-    DBFunctionSymbol getDBBinaryTemporalOperationFunctionSymbol(String operator, DBTermType argType1, DBTermType argType2, DBTermType DBResultType);
+    DBFunctionSymbol getDBTemporalBinaryOperator(String operator, ImmutableList<DBTermType> argumentsTerms, DBTermType dbResultType);
     /**
      * Please use getDBMathBinaryOperator(...) if you know the type
      */

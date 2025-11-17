@@ -469,11 +469,11 @@ public class TermFactoryImpl implements TermFactory {
 	}
 
     @Override
-    public ImmutableFunctionalTerm getDBBinaryTemporalOperationFunctionalTerm(String dbArithmeticOperationName, ImmutableTerm dbTerm1, ImmutableTerm dbTerm2,
-                                                                              DBTermType argumentType1, DBTermType argumentType2, DBTermType returnType) {
+    public ImmutableFunctionalTerm getDBBinaryTemporalFunctionalTerm(String dbArithmeticOperationName, ImmutableList<ImmutableTerm> dbTerms,
+                                                                     ImmutableList<DBTermType> argumentsTypes, DBTermType returnType) {
         return getImmutableFunctionalTerm(
-                dbFunctionSymbolFactory.getDBBinaryTemporalOperationFunctionSymbol(dbArithmeticOperationName, argumentType1, argumentType2, returnType),
-                dbTerm1, dbTerm2);
+                dbFunctionSymbolFactory.getDBTemporalBinaryOperator(dbArithmeticOperationName, argumentsTypes, returnType),
+                dbTerms.get(0), dbTerms.get(1));
     }
 
 	@Override

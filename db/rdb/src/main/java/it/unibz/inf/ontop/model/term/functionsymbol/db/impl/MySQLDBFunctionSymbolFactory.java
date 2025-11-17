@@ -14,6 +14,7 @@ import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.DBTypeFactory;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.model.vocabulary.SPARQL;
+import it.unibz.inf.ontop.utils.Interval;
 
 
 import java.util.HashMap;
@@ -531,5 +532,33 @@ public class MySQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFac
             throw new UnsupportedOperationException("This dialect does not allow the use of DISTINCT with the variance function.");
         }
         return super.getNullIgnoringDBVariance(dbType, isPop, false);
+    }
+
+    @Override
+    protected String serializeIntervalDenorm(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        Interval interval = new Interval(termConverter.apply(terms.get(0)));
+        String intervalYearMonth;
+        String intervalDayTime;
+        if (interval.isNegative()) {
+            intervalYearMonth = interval.getMonths() == 0 && interval.getYears() == 0 ? ""
+                    : String.format("INTERVAL '-%d-%d' YEAR_MONTH", interval.getYears(), interval.getMonths());
+
+            intervalDayTime = interval.getDays() == 0 && interval.getHours() == 0
+                    && interval.getMinutes() == 0 && interval.getTotalSeconds() == 0 ? ""
+                    : String.format("INTERVAL '-%d %d:%d:%f' DAY_MICROSECOND", interval.getDays(), interval.getHours(),
+                    interval.getMinutes(), interval.getTotalSeconds());
+        } else {
+            intervalYearMonth = interval.getMonths() == 0 && interval.getYears() == 0 ? ""
+                    : String.format("INTERVAL '%d-%d' YEAR_MONTH", interval.getYears(), interval.getMonths());
+
+            intervalDayTime = interval.getDays() == 0 && interval.getHours() == 0
+                    && interval.getMinutes() == 0 && interval.getTotalSeconds() == 0 ? ""
+                    : String.format("INTERVAL '%d %d:%d:%f' DAY_MICROSECOND", interval.getDays(), interval.getHours(),
+                    interval.getMinutes(), interval.getTotalSeconds());
+        }
+
+        return intervalYearMonth.isEmpty() || intervalDayTime.isEmpty()
+                ? String.format("%s%s", intervalYearMonth, intervalDayTime)
+                : String.format("%s + %s", intervalYearMonth, intervalDayTime);
     }
 }

@@ -141,14 +141,27 @@ public class BinaryArithmeticLexicalFunctionSymbolImpl extends FunctionSymbolImp
                     .collect(ImmutableCollectors.toList());
 
             if (!(durationArgumentsIdx.stream().allMatch(i -> lexicalTerms.get(i) instanceof Constant))) {
-                return termFactory.getNullConstant();
+                throw new UnsupportedOperationException("Duration arguments must be constants");
             }
             
             ImmutableList<DBTermType> dbTypes = typeTerms.stream()
                     .map(t -> t.getClosestDBType(termFactory.getTypeFactory().getDBTypeFactory()))
                     .collect(ImmutableCollectors.toList());
 
-            return termFactory.getDBBinaryTemporalOperationFunctionalTerm(dbOperationName, lexicalTerms.get(0), lexicalTerms.get(1),
-                    dbTypes.get(0), dbTypes.get(1),dbTypes.get(2));
+            // reorder the arguments so that the possible duration argument is second
+            ImmutableFunctionalTerm temporalTerm;
+            if (durationArgumentsIdx.size() == 1 && durationArgumentsIdx.get(0) == 0) {
+                temporalTerm = termFactory.getDBBinaryTemporalFunctionalTerm(dbOperationName,
+                        ImmutableList.of(termFactory.getConversionFromRDFLexical2DB(dbTypes.get(1), lexicalTerms.get(1), typeTerms.get(1)),
+                                termFactory.getConversionFromRDFLexical2DB(dbTypes.get(0), lexicalTerms.get(0), typeTerms.get(0))),
+                        ImmutableList.of(dbTypes.get(1), dbTypes.get(0)), dbTypes.get(2));
+            } else {
+                temporalTerm = termFactory.getDBBinaryTemporalFunctionalTerm(dbOperationName,
+                        ImmutableList.of(termFactory.getConversionFromRDFLexical2DB(dbTypes.get(0), lexicalTerms.get(0), typeTerms.get(0)),
+                                termFactory.getConversionFromRDFLexical2DB(dbTypes.get(1), lexicalTerms.get(1), typeTerms.get(1))),
+                        dbTypes.subList(0,2), dbTypes.get(2));
+            }
+
+            return termFactory.getConversion2RDFLexical(dbTypes.get(2), temporalTerm, typeTerms.get(2));
     }
 }

@@ -10,6 +10,7 @@ import it.unibz.inf.ontop.model.term.functionsymbol.InequalityLabel;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.*;
 import it.unibz.inf.ontop.model.type.*;
 import it.unibz.inf.ontop.model.type.impl.DatetimeDBTermType;
+import it.unibz.inf.ontop.utils.Interval;
 
 import java.util.Map;
 import java.util.Optional;
@@ -872,6 +873,44 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
     }
 
     @Override
+    protected String serializeIntervalNorm(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        throw new RuntimeException("Not yet implemented");
+    }
+
+    @Override
+    protected String serializeIntervalDenorm(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        Interval interval = new Interval(termConverter.apply(terms.get(0)));
+        String intervalYearMonth;
+        String intervalDayTime;
+        if (interval.isNegative()) {
+            intervalYearMonth = interval.getMonths() == 0 && interval.getYears() == 0 ? ""
+                    : String.format("INTERVAL '-%d-%d' YEAR TO MONTH", interval.getYears(), interval.getMonths());
+
+            intervalDayTime = interval.getDays() == 0 && interval.getHours() == 0
+                    && interval.getMinutes() == 0 && interval.getTotalSeconds() == 0 ? ""
+                    : String.format("INTERVAL '-%d %d:%d:%f' DAY TO SECOND", interval.getDays(), interval.getHours(),
+                    interval.getMinutes(), interval.getTotalSeconds());
+        } else {
+            intervalYearMonth = interval.getMonths() == 0 && interval.getYears() == 0 ? ""
+                    : String.format("INTERVAL '%d-%d' YEAR TO MONTH", interval.getYears(), interval.getMonths());
+
+            intervalDayTime = interval.getDays() == 0 && interval.getHours() == 0
+                    && interval.getMinutes() == 0 && interval.getTotalSeconds() == 0 ? ""
+                    : String.format("INTERVAL '%d %d:%d:%f' DAY TO SECOND", interval.getDays(), interval.getHours(),
+                    interval.getMinutes(), interval.getTotalSeconds());
+        }
+
+        return intervalYearMonth.isEmpty() || intervalDayTime.isEmpty()
+                ? String.format("%s%s", intervalYearMonth, intervalDayTime)
+                : String.format("%s + %s", intervalYearMonth, intervalDayTime);
+
+    }
+    @Override
+    protected DBTypeConversionFunctionSymbol createIntervalNormFunctionSymbol(DBTermType intervalType) {
+        return new DefaultIntervalNormFunctionSymbol(intervalType, dbStringType, this::serializeIntervalNorm);
+    }
+
+    @Override
     protected DBTypeConversionFunctionSymbol createDateTimeDenormFunctionSymbol(DBTermType timestampType) {
         return new DefaultSQLTimestampISODenormFunctionSymbol(timestampType, dbStringType);
     }
@@ -884,6 +923,11 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
     @Override
     protected DBTypeConversionFunctionSymbol createHexBinaryDenormFunctionSymbol(DBTermType binaryType) {
         return new DefaultHexBinaryDenormFunctionSymbol(binaryType, dbStringType, this::serializeHexBinaryDenorm);
+    }
+
+    @Override
+    protected DBTypeConversionFunctionSymbol createIntervalDenormFunctionSymbol(DBTermType intervalType) {
+        return new DefaultIntervalDenormFunctionSymbol(intervalType, dbStringType, this::serializeIntervalDenorm);
     }
 
     @Override
@@ -1536,4 +1580,68 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
                         " THEN NULL ELSE CAST(%1$s AS DATE) END",
                 term);
     }
+
+/*    protected ImmutableList<String> getSerializedIntervals(String operator, ImmutableList<? extends ImmutableTerm> terms,
+                                                           ImmutableList<DBTermType> argumentTypes) {
+
+        ImmutableList<Integer> intervalTermIdx = IntStream.range(0, argumentTypes.size())
+                .filter(i -> argumentTypes.get(i).getCategory() == DBTermType.Category.INTERVAL)
+                .boxed()
+                .collect(ImmutableList.toImmutableList());
+
+        ImmutableList<ImmutableTerm> intervalTerms = intervalTermIdx.stream()
+                .map(terms::get)
+                .collect(ImmutableList.toImmutableList());
+
+        return   intervalTerms.stream()
+                .map(i -> new DBInterval(((DBConstant) i).getValue()))
+                .map(interval -> serializeInterval(operator, interval))
+                .collect(ImmutableList.toImmutableList());
+    }
+
+    @Override
+    protected String serializeIntervalOperation(String operator, ImmutableList<? extends ImmutableTerm> terms, ImmutableList<DBTermType> argumentTypes,
+                                                Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        String template = "%s " + operator + " %s";
+
+        var serializedIntervals =  getSerializedIntervals(operator, terms, argumentTypes);
+
+        if (serializedIntervals.isEmpty()) {
+            return String.format(template,
+                    termConverter.apply(terms.get(0)),
+                    termConverter.apply(terms.get(1)));
+        } else if (serializedIntervals.size() == 2) {
+            return String.format(template, serializedIntervals.get(0), serializedIntervals.get(1));
+        } else if (serializedIntervals.size() == 1) {
+            // Always put the interval as the second argument
+            int intervalIdx = argumentTypes.get(0).getCategory() == DBTermType.Category.INTERVAL ? 0 : 1;
+            int otherIdx = 1 - intervalIdx;
+            String otherSerialized = getDBCastFunctionSymbol(argumentTypes.get(otherIdx))
+                    .getNativeDBString(ImmutableList.of(terms.get(otherIdx)), termConverter, termFactory);
+            return String.format(template, otherSerialized, serializedIntervals.get(0));
+        } else {
+            throw new IllegalStateException("Unexpected interval count: " + serializedIntervals.size());
+        }
+    }*/
+
+/*    @Override
+    protected String serializeInterval(String operatorString, DBInterval interval) {
+        String intervalYearMonth = interval.getMonths() == 0 && interval.getYears() == 0 ? ""
+                : String.format("INTERVAL '%d-%d' YEAR TO MONTH", interval.getYears(), interval.getMonths());
+
+        String intervalDayTime = interval.getDays() == 0 && interval.getHours() == 0
+                && interval.getMinutes() == 0 && interval.getTotalSeconds() == 0 ? ""
+                : String.format("INTERVAL '%d %d:%d:%f' DAY TO SECOND", interval.getDays(), interval.getHours(),
+                interval.getMinutes(), interval.getTotalSeconds());
+
+        if (interval.isNegative()) {
+            return intervalYearMonth.isEmpty() || intervalDayTime.isEmpty()
+                    ? String.format("-%s%s", intervalYearMonth, intervalDayTime)
+                    : String.format("(-%s) %s (-%s)", intervalYearMonth, operatorString, intervalDayTime);
+        } else {
+            return intervalYearMonth.isEmpty() || intervalDayTime.isEmpty()
+                    ? String.format("%s%s", intervalYearMonth, intervalDayTime)
+                    : String.format("%s %s %s", intervalYearMonth, operatorString, intervalDayTime);
+        }
+    }*/
 }

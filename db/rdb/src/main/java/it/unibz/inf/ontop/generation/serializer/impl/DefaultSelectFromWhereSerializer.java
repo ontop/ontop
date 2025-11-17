@@ -541,7 +541,7 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
         }
 
         protected String serializeDatetimeConstant(String datetime, DBTermType dbType) {
-            return serializeStringConstant(datetime);
+            return String.format("CAST(%s AS %s)", serializeStringConstant(datetime), dbType.getCastName());
         }
 
         protected String serializeBooleanConstant(DBConstant booleanConstant) {
