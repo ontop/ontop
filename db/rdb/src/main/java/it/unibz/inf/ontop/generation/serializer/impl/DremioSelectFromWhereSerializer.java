@@ -9,6 +9,7 @@ import it.unibz.inf.ontop.generation.algebra.SQLFlattenExpression;
 import it.unibz.inf.ontop.generation.algebra.SelectFromWhereWithModifiers;
 import it.unibz.inf.ontop.generation.serializer.SQLSerializationException;
 import it.unibz.inf.ontop.generation.serializer.SelectFromWhereSerializer;
+import it.unibz.inf.ontop.injection.OntopSQLCoreSettings;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.type.DBTermType;
 
@@ -19,7 +20,7 @@ import java.util.stream.Stream;
 public class DremioSelectFromWhereSerializer extends DefaultSelectFromWhereSerializer implements SelectFromWhereSerializer {
 
     @Inject
-    private DremioSelectFromWhereSerializer(TermFactory termFactory) {
+    private DremioSelectFromWhereSerializer(TermFactory termFactory, OntopSQLCoreSettings settings) {
         super(new DefaultSQLTermSerializer(termFactory) {
             @Override
             public String serialize(ImmutableTerm term, ImmutableMap<Variable, QualifiedAttributeID> columnIDs) {
@@ -30,7 +31,7 @@ public class DremioSelectFromWhereSerializer extends DefaultSelectFromWhereSeria
             protected String serializeDatetimeConstant(String datetime, DBTermType dbType) {
                 return String.format("CAST(%s AS %s)", serializeStringConstant(datetime), dbType.getCastName());
             }
-        });
+        }, settings);
     }
 
     @Override

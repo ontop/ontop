@@ -7,6 +7,7 @@ import it.unibz.inf.ontop.dbschema.QualifiedAttributeID;
 import it.unibz.inf.ontop.generation.algebra.SQLFlattenExpression;
 import it.unibz.inf.ontop.generation.algebra.SelectFromWhereWithModifiers;
 import it.unibz.inf.ontop.dbschema.DBParameters;
+import it.unibz.inf.ontop.injection.OntopSQLCoreSettings;
 import it.unibz.inf.ontop.model.term.DBConstant;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
@@ -18,7 +19,7 @@ import java.util.Optional;
 public class OracleSelectFromWhereSerializer extends DefaultSelectFromWhereSerializer {
 
     @Inject
-    private OracleSelectFromWhereSerializer(TermFactory termFactory) {
+    private OracleSelectFromWhereSerializer(TermFactory termFactory, OntopSQLCoreSettings settings) {
         super(new DefaultSQLTermSerializer(termFactory) {
             @Override
             protected String serializeDBConstant(DBConstant constant) {
@@ -30,7 +31,7 @@ public class OracleSelectFromWhereSerializer extends DefaultSelectFromWhereSeria
                         return super.serializeDBConstant(constant);
                 }
             }
-        });
+        }, settings);
     }
 
     public static final int NAME_MAX_LENGTH = 30;

@@ -9,6 +9,7 @@ import it.unibz.inf.ontop.generation.algebra.*;
 import it.unibz.inf.ontop.generation.serializer.SQLSerializationException;
 import it.unibz.inf.ontop.generation.serializer.SelectFromWhereSerializer;
 import it.unibz.inf.ontop.dbschema.*;
+import it.unibz.inf.ontop.injection.OntopSQLCoreSettings;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbol;
 import it.unibz.inf.ontop.model.type.DBTermType;
@@ -28,14 +29,19 @@ import java.util.stream.Stream;
 public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializer {
 
     protected final SQLTermSerializer sqlTermSerializer;
+    private final String ctePrefix;
+    private final boolean useCTEs;
+
 
     @Inject
-    private DefaultSelectFromWhereSerializer(TermFactory termFactory) {
-        this(new DefaultSQLTermSerializer(termFactory));
+    private DefaultSelectFromWhereSerializer(TermFactory termFactory, OntopSQLCoreSettings settings) {
+        this(new DefaultSQLTermSerializer(termFactory), settings);
     }
 
-    protected DefaultSelectFromWhereSerializer(SQLTermSerializer sqlTermSerializer) {
+    protected DefaultSelectFromWhereSerializer(SQLTermSerializer sqlTermSerializer, OntopSQLCoreSettings settings) {
         this.sqlTermSerializer = sqlTermSerializer;
+        this.ctePrefix = settings.getOntopCommonTableExpressionsPrefix();
+        this.useCTEs = settings.useCommonTableExpressionsForBlackViewsIfSupported();
     }
 
     @Override
@@ -60,6 +66,7 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
         protected final QuotedIDFactory idFactory;
 
         protected final AtomicInteger viewCounter;
+        private final Map<String, RelationID> commonTableExpressions = Maps.newHashMap();
 
         protected DefaultRelationVisitingSerializer(QuotedIDFactory idFactory) {
             this.idFactory = idFactory;
@@ -235,13 +242,11 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
             return serializeOffset(offset.get(), noSortCondition);
         }
 
-        private final Map<String, RelationID> commonTableExpressions = Maps.newHashMap();
-        private final String CTE_PREFIX = "BBV";
-
         @Override
         public QuerySerialization visit(SQLTable sqlTable) {
             RelationDefinition relation = sqlTable.getRelationDefinition();
-            if (isCTEExpansionOfBlackBoxViewsSupported()
+            if (useCTEs
+                    && isCTEExpansionOfBlackBoxViewsSupported()
                     && relation instanceof BlackBoxViewDefinition) {
                 return serializeRelationAsCTE(relation, sqlTable.getArgumentMap());
             }
@@ -267,7 +272,7 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
             String relationDefinition = relation.getAtomPredicate().getName();
             RelationID cteID = commonTableExpressions.computeIfAbsent(
                     relationDefinition,
-                    k -> idFactory.createRelationID(CTE_PREFIX + commonTableExpressions.size()));
+                    k -> idFactory.createRelationID(ctePrefix + commonTableExpressions.size()));
 
             RelationID alias = generateFreshViewAlias();
             String sql = String.format("%s %s", cteID.getSQLRendering(), alias.getSQLRendering());

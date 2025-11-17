@@ -8,6 +8,7 @@ import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.generation.algebra.SQLValuesExpression;
 import it.unibz.inf.ontop.generation.algebra.SelectFromWhereWithModifiers;
 import it.unibz.inf.ontop.generation.serializer.SelectFromWhereSerializer;
+import it.unibz.inf.ontop.injection.OntopSQLCoreSettings;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -18,8 +19,8 @@ import java.util.stream.Collectors;
 public class H2SelectFromWhereSerializer extends DefaultSelectFromWhereSerializer implements SelectFromWhereSerializer {
 
     @Inject
-    private H2SelectFromWhereSerializer(TermFactory termFactory) {
-        super(new DefaultSQLTermSerializer(termFactory));
+    private H2SelectFromWhereSerializer(TermFactory termFactory, OntopSQLCoreSettings settings) {
+        super(new DefaultSQLTermSerializer(termFactory), settings);
     }
 
     @Override

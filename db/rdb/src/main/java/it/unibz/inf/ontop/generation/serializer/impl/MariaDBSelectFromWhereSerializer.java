@@ -2,14 +2,15 @@ package it.unibz.inf.ontop.generation.serializer.impl;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import it.unibz.inf.ontop.injection.OntopSQLCoreSettings;
 import it.unibz.inf.ontop.model.term.TermFactory;
 
 @Singleton
 public class MariaDBSelectFromWhereSerializer extends MySQLSelectFromWhereSerializer {
 
     @Inject
-    private MariaDBSelectFromWhereSerializer(TermFactory termFactory) {
-        super(termFactory);
+    private MariaDBSelectFromWhereSerializer(TermFactory termFactory, OntopSQLCoreSettings settings) {
+        super(termFactory, settings);
     }
 
     @Override

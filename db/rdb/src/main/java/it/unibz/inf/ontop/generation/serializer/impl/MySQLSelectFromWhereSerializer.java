@@ -9,6 +9,7 @@ import it.unibz.inf.ontop.generation.algebra.SelectFromWhereWithModifiers;
 import it.unibz.inf.ontop.generation.serializer.SelectFromWhereSerializer;
 import it.unibz.inf.ontop.dbschema.DBParameters;
 import it.unibz.inf.ontop.dbschema.QualifiedAttributeID;
+import it.unibz.inf.ontop.injection.OntopSQLCoreSettings;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.type.DBTermType;
@@ -22,14 +23,14 @@ public class MySQLSelectFromWhereSerializer extends DefaultSelectFromWhereSerial
     private static final ImmutableMap<Character, String> BACKSLASH = ImmutableMap.of('\\', "\\\\");
 
     @Inject
-    protected MySQLSelectFromWhereSerializer(TermFactory termFactory) {
+    protected MySQLSelectFromWhereSerializer(TermFactory termFactory, OntopSQLCoreSettings settings) {
         super(new DefaultSQLTermSerializer(termFactory) {
             @Override
             protected String serializeStringConstant(String constant) {
                 // parent method + doubles backslashes
                 return StringUtils.encode(super.serializeStringConstant(constant), BACKSLASH);
             }
-        });
+        }, settings);
     }
 
     @Override

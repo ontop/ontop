@@ -13,6 +13,7 @@ import it.unibz.inf.ontop.generation.algebra.SQLOrderComparator;
 import it.unibz.inf.ontop.generation.algebra.SelectFromWhereWithModifiers;
 import it.unibz.inf.ontop.generation.serializer.SQLSerializationException;
 import it.unibz.inf.ontop.generation.serializer.SelectFromWhereSerializer;
+import it.unibz.inf.ontop.injection.OntopSQLCoreSettings;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.substitution.Substitution;
@@ -30,14 +31,14 @@ public class SparkSQLSelectFromWhereSerializer extends DefaultSelectFromWhereSer
 
 
     @Inject
-    private SparkSQLSelectFromWhereSerializer(TermFactory termFactory) {
+    private SparkSQLSelectFromWhereSerializer(TermFactory termFactory, OntopSQLCoreSettings settings) {
         super(new DefaultSQLTermSerializer(termFactory) {
             @Override
             protected String serializeStringConstant(String constant) {
                 // parent method + doubles backslashes
                 return StringUtils.encode(super.serializeStringConstant(constant), BACKSLASH);
             }
-        });
+        }, settings);
     }
 
     @Override

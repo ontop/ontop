@@ -36,4 +36,14 @@ public class OntopReformulationSQLSettingsImpl extends OntopReformulationSetting
     public String getJdbcDriver() {
         return sqlSettings.getJdbcDriver();
     }
+
+    @Override
+    public boolean useCommonTableExpressionsForBlackViewsIfSupported() {
+        return sqlSettings.useCommonTableExpressionsForBlackViewsIfSupported();
+    }
+
+    @Override
+    public String getOntopCommonTableExpressionsPrefix() {
+        return sqlSettings.getOntopCommonTableExpressionsPrefix();
+    }
 }

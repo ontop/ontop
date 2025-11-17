@@ -9,6 +9,7 @@ import it.unibz.inf.ontop.generation.algebra.SelectFromWhereWithModifiers;
 import it.unibz.inf.ontop.generation.serializer.SelectFromWhereSerializer;
 import it.unibz.inf.ontop.dbschema.DBParameters;
 import it.unibz.inf.ontop.dbschema.QualifiedAttributeID;
+import it.unibz.inf.ontop.injection.OntopSQLCoreSettings;
 import it.unibz.inf.ontop.model.term.DBConstant;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
@@ -20,7 +21,7 @@ import java.util.stream.Collectors;
 public class DenodoSelectFromWhereSerializer extends DefaultSelectFromWhereSerializer implements SelectFromWhereSerializer {
 
     @Inject
-    private DenodoSelectFromWhereSerializer(TermFactory termFactory) {
+    private DenodoSelectFromWhereSerializer(TermFactory termFactory, OntopSQLCoreSettings settings) {
         super(new DefaultSQLTermSerializer(termFactory) {
             @Override
             protected String serializeDBConstant(DBConstant constant) {
@@ -39,7 +40,7 @@ public class DenodoSelectFromWhereSerializer extends DefaultSelectFromWhereSeria
 
                 return super.serializeDBConstant(constant);
             }
-        });
+        }, settings);
     }
 
     @Override

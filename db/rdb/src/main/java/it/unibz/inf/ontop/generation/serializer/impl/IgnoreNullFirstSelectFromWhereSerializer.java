@@ -9,6 +9,7 @@ import it.unibz.inf.ontop.generation.serializer.SelectFromWhereSerializer;
 import it.unibz.inf.ontop.dbschema.DBParameters;
 import it.unibz.inf.ontop.dbschema.QualifiedAttributeID;
 import it.unibz.inf.ontop.dbschema.QuotedIDFactory;
+import it.unibz.inf.ontop.injection.OntopSQLCoreSettings;
 import it.unibz.inf.ontop.model.term.Variable;
 
 /**
@@ -19,8 +20,8 @@ import it.unibz.inf.ontop.model.term.Variable;
 public class IgnoreNullFirstSelectFromWhereSerializer extends DefaultSelectFromWhereSerializer implements SelectFromWhereSerializer {
 
     @Inject
-    protected IgnoreNullFirstSelectFromWhereSerializer(SQLTermSerializer sqlTermSerializer) {
-        super(sqlTermSerializer);
+    protected IgnoreNullFirstSelectFromWhereSerializer(SQLTermSerializer sqlTermSerializer, OntopSQLCoreSettings settings) {
+        super(sqlTermSerializer, settings);
     }
 
     @Override

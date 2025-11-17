@@ -9,6 +9,7 @@ import it.unibz.inf.ontop.dbschema.RelationID;
 import it.unibz.inf.ontop.generation.algebra.SQLFlattenExpression;
 import it.unibz.inf.ontop.generation.algebra.SelectFromWhereWithModifiers;
 import it.unibz.inf.ontop.generation.serializer.SelectFromWhereSerializer;
+import it.unibz.inf.ontop.injection.OntopSQLCoreSettings;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.type.DBTermType;
@@ -19,13 +20,13 @@ import java.util.Optional;
 public class TrinoSelectFromWhereSerializer extends DefaultSelectFromWhereSerializer implements SelectFromWhereSerializer {
 
     @Inject
-    private TrinoSelectFromWhereSerializer(TermFactory termFactory) {
+    private TrinoSelectFromWhereSerializer(TermFactory termFactory, OntopSQLCoreSettings settings) {
         super(new DefaultSQLTermSerializer(termFactory) {
             @Override
             protected String serializeDatetimeConstant(String datetime, DBTermType dbType) {
                 return String.format("TIMESTAMP %s", serializeStringConstant(datetime));
             }
-        });
+        }, settings);
     }
 
     @Override

@@ -12,6 +12,7 @@ import it.unibz.inf.ontop.generation.algebra.SelectFromWhereWithModifiers;
 import it.unibz.inf.ontop.generation.serializer.SQLSerializationException;
 import it.unibz.inf.ontop.generation.serializer.SelectFromWhereSerializer;
 import it.unibz.inf.ontop.dbschema.DBParameters;
+import it.unibz.inf.ontop.injection.OntopSQLCoreSettings;
 import it.unibz.inf.ontop.model.term.DBConstant;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
@@ -29,7 +30,7 @@ import static it.unibz.inf.ontop.model.type.impl.PostgreSQLDBTypeFactory.*;
 public class PostgresSelectFromWhereSerializer extends DefaultSelectFromWhereSerializer implements SelectFromWhereSerializer {
 
     @Inject
-    protected PostgresSelectFromWhereSerializer(TermFactory termFactory) {
+    protected PostgresSelectFromWhereSerializer(TermFactory termFactory, OntopSQLCoreSettings settings) {
         super(new DefaultSQLTermSerializer(termFactory) {
             @Override
             protected String castFloatingConstant(String value, DBTermType dbType) {
@@ -53,7 +54,7 @@ public class PostgresSelectFromWhereSerializer extends DefaultSelectFromWhereSer
                         return "'" + value + "'";
                 }
             }
-        });
+        }, settings);
     }
 
     @Override
