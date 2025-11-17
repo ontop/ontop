@@ -19,5 +19,8 @@ public interface SelectFromWhereSerializer {
     interface QuerySerialization {
         String getString();
         ImmutableMap<Variable, QualifiedAttributeID> getColumnIDs();
+
+        String getStringWithPreamble();
+        ImmutableMap<String, String> getCTEMap();
     }
 }

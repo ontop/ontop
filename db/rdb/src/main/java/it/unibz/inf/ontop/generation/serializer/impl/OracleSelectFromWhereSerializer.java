@@ -7,11 +7,11 @@ import it.unibz.inf.ontop.dbschema.QualifiedAttributeID;
 import it.unibz.inf.ontop.generation.algebra.SQLFlattenExpression;
 import it.unibz.inf.ontop.generation.algebra.SelectFromWhereWithModifiers;
 import it.unibz.inf.ontop.dbschema.DBParameters;
+import it.unibz.inf.ontop.injection.OntopSQLCoreSettings;
 import it.unibz.inf.ontop.model.term.DBConstant;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.type.DBTermType;
-import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Optional;
 
@@ -19,7 +19,7 @@ import java.util.Optional;
 public class OracleSelectFromWhereSerializer extends DefaultSelectFromWhereSerializer {
 
     @Inject
-    private OracleSelectFromWhereSerializer(TermFactory termFactory) {
+    private OracleSelectFromWhereSerializer(TermFactory termFactory, OntopSQLCoreSettings settings) {
         super(new DefaultSQLTermSerializer(termFactory) {
             @Override
             protected String serializeDBConstant(DBConstant constant) {
@@ -31,7 +31,7 @@ public class OracleSelectFromWhereSerializer extends DefaultSelectFromWhereSeria
                         return super.serializeDBConstant(constant);
                 }
             }
-        });
+        }, settings);
     }
 
     public static final int NAME_MAX_LENGTH = 30;
@@ -73,27 +73,15 @@ public class OracleSelectFromWhereSerializer extends DefaultSelectFromWhereSeria
 
             @Override
             protected QuerySerialization serializeFlatten(SQLFlattenExpression sqlFlattenExpression, Variable flattenedVar, Variable outputVar, Optional<Variable> indexVar, DBTermType flattenedType, ImmutableMap<Variable, QualifiedAttributeID> allColumnIDs, QuerySerialization subQuerySerialization) {
-                /* We build the query string of the form
-                *  `SELECT <variables> FROM <subquery> CROSS JOIN JSON_TABLE(<flattenedVar>, '$[*]' COLUMNS (<outputVar> VARCHAR2(1000) FORMAT JSON PATH '$' [, <indexVar> FOR ORDINALITY]))
-                */
-                StringBuilder builder = new StringBuilder();
-
-                builder.append(
-                        String.format(
-                                "%s CROSS JOIN JSON_TABLE(%s, '$[*]' COLUMNS(%s VARCHAR2(1000) FORMAT JSON PATH '$'",
-                                subQuerySerialization.getString(),
-                                allColumnIDs.get(flattenedVar).getSQLRendering(),
-                                allColumnIDs.get(outputVar).getSQLRendering()
-                        ));
-                indexVar.ifPresent( v -> builder.append(String.format(", %s FOR ORDINALITY", allColumnIDs.get(v).getSQLRendering())));
-                builder.append(String.format(")) %s", generateFreshViewAlias().getSQLRendering()));
-
-                return new QuerySerializationImpl(
-                        builder.toString(),
-                        allColumnIDs.entrySet().stream()
-                                .filter(e -> e.getKey() != flattenedVar)
-                                .collect(ImmutableCollectors.toMap())
-                );
+                // `SELECT <variables> FROM <subquery> CROSS JOIN JSON_TABLE(<flattenedVar>, '$[*]' COLUMNS (<outputVar> VARCHAR2(1000) FORMAT JSON PATH '$' [, <indexVar> FOR ORDINALITY]))
+                return serializeFlattenAsJoin(
+                        flattenedVar,
+                        String.format("JSON_TABLE(%s, '$[*]' COLUMNS(%s VARCHAR2(1000) FORMAT JSON PATH '$'%s))",
+                                serializeTerm(flattenedVar, allColumnIDs),
+                                serializeTerm(outputVar, allColumnIDs),
+                                serializeOptionalTerm(", %s FOR ORDINALITY", indexVar, allColumnIDs)),
+                        allColumnIDs,
+                        subQuerySerialization);
             }
         });
     }

@@ -12,6 +12,7 @@ import it.unibz.inf.ontop.generation.algebra.SelectFromWhereWithModifiers;
 import it.unibz.inf.ontop.generation.serializer.SQLSerializationException;
 import it.unibz.inf.ontop.generation.serializer.SelectFromWhereSerializer;
 import it.unibz.inf.ontop.dbschema.DBParameters;
+import it.unibz.inf.ontop.injection.OntopSQLCoreSettings;
 import it.unibz.inf.ontop.model.term.DBConstant;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
@@ -19,11 +20,9 @@ import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.DBTypeFactory;
 import it.unibz.inf.ontop.model.type.GenericDBTermType;
 import it.unibz.inf.ontop.model.type.impl.ArrayDBTermType;
-import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
-import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static it.unibz.inf.ontop.model.type.impl.PostgreSQLDBTypeFactory.*;
 
@@ -31,7 +30,7 @@ import static it.unibz.inf.ontop.model.type.impl.PostgreSQLDBTypeFactory.*;
 public class PostgresSelectFromWhereSerializer extends DefaultSelectFromWhereSerializer implements SelectFromWhereSerializer {
 
     @Inject
-    protected PostgresSelectFromWhereSerializer(TermFactory termFactory) {
+    protected PostgresSelectFromWhereSerializer(TermFactory termFactory, OntopSQLCoreSettings settings) {
         super(new DefaultSQLTermSerializer(termFactory) {
             @Override
             protected String castFloatingConstant(String value, DBTermType dbType) {
@@ -55,7 +54,7 @@ public class PostgresSelectFromWhereSerializer extends DefaultSelectFromWhereSer
                         return "'" + value + "'";
                 }
             }
-        });
+        }, settings);
     }
 
     @Override
@@ -109,100 +108,56 @@ public class PostgresSelectFromWhereSerializer extends DefaultSelectFromWhereSer
                                 && ((GenericDBTermType) sqlFlattenExpression.getFlattenedType()).getGenericArguments().get(0).getCategory() == DBTermType.Category.ARRAY);
 
                         //We now build the query string of the form SELECT <variables> FROM <subquery> JOIN LATERAL <flatten_function>(<flattenedVariable>) WITH ORDINALITY AS <name>
-                        StringBuilder builder = new StringBuilder();
-
-                        builder.append(
-                                String.format(
-                                        String.format(
-                                                "%%s JOIN LATERAL %s ",
-                                                getFlattenFunctionSymbolString(sqlFlattenExpression.getFlattenedType())
-                                        ),
-                                        subQuerySerialization.getString(),
-                                        allColumnIDs.get(flattenedVar).getSQLRendering()
-                                ));
-                        indexVar.ifPresent( v -> builder.append(" WITH ORDINALITY "));
 
                         /*
                          * If we are flattening an ND-Array, we need to first transform it into a JSONB array,
                          * call jsonb_array_elements on it, then transform it back into an Array in a further subquery.
                          */
-                        if(flatteningNDArray) {
+                        if (flatteningNDArray) {
                             RelationID castAlias = generateFreshViewAlias();
-                            RelationID outerViewAlias = generateFreshViewAlias();
+
                             QuotedID intermediateOutputVar = generateIntermediateVariable(outputVar.getName(), allColumnIDs.keySet());
-                            builder.append(
-                                    String.format(
-                                            "AS %s ON TRUE",
-                                            getOutputVarsRendering(intermediateOutputVar.getSQLRendering(), indexVar, allColumnIDs, castAlias)
-                                    )
-                            );
+                            String string = String.format("%s JOIN LATERAL %s %s AS %s ON TRUE",
+                                    subQuerySerialization.getString(),
+                                    String.format(getFlattenFunctionSymbolString(sqlFlattenExpression.getFlattenedType()),
+                                            serializeTerm(flattenedVar, allColumnIDs)),
+                                    serializeOptionalTerm("WITH ORDINALITY", indexVar, allColumnIDs),
+                                    getOutputVarsRendering(intermediateOutputVar.getSQLRendering(), indexVar, allColumnIDs, castAlias));
 
-                            //Create new variable aliases for super-query.
-                            var variableAliases = allColumnIDs.entrySet().stream()
-                                    .filter(e -> e.getKey() != flattenedVar)
-                                    .collect(ImmutableCollectors.toMap(
-                                            v -> v.getKey(),
-                                            v -> new QualifiedAttributeID(idFactory.createRelationID(outerViewAlias.getSQLRendering()), v.getValue().getAttribute())
-                                    ));
+                            QuerySerialization qs = new QuerySerializationImpl(string, subQuerySerialization.getColumnIDs(), subQuerySerialization.getCTEMap());
 
-                            //Explicitly include all variables used in the subQuery in the SELECT part.
-                            var subProjection = subQuerySerialization.getColumnIDs().keySet().stream()
-                                    .filter(v -> variableAliases.containsKey(v))
-                                    .map(
-                                            v -> subQuerySerialization.getColumnIDs().get(v).getSQLRendering() + " AS " + idFactory.createAttributeID(v.getName()).getSQLRendering()
-                                    )
-                                    .collect(Collectors.joining(", "));
-                            if (subProjection.length() > 0)
-                                subProjection += ",";
-
-                            //Add the index variable to the SELECT of the super-query
-                            var indexProjection = indexVar.isPresent() ?
-                                    String.format("%s AS %s, ",
-                                            new QualifiedAttributeID(castAlias, allColumnIDs.get(indexVar.get()).getAttribute()),
-                                            indexVar.get().getName()) :
-                                    "";
-
-                            return new QuerySerializationImpl(
-                                    String.format(
-                                            "(SELECT %s %s ARRAY(SELECT jsonb_array_elements_text(%s))::%s AS %s FROM %s) %s",
-                                            subProjection,
-                                            indexProjection,
-                                            intermediateOutputVar.getSQLRendering(),
-                                            ((ArrayDBTermType) sqlFlattenExpression.getFlattenedType()).getGenericArguments().get(0).getCastName(),
-                                            allColumnIDs.get(outputVar).getSQLRendering(),
-                                            builder,
-                                            outerViewAlias
-                                    ),
-                                    variableAliases);
+                            return serializeFlattenAsSubQuery(flattenedVar, allColumnIDs, qs,
+                                    Stream.concat(
+                                            indexVar.stream().map(ind -> serializeColumnAlias(
+                                                    new QualifiedAttributeID(castAlias, allColumnIDs.get(ind).getAttribute()).toString(),
+                                                    indexVar.get().getName())),
+                                            Stream.of(serializeColumnAlias(
+                                                    String.format("ARRAY(SELECT jsonb_array_elements_text(%s))::%s",
+                                                            intermediateOutputVar.getSQLRendering(),
+                                                            ((ArrayDBTermType) sqlFlattenExpression.getFlattenedType()).getGenericArguments().get(0).getCastName()),
+                                                    serializeTerm(outputVar, allColumnIDs)))));
                         }
-                        builder.append(
-                                String.format(
-                                        "AS %s ON TRUE",
-                                        getOutputVarsRendering(outputVar, indexVar, allColumnIDs)
-                                )
-                        );
+
+                        String string = String.format("%s JOIN LATERAL %s %s AS %s ON TRUE",
+                                subQuerySerialization.getString(),
+                                String.format(getFlattenFunctionSymbolString(sqlFlattenExpression.getFlattenedType()),
+                                        serializeTerm(flattenedVar, allColumnIDs)),
+                                serializeOptionalTerm("WITH ORDINALITY", indexVar, allColumnIDs),
+                                getOutputVarsRendering(serializeTerm(outputVar, allColumnIDs), indexVar, allColumnIDs, generateFreshViewAlias()));
 
                         return new QuerySerializationImpl(
-                                builder.toString(),
-                                allColumnIDs.entrySet().stream()
-                                        .filter(e -> e.getKey() != flattenedVar)
-                                        .collect(ImmutableCollectors.toMap())
-                        );
+                                string,
+                                getFlattenAllColumnIDs(flattenedVar, allColumnIDs),
+                                subQuerySerialization.getCTEMap());
                     }
 
-                    private Object getOutputVarsRendering(Variable outputVar, Optional<Variable> indexVar, ImmutableMap<Variable, QualifiedAttributeID> allColumnIDs) {
-                        String outputVarString = allColumnIDs.get(outputVar).getSQLRendering();
-                        return getOutputVarsRendering(outputVarString, indexVar, allColumnIDs, generateFreshViewAlias());
-                    }
-
-                    private Object getOutputVarsRendering(String outputVarString, Optional<Variable> indexVar, ImmutableMap<Variable, QualifiedAttributeID> allColumnIDs, RelationID viewAlias) {
-                        return indexVar.isPresent()?
-                                String.format(
-                                        "%s(%s, %s)",
+                    private String getOutputVarsRendering(String outputVarString, Optional<Variable> indexVar, ImmutableMap<Variable, QualifiedAttributeID> allColumnIDs, RelationID viewAlias) {
+                        return indexVar.isPresent()
+                                ? String.format("%s(%s, %s)",
                                         viewAlias.getSQLRendering(),
                                         outputVarString,
-                                        allColumnIDs.get(indexVar.get()).getSQLRendering()):
-                                outputVarString;
+                                        serializeTerm(indexVar.get(), allColumnIDs))
+                                : outputVarString;
                     }
 
                     private String getFlattenFunctionSymbolString(DBTermType dbType) {
@@ -216,11 +171,10 @@ public class PostgresSelectFromWhereSerializer extends DefaultSelectFromWhereSer
                         }
                         if (dbType.getCategory() == DBTermType.Category.ARRAY) {
                             GenericDBTermType genericDbType = (GenericDBTermType) dbType;
-                            //When it is a multi-dimensional array, we cannot use unnest, because it would flatten all levels at once.
-                            if(genericDbType.getGenericArguments().get(0).getCategory() == DBTermType.Category.ARRAY) {
-                                return "jsonb_array_elements(to_jsonb(%s))";
-                            } else
-                                return "unnest(%s)";
+                            //When it is a multidimensional array, we cannot use unnest, because it would flatten all levels at once.
+                            return (genericDbType.getGenericArguments().get(0).getCategory() == DBTermType.Category.ARRAY)
+                                ? "jsonb_array_elements(to_jsonb(%s))"
+                                : "unnest(%s)";
                         }
 
                         throw new SQLSerializationException("Unsupported nested type for flattening: " + dbType.getName());
