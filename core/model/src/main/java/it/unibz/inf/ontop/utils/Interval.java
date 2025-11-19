@@ -1,14 +1,8 @@
 package it.unibz.inf.ontop.utils;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
-import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
 
-import java.util.Optional;
 import java.util.regex.Matcher;
-import java.util.stream.Stream;
 
 public class Interval {
     private final int years;
@@ -109,89 +103,4 @@ public class Interval {
         return isNegative;
     }
 
-/*
-    @Override
-    public ImmutableList<? extends GroundTerm> getTerms() {
-        return null;
-    }
-
-    @Override
-    public ImmutableTerm getTerm(int index) {
-        return null;
-    }
-
-    @Override
-    public FunctionSymbol getFunctionSymbol() {
-        return null;
-    }
-
-    @Override
-    public int getArity() {
-        return 0;
-    }
-
-    @Override
-    public ImmutableSet<Variable> getVariables() {
-        return null;
-    }
-
-    @Override
-    public boolean canBePostProcessed() {
-        return false;
-    }
-
-    @Override
-    public Optional<FunctionalTermDecomposition> analyzeInjectivity(ImmutableSet<Variable> nonFreeVariables, VariableNullability variableNullability, VariableGenerator variableGenerator) {
-        return Optional.empty();
-    }
-
-    @Override
-    public Stream<Variable> proposeProvenanceVariables() {
-        return Stream.empty();
-    }
-
-    @Override
-    public FunctionalTermSimplification simplifyAsGuaranteedToBeNonNull() {
-        return null;
-    }
-
-    @Override
-    public boolean isDeterministic() {
-        return false;
-    }
-
-    @Override
-    public boolean isGround() {
-        return false;
-    }
-
-    @Override
-    public Stream<Variable> getVariableStream() {
-        return Stream.empty();
-    }
-
-    @Override
-    public IncrementalEvaluation evaluateStrictEq(ImmutableTerm otherTerm, VariableNullability variableNullability) {
-        return null;
-    }
-
-    @Override
-    public IncrementalEvaluation evaluateIsNotNull(VariableNullability variableNullability) {
-        return null;
-    }
-
-    @Override
-    public ImmutableTerm simplify(VariableNullability variableNullability) {
-        return null;
-    }
-
-    @Override
-    public ImmutableTerm simplify() {
-        return null;
-    }
-
-    @Override
-    public boolean isNullable(ImmutableSet<Variable> nullableVariables) {
-        return false;
-    }*/
 }

@@ -15,7 +15,6 @@ public class H2SQLDBTypeFactory extends DefaultSQLDBTypeFactory {
 
     protected static final String GEOMETRY_STR = "GEOMETRY";
     public static final String DEFAULT_DECIMAL_STR = "DECIMAL(20, 6)";
-    protected static final String INTERVAL_STR = "INTERVAL";
     private final DatabaseInfoSupplier databaseInfoSupplier;
 
 
@@ -46,9 +45,6 @@ public class H2SQLDBTypeFactory extends DefaultSQLDBTypeFactory {
          * H2GIS types
          */
         map.put(GEOMETRY_STR, new NonStringNonNumberNonBooleanNonDatetimeDBTermType(GEOMETRY_STR, rootAncestry, xsdString));
-
-        //map.put(INTERVAL_STR, new NonStringNonNumberNonBooleanNonDatetimeDBTermType(INTERVAL_STR, rootAncestry, xsdString));
-
         return map;
     }
 
@@ -59,7 +55,6 @@ public class H2SQLDBTypeFactory extends DefaultSQLDBTypeFactory {
          * H2GIS types
          */
         map.put(DefaultTypeCode.GEOMETRY, GEOMETRY_STR);
-        map.put(DefaultTypeCode.INTERVAL, INTERVAL_STR);
 
         return ImmutableMap.copyOf(map);
     }

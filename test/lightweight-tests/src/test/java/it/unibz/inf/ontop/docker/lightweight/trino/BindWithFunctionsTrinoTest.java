@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.sql.SQLException;
+import java.util.TimeZone;
 
 /**
  * Class to test if functions on Strings and Numerics in SPARQL are working properly.
@@ -23,11 +24,13 @@ public class BindWithFunctionsTrinoTest extends AbstractBindTestWithFunctions {
 
     @BeforeAll
     public static void before() throws IOException, SQLException {
+        TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
         initOBDA(OBDA_FILE, OWL_FILE, PROPERTIES_FILE);
     }
 
     @AfterAll
     public static void after() throws SQLException {
+        TimeZone.setDefault(null);
         release();
     }
 
@@ -52,15 +55,6 @@ public class BindWithFunctionsTrinoTest extends AbstractBindTestWithFunctions {
     @Override
     protected ImmutableList<String> getConstantIntegerDivideExpectedResults() {
         return ImmutableList.of("\"0.500000000000000000\"^^xsd:decimal");
-    }
-
-    @Disabled("Since Trino does not have unique constraint information, a 'DISTINCT' must be enforced. This DISTINCT" +
-            "causes the remaining query to be packed into a sub-query, including the 'ORDER BY'. Selecting from sub" +
-            "queries does not conserve order in Trino, so while the results are correct, they are in the wrong order")
-    @Test
-    @Override
-    public void testSimpleDateTrunc() {
-        super.testSimpleDateTrunc();
     }
 
     @Disabled("Trino counts one hour less on two results")
@@ -103,7 +97,7 @@ public class BindWithFunctionsTrinoTest extends AbstractBindTestWithFunctions {
 
     @Override
     protected ImmutableSet<String> getDurationArithmeticExpectedResults() {
-        return ImmutableSet.of("\"1970-09-05T07:35:00.000+02:00\"^^xsd:dateTime", "\"2011-10-08T11:15:00.000+02:00\"^^xsd:dateTime",
-                "\"2014-04-05T16:32:52.000+02:00\"^^xsd:dateTime", "\"2015-07-21T09:08:06.000+02:00\"^^xsd:dateTime" );
+        return ImmutableSet.of("\"1970-09-05T07:35:00.000Z\"^^xsd:dateTime", "\"2011-10-08T11:15:00.000Z\"^^xsd:dateTime",
+                "\"2014-04-05T16:32:52.000Z\"^^xsd:dateTime", "\"2015-07-21T09:08:06.000Z\"^^xsd:dateTime" );
     }
 }

@@ -13,8 +13,7 @@ import java.util.function.Function;
 public class SparkSQLTimestampDenormFunctionSymbol extends AbstractDBTypeConversionFunctionSymbolImpl{
 
     private final DBTermType dbStringType;
-    //protected static final String TEMPLATE = "TO_TIMESTAMP(%s, 'yyyy-MM-dd HH:mm:ss.SSSxxx')";
-    protected static final String TEMPLATE = "TO_TIMESTAMP(%s)";
+    protected static final String TEMPLATE = "TO_TIMESTAMP(%s, 'yyyy-MM-dd HH:mm:ss.SSSxxx')";
 
     protected SparkSQLTimestampDenormFunctionSymbol(DBTermType dbTimestampType,DBTermType dbStringType) {
         super("timestampDenorm", dbTimestampType, dbStringType);

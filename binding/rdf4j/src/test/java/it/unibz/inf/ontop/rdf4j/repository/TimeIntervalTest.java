@@ -18,7 +18,7 @@ public class TimeIntervalTest extends AbstractRDF4JTest {
 
     @BeforeClass
     public static void before() throws SQLException, IOException {
-        TimeZone.setDefault(TimeZone.getTimeZone("UCT"));
+        TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
         initOBDA(SQL_FILE, OBDA_FILE);
     }
 

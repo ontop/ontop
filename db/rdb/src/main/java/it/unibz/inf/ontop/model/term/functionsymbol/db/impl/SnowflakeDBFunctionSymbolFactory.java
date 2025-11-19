@@ -338,7 +338,7 @@ public class SnowflakeDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbo
     @Override
     protected String serializeIntervalDenorm(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
         Interval interval = new Interval(termConverter.apply(terms.get(0)));
-        String intervalString = String.format("INTERVAL '%d years %d months %d days %d hours %d minutes %f seconds'",
+        String intervalString = String.format("INTERVAL '%d years, %d months, %d days, %d hours, %d minutes, %f seconds'",
                 interval.getYears(),
                 interval.getMonths(),
                 interval.getDays(),
