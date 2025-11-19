@@ -67,25 +67,52 @@ public class DuckDBDBMetadataProvider extends DefaultSchemaCatalogDBMetadataProv
 
     @Override
     protected ResultSet getImportedKeysResultSet(String catalog, String schema, String name) throws SQLException {
-        PreparedStatement st = metadata.getConnection().prepareStatement(
-                "SELECT f.database_name AS FKTABLE_CAT, " +
-                        "f.schema_name AS FKTABLE_SCHEM, " +
-                        "f.table_name AS FKTABLE_NAME, " +
-                        "p.database_name AS PKTABLE_CAT, " +
-                        "p.schema_name AS PKTABLE_SCHEM, " +
-                        "p.table_name AS PKTABLE_NAME, " +
-                        "CONCAT(f.database_name, '_', f.schema_name, '_', f.table_name, '_fk_', f.constraint_index) AS FK_NAME, " +
-                        "unnest(f.constraint_column_names) AS FKCOLUMN_NAME, " +
-                        "generate_subscripts(f.constraint_column_names, 1) AS KEY_SEQ, " +
-                        "unnest(p.constraint_column_names) AS PKCOLUMN_NAME, " +
-                        "FROM duckdb_constraints f INNER JOIN duckdb_constraints p " +
-                        "ON f.referenced_table = p.table_name " +
-                        "WHERE " +
-                        "f.database_name = ? AND " +
-                        "f.schema_name = ? AND " +
-                        "f.table_name = ? AND " +
-                        "p.constraint_type = 'PRIMARY KEY' AND " +
-                        "f.constraint_type = 'FOREIGN KEY'");
+        PreparedStatement st;
+        try {
+            st = metadata.getConnection().prepareStatement(
+                    "SELECT f.database_name AS FKTABLE_CAT, " +
+                            "f.schema_name AS FKTABLE_SCHEM, " +
+                            "f.table_name AS FKTABLE_NAME, " +
+                            "p.database_name AS PKTABLE_CAT, " +
+                            "p.schema_name AS PKTABLE_SCHEM, " +
+                            "p.table_name AS PKTABLE_NAME, " +
+                            "CONCAT(f.database_name, '_', f.schema_name, '_', f.table_name, '_fk_', f.constraint_index) AS FK_NAME, " +
+                            "unnest(f.constraint_column_names) AS FKCOLUMN_NAME, " +
+                            "generate_subscripts(f.constraint_column_names, 1) AS KEY_SEQ, " +
+                            "unnest(p.constraint_column_names) AS PKCOLUMN_NAME " +
+                            "FROM duckdb_constraints f INNER JOIN duckdb_constraints p " +
+                            "ON f.referenced_table = p.table_name " +
+                            "WHERE " +
+                            "f.database_name = ? AND " +
+                            "f.schema_name = ? AND " +
+                            "f.table_name = ? AND " +
+                            "p.constraint_type = 'PRIMARY KEY' AND " +
+                            "f.constraint_type = 'FOREIGN KEY'");
+
+        }
+        catch (SQLException e) {
+            // Workaround for older DuckDB versions where the referenced_table field does not exist and instead
+            // the constraint_index column is used to link foreign keys to primary keys.
+            st = metadata.getConnection().prepareStatement(
+                    "SELECT f.database_name AS FKTABLE_CAT, " +
+                            "f.schema_name AS FKTABLE_SCHEM, " +
+                            "f.table_name AS FKTABLE_NAME, " +
+                            "p.database_name AS PKTABLE_CAT, " +
+                            "p.schema_name AS PKTABLE_SCHEM, " +
+                            "p.table_name AS PKTABLE_NAME, " +
+                            "CONCAT(f.database_name, '_', f.schema_name, '_', f.table_name, '_fk_', f.constraint_index) AS FK_NAME, " +
+                            "unnest(f.constraint_column_names) AS FKCOLUMN_NAME, " +
+                            "generate_subscripts(f.constraint_column_names, 1) AS KEY_SEQ, " +
+                            "unnest(p.constraint_column_names) AS PKCOLUMN_NAME " +
+                            "FROM duckdb_constraints f INNER JOIN duckdb_constraints p " +
+                            "ON f.constraint_index = p.constraint_index " +
+                            "WHERE " +
+                            "f.database_name = ? AND " +
+                            "f.schema_name = ? AND " +
+                            "f.table_name = ? AND " +
+                            "p.constraint_type = 'PRIMARY KEY' AND " +
+                            "f.constraint_type = 'FOREIGN KEY'");
+        }
 
         st.setString(1, catalog);
         st.setString(2, schema);
