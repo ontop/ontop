@@ -79,7 +79,7 @@ public class DuckDBDBMetadataProvider extends DefaultSchemaCatalogDBMetadataProv
                         "generate_subscripts(f.constraint_column_names, 1) AS KEY_SEQ, " +
                         "unnest(p.constraint_column_names) AS PKCOLUMN_NAME, " +
                         "FROM duckdb_constraints f INNER JOIN duckdb_constraints p " +
-                        "ON f.constraint_index = p.constraint_index " +
+                        "ON f.referenced_table = p.table_name " +
                         "WHERE " +
                         "f.database_name = ? AND " +
                         "f.schema_name = ? AND " +
