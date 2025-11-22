@@ -160,7 +160,7 @@ public class NativeMappingParserTest {
                         "MappingId = 'M1'\n" +
                         "Line 14: Invalid target: ':P{id} :Student ; :firstName {fname} ; :lastName {lname} ; :age {age}^^xsd:integer .'\n" +
                         "Debug information\n" +
-                        "extraneous input ';' expecting {'true', 'false', 'TRUE', 'True', 'FALSE', 'False', ENCLOSED_COLUMN_NAME, IRIREF, PNAME_LN, BLANK_NODE_LABEL, INTEGER, DECIMAL, DOUBLE, STRING_LITERAL_QUOTE, ANON}\n" +
+                        "extraneous input ';' expecting {'true', 'false', 'TRUE', 'True', 'FALSE', 'False', '[', '(', '<<', '<<(', ENCLOSED_COLUMN_NAME, IRIREF, PNAME_LN, BLANK_NODE_LABEL, INTEGER, DECIMAL, DOUBLE, STRING_LITERAL_QUOTE, ANON}\n" +
                         "MappingId = 'M2'\n" +
                         "Line 19: Invalid target: ':C{id} a :Course ; :title {title} ; :hasLecturer :L{id} ; description {description}@en-US .'\n" +
                         "Debug information\n" +
@@ -177,7 +177,7 @@ public class NativeMappingParserTest {
                 "MappingId = 'M1'\n" +
                 "Line 17: Invalid target: ':P{id} :Student ; :firstName {fname} ; :lastName {lname} ; :age {age}^^xsd:integer .'\n" +
                 "Debug information\n" +
-                "extraneous input ';' expecting {'true', 'false', 'TRUE', 'True', 'FALSE', 'False', ENCLOSED_COLUMN_NAME, IRIREF, PNAME_LN, BLANK_NODE_LABEL, INTEGER, DECIMAL, DOUBLE, STRING_LITERAL_QUOTE, ANON}\n" +
+                "extraneous input ';' expecting {'true', 'false', 'TRUE', 'True', 'FALSE', 'False', '[', '(', '<<', '<<(', ENCLOSED_COLUMN_NAME, IRIREF, PNAME_LN, BLANK_NODE_LABEL, INTEGER, DECIMAL, DOUBLE, STRING_LITERAL_QUOTE, ANON}\n" +
                 "MappingId = 'M2'\n" +
                 "Line 25: Invalid target: ':C{id} a :Course ; :title {title} ; :hasLecturer :L{id} ; description {description}@en-US .'\n" +
                 "Debug information\n" +

@@ -20,6 +20,11 @@ public interface TypeFactory {
 
 	ObjectRDFType getBlankNodeType();
 
+	/**
+	 * RDF-star term type representing embedded triple terms.
+	 */
+	RDFTermType getRDFStarTripleTermType();
+
 	RDFDatatype getUnsupportedDatatype();
 
 	RDFDatatype getAbstractOntopNumericDatatype();

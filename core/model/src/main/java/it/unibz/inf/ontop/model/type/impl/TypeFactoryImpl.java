@@ -31,6 +31,7 @@ public class TypeFactoryImpl implements TypeFactory {
 	private final MetaRDFTermType metaRDFTermType;
 	private final RDFTermType rootRDFTermType;
 	private final ObjectRDFType objectRDFType, iriTermType, blankNodeTermType;
+	private final RDFTermType rdfStarTripleTermType;
 	private final RDFDatatype rdfsLiteralDatatype, dateOrDatetimeDatatype;
 	private final NumericRDFDatatype numericDatatype, owlRealDatatype;
 	private final ConcreteNumericRDFDatatype owlRationalDatatype, xsdDecimalDatatype;
@@ -55,6 +56,7 @@ public class TypeFactoryImpl implements TypeFactory {
 		objectRDFType = AbstractObjectRDFType.createAbstractObjectRDFType(rootRDFTermType.getAncestry());
 		iriTermType = new IRITermType(objectRDFType.getAncestry());
 		blankNodeTermType = new BlankNodeTermType(objectRDFType.getAncestry());
+		rdfStarTripleTermType = new TripleRDFTermType(rootRDFTermType.getAncestry());
 
 		rdfsLiteralDatatype = createSimpleAbstractRDFDatatype(RDFS.LITERAL, rootRDFTermType.getAncestry());
 		registerDatatype(rdfsLiteralDatatype);
@@ -223,6 +225,11 @@ public class TypeFactoryImpl implements TypeFactory {
 	@Override
 	public ObjectRDFType getBlankNodeType() {
 		return blankNodeTermType;
+	}
+
+	@Override
+	public RDFTermType getRDFStarTripleTermType() {
+		return rdfStarTripleTermType;
 	}
 
 	@Override

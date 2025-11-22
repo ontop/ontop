@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.model.type.impl;
 
 import it.unibz.inf.ontop.model.type.*;
 import it.unibz.inf.ontop.model.vocabulary.RDF;
+import org.apache.commons.rdf.api.IRI;
 
 import java.util.Optional;
 
@@ -12,7 +13,7 @@ public class LangDatatype extends AbstractRDFDatatype {
     private final TypeFactory typeFactory;
 
     private LangDatatype(LanguageTag langTag, TermTypeAncestry parentAncestry, TypeFactory typeFactory) {
-        super(RDF.LANGSTRING, parentAncestry, DBTypeFactory::getDBStringType);
+        super(selectDatatypeIri(langTag), parentAncestry, DBTypeFactory::getDBStringType);
         this.langTag = langTag;
         this.parentAncestry = parentAncestry;
         this.typeFactory = typeFactory;
@@ -21,6 +22,12 @@ public class LangDatatype extends AbstractRDFDatatype {
     static RDFDatatype createLangDatatype(LanguageTag langTag, TermTypeAncestry parentAncestry,
                                           TypeFactory typeFactory) {
         return new LangDatatype(langTag, parentAncestry, typeFactory);
+    }
+
+    private static IRI selectDatatypeIri(LanguageTag langTag) {
+        return langTag.getDirection().isPresent()
+                ? RDF.DIRLANGSTRING
+                : RDF.LANGSTRING;
     }
 
 

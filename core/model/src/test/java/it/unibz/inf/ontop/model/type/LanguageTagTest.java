@@ -9,6 +9,8 @@ import static it.unibz.inf.ontop.OntopModelTestingTools.TYPE_FACTORY;
 import static junit.framework.TestCase.assertTrue;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertFalse;
+import it.unibz.inf.ontop.model.vocabulary.RDF;
 
 public class LanguageTagTest {
 
@@ -128,6 +130,38 @@ public class LanguageTagTest {
 
         TermType commonDenominator = type1.getCommonDenominator(type2);
         assertEquals(commonDenominator, TYPE_FACTORY.getAbstractRDFSLiteral());
+    }
+
+    @Test
+    public void testDirectionalLanguageTag() {
+        RDFDatatype type = TYPE_FACTORY.getLangTermType("en--ltr");
+
+        assertEquals(RDF.DIRLANGSTRING, type.getIRI());
+
+        Optional<LanguageTag> optionalLanguageTag = type.getLanguageTag();
+        assertTrue(optionalLanguageTag.isPresent());
+
+        LanguageTag langTag = optionalLanguageTag.get();
+        assertEquals("en--ltr", langTag.getFullString());
+        assertEquals("en", langTag.getPrefix());
+        assertFalse(langTag.getOptionalSuffix().isPresent());
+        assertTrue(langTag.getDirection().isPresent());
+        assertEquals("ltr", langTag.getDirection().get());
+    }
+
+    @Test
+    public void testDirectionalCommonDenominator() {
+        TermType type1 = TYPE_FACTORY.getLangTermType("en--ltr");
+        TermType type2 = TYPE_FACTORY.getLangTermType("en--rtl");
+
+        TermType commonDenominator = type1.getCommonDenominator(type2);
+
+        assertEquals(TYPE_FACTORY.getLangTermType("en"), commonDenominator);
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void testInvalidDirection() {
+        TYPE_FACTORY.getLangTermType("en--sideways");
     }
 
 }

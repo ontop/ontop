@@ -26,4 +26,8 @@ public interface LanguageTag {
 
     Optional<LanguageTag> getCommonDenominator(LanguageTag otherTag);
 
+    default Optional<String> getDirection() {
+        return Optional.empty();
+    }
+
 }

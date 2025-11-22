@@ -59,7 +59,51 @@ grammar TurtleOBDA;
  *------------------------------------------------------------------*/
 
 parse
-  : (triplesStatement|quadsStatement)+ EOF
+  : statement+ EOF
+  ;
+
+statement
+  : directive
+  | triplesStatement
+  | quadsStatement
+  ;
+
+directive
+  : prefixID
+  | base
+  | version
+  | sparqlPrefix
+  | sparqlBase
+  | sparqlVersion
+  ;
+
+prefixID
+  : '@prefix' PNAME_NS IRIREF '.'
+  ;
+
+base
+  : '@base' IRIREF '.'
+  ;
+
+version
+  : '@version' VersionSpecifier '.'
+  ;
+
+sparqlPrefix
+  : 'PREFIX' PNAME_NS IRIREF
+  ;
+
+sparqlBase
+  : 'BASE' IRIREF
+  ;
+
+sparqlVersion
+  : 'VERSION' versionSpecifier
+  ;
+
+versionSpecifier
+  : STRING_LITERAL_QUOTE
+  | STRING_LITERAL_SINGLE_QUOTE
   ;
 
 triplesStatement
@@ -67,20 +111,21 @@ triplesStatement
   ;
 
 quadsStatement
-    : 'GRAPH' graph '{' (triples '.')+ '}'
-    ;
-
-triples // [6]
-  : subject predicateObjectList
-  // blankNodePropertyList predicateObjectList?
+  : 'GRAPH' graph '{' (triples '.')+ '}'
   ;
 
-predicateObjectList // [7]
+triples
+  : subject predicateObjectList
+  | blankNodePropertyList predicateObjectList?
+  | reifiedTriple predicateObjectList?
+  ;
+
+predicateObjectList
   : verb objectList (';' (verb objectList)?)*
   ;
 
-objectList // [8]
-  : object (',' object)*
+objectList
+  : object annotation (',' object annotation)*
   ;
 
 graph
@@ -93,15 +138,20 @@ verb  // [9] verb ::= predicate | 'a' [11] predicate ::= iri
   | 'a'        # predicateRdfType
   ;
 
-subject // [10]	subject ::= iri | BlankNode | collection
+subject
   : iri
   | blank
+  | collection
   ;
 
-object  // [12]	object ::= iri | BlankNode | collection | blankNodePropertyList | literal
+object
   : iri
   | blank
+  | collection
+  | blankNodePropertyList
   | literal
+  | tripleTerm
+  | reifiedTriple
   ;
 
 iri // [135s] iri ::= IRIREF | PrefixedName  [136s] PrefixedName ::= PNAME_LN | PNAME_NS
@@ -114,16 +164,15 @@ blank  // [137s] BlankNode ::= BLANK_NODE_LABEL | ANON
   | ANON                 # blankNodeAnonymous
   ;
 
-literal // [13] literal ::= RDFLiteral | NumericLiteral | BooleanLiteral
+literal
   : rdfLiteral
   | numericLiteral
   | booleanLiteral
   ;
 
-rdfLiteral // [128s] RDFLiteral ::=	String (LANGTAG | '^^' iri)?
-          // [17] String ::= STRING_LITERAL_QUOTE | STRING_LITERAL_SINGLE_QUOTE | STRING_LITERAL_LONG_SINGLE_QUOTE | STRING_LITERAL_LONG_QUOTE
-  : STRING_LITERAL_QUOTE (LANGTAG | '^^' iri)?  # constantRdfLiteral  // includes templates
-  | ENCLOSED_COLUMN_NAME (LANGTAG | '^^' iri)?  # variableRdfLiteral
+rdfLiteral
+  : STRING_LITERAL_QUOTE (LANGTAG | '^^' iri)?      # constantRdfLiteral
+  | ENCLOSED_COLUMN_NAME (LANGTAG | '^^' iri)?      # variableRdfLiteral
   ;
 
 numericLiteral  // [16]
@@ -134,6 +183,60 @@ numericLiteral  // [16]
 
 booleanLiteral // [133s] BooleanLiteral ::= 'true' | 'false'
   : 'true' | 'false'| 'TRUE' | 'True' | 'FALSE'| 'False'
+  ;
+
+blankNodePropertyList
+  : '[' predicateObjectList ']'
+  ;
+
+collection
+  : '(' object* ')'
+  ;
+
+annotation
+  : (reifier | annotationBlock)*
+  ;
+
+annotationBlock
+  : '{|' predicateObjectList '|}'
+  ;
+
+reifier
+  : '~' (iri | blank)?
+  ;
+
+reifiedTriple
+  : '<<' rtSubject verb rtObject reifier? '>>'
+  ;
+
+rtSubject
+  : iri
+  | blank
+  | reifiedTriple
+  ;
+
+rtObject
+  : iri
+  | blank
+  | literal
+  | tripleTerm
+  | reifiedTriple
+  ;
+
+tripleTerm
+  : '<<(' ttSubject verb ttObject ')>>'
+  ;
+
+ttSubject
+  : iri
+  | blank
+  ;
+
+ttObject
+  : iri
+  | blank
+  | literal
+  | tripleTerm
   ;
 
 WS
@@ -177,8 +280,8 @@ BLANK_NODE_LABEL
   : '_:' PN_LOCAL
   ;
 
-LANGTAG // [144s]
-  : '@' [a-zA-Z]+ ('-' [a-zA-Z0-9]+)*
+LANGTAG
+  : '@' [a-zA-Z]+ ('-' [a-zA-Z0-9]+)* ('--' [a-zA-Z]+)?
   ;
 
 INTEGER // [19]
@@ -201,6 +304,10 @@ EXPONENT // [154s]
 // but the one below is what is written in https://www.w3.org/TR/turtle/#grammar-production-STRING_LITERAL_QUOTE
 STRING_LITERAL_QUOTE // [22]
   : '"' (~["\\\r\n] | ECHAR |  UCHAR)* '"'
+  ;
+
+STRING_LITERAL_SINGLE_QUOTE // [23]
+  : '\'' (~['\\\r\n] | ECHAR | UCHAR)* '\''
   ;
 
 UCHAR // [26]: numeric escapes for IRIs and Strings

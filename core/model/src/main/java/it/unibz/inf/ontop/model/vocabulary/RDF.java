@@ -17,6 +17,7 @@ public class RDF {
     public final static IRI XMLLITERAL;
 
     public static final IRI LANGSTRING;
+    public static final IRI DIRLANGSTRING;
 
     static {
         org.apache.commons.rdf.api.RDF factory = new SimpleRDF();
@@ -25,5 +26,6 @@ public class RDF {
         XMLLITERAL = factory.createIRI(PREFIX + "XMLLiteral");
         PLAINLITERAL = factory.createIRI(PREFIX + "PlainLiteral");
         LANGSTRING = factory.createIRI(PREFIX + "langString");
+        DIRLANGSTRING = factory.createIRI(PREFIX + "dirLangString");
     }
 }

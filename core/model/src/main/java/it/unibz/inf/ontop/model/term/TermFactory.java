@@ -298,6 +298,8 @@ public interface TermFactory {
 
 	ImmutableFunctionalTerm getRDFFunctionalTerm(ImmutableTerm lexicalTerm, ImmutableTerm typeTerm);
 
+	ImmutableFunctionalTerm getRDFStarTripleFunctionalTerm(ImmutableTerm subject, ImmutableTerm predicate, ImmutableTerm object);
+
 	/**
 	 * @param term is a variable or a cast variable
 	 */

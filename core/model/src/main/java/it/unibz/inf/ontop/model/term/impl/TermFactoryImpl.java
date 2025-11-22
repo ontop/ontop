@@ -42,7 +42,7 @@ public class TermFactoryImpl implements TermFactory {
 	private final DBConstant doubleNaN;
 	private final DBConstant provenanceConstant;
 	private final Map<RDFTermType, RDFTermTypeConstant> termTypeConstantMap;
-	private final RDFTermTypeConstant iriTypeConstant, bnodeTypeConstant;
+	private final RDFTermTypeConstant iriTypeConstant, bnodeTypeConstant, rdfStarTripleTypeConstant;
 	private final RDF rdfFactory;
 	private final ImmutableExpression.Evaluation positiveEvaluation, negativeEvaluation, nullEvaluation;
 
@@ -73,6 +73,7 @@ public class TermFactoryImpl implements TermFactory {
 		this.termTypeConstantMap = new HashMap<>();
 		this.iriTypeConstant = getRDFTermTypeConstant(typeFactory.getIRITermType());
 		this.bnodeTypeConstant = getRDFTermTypeConstant(typeFactory.getBlankNodeType());
+		this.rdfStarTripleTypeConstant = getRDFTermTypeConstant(typeFactory.getRDFStarTripleTermType());
 		this.positiveEvaluation = new ImmutableExpressionImpl.ValueEvaluationImpl(
 				ImmutableExpression.Evaluation.BooleanValue.TRUE, valueTrue);
 		this.negativeEvaluation = new ImmutableExpressionImpl.ValueEvaluationImpl(
@@ -953,6 +954,180 @@ public class TermFactoryImpl implements TermFactory {
 	@Override
 	public ImmutableFunctionalTerm getRDFFunctionalTerm(ImmutableTerm lexicalTerm, ImmutableTerm typeTerm) {
 		return getImmutableFunctionalTerm(functionSymbolFactory.getRDFTermFunctionSymbol(), lexicalTerm, typeTerm);
+	}
+
+	@Override
+	public ImmutableFunctionalTerm getRDFStarTripleFunctionalTerm(ImmutableTerm subject, ImmutableTerm predicate, ImmutableTerm object) {
+		Optional<String> serializedSubject = serializeEmbeddedTripleComponentAsStringIfConstant(subject);
+		Optional<String> serializedPredicate = serializeEmbeddedTripleComponentAsStringIfConstant(predicate);
+		Optional<String> serializedObject = serializeEmbeddedTripleComponentAsStringIfConstant(object);
+
+		ImmutableTerm lexicalTerm;
+		if (serializedSubject.isPresent() && serializedPredicate.isPresent() && serializedObject.isPresent()) {
+			String lexicalValue = buildEmbeddedTripleLexicalValue(
+					serializedSubject.get(),
+					serializedPredicate.get(),
+					serializedObject.get());
+			lexicalTerm = getDBStringConstant(lexicalValue);
+		}
+		else {
+			lexicalTerm = buildEmbeddedTripleLexicalTerm(subject, predicate, object);
+		}
+
+		return getRDFFunctionalTerm(lexicalTerm, rdfStarTripleTypeConstant);
+	}
+
+	private ImmutableFunctionalTerm buildEmbeddedTripleLexicalTerm(ImmutableTerm subject, ImmutableTerm predicate, ImmutableTerm object) {
+		ImmutableTerm serializedSubject = serializeEmbeddedTripleComponent(subject);
+		ImmutableTerm serializedPredicate = serializeEmbeddedTripleComponent(predicate);
+		ImmutableTerm serializedObject = serializeEmbeddedTripleComponent(object);
+
+		ImmutableList<ImmutableTerm> pieces = ImmutableList.of(
+				getDBStringConstant("<<"),
+				serializedSubject,
+				getDBStringConstant("|"),
+				serializedPredicate,
+				getDBStringConstant("|"),
+				serializedObject,
+				getDBStringConstant(">>"));
+
+		return getImmutableFunctionalTerm(
+				dbFunctionSymbolFactory.getDBConcatOperator(pieces.size()),
+				pieces);
+	}
+
+	private ImmutableTerm serializeEmbeddedTripleComponent(ImmutableTerm component) {
+		Optional<String> serialized = serializeEmbeddedTripleComponentAsStringIfConstant(component);
+		if (serialized.isPresent())
+			return getDBStringConstant(serialized.get());
+		return serializeEmbeddedTripleComponentTerm(component);
+	}
+
+	private ImmutableFunctionalTerm serializeEmbeddedTripleComponentTerm(ImmutableTerm component) {
+		ImmutableTerm lexicalTerm = getImmutableFunctionalTerm(
+				functionSymbolFactory.getExtractLexicalTermFromRDFTerm(), component);
+		ImmutableTerm escapedLexical = escapeTripleLexicalFragment(lexicalTerm);
+		ImmutableTerm typeCode = getDBStringConstant(serializeRDFTermType(extractRDFTermType(component)));
+
+		ImmutableList<ImmutableTerm> parts = ImmutableList.of(
+				getDBStringConstant("{"),
+				typeCode,
+				getDBStringConstant("|"),
+				escapedLexical,
+				getDBStringConstant("}"));
+
+		return getImmutableFunctionalTerm(
+				dbFunctionSymbolFactory.getDBConcatOperator(parts.size()),
+				parts);
+	}
+
+	private Optional<String> serializeEmbeddedTripleComponentAsStringIfConstant(ImmutableTerm component) {
+		if (component instanceof RDFConstant)
+			return Optional.of(buildSerializedTripleFragment((RDFConstant) component));
+
+		if (component instanceof ImmutableFunctionalTerm) {
+			ImmutableFunctionalTerm functionalTerm = (ImmutableFunctionalTerm) component;
+			if (functionalTerm.getFunctionSymbol() instanceof RDFTermFunctionSymbol) {
+				ImmutableTerm lexicalTerm = functionalTerm.getTerm(0).simplify();
+				ImmutableTerm typeTerm = functionalTerm.getTerm(1);
+				if (lexicalTerm instanceof DBConstant && typeTerm instanceof RDFTermTypeConstant) {
+					RDFTermType rdfTermType = ((RDFTermTypeConstant) typeTerm).getRDFTermType();
+					String lexicalValue = ((DBConstant) lexicalTerm).getValue();
+					return Optional.of(buildSerializedTripleFragment(rdfTermType, lexicalValue));
+				}
+			}
+		}
+
+		return Optional.empty();
+	}
+
+	private String buildSerializedTripleFragment(RDFConstant constant) {
+		return buildSerializedTripleFragment(constant.getType(), getLexicalValue(constant));
+	}
+
+	private String buildSerializedTripleFragment(RDFTermType rdfTermType, String lexicalValue) {
+		return "{" + serializeRDFTermType(rdfTermType) + "|" + escapeTripleLexicalFragment(lexicalValue) + "}";
+	}
+
+	private String buildEmbeddedTripleLexicalValue(String serializedSubject, String serializedPredicate, String serializedObject) {
+		return new StringBuilder("<<")
+				.append(serializedSubject)
+				.append("|")
+				.append(serializedPredicate)
+				.append("|")
+				.append(serializedObject)
+				.append(">>")
+				.toString();
+	}
+
+	private String getLexicalValue(RDFConstant rdfConstant) {
+		if (rdfConstant instanceof RDFLiteralConstant)
+			return ((RDFLiteralConstant) rdfConstant).getValue();
+		if (rdfConstant instanceof IRIConstant)
+			return ((IRIConstant) rdfConstant).getIRI().getIRIString();
+		if (rdfConstant instanceof BNode)
+			return ((BNode) rdfConstant).getLabel();
+		throw new MinorOntopInternalBugException("Unsupported RDF constant type for embedded triple serialization: " + rdfConstant);
+	}
+
+	private String escapeTripleLexicalFragment(String lexical) {
+		return lexical
+				.replace("\\", "\\\\")
+				.replace("{", "\\{")
+				.replace("}", "\\}")
+				.replace("|", "\\|");
+	}
+
+	private ImmutableTerm escapeTripleLexicalFragment(ImmutableTerm lexicalTerm) {
+		ImmutableTerm escaped = lexicalTerm;
+		escaped = applyEscapeReplacement(escaped, "\\", "\\\\");
+		escaped = applyEscapeReplacement(escaped, "{", "\\{");
+		escaped = applyEscapeReplacement(escaped, "}", "\\}");
+		escaped = applyEscapeReplacement(escaped, "|", "\\|");
+		return escaped;
+	}
+
+	private ImmutableTerm applyEscapeReplacement(ImmutableTerm term, String target, String replacement) {
+		return getImmutableFunctionalTerm(
+				dbFunctionSymbolFactory.getDBReplace(),
+				term,
+				getDBStringConstant(target),
+				getDBStringConstant(replacement));
+	}
+
+	private RDFTermType extractRDFTermType(ImmutableTerm rdfTerm) {
+		if (rdfTerm instanceof RDFConstant)
+			return ((RDFConstant) rdfTerm).getType();
+
+		if (rdfTerm instanceof ImmutableFunctionalTerm) {
+			ImmutableFunctionalTerm functionalTerm = (ImmutableFunctionalTerm) rdfTerm;
+			if (functionalTerm.getFunctionSymbol() instanceof RDFTermFunctionSymbol) {
+				ImmutableTerm typeTerm = functionalTerm.getTerm(1);
+				if (typeTerm instanceof RDFTermTypeConstant)
+					return ((RDFTermTypeConstant) typeTerm).getRDFTermType();
+			}
+		}
+
+		throw new MinorOntopInternalBugException("Unable to determine RDF term type for embedded triple component: " + rdfTerm);
+	}
+
+	private String serializeRDFTermType(RDFTermType rdfTermType) {
+		if (rdfTermType instanceof RDFDatatype) {
+			RDFDatatype datatype = (RDFDatatype) rdfTermType;
+			return datatype.getLanguageTag()
+					.map(lang -> "@" + lang.getFullString())
+					.orElseGet(() -> datatype.getIRI().getIRIString());
+		}
+
+		if (rdfTermType instanceof ObjectRDFType) {
+			ObjectRDFType objectType = (ObjectRDFType) rdfTermType;
+			return objectType.isBlankNode() ? "BNODE" : "IRI";
+		}
+
+		if (rdfTermType.equals(typeFactory.getRDFStarTripleTermType()))
+			return "TRIPLE";
+
+		return rdfTermType.toString();
 	}
 
 	@Override
