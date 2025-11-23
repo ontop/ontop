@@ -136,6 +136,16 @@ public class RDF4JValueExprTranslator {
             return new ExistsMapAnnotatedObject<>(boundTerm,
                     ImmutableMap.of(freshVariable, (Exists)expr));
         }
+        if (expr instanceof ValueExprTripleRef) {
+            ValueExprTripleRef tripleRef = (ValueExprTripleRef) expr;
+
+            ImmutableTerm subject = (ImmutableTerm) translateRDF4JVar(tripleRef.getSubjectVar(), false);
+            ImmutableTerm predicate = (ImmutableTerm) translateRDF4JVar(tripleRef.getPredicateVar(), false);
+            ImmutableTerm object = (ImmutableTerm) translateRDF4JVar(tripleRef.getObjectVar(), false);
+
+            return ExistsMapAnnotatedObject.of(
+                termFactory.getRDFStarTripleFunctionalTerm(subject, predicate, object));
+        }
         // other subclasses
         // SubQueryValueOperator
         // ValueExprTripleRef

@@ -1,0 +1,41 @@
+[PrefixDeclaration]
+:        http://example.org/iot#
+ex:      http://example.org/schema#
+rdfs:    http://www.w3.org/2000/01/rdf-schema#
+xsd:     http://www.w3.org/2001/XMLSchema#
+
+[MappingDeclaration] @collection [[
+mappingId   sensor-metadata
+target      :Sensor{sensor_id} a ex:Sensor ;
+            rdfs:label {label}@en ;
+            ex:locatedIn {location} .
+source      SELECT sensor_id, label, location FROM sensors
+
+mappingId   device-metadata
+target      :Device{device_id} a ex:EdgeDevice ;
+            rdfs:label {device_label}@en ;
+            ex:firmwareVersion {firmware} .
+source      SELECT device_id,
+                   model,
+                   firmware,
+                   model || ' firmware ' || firmware AS device_label
+            FROM devices
+
+mappingId   observation-core
+target      :Observation{observation_id} a ex:Observation ;
+            ex:temperature {temperature}^^xsd:double ;
+            ex:observedAt {observed_at}^^xsd:dateTime ;
+            ex:reportedTriple <<(:Sensor{sensor_id} ex:reports :Observation{observation_id})>> .
+source      SELECT observation_id, sensor_id, temperature, observed_at FROM observations
+
+mappingId   rdfstar-observation
+target      :Sensor{sensor_id} ex:reports :Observation{observation_id} .
+source      SELECT observation_id, sensor_id FROM observations
+
+mappingId   rdfstar-annotation
+target      << :Sensor{sensor_id} ex:reports :Observation{observation_id} >>
+                ex:recordedBy :Device{device_id} ;
+                ex:confidence {confidence}^^xsd:decimal ;
+                ex:observedAt {observed_at}^^xsd:dateTime .
+source      SELECT observation_id, sensor_id, device_id, confidence, observed_at FROM observations
+]]

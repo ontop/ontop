@@ -49,6 +49,7 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
     private final FunctionSymbol commonNumericTypeFunctionSymbol;
     private final FunctionSymbol EBVSPARQLLikeFunctionSymbol;
     private final FunctionSymbol extractLexicalTermFunctionSymbol;
+    private final FunctionSymbol serializeRDFTermTypeFunctionSymbol;
 
     private final MetaRDFTermType metaRDFType;
     private final DBTermType dbBooleanType;
@@ -112,6 +113,7 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
         this.iriNoBaseFunctionSymbol = new IriSPARQLFunctionSymbolImpl(abstractRDFType,
                 xsdStringType, typeFactory.getIRITermType());
         this.extractLexicalTermFunctionSymbol = new ExtractLexicalTermFunctionSymbolImpl(abstractRDFType, dbStringType);
+        this.serializeRDFTermTypeFunctionSymbol = new SerializeRDFTermTypeFunctionSymbolImpl(abstractRDFType, dbStringType, typeFactory);
         this.identityFunctionSymbol = new IdentityFunctionSymbol(dbTypeFactory.getAbstractRootDBType());
 
         this.bnodeTolerantSPARQLStrFunctionSymbol = new BNodeTolerantStrSPARQLFunctionSymbolImpl(abstractRDFType, xsdStringType);
@@ -711,6 +713,11 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
     @Override
     public FunctionSymbol getExtractLexicalTermFromRDFTerm() {
         return extractLexicalTermFunctionSymbol;
+    }
+
+    @Override
+    public FunctionSymbol getSerializeRDFTermTypeFunctionSymbol() {
+        return serializeRDFTermTypeFunctionSymbol;
     }
 
     @Override

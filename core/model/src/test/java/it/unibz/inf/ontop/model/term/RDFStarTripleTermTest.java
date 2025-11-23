@@ -63,4 +63,38 @@ public class RDFStarTripleTermTest {
         assertTrue(lexical instanceof DBConstant);
         assertTrue(((DBConstant) lexical).getValue().contains("{TRIPLE|<<"));
     }
+
+        @Test
+        public void tripleFunctionalTermSimplifiesToConstant() {
+                ImmutableTerm simplified = TERM_FACTORY.getRDFStarTripleFunctionalTerm(
+                                TERM_FACTORY.getConstantIRI("http://example.com/s"),
+                                TERM_FACTORY.getConstantIRI("http://example.com/p"),
+                                TERM_FACTORY.getRDFLiteralConstant("42", XSD.INTEGER)).simplify();
+
+                assertTrue(simplified instanceof RDFStarTripleConstant);
+                RDFStarTripleConstant tripleConstant = (RDFStarTripleConstant) simplified;
+                assertEquals("http://example.com/s",
+                                ((IRIConstant) tripleConstant.getSubject()).getIRI().getIRIString());
+                assertEquals("http://example.com/p", tripleConstant.getPredicate().getIRI().getIRIString());
+                assertEquals("42", ((RDFLiteralConstant) tripleConstant.getObject()).getValue());
+        }
+
+        @Test
+        public void deserializeTripleConstantFromLexicalValue() {
+                ImmutableFunctionalTerm innerTriple = TERM_FACTORY.getRDFStarTripleFunctionalTerm(
+                                TERM_FACTORY.getConstantIRI("http://example.com/a"),
+                                TERM_FACTORY.getConstantIRI("http://example.com/b"),
+                                TERM_FACTORY.getConstantIRI("http://example.com/c"));
+
+                ImmutableFunctionalTerm outerTriple = TERM_FACTORY.getRDFStarTripleFunctionalTerm(
+                                TERM_FACTORY.getConstantIRI("http://example.com/s"),
+                                TERM_FACTORY.getConstantIRI("http://example.com/p"),
+                                innerTriple);
+
+                String lexical = ((DBConstant) outerTriple.getTerm(0).simplify()).getValue();
+                RDFConstant reconstructed = TERM_FACTORY.getRDFConstant(lexical, TRIPLE_TYPE);
+                assertTrue(reconstructed instanceof RDFStarTripleConstant);
+                RDFStarTripleConstant tripleConstant = (RDFStarTripleConstant) reconstructed;
+                assertTrue(tripleConstant.getObject() instanceof RDFStarTripleConstant);
+        }
 }

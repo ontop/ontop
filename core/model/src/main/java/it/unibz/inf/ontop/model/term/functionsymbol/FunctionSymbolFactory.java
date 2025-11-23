@@ -132,5 +132,7 @@ public interface FunctionSymbolFactory {
 
     FunctionSymbol getExtractLexicalTermFromRDFTerm();
 
+    FunctionSymbol getSerializeRDFTermTypeFunctionSymbol();
+
     FunctionSymbol getIdentity();
 }

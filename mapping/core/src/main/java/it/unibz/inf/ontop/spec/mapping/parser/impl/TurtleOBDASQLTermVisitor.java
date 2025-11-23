@@ -153,4 +153,20 @@ public class TurtleOBDASQLTermVisitor extends TurtleOBDABaseVisitor<ImmutableTer
     public ImmutableTerm visitDecimalLiteral(TurtleOBDAParser.DecimalLiteralContext ctx) {
         return termFactory.getRDFLiteralConstant(ctx.DECIMAL().getText(), XSD.DECIMAL);
     }
+
+    @Override
+    public ImmutableTerm visitTripleTerm(TurtleOBDAParser.TripleTermContext ctx) {
+        ImmutableTerm subject = ctx.ttSubject().accept(this);
+        ImmutableTerm predicate = ctx.verb().accept(this);
+        ImmutableTerm object = ctx.ttObject().accept(this);
+        return termFactory.getRDFStarTripleFunctionalTerm(subject, predicate, object);
+    }
+
+    @Override
+    public ImmutableTerm visitReifiedTriple(TurtleOBDAParser.ReifiedTripleContext ctx) {
+        ImmutableTerm subject = ctx.rtSubject().accept(this);
+        ImmutableTerm predicate = ctx.verb().accept(this);
+        ImmutableTerm object = ctx.rtObject().accept(this);
+        return termFactory.getRDFStarTripleFunctionalTerm(subject, predicate, object);
+    }
 }

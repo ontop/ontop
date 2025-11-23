@@ -142,6 +142,9 @@ public class RDF4JTupleExprTranslator {
             return translate((ArbitraryLengthPath) node);
         }
 
+        if (node instanceof TripleRef)
+            return translate((TripleRef) node);
+
         throw new OntopUnsupportedKGQueryException("Unsupported SPARQL operator: " + node.toString());
     }
 
@@ -688,6 +691,34 @@ public class RDF4JTupleExprTranslator {
         }
 
         IQTree iqTree = applyExternalBindingFilter(subTree, subTree.getVariables());
+        return createTranslationResult(iqTree, ImmutableSet.of());
+    }
+
+    private TranslationResult translate(TripleRef tripleRef) throws OntopUnsupportedKGQueryException {
+        if (tripleRef.getExprVar() == null)
+            throw new OntopUnsupportedKGQueryException("TripleRef node without an expression variable is not supported");
+
+        RDF4JValueExprTranslator translator = getValueTranslator(ImmutableSet.of());
+        VariableOrGroundTerm subject = translator.translateRDF4JVar(tripleRef.getSubjectVar(), true);
+        VariableOrGroundTerm predicate = translator.translateRDF4JVar(tripleRef.getPredicateVar(), true);
+        VariableOrGroundTerm object = translator.translateRDF4JVar(tripleRef.getObjectVar(), true);
+
+        Variable exprVariable = termFactory.getVariable(tripleRef.getExprVar().getName());
+
+        IQTree tripleTree = translateTriplePattern(subject, predicate, object);
+
+        ImmutableFunctionalTerm tripleTerm = termFactory.getRDFStarTripleFunctionalTerm(
+                (ImmutableTerm) subject, (ImmutableTerm) predicate, (ImmutableTerm) object);
+
+        ImmutableSet<Variable> projectedVariables = Sets.union(tripleTree.getVariables(), ImmutableSet.of(exprVariable)).immutableCopy();
+        ConstructionNode constructionNode = iqFactory.createConstructionNode(
+                projectedVariables,
+                substitutionFactory.getSubstitution(exprVariable, tripleTerm));
+
+        IQTree iqTree = applyExternalBindingFilter(
+                iqFactory.createUnaryIQTree(constructionNode, tripleTree),
+                projectedVariables);
+
         return createTranslationResult(iqTree, ImmutableSet.of());
     }
 

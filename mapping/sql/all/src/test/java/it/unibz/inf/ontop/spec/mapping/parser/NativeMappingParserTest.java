@@ -21,6 +21,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 
 public class NativeMappingParserTest {
@@ -244,6 +245,25 @@ public class NativeMappingParserTest {
         assertEquals("java.io.IOException: ERROR reading mapping-northwind-multiline-m4.obda at line: 11\n" +
                 "MESSAGE: Unknown parameter name \"NORTHWIND.EMPLOYEES\" at line: 11.", ex.getMessage());
     }
+
+        @Test
+        public void testLoadRdfStarInline() throws Exception {
+                var mapping = mappingParser.parse(new File(ROOT2 + "mapping-rdfstar-inline.obda"));
+                var triplesMap = mapping.getTripleMaps().get(0);
+
+                assertEquals(2, triplesMap.getTargetAtoms().size());
+                assertTrue(triplesMap.getOptionalTargetString().orElseThrow().contains("<<"));
+        }
+
+        @Test
+        public void testLoadRdfStarTripleTerm() throws Exception {
+                var mapping = mappingParser.parse(new File(ROOT2 + "mapping-rdfstar-tripleterm.obda"));
+                var triplesMap = mapping.getTripleMaps().get(0);
+
+                assertEquals(4, triplesMap.getTargetAtoms().size());
+                var target = triplesMap.getOptionalTargetString().orElseThrow();
+                assertTrue(target.contains("<<(") && target.contains(")>>"));
+        }
 
     @Test
     public void testSpaceBeforeEndCollectionSymbol() throws Exception {

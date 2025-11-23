@@ -117,6 +117,8 @@ public class TermFactoryImpl implements TermFactory {
 			return getConstantIRI(rdfFactory.createIRI(lexicalValue));
 		else if (termType.equals(typeFactory.getBlankNodeType()))
 			return getConstantBNode(lexicalValue);
+		else if (termType.equals(typeFactory.getRDFStarTripleTermType()))
+			return deserializeEmbeddedTripleConstant(lexicalValue);
 		throw new MinorOntopInternalBugException("Unexpected RDF term type: " + termType);
 	}
 
@@ -1007,7 +1009,8 @@ public class TermFactoryImpl implements TermFactory {
 		ImmutableTerm lexicalTerm = getImmutableFunctionalTerm(
 				functionSymbolFactory.getExtractLexicalTermFromRDFTerm(), component);
 		ImmutableTerm escapedLexical = escapeTripleLexicalFragment(lexicalTerm);
-		ImmutableTerm typeCode = getDBStringConstant(serializeRDFTermType(extractRDFTermType(component)));
+		ImmutableTerm typeCode = getImmutableFunctionalTerm(
+				functionSymbolFactory.getSerializeRDFTermTypeFunctionSymbol(), component);
 
 		ImmutableList<ImmutableTerm> parts = ImmutableList.of(
 				getDBStringConstant("{"),
@@ -1067,6 +1070,8 @@ public class TermFactoryImpl implements TermFactory {
 			return ((IRIConstant) rdfConstant).getIRI().getIRIString();
 		if (rdfConstant instanceof BNode)
 			return ((BNode) rdfConstant).getLabel();
+		if (rdfConstant instanceof RDFStarTripleConstant)
+			return rdfConstant.getValue();
 		throw new MinorOntopInternalBugException("Unsupported RDF constant type for embedded triple serialization: " + rdfConstant);
 	}
 
@@ -1095,22 +1100,6 @@ public class TermFactoryImpl implements TermFactory {
 				getDBStringConstant(replacement));
 	}
 
-	private RDFTermType extractRDFTermType(ImmutableTerm rdfTerm) {
-		if (rdfTerm instanceof RDFConstant)
-			return ((RDFConstant) rdfTerm).getType();
-
-		if (rdfTerm instanceof ImmutableFunctionalTerm) {
-			ImmutableFunctionalTerm functionalTerm = (ImmutableFunctionalTerm) rdfTerm;
-			if (functionalTerm.getFunctionSymbol() instanceof RDFTermFunctionSymbol) {
-				ImmutableTerm typeTerm = functionalTerm.getTerm(1);
-				if (typeTerm instanceof RDFTermTypeConstant)
-					return ((RDFTermTypeConstant) typeTerm).getRDFTermType();
-			}
-		}
-
-		throw new MinorOntopInternalBugException("Unable to determine RDF term type for embedded triple component: " + rdfTerm);
-	}
-
 	private String serializeRDFTermType(RDFTermType rdfTermType) {
 		if (rdfTermType instanceof RDFDatatype) {
 			RDFDatatype datatype = (RDFDatatype) rdfTermType;
@@ -1128,6 +1117,111 @@ public class TermFactoryImpl implements TermFactory {
 			return "TRIPLE";
 
 		return rdfTermType.toString();
+	}
+
+	private RDFStarTripleConstant deserializeEmbeddedTripleConstant(String lexicalValue) {
+		EmbeddedTripleCursor cursor = EmbeddedTripleCursor.from(lexicalValue);
+		RDFConstant subject = deserializeEmbeddedTripleComponent(cursor, lexicalValue);
+		cursor.expect('|');
+		RDFConstant predicate = deserializeEmbeddedTripleComponent(cursor, lexicalValue);
+		cursor.expect('|');
+		RDFConstant object = deserializeEmbeddedTripleComponent(cursor, lexicalValue);
+		if (cursor.hasRemaining())
+			throw new MinorOntopInternalBugException("Unexpected trailing characters in embedded triple lexical value: " + lexicalValue);
+		if (!(predicate instanceof IRIConstant))
+			throw new MinorOntopInternalBugException("Embedded triple predicate must be an IRI: " + lexicalValue);
+		return new RDFStarTripleConstantImpl(subject, (IRIConstant) predicate, object,
+				typeFactory.getRDFStarTripleTermType(), lexicalValue);
+	}
+
+	private RDFConstant deserializeEmbeddedTripleComponent(EmbeddedTripleCursor cursor, String lexicalValue) {
+		cursor.expect('{');
+		String typeCode = cursor.readUntil('|');
+		String lexical = cursor.readEscapedUntilClosingBrace();
+		return rebuildEmbeddedComponent(typeCode, lexical, lexicalValue);
+	}
+
+	private RDFConstant rebuildEmbeddedComponent(String typeCode, String lexical, String serializedTriple) {
+		switch (typeCode) {
+			case "IRI":
+				return getConstantIRI(lexical);
+			case "BNODE":
+				return getConstantBNode(lexical);
+			case "TRIPLE":
+				return deserializeEmbeddedTripleConstant(lexical);
+			default:
+				if (typeCode.startsWith("@"))
+					return getRDFLiteralConstant(lexical, typeCode.substring(1));
+				try {
+					return getRDFLiteralConstant(lexical, rdfFactory.createIRI(typeCode));
+				}
+				catch (IllegalArgumentException e) {
+					throw new MinorOntopInternalBugException(
+							"Invalid embedded triple component type '" + typeCode + "' in " + serializedTriple, e);
+				}
+		}
+	}
+
+	private static final class EmbeddedTripleCursor {
+		private final String data;
+		private final String fullLexical;
+		private int offset;
+
+		private EmbeddedTripleCursor(String data, String fullLexical) {
+			this.data = data;
+			this.fullLexical = fullLexical;
+		}
+
+		static EmbeddedTripleCursor from(String lexicalValue) {
+			if (!lexicalValue.startsWith("<<") || !lexicalValue.endsWith(">>"))
+				throw new MinorOntopInternalBugException("Invalid embedded triple lexical form: " + lexicalValue);
+			String body = lexicalValue.substring(2, lexicalValue.length() - 2);
+			return new EmbeddedTripleCursor(body, lexicalValue);
+		}
+
+		void expect(char expected) {
+			if (!hasRemaining() || data.charAt(offset) != expected)
+				throw new MinorOntopInternalBugException(
+						"Malformed embedded triple '" + fullLexical + "': expected '" + expected + "' at position " + offset);
+			offset++;
+		}
+
+		String readUntil(char delimiter) {
+			int start = offset;
+			while (hasRemaining()) {
+				char c = data.charAt(offset++);
+				if (c == delimiter)
+					return data.substring(start, offset - 1);
+			}
+			throw new MinorOntopInternalBugException(
+					"Malformed embedded triple '" + fullLexical + "': missing '" + delimiter + "'.");
+		}
+
+		String readEscapedUntilClosingBrace() {
+			StringBuilder builder = new StringBuilder();
+			boolean escaping = false;
+			while (hasRemaining()) {
+				char c = data.charAt(offset++);
+				if (escaping) {
+					builder.append(c);
+					escaping = false;
+					continue;
+				}
+				if (c == '\\') {
+					escaping = true;
+					continue;
+				}
+				if (c == '}')
+					return builder.toString();
+				builder.append(c);
+			}
+			throw new MinorOntopInternalBugException(
+					"Malformed embedded triple '" + fullLexical + "': component not terminated by '}'.");
+		}
+
+		boolean hasRemaining() {
+			return offset < data.length();
+		}
 	}
 
 	@Override

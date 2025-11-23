@@ -92,3 +92,11 @@ header {
     background-color: #337ab7;
     color: #fff;
 }
+
+.yasgui-host {
+    width: 100%;
+}
+
+.yasgui-component {
+    display: block;
+}

@@ -15,6 +15,7 @@ import it.unibz.inf.ontop.model.term.IRIConstant;
 import it.unibz.inf.ontop.model.term.ObjectConstant;
 import it.unibz.inf.ontop.model.term.RDFConstant;
 import it.unibz.inf.ontop.model.term.RDFLiteralConstant;
+import it.unibz.inf.ontop.model.term.RDFStarTripleConstant;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.spec.ontology.RDFFact;
 
@@ -54,12 +55,28 @@ public class RDF4JHelper {
             return null;
 
         Value value = null;
-        if (c instanceof RDFLiteralConstant) {
+        if (c instanceof RDFStarTripleConstant) {
+            value = getTripleValue((RDFStarTripleConstant) c);
+        }
+        else if (c instanceof RDFLiteralConstant) {
             value = RDF4JHelper.getLiteral((RDFLiteralConstant) c);
         } else if (c instanceof ObjectConstant) {
             value = RDF4JHelper.getResource((ObjectConstant) c);
         }
         return value;
+    }
+
+    private static Value getTripleValue(RDFStarTripleConstant tripleConstant) {
+        Value subjectValue = getValue(tripleConstant.getSubject());
+        if (!(subjectValue instanceof Resource))
+            throw new IllegalStateException("RDF-star subject must be a resource: " + subjectValue);
+
+        Value predicateValue = getValue(tripleConstant.getPredicate());
+        if (!(predicateValue instanceof IRI))
+            throw new IllegalStateException("RDF-star predicate must be an IRI: " + predicateValue);
+
+        Value objectValue = getValue(tripleConstant.getObject());
+        return fact.createTriple((Resource) subjectValue, (IRI) predicateValue, objectValue);
     }
 
     private static IRI createURI(String uri) {

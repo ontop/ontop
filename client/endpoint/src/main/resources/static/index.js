@@ -1,119 +1,171 @@
-// https://stackoverflow.com/questions/30987218/update-progressbar-in-each-loop/31654481
-function delayedLoop(collection, delay, callback, context) {
-    context = context || null;
+const TAB_OWNER = 'ontop-portal';
 
-    let i = 0;
-    const nextIteration = function () {
-        if (i === collection.length) {
-            return;
-        }
-        callback.call(context, collection[i], i);
-        i++;
-        setTimeout(nextIteration, delay);
-    };
-
-    nextIteration();
+function waitForComponent(el) {
+    if (el && typeof el.componentOnReady === 'function') {
+        return el.componentOnReady();
+    }
+    return Promise.resolve();
 }
 
+function buildComponentConfig(suffix, overrides) {
+    const baseConfig = {
+        endpoint: window.endpointUrl,
+        componentId: `ontop-${suffix}`,
+        clearState: true,
+        copyEndpointOnNewTab: true,
+        method: 'POST',
+        headers: () => ({})
+    };
+    return Object.assign(baseConfig, overrides || {});
+}
 
-function selectGroup(index, numGroups, elem) {
-    $("div").removeClass("chosen");
+function createHost(index, extraClasses) {
+    const host = document.createElement('div');
+    host.id = `yasgui${index}`;
+    host.style.display = 'none';
+    host.classList.add('yasgui-host');
+    if (Array.isArray(extraClasses)) {
+        extraClasses.forEach(cls => host.classList.add(cls));
+    }
+    document.getElementById('yasguis').appendChild(host);
+    return host;
+}
+
+function getGroupDefinition(index) {
+    if (!window.portalConfig || !Array.isArray(window.portalConfig.tabGroups)) {
+        return null;
+    }
+    return window.portalConfig.tabGroups[index - 1] || null;
+}
+
+async function seedPredefinedTabs(component, tabs) {
+    await waitForComponent(component);
+    if (!Array.isArray(tabs) || tabs.length === 0) {
+        return;
+    }
+
+    for (const tab of tabs) {
+        await component.openTab({
+            queryName: tab.name,
+            query: tab.query,
+            owner: TAB_OWNER
+        });
+    }
+
+    const first = tabs[0];
+    await component.openTab({
+        queryName: first.name,
+        query: first.query,
+        owner: TAB_OWNER
+    });
+}
+
+async function ensureGroupLoaded(index) {
+    const hostId = `yasgui${index}`;
+    const isPlayground = index === 0;
+    let host = document.getElementById(hostId);
+    const alreadyInitialized = host && host.querySelector('ontotext-yasgui');
+    if (alreadyInitialized) {
+        return;
+    }
+
+    if (!host) {
+        host = createHost(index, isPlayground ? [] : ['predefined']);
+    }
+
+    const component = document.createElement('ontotext-yasgui');
+    component.classList.add('yasgui-component');
+
+    const overrides = {};
+    if (isPlayground && window.portalConfig && window.portalConfig.defaultTab && window.portalConfig.defaultTab.query) {
+        overrides.initialQuery = window.portalConfig.defaultTab.query;
+    }
+
+    component.config = buildComponentConfig(isPlayground ? 'playground' : `group-${index}`, overrides);
+    host.appendChild(component);
+
+    if (isPlayground) {
+        await waitForComponent(component);
+        if (overrides.initialQuery) {
+            await component.setQuery(overrides.initialQuery);
+        }
+        return;
+    }
+
+    const group = getGroupDefinition(index);
+    await seedPredefinedTabs(component, group ? group.tabs : []);
+}
+
+function withSpinner(promise) {
+    $("#spinner").css("visibility", "visible");
+    return promise.finally(() => $("#spinner").css("visibility", "hidden"));
+}
+
+async function selectGroup(index, numGroups, elem) {
+    $(".choice-option").removeClass("chosen");
     $(elem).addClass("chosen");
 
-    const yId = 'yasgui' + index;
-    let x = document.getElementById(yId);
-    if (x) {
-        x.style.display = "block";
-    } else {
-        delayedLoop([0, 1, 2], 10, (_, idx) => {
-            if (idx === 0) {
-                $("#spinner").css("visibility", "visible");
-            } else if (idx === 1) {
-                createYasgui(index);
-            } else /* idx === 2*/ {
-                $("#spinner").css("visibility", "hidden");
-            }
-        })
+    if (!document.getElementById(`yasgui${index}`)) {
+        try {
+            await withSpinner(ensureGroupLoaded(index));
+        } catch (error) {
+            console.error('Failed to initialize ontotext YASGUI component', error);
+        }
     }
 
-    for (i = 0; i <= numGroups; i++) {
-        x = document.getElementById('yasgui' + i);
-        if (x) {
-            if (i === index) {
-                x.style.display = "block";
-            } else {
-                x.style.display = "none";
-            }
+    for (let i = 0; i <= numGroups; i++) {
+        const container = document.getElementById(`yasgui${i}`);
+        if (container) {
+            container.style.display = i === index ? 'block' : 'none';
         }
     }
 }
 
-function createYasgui(i) {
-    let group = window.portalConfig.tabGroups[i - 1];
-    const yId = `yasgui${i}`;
-    $('#yasguis').append(`<div id='${yId}' class="predefined"></div>`);
+$(async () => {
+    window.portalConfig = {};
+    const endpointUrl = new Request('sparql').url;
+    window.endpointUrl = endpointUrl;
+    $('#endpoint').text(endpointUrl);
 
-    const y = YASGUI(document.getElementById(yId), {
-        yasqe: {
-            sparql: {endpoint: window.endpointUrl},
-            persistent: null
+    try {
+        const response = await fetch('ontop/portalConfig');
+        if (!response.ok) {
+            throw new Error('Failed to fetch portal configuration');
         }
-    });
+        const config = await response.json();
+        window.portalConfig = config || {};
+        const $switcher = $("#switcher");
+        const hasGroups = Array.isArray(window.portalConfig.tabGroups) && window.portalConfig.tabGroups.length > 0;
 
-    for (let tabId in y.tabs) {
-        y.closeTab(tabId);
-    }
+        if (config && config.title) {
+            $("#title").text(config.title);
+        }
 
-    delayedLoop(group.tabs, 1, (t, _) => {
-        let tab = y.addTab();
-        tab.rename(t.name);
-        tab.setQuery(t.query);
-        //console.log(t.name, new Date().toLocaleTimeString());
-    });
+        await withSpinner(ensureGroupLoaded(0));
 
-    y.selectTab(Object.keys(y.tabs)[0]);
-    return yId;
-}
-
-$(() => {
-    // fetch data form the toml file
-    fetch('ontop/portalConfig')
-        .then(response => response.json())
-        .then(
-            config => {
-                window.portalConfig = config;
-                // console.log("ontop/portalConfig fetched", new Date().toLocaleTimeString());
-                const $switcher = $("#switcher");
-                if ($.isEmptyObject(config)) {
-                    // we hide the switcher since in this case the endpoint was not initialized with a .toml file
-                    $switcher.hide();
-                } else {
-                    if (config.title) $("#title").text(config.title);
-
-                    // If a portal file is provided with default query provided, set the default tab
-                    if (config.defaultTab && config.defaultTab.query) 
-                        YASGUI.YASQE.defaults.value = config.defaultTab.query;
-
-                    if (config.tabGroups) {
-                        let numGroups = config.tabGroups.length;
-                        $switcher.append(`<div class="choice-option" id="select0" onclick='selectGroup(0, ${numGroups}, this)'>Playground</div>`);
-                        for (let i = 0; i < numGroups; i++) {
-                            let group = config.tabGroups[i];
-                            $switcher.append(`<div class="choice-option" id='select${i + 1}' onclick='selectGroup(${i + 1}, ${numGroups}, this)'> ${group.name} </div>`)
-                        }
-
-                        selectGroup(0, numGroups, "#select0");
-                    }
-                }
-
-                const endpointUrl = new Request('sparql').url;
-                window.endpointUrl = endpointUrl;
-                $('#endpoint').text(endpointUrl);
-                window.yasgui = YASGUI(document.getElementById("yasgui0"), {
-                    yasqe: {sparql: {endpoint: endpointUrl}}
-                });
+        if (hasGroups) {
+            const numGroups = window.portalConfig.tabGroups.length;
+            $switcher.append(`<div class="choice-option" id="select0" onclick='selectGroup(0, ${numGroups}, this)'>Playground</div>`);
+            window.portalConfig.tabGroups.forEach((group, idx) => {
+                $switcher.append(`<div class="choice-option" id='select${idx + 1}' onclick='selectGroup(${idx + 1}, ${numGroups}, this)'> ${group.name} </div>`);
+            });
+            selectGroup(0, numGroups, "#select0");
+        } else {
+            $switcher.hide();
+            const host = document.getElementById('yasgui0');
+            if (host) {
+                host.style.display = 'block';
             }
-        );
+        }
+    } catch (error) {
+        console.error('Unable to load portal configuration; falling back to playground only.', error);
+        await withSpinner(ensureGroupLoaded(0));
+        const host = document.getElementById('yasgui0');
+        if (host) {
+            host.style.display = 'block';
+        }
+        $("#switcher").hide();
+    }
 });
 
 

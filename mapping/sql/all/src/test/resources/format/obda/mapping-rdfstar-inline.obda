@@ -1,0 +1,11 @@
+[PrefixDeclaration]
+:        http://example.org/star#
+ex:      http://example.org/schema#
+xsd:     http://www.w3.org/2001/XMLSchema#
+
+[MappingDeclaration] @collection [[
+mappingId   rdfstar-inline
+target      << :Sensor{sensor_id} ex:reports :Observation{observation_id} >> ex:recordedBy :Device{device_id} ;
+            ex:confidence {confidence}^^xsd:decimal .
+source      SELECT 1 AS sensor_id, 2 AS observation_id, 3 AS device_id, 0.95 AS confidence
+]]

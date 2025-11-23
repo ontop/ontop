@@ -46,8 +46,18 @@ public class TurtleOBDASQLVisitor extends TurtleOBDABaseVisitor<Stream<TargetAto
 
     @Override
     public Stream<TargetAtom> visitTriples(TurtleOBDAParser.TriplesContext ctx) {
-        currentSubject = ctx.subject().accept(turtleOBDASQLTermVisitor);
-        return visitChildren(ctx);
+        if (ctx.subject() != null)
+            currentSubject = ctx.subject().accept(turtleOBDASQLTermVisitor);
+        else if (ctx.reifiedTriple() != null)
+            currentSubject = ctx.reifiedTriple().accept(turtleOBDASQLTermVisitor);
+        else if (ctx.blankNodePropertyList() != null)
+            throw new IllegalArgumentException("Blank node property lists are not supported in mapping targets");
+        else
+            throw new IllegalArgumentException("Unsupported triple structure in mapping target");
+
+        return ctx.predicateObjectList() == null
+                ? Stream.empty()
+                : ctx.predicateObjectList().accept(this);
     }
 
     @Override

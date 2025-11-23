@@ -1,0 +1,14 @@
+[PrefixDeclaration]
+:        http://example.org/star#
+ex:      http://example.org/schema#
+rdfs:    http://www.w3.org/2000/01/rdf-schema#
+xsd:     http://www.w3.org/2001/XMLSchema#
+
+[MappingDeclaration] @collection [[
+mappingId   rdfstar-tripleterm
+target      :Sensor{sensor_id} ex:hasEmbedded <<(:Sensor{sensor_id} ex:reports :Observation{observation_id})>> ;
+            ex:embeddedTriple <<(:Sensor{sensor_id} ex:reports :Observation{observation_id})>> .
+            :Sensor{sensor_id} rdfs:comment {comment}@en ;
+            ex:qualityScore {score}^^xsd:int .
+source      SELECT 1 AS sensor_id, 2 AS observation_id, 42 AS score, 'ok' AS comment
+]]
