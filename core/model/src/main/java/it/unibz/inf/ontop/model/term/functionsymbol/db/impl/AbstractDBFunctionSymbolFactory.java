@@ -1625,7 +1625,6 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
                 this::serializeDBRowNumberWithOrderBy);
     }
 
-
     protected abstract DBMathBinaryOperator createMultiplyOperator(DBTermType dbNumericType);
     protected abstract DBMathBinaryOperator createDivideOperator(DBTermType dbNumericType);
     protected abstract DBMathBinaryOperator createAddOperator(DBTermType dbNumericType) ;
@@ -2075,6 +2074,9 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
                                                                 Function<ImmutableTerm, String> converter,
                                                               TermFactory termFactory);
 
+    protected abstract String serializeTemporalBinaryOperator(String operator, ImmutableList<? extends ImmutableTerm> terms,
+                                                               Function<ImmutableTerm, String> termConverter, TermFactory termFactory);
+
     @Override
     public DBTypeConversionFunctionSymbol getConversion2RDFLexicalFunctionSymbol(DBTermType inputType, RDFTermType rdfTermType) {
         return Optional.of(rdfTermType)
@@ -2105,7 +2107,9 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
 
     @Override
     public DBFunctionSymbol getDBTemporalBinaryOperator(String operator, ImmutableList<DBTermType> argumentsTerms, DBTermType dbResultType) {
-        return new DBBinaryTemporalOperationFunctionSymbol(operator, argumentsTerms.get(0), argumentsTerms.get(1), dbResultType);
+        return new DBFunctionSymbolWithSerializerImpl(String.format("%s_%s_%s", argumentsTerms.get(0), argumentsTerms.get(1), operator),
+                ImmutableList.copyOf(argumentsTerms), dbResultType, false,
+                (t, c, f) -> serializeTemporalBinaryOperator(operator, t, c, f));
     }
 
     protected abstract String serializeIntervalNorm(ImmutableList<? extends ImmutableTerm> terms,
@@ -2114,7 +2118,5 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
 
     protected abstract String serializeIntervalDenorm(ImmutableList<? extends ImmutableTerm> terms,
                                                       Function<ImmutableTerm, String> termConverter, TermFactory termFactory);
-
-
 
 }

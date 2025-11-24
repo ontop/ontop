@@ -1,5 +1,6 @@
 package it.unibz.inf.ontop.utils;
 
+import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.model.term.*;
 
 import java.util.regex.Matcher;
@@ -101,6 +102,18 @@ public class Interval {
     }
     public boolean isNegative() {
         return isNegative;
+    }
+
+    public ImmutableMap<String, Integer> toMap() {
+        return ImmutableMap.of(
+                "year", years,
+                "month", months,
+                "day", days,
+                "hour", hours,
+                "minute", minutes,
+                "second", seconds,
+                "millisecond", milliseconds
+        );
     }
 
 }

@@ -1390,6 +1390,15 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
                 termConverter.apply(terms.get(0)));
     }
 
+    @Override
+    protected String serializeTemporalBinaryOperator(String operator, ImmutableList<? extends ImmutableTerm> terms,
+                                                     Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return String.format("(%s %s %s)",
+                termConverter.apply(terms.get(0)),
+                operator,
+                termConverter.apply(terms.get(1)));
+    }
+
     /**
      * Can be overridden.
      * <p>

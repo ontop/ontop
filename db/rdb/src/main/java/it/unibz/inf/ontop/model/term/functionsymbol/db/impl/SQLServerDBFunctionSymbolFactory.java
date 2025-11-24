@@ -9,6 +9,7 @@ import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.DBTypeFactory;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.model.type.impl.SQLServerDBTypeFactory;
+import it.unibz.inf.ontop.utils.Interval;
 import org.apache.commons.rdf.api.IRI;
 
 import java.util.Optional;
@@ -705,12 +706,61 @@ public class SQLServerDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbo
     }
 
     @Override
-    protected String serializeIntervalDenorm(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
-        throw new UnsupportedOperationException("SQL Server does not support INTERVAL as a type");
+    protected String serializeTemporalBinaryOperator(String operator, ImmutableList<? extends ImmutableTerm> terms,
+                                                     Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        Interval interval = new Interval(termConverter.apply(terms.get(1)));
+
+        if ( operator.equals("+") ) {
+            return serializeIntervalAddition(interval, terms, termConverter);
+        } else if ( operator.equals("-") ) {
+            return serializeIntervalSubtraction(interval, terms, termConverter);
+        } else {
+            throw new UnsupportedOperationException("Unsupported operator: " + operator);
+        }
+    }
+
+    private String serializeIntervalAddition(Interval interval, ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter) {
+        String start = interval.toMap().entrySet().stream()
+                .filter(e -> e.getValue() != 0)
+                .map(e -> interval.isNegative()
+                        ? String.format("DATEADD(%s, -%d, ", e.getKey(), e.getValue())
+                        : String.format("DATEADD(%s, %d, ", e.getKey(), e.getValue()))
+                .collect(Collectors.joining());
+
+        String end = ")".repeat((int) interval.toMap().entrySet().stream()
+                .filter(e -> e.getValue() != 0)
+                .count());
+
+        return start + (termConverter.apply(terms.get(0))) + end;
+    }
+
+    private String serializeIntervalSubtraction(Interval interval, ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter) {
+        String start = interval.toMap().entrySet().stream()
+                .filter(e -> e.getValue() != 0)
+                .map(e -> interval.isNegative()
+                        ? String.format("DATEDIFF(%s, -%d, ", e.getKey(), e.getValue())
+                        : String.format("DATEDIFF(%s, %d, ", e.getKey(), e.getValue()))
+                .collect(Collectors.joining());
+
+        String end = ")".repeat((int) interval.toMap().entrySet().stream()
+                .filter(e -> e.getValue() != 0)
+                .count());
+
+        return start + termConverter.apply(terms.get(0)) + end;
     }
 
     @Override
-    protected String serializeIntervalNorm(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+    protected String serializeIntervalDenorm(ImmutableList<? extends ImmutableTerm> terms,
+                                             Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        if (terms.size() != 1 || !(terms.get(0) instanceof DBConstant)) {
+            throw new UnsupportedOperationException("Expected the interval to be a single constant");
+        }
+        return ((DBConstant)terms.get(0)).getValue();
+    }
+
+    @Override
+    protected String serializeIntervalNorm(ImmutableList<? extends ImmutableTerm> terms,
+                                           Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
         throw new UnsupportedOperationException("SQL Server does not support INTERVAL as a type");
     }
 }

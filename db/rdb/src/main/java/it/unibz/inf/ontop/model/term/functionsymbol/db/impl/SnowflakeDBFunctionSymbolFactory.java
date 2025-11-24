@@ -2,7 +2,6 @@ package it.unibz.inf.ontop.model.term.functionsymbol.db.impl;
 
 import com.google.common.collect.*;
 import com.google.inject.Inject;
-import it.unibz.inf.ontop.model.term.DBConstant;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.*;
@@ -338,17 +337,26 @@ public class SnowflakeDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbo
     @Override
     protected String serializeIntervalDenorm(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
         Interval interval = new Interval(termConverter.apply(terms.get(0)));
-        String intervalString = String.format("INTERVAL '%d years, %d months, %d days, %d hours, %d minutes, %f seconds'",
-                interval.getYears(),
-                interval.getMonths(),
-                interval.getDays(),
-                interval.getHours(),
-                interval.getMinutes(),
-                interval.getTotalSeconds()
-        );
-
-        return interval.isNegative()
-                ? String.format("(-%s)", intervalString)
-                : intervalString;
+        String intervalString;
+        if (interval.isNegative()) {
+             intervalString = String.format("INTERVAL '-%d years, -%d months, -%d days, -%d hours, -%d minutes, -%f seconds'",
+                    interval.getYears(),
+                    interval.getMonths(),
+                    interval.getDays(),
+                    interval.getHours(),
+                    interval.getMinutes(),
+                    interval.getTotalSeconds()
+            );
+        } else {
+            intervalString = String.format("INTERVAL '%d years, %d months, %d days, %d hours, %d minutes, %f seconds'",
+                    interval.getYears(),
+                    interval.getMonths(),
+                    interval.getDays(),
+                    interval.getHours(),
+                    interval.getMinutes(),
+                    interval.getTotalSeconds()
+            );
+        }
+        return intervalString;
     }
 }
