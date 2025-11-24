@@ -4,14 +4,15 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import it.unibz.inf.ontop.generation.algebra.SelectFromWhereWithModifiers;
 import it.unibz.inf.ontop.dbschema.DBParameters;
+import it.unibz.inf.ontop.injection.OntopSQLCoreSettings;
 import it.unibz.inf.ontop.model.term.TermFactory;
 
 @Singleton
 public class DB2SelectFromWhereSerializer extends IgnoreNullFirstSelectFromWhereSerializer {
 
     @Inject
-    private DB2SelectFromWhereSerializer(TermFactory termFactory) {
-        super(new DefaultSQLTermSerializer(termFactory));
+    private DB2SelectFromWhereSerializer(TermFactory termFactory, OntopSQLCoreSettings settings) {
+        super(new DefaultSQLTermSerializer(termFactory), settings);
     }
 
     @Override

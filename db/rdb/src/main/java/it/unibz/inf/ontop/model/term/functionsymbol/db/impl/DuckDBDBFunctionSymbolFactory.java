@@ -9,6 +9,7 @@ import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.DBTypeFactory;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.utils.Interval;
+import it.unibz.inf.ontop.model.vocabulary.SPARQL;
 
 import java.util.UUID;
 import java.util.function.Function;
@@ -290,6 +291,14 @@ public class DuckDBDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFa
     @Override
     protected DBFunctionSymbol createDBSample(DBTermType termType) {
         return new DBSampleFunctionSymbolImpl(termType, "FIRST");
+    }
+
+    @Override
+    protected DBTermType inferOutputTypeMathOperator(String dbMathOperatorName, DBTermType arg1Type, DBTermType arg2Type) {
+        if (dbMathOperatorName.equals(SPARQL.DIVIDE))
+            return dbDecimalType;
+
+        return super.inferOutputTypeMathOperator(dbMathOperatorName, arg1Type, arg2Type);
     }
 
     @Override

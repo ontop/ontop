@@ -5,16 +5,17 @@ import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import it.unibz.inf.ontop.dbschema.QualifiedAttributeID;
+import it.unibz.inf.ontop.dbschema.QuotedID;
 import it.unibz.inf.ontop.generation.algebra.SQLFlattenExpression;
 import it.unibz.inf.ontop.generation.algebra.SQLOneTupleDummyQueryExpression;
 import it.unibz.inf.ontop.generation.algebra.SQLOrderComparator;
 import it.unibz.inf.ontop.generation.algebra.SelectFromWhereWithModifiers;
 import it.unibz.inf.ontop.dbschema.DBParameters;
 import it.unibz.inf.ontop.generation.serializer.SQLSerializationException;
+import it.unibz.inf.ontop.injection.OntopSQLCoreSettings;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.type.DBTermType;
-import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Optional;
 
@@ -23,8 +24,8 @@ import java.util.Optional;
 public class SQLServerSelectFromWhereSerializer extends IgnoreNullFirstSelectFromWhereSerializer {
 
     @Inject
-    private SQLServerSelectFromWhereSerializer(TermFactory termFactory) {
-        super(new DefaultSQLTermSerializer(termFactory));
+    private SQLServerSelectFromWhereSerializer(TermFactory termFactory, OntopSQLCoreSettings settings) {
+        super(new DefaultSQLTermSerializer(termFactory), settings);
     }
 
     @Override
@@ -75,12 +76,12 @@ public class SQLServerSelectFromWhereSerializer extends IgnoreNullFirstSelectFro
             public QuerySerialization visit(SQLOneTupleDummyQueryExpression sqlOneTupleDummyQueryExpression) {
                 String fromString = serializeDummyTable();
                 String sqlSubString = String.format("(SELECT 1 AS dummyVarSQLServer %s) tdummy", fromString);
-                return new QuerySerializationImpl(sqlSubString, ImmutableMap.of());
+                return new QuerySerializationImpl(sqlSubString, ImmutableMap.of(), ImmutableMap.of());
             }
 
             @Override
             protected QuerySerialization serializeFlatten(SQLFlattenExpression sqlFlattenExpression, Variable flattenedVar, Variable outputVar, Optional<Variable> indexVar, DBTermType flattenedType, ImmutableMap<Variable, QualifiedAttributeID> allColumnIDs, QuerySerialization subQuerySerialization) {
-                if(indexVar.isPresent()) {
+                if (indexVar.isPresent()) {
                     /*
                     * adding `<indexVar> int '$.sql:identity()'` to the `WITH` clause can create a position argument, but
                     * this feature is only supported in the "serverless SQL pool in Synapse Analytics".
@@ -88,8 +89,7 @@ public class SQLServerSelectFromWhereSerializer extends IgnoreNullFirstSelectFro
                     throw new SQLSerializationException("SQLServer currently does not support FLATTEN with position arguments.");
                 }
 
-                //We build the query string of the form SELECT <variables> FROM <subquery> CROSS APPLY OPENJSON(<flattenedVariable>) WITH (<names> NVARCHAR(MAX) '$')
-                StringBuilder builder = new StringBuilder();
+                // SELECT <variables> FROM <subquery> CROSS APPLY OPENJSON(<flattenedVariable>) WITH (<names> NVARCHAR(MAX) '$')
 
                 /*
                  * When flattening an array, we have to indicate if the children are either a SCALAR value or a NESTED value.
@@ -98,29 +98,27 @@ public class SQLServerSelectFromWhereSerializer extends IgnoreNullFirstSelectFro
                  * one to the output variable.
                  */
                 var attributeAliasFactory = createAttributeAliasFactory();
-                String jsonVariable = attributeAliasFactory.createAttributeAlias(outputVar.getName() + "json").getSQLRendering();
-                String scalarVariable = attributeAliasFactory.createAttributeAlias(outputVar.getName() + "scalar").getSQLRendering();
+                QuotedID jsonVariable = attributeAliasFactory.createAttributeAlias(outputVar.getName() + "json");
+                QuotedID scalarVariable = attributeAliasFactory.createAttributeAlias(outputVar.getName() + "scalar");
 
-                builder.append(
-                        String.format(
-                                "%s CROSS APPLY (SELECT (CASE WHEN %s IS NOT NULL THEN %S ELSE %S END) as %s FROM OPENJSON(%s) WITH (%s NVARCHAR(MAX) '$', %s NVARCHAR(MAX) '$' AS JSON)) %s",
-                                subQuerySerialization.getString(),
-                                jsonVariable,
-                                jsonVariable,
-                                scalarVariable,
-                                allColumnIDs.get(outputVar).getSQLRendering(),
-                                allColumnIDs.get(flattenedVar).getSQLRendering(),
-                                scalarVariable,
-                                jsonVariable,
-                                generateFreshViewAlias().getSQLRendering()
-                        ));
+                return serializeFlattenAsJoin(
+                        flattenedVar,
+                        String.format("SELECT %s FROM OPENJSON(%s) WITH (%s NVARCHAR(MAX) '$', %s NVARCHAR(MAX) '$' AS JSON)",
+                                serializeColumnAlias(String.format("(CASE WHEN %s IS NOT NULL THEN %S ELSE %S END)",
+                                                jsonVariable.getSQLRendering(),
+                                                jsonVariable.getSQLRendering(),
+                                                scalarVariable.getSQLRendering()),
+                                        serializeTerm(outputVar, allColumnIDs)),
+                                serializeTerm(flattenedVar, allColumnIDs),
+                                scalarVariable.getSQLRendering(),
+                                jsonVariable.getSQLRendering()),
+                        allColumnIDs,
+                        subQuerySerialization);
+            }
 
-                return new QuerySerializationImpl(
-                        builder.toString(),
-                        allColumnIDs.entrySet().stream()
-                                .filter(e -> e.getKey() != flattenedVar)
-                                .collect(ImmutableCollectors.toMap())
-                );
+            @Override
+            protected String getFlattenJoinTemplate() {
+                return "%s CROSS APPLY (%s) %s";
             }
         });
     }

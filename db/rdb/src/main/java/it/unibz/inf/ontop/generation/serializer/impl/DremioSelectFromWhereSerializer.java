@@ -1,7 +1,6 @@
 package it.unibz.inf.ontop.generation.serializer.impl;
 
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import it.unibz.inf.ontop.dbschema.DBParameters;
@@ -10,19 +9,18 @@ import it.unibz.inf.ontop.generation.algebra.SQLFlattenExpression;
 import it.unibz.inf.ontop.generation.algebra.SelectFromWhereWithModifiers;
 import it.unibz.inf.ontop.generation.serializer.SQLSerializationException;
 import it.unibz.inf.ontop.generation.serializer.SelectFromWhereSerializer;
+import it.unibz.inf.ontop.injection.OntopSQLCoreSettings;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.type.DBTermType;
-import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
-import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Singleton
 public class DremioSelectFromWhereSerializer extends DefaultSelectFromWhereSerializer implements SelectFromWhereSerializer {
 
     @Inject
-    private DremioSelectFromWhereSerializer(TermFactory termFactory) {
+    private DremioSelectFromWhereSerializer(TermFactory termFactory, OntopSQLCoreSettings settings) {
         super(new DefaultSQLTermSerializer(termFactory) {
             @Override
             public String serialize(ImmutableTerm term, ImmutableMap<Variable, QualifiedAttributeID> columnIDs) {
@@ -33,7 +31,7 @@ public class DremioSelectFromWhereSerializer extends DefaultSelectFromWhereSeria
             protected String serializeDatetimeConstant(String datetime, DBTermType dbType) {
                 return String.format("CAST(%s AS %s)", serializeStringConstant(datetime), dbType.getCastName());
             }
-        });
+        }, settings);
     }
 
     @Override
@@ -47,9 +45,9 @@ public class DremioSelectFromWhereSerializer extends DefaultSelectFromWhereSeria
 
                     //Due to a limitation of dremio, we need to cast integer constants in VALUES terms to integers, as they would be types as int64 otherwise.
                     @Override
-                    protected String serializeValuesEntry(Constant constant, ImmutableMap<Variable, QualifiedAttributeID> childColumnIDs) {
-                        String serialization = sqlTermSerializer.serialize(constant, childColumnIDs);
-                        if(constant instanceof DBConstant && ((DBConstant) constant).getType().getCategory() == DBTermType.Category.INTEGER) {
+                    protected String serializeValuesEntry(Constant constant) {
+                        String serialization = super.serializeValuesEntry(constant);
+                        if (constant instanceof DBConstant && ((DBConstant) constant).getType().getCategory() == DBTermType.Category.INTEGER) {
                             return String.format("CAST(%s as INTEGER)", serialization);
                         }
                         return serialization;
@@ -97,7 +95,7 @@ public class DremioSelectFromWhereSerializer extends DefaultSelectFromWhereSeria
 
                     @Override
                     protected QuerySerialization serializeFlatten(SQLFlattenExpression sqlFlattenExpression, Variable flattenedVar, Variable outputVar, Optional<Variable> indexVar, DBTermType flattenedType, ImmutableMap<Variable, QualifiedAttributeID> allColumnIDs, QuerySerialization subQuerySerialization) {
-                        if(indexVar.isPresent()) {
+                        if (indexVar.isPresent()) {
                             throw new SQLSerializationException("Dremio does not support FLATTEN with position arguments.");
                         }
 
@@ -105,47 +103,25 @@ public class DremioSelectFromWhereSerializer extends DefaultSelectFromWhereSeria
 
                         //FLATTEN only works on ARRAY<T> types, so we first transform the JSON-array into an ARRAY<STRING> if it is not already one
                         var expression = flattenedType.getCategory() == DBTermType.Category.ARRAY
-                                ? allColumnIDs.get(flattenedVar).getSQLRendering()
-                                : String.format("CONVERT_FROM(%s, 'json')", allColumnIDs.get(flattenedVar).getSQLRendering());
+                                ? serializeTerm(flattenedVar, allColumnIDs)
+                                : String.format("CONVERT_FROM(%s, 'json')", serializeTerm(flattenedVar, allColumnIDs));
 
-                        //We compute an alias for the sub-query, and new aliases for each projected variable.
-                        var alias = this.generateFreshViewAlias().getSQLRendering();
-                        var variableAliases = allColumnIDs.entrySet().stream()
-                                .filter(e -> e.getKey() != flattenedVar)
-                                .collect(ImmutableCollectors.toMap(
-                                        v -> v.getKey(),
-                                        v -> new QualifiedAttributeID(idFactory.createRelationID(alias), v.getValue().getAttribute())
-                                ));
-                        var subProjection = subQuerySerialization.getColumnIDs().keySet().stream()
-                                .filter(v -> variableAliases.containsKey(v))
-                                .map(
-                                        v -> subQuerySerialization.getColumnIDs().get(v).getSQLRendering() + " AS " + idFactory.createAttributeID(v.getName()).getSQLRendering()
-                                )
-                                .collect(Collectors.joining(", "));
-                        if(subProjection.length() > 0)
-                            subProjection += ",";
+                        // We need to run `CASE WHEN RAND() > 1...` here, because otherwise, casting the resulting column to
+                        //a different datatype will make the query fail.
+                        return serializeFlattenAsSubQuery(flattenedVar, allColumnIDs, subQuerySerialization,
+                                Stream.of(serializeColumnAlias(
+                                        String.format("CASE WHEN RAND() > 1 THEN NULL ELSE FLATTEN(%s) END", expression),
+                                        serializeTerm(outputVar, allColumnIDs))));
+                    }
 
-                        var builder = new StringBuilder();
-                        /*We need to run `CASE WHEN RAND() > 1...` here, because otherwise, casting the resulting column to
-                         * a different datatype will make the query fail.
-                         * We need to add a LIMIT to the end, because otherwise, when accessing a JSON object that is the
-                         * result of flatten with square brackets, the access operation will be ignored.
-                         * */
-                        builder.append(String.format(
-                                "(SELECT %s CASE WHEN RAND() > 1 THEN NULL ELSE FLATTEN(%s) END AS %s FROM %s LIMIT 999999999) %s",
-                                subProjection,
-                                expression,
-                                allColumnIDs.get(outputVar).getSQLRendering(),
-                                subQuerySerialization.getString(),
-                                alias
-                        ));
-                        return new QuerySerializationImpl(
-                                builder.toString(),
-                                variableAliases
-                        );
+                    /*
+                     * We need to add a LIMIT to the end, because otherwise, when accessing a JSON object that is the
+                     * result of flatten with square brackets, the access operation will be ignored.
+                     */
+                    @Override
+                    protected String getFlattenSubQueryTemplate() {
+                        return "(SELECT %s FROM %s LIMIT 999999999) %s";
                     }
                 });
-
-
     }
 }

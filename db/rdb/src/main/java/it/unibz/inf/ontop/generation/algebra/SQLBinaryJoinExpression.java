@@ -7,7 +7,7 @@ import java.util.Optional;
 /**
  * Abstraction for LeftJoinRelation and explicit InnerJoinRelation
  */
-public interface BinaryJoinExpression extends SQLExpression {
+public interface SQLBinaryJoinExpression extends SQLExpression {
 
     SQLExpression getLeft();
     SQLExpression getRight();

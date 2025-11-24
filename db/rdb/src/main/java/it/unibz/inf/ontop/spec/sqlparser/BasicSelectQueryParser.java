@@ -3,42 +3,55 @@ package it.unibz.inf.ontop.spec.sqlparser;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.dbschema.*;
+import it.unibz.inf.ontop.exception.InvalidQueryException;
 import it.unibz.inf.ontop.exception.MetadataExtractionException;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
-import it.unibz.inf.ontop.spec.sqlparser.exception.IllegalJoinException;
-import it.unibz.inf.ontop.spec.sqlparser.exception.InvalidSelectQueryRuntimeException;
-import it.unibz.inf.ontop.spec.sqlparser.exception.UnsupportedSelectQueryRuntimeException;
+import it.unibz.inf.ontop.spec.sqlparser.exception.*;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import net.sf.jsqlparser.expression.Alias;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.select.*;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Function;
 
-public abstract class BasicSelectQueryParser<T, O extends RAOperations<T>> {
+public abstract class BasicSelectQueryParser<T> {
 
     protected final ExpressionParser expressionParser;
     protected final TermFactory termFactory;
 
     protected final QuotedIDFactory idfac;
-    private final MetadataLookup metadata;
+    protected final MetadataLookup metadata;
 
-    protected final O operations;
+    protected final RAOperations<T> operations;
 
     private int relationIndex = 0;
 
     protected abstract T create(NamedRelationDefinition relation);
 
-    protected BasicSelectQueryParser(MetadataLookup metadata, CoreSingletons coreSingletons, O operations) {
+    protected BasicSelectQueryParser(MetadataLookup metadata, CoreSingletons coreSingletons, RAOperations<T> operations) {
         this.expressionParser = new ExpressionParser(metadata.getQuotedIDFactory(), coreSingletons);
         this.idfac = metadata.getQuotedIDFactory();
         this.metadata = metadata;
         this.termFactory = coreSingletons.getTermFactory();
         this.operations = operations;
+    }
+
+    protected T parseJSqlSelectQuery(String sql) throws InvalidQueryException, UnsupportedSelectQueryException, QueryParseException {
+        try {
+            Select select = JSqlParserTools.parse(sql, !idfac.supportsSquareBracketQuotation());
+            return translateSelect(select.getSelectBody(), select.getWithItemsList());
+        }
+        catch (InvalidSelectQueryRuntimeException e) {
+            throw new InvalidQueryException(e.getMessage(), e.getObject());
+        }
+        catch (UnsupportedSelectQueryRuntimeException e) {
+            throw new UnsupportedSelectQueryException(e.getMessage(), e.getObject());
+        }
     }
 
 
@@ -192,10 +205,10 @@ public abstract class BasicSelectQueryParser<T, O extends RAOperations<T>> {
                     return left;
                 }
 
-                Function<RAExpressionAttributes, ImmutableList<ImmutableExpression>> getAtomOnExpression =
+                Function<RAExpressionAttributes, Optional<ImmutableExpression>> getAtomOnExpression =
                         attributes -> join.getOnExpressions().stream()
-                                .flatMap(exp -> expressionParser.parseBooleanExpression(exp, attributes).stream())
-                                .collect(ImmutableCollectors.toList());
+                                .map(exp -> expressionParser.parseBooleanExpression(exp, attributes))
+                                .reduce(termFactory::getConjunction);
 
                 if (join.isLeft())
                     return leftJoinOn(left, right, getAtomOnExpression, join);
@@ -240,13 +253,13 @@ public abstract class BasicSelectQueryParser<T, O extends RAOperations<T>> {
     }
 
     protected T leftJoinOn(T left, T right,
-                           Function<RAExpressionAttributes, ImmutableList<ImmutableExpression>> getAtomOnExpression,
+                           Function<RAExpressionAttributes, Optional<ImmutableExpression>> getAtomOnExpression,
                            Join join) {
         throw new UnsupportedSelectQueryRuntimeException("[LEFT|RIGHT] OUTER join is not supported", join);
     }
 
     protected T fullJoinOn(T left, T right,
-                           Function<RAExpressionAttributes, ImmutableList<ImmutableExpression>> getAtomOnExpression,
+                           Function<RAExpressionAttributes, Optional<ImmutableExpression>> getAtomOnExpression,
                            Join join) {
         throw new UnsupportedSelectQueryRuntimeException("FULL OUTER join is not supported", join);
     }

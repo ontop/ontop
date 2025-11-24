@@ -51,7 +51,11 @@ public class QualifiedAttributeID {
 		return relation;
 	}
 
-	public String getSQLRendering() {
+    public boolean isQualified() {
+        return relation != null;
+    }
+
+    public String getSQLRendering() {
 		return ((relation == null) ? "" : (relation.getSQLRendering() + ".")) + attribute.getSQLRendering();
 	}
 	

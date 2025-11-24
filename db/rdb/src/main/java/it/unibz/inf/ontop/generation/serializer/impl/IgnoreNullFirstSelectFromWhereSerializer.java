@@ -1,6 +1,5 @@
 package it.unibz.inf.ontop.generation.serializer.impl;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
@@ -10,9 +9,8 @@ import it.unibz.inf.ontop.generation.serializer.SelectFromWhereSerializer;
 import it.unibz.inf.ontop.dbschema.DBParameters;
 import it.unibz.inf.ontop.dbschema.QualifiedAttributeID;
 import it.unibz.inf.ontop.dbschema.QuotedIDFactory;
+import it.unibz.inf.ontop.injection.OntopSQLCoreSettings;
 import it.unibz.inf.ontop.model.term.Variable;
-
-import java.util.stream.Collectors;
 
 /**
  * Useful for instead for SQL Server which already treats NULLs as the lowest values
@@ -22,8 +20,8 @@ import java.util.stream.Collectors;
 public class IgnoreNullFirstSelectFromWhereSerializer extends DefaultSelectFromWhereSerializer implements SelectFromWhereSerializer {
 
     @Inject
-    protected IgnoreNullFirstSelectFromWhereSerializer(SQLTermSerializer sqlTermSerializer) {
-        super(sqlTermSerializer);
+    protected IgnoreNullFirstSelectFromWhereSerializer(SQLTermSerializer sqlTermSerializer, OntopSQLCoreSettings settings) {
+        super(sqlTermSerializer, settings);
     }
 
     @Override
@@ -36,17 +34,9 @@ public class IgnoreNullFirstSelectFromWhereSerializer extends DefaultSelectFromW
         protected IgnoreNullFirstRelationVisitingSerializer(QuotedIDFactory idFactory) { super(idFactory); }
 
         @Override
-        protected String serializeOrderBy(ImmutableList<SQLOrderComparator> sortConditions,
-                ImmutableMap<Variable, QualifiedAttributeID> fromColumnMap) {
-            if (sortConditions.isEmpty())
-                return "";
-
-            String conditionString = sortConditions.stream()
-                    .map(c -> sqlTermSerializer.serialize(c.getTerm(), fromColumnMap)
-                            + (c.isAscending() ? "" : " DESC"))
-                    .collect(Collectors.joining(", "));
-
-            return String.format("ORDER BY %s\n", conditionString);
+        protected String serializeOrderByComparator(SQLOrderComparator c, ImmutableMap<Variable, QualifiedAttributeID> columnIDs) {
+            return serializeTerm(c.getTerm(), columnIDs)
+                    + (c.isAscending() ? "" : " DESC");
         }
     }
 }

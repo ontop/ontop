@@ -7,10 +7,10 @@ import it.unibz.inf.ontop.iq.node.ValuesNode;
 import it.unibz.inf.ontop.model.term.DBConstant;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.utils.VariableGenerator;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static it.unibz.inf.ontop.spec.sqlparser.SQLTestingTools.*;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ConvertValuesToUnionTest {
 
@@ -57,6 +57,4 @@ public class ConvertValuesToUnionTest {
 
         assertEquals(expectedTree, newTree);
     }
-
-
 }

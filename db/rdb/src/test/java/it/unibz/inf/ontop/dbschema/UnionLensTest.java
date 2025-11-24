@@ -3,12 +3,12 @@ package it.unibz.inf.ontop.dbschema;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.Collection;
 import java.util.stream.Collectors;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class UnionLensTest {
     private static final String LENS_FILE = "src/test/resources/union/union_lenses.json";
@@ -138,7 +138,4 @@ public class UnionLensTest {
             //correct
         }
     }
-
-
-
 }

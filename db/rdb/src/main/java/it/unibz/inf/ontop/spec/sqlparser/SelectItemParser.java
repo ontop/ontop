@@ -1,13 +1,11 @@
 package it.unibz.inf.ontop.spec.sqlparser;
 
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import it.unibz.inf.ontop.dbschema.QuotedID;
 import it.unibz.inf.ontop.dbschema.QuotedIDFactory;
 import it.unibz.inf.ontop.dbschema.RelationID;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.spec.sqlparser.exception.InvalidSelectQueryRuntimeException;
-import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import net.sf.jsqlparser.expression.Alias;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.schema.Column;
@@ -32,23 +30,12 @@ public class SelectItemParser {
     }
 
     public RAExpressionAttributes parseSelectItems(List<SelectItem> selectItems) {
-
         try {
-            ImmutableMap<QuotedID, ImmutableTerm> map = selectItems.stream()
-                    .flatMap(si -> new SelectItemProcessor().getAttributes(si))
-                    .collect(ImmutableCollectors.toMap());
-
-            return new RAExpressionAttributesOperations().create(map);
+            return RAExpressionAttributes.of(selectItems.stream()
+                    .flatMap(si -> new SelectItemProcessor().getAttributes(si)));
         }
-        catch (IllegalArgumentException e) {
-            Map<QuotedID, Integer> duplicates = new HashMap<>();
-            selectItems.stream()
-                    .flatMap(si -> new SelectItemProcessor().getAttributes(si))
-                    .forEach(a -> duplicates.put(a.getKey(), duplicates.getOrDefault(a.getKey(), 0) + 1));
-
-            throw new InvalidSelectQueryRuntimeException(duplicates.entrySet().stream()
-                    .filter(d -> d.getValue() > 1)
-                    .map(Map.Entry::getKey)
+        catch (RAExpressionAttributes.DuplicateAttrbuteEntriesException e) {
+            throw new InvalidSelectQueryRuntimeException(e.getDuplicates().stream()
                     .map(QuotedID::getSQLRendering)
                     .collect(Collectors.joining(", ",
                             "Duplicate column names ",
@@ -67,9 +54,7 @@ public class SelectItemParser {
 
         @Override
         public void visit(AllColumns allColumns) {
-            stream = attributes.asMap().entrySet().stream()
-                    .filter(e -> e.getKey().getRelation() == null)
-                    .map(e -> Maps.immutableEntry(e.getKey().getAttribute(), e.getValue()));
+            stream =  attributes.getUnqualifiedAttributesMap().entrySet().stream();
         }
 
         @Override
@@ -77,9 +62,7 @@ public class SelectItemParser {
             Table table = allTableColumns.getTable();
             RelationID id = JSqlParserTools.getRelationId(idfac, table);
 
-            stream = attributes.asMap().entrySet().stream()
-                    .filter(e -> e.getKey().getRelation() != null && e.getKey().getRelation().equals(id))
-                    .map(e -> Maps.immutableEntry(e.getKey().getAttribute(), e.getValue()));
+            stream = attributes.getRelationAttributesMap(id).entrySet().stream();
         }
 
         @Override

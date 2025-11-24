@@ -2,7 +2,6 @@ package it.unibz.inf.ontop.generation.serializer.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import it.unibz.inf.ontop.dbschema.DBParameters;
@@ -12,18 +11,17 @@ import it.unibz.inf.ontop.dbschema.RelationID;
 import it.unibz.inf.ontop.generation.algebra.SQLFlattenExpression;
 import it.unibz.inf.ontop.generation.algebra.SQLOrderComparator;
 import it.unibz.inf.ontop.generation.algebra.SelectFromWhereWithModifiers;
-import it.unibz.inf.ontop.generation.algebra.impl.SelectFromWhereWithModifiersImpl;
 import it.unibz.inf.ontop.generation.serializer.SQLSerializationException;
 import it.unibz.inf.ontop.generation.serializer.SelectFromWhereSerializer;
+import it.unibz.inf.ontop.injection.OntopSQLCoreSettings;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.substitution.Substitution;
-import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.StringUtils;
 
-import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Singleton
 public class SparkSQLSelectFromWhereSerializer extends DefaultSelectFromWhereSerializer implements SelectFromWhereSerializer {
@@ -33,14 +31,14 @@ public class SparkSQLSelectFromWhereSerializer extends DefaultSelectFromWhereSer
 
 
     @Inject
-    private SparkSQLSelectFromWhereSerializer(TermFactory termFactory) {
+    private SparkSQLSelectFromWhereSerializer(TermFactory termFactory, OntopSQLCoreSettings settings) {
         super(new DefaultSQLTermSerializer(termFactory) {
             @Override
             protected String serializeStringConstant(String constant) {
                 // parent method + doubles backslashes
                 return StringUtils.encode(super.serializeStringConstant(constant), BACKSLASH);
             }
-        });
+        }, settings);
     }
 
     @Override
@@ -68,7 +66,7 @@ public class SparkSQLSelectFromWhereSerializer extends DefaultSelectFromWhereSer
 
                 // TODO: if selectFromWhere.getLimit is 0, then replace it with an additional filter 0 = 1
                 String whereString = selectFromWhere.getWhereExpression()
-                        .map(e -> sqlTermSerializer.serialize(e, columnIDs))
+                        .map(e -> serializeTerm(e, columnIDs))
                         .map(s -> String.format("WHERE %s\n", s))
                         .orElse("");
 
@@ -82,7 +80,7 @@ public class SparkSQLSelectFromWhereSerializer extends DefaultSelectFromWhereSer
 
                 // Creates an alias for this SQLExpression and uses it for the projected columns
                 RelationID alias = generateFreshViewAlias();
-                return new QuerySerializationImpl(sql, attachRelationAlias(alias, variableAliases));
+                return new QuerySerializationImpl(sql, attachRelationAlias(alias, variableAliases), fromQuerySerialization.getCTEMap());
             }
 
             /**
@@ -116,7 +114,7 @@ public class SparkSQLSelectFromWhereSerializer extends DefaultSelectFromWhereSer
                     throws SQLSerializationException {
 
                 if (term instanceof Constant) {
-                    return getTermSerializer().serialize(term, columnIDs);
+                    return serializeTerm(term, columnIDs);
                 }
                 else if (term instanceof Variable) {
                     Optional<QuotedID> alias = Optional.ofNullable(variableAliases.get(term));
@@ -146,23 +144,22 @@ public class SparkSQLSelectFromWhereSerializer extends DefaultSelectFromWhereSer
 
                 //EXPLODE only works on ARRAY<T> types, so we first transform the JSON-array into an ARRAY<STRING> if it is not already one
                 var expression = flattenedType.getCategory() == DBTermType.Category.ARRAY
-                        ? allColumnIDs.get(flattenedVar).getSQLRendering()
-                        : String.format("FROM_JSON(%s, 'ARRAY<STRING>')", allColumnIDs.get(flattenedVar).getSQLRendering());
+                        ? serializeTerm(flattenedVar, allColumnIDs)
+                        : String.format("FROM_JSON(%s, 'ARRAY<STRING>')", serializeTerm(flattenedVar, allColumnIDs));
 
                 //If an index is required, we use POSEXPLODE instead of EXPLODE
-                String flattenCall;
-                String aliasFormat;
-                if(indexVar.isPresent()) {
-                    flattenCall = String.format("POSEXPLODE_OUTER(%s)", expression);
-                    aliasFormat = String.format("(%s, %s)",
-                            allColumnIDs.get(indexVar.get()).getSQLRendering(),
-                            allColumnIDs.get(outputVar).getSQLRendering());
-                } else {
-                    flattenCall = String.format("EXPLODE_OUTER(%s)", expression);
-                    aliasFormat = String.format("%s",
-                            allColumnIDs.get(outputVar).getSQLRendering());
-                }
-                return serializeFlattenAsFunction(flattenedVar, allColumnIDs, subQuerySerialization, flattenCall, aliasFormat);
+                String flattenFunctionCallWithAlias = indexVar.isPresent()
+                    ? serializeColumnAlias(
+                            String.format("POSEXPLODE_OUTER(%s)", expression),
+                            String.format("(%s, %s)",
+                                    serializeTerm(indexVar.get(), allColumnIDs),
+                                    serializeTerm(outputVar, allColumnIDs)))
+
+                    : serializeColumnAlias(
+                                String.format("EXPLODE_OUTER(%s)", expression),
+                                serializeTerm(outputVar, allColumnIDs));
+
+                return serializeFlattenAsSubQuery(flattenedVar, allColumnIDs, subQuerySerialization, Stream.of(flattenFunctionCallWithAlias));
             }
         });
     }
