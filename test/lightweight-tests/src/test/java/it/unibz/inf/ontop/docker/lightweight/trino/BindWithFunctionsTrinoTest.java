@@ -11,7 +11,6 @@ import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.sql.SQLException;
-import java.util.TimeZone;
 
 /**
  * Class to test if functions on Strings and Numerics in SPARQL are working properly.
@@ -24,13 +23,11 @@ public class BindWithFunctionsTrinoTest extends AbstractBindTestWithFunctions {
 
     @BeforeAll
     public static void before() throws IOException, SQLException {
-        TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
         initOBDA(OBDA_FILE, OWL_FILE, PROPERTIES_FILE);
     }
 
     @AfterAll
     public static void after() throws SQLException {
-        TimeZone.setDefault(null);
         release();
     }
 

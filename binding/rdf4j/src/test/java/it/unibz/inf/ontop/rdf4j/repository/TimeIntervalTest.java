@@ -8,23 +8,21 @@ import org.junit.Test;
 
 import java.io.IOException;
 import java.sql.SQLException;
-import java.util.TimeZone;
 
 
 public class TimeIntervalTest extends AbstractRDF4JTest {
 
     private static final String OBDA_FILE = "/time-interval/mapping.obda";
     private static final String SQL_FILE = "/time-interval/db.sql";
+    private static final String PROPERTIES_FILE = "/time-interval/time-interval.properties";
 
     @BeforeClass
     public static void before() throws SQLException, IOException {
-        TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
-        initOBDA(SQL_FILE, OBDA_FILE);
+        initOBDA(SQL_FILE, OBDA_FILE, null, PROPERTIES_FILE);
     }
 
     @AfterClass
     public static void after() throws SQLException {
-        TimeZone.setDefault(null);
         release();
     }
 

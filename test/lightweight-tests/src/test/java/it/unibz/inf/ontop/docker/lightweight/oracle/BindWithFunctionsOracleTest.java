@@ -10,7 +10,6 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
-import java.util.TimeZone;
 
 /**
  * Class to test if functions on Strings and Numerics in SPARQL are working properly.
@@ -24,13 +23,11 @@ public class BindWithFunctionsOracleTest extends AbstractBindTestWithFunctions {
 
     @BeforeAll
     public static void before() {
-        TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
         initOBDA("/books/oracle/books-oracle.obda", OWL_FILE, PROPERTIES_FILE);
     }
 
     @AfterAll
     public static void after() {
-        TimeZone.setDefault(null);
         release();
     }
 
