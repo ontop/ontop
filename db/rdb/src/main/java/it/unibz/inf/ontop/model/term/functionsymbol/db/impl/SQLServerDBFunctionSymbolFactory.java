@@ -738,8 +738,8 @@ public class SQLServerDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbo
         String start = interval.toMap().entrySet().stream()
                 .filter(e -> e.getValue() != 0)
                 .map(e -> interval.isNegative()
-                        ? String.format("DATEDIFF(%s, -%d, ", e.getKey(), e.getValue())
-                        : String.format("DATEDIFF(%s, %d, ", e.getKey(), e.getValue()))
+                        ? String.format("DATEADD(%s, %d, ", e.getKey(), e.getValue())
+                        : String.format("DATEADD(%s, -%d, ", e.getKey(), e.getValue()))
                 .collect(Collectors.joining());
 
         String end = ")".repeat((int) interval.toMap().entrySet().stream()
