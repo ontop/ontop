@@ -100,6 +100,36 @@ public class TimeIntervalTest extends AbstractRDF4JTest {
         String sparql = "SELECT * WHERE {\n" +
                 "    BIND(\"PT1H15M\"^^xsd:duration * 2 as ?v) \n" +
                 "}";
-        runQueryAndCompare(sparql, ImmutableSet.of("INTERVAL '0 02:30:0' DAY TO SECOND"));
+        runQueryAndCompare(sparql, ImmutableSet.of("PT2H30M"));
+    }
+
+    @Test
+    @Ignore("For now durations can only be constants")
+    public void intervalVariableAdditionTest() {
+        String sparql = "PREFIX : <http://vocabulary.example.org/>\n" +
+                "SELECT * WHERE {\n" +
+                "    ?p :duration ?dur .\n" +
+                "    BIND(\"2025-02-17T09:50:00\"^^xsd:dateTime + ?dur as ?v) \n" +
+                "}";
+        runQueryAndCompare(sparql, ImmutableSet.of("2025-02-17T11:50:00", "2025-02-19T11:50:00"));
+    }
+
+    @Test
+    @Ignore("For now durations can only be constants")
+    public void intervalVariableTest() {
+        String sparql = "PREFIX : <http://vocabulary.example.org/>\n" +
+                "SELECT * WHERE {\n" +
+                "    ?p :duration ?v .\n" +
+                "}";
+        runQueryAndCompare(sparql, ImmutableSet.of("PT2H", "PT2D12H"));
+    }
+
+    @Test
+    @Ignore("Conversion back to xsd:duration not yet implemented")
+    public void timestampsDifferenceTest() {
+        String sparql = "SELECT * WHERE {\n" +
+                "    BIND(\"2025-02-20T13:55:06.500Z\"^^xsd:dateTime - \"2025-02-17T09:50:00\"^^xsd:dateTime as ?v) \n" +
+                "}";
+        runQueryAndCompare(sparql, ImmutableSet.of("P3DT4H5M6.5S"));
     }
 }

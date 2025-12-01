@@ -6,4 +6,9 @@ xsd:		http://www.w3.org/2001/XMLSchema#
 mappingId	person
 target		:person/{id} a :Person ; :name {name} ; :birthDate {birth_date}^^xsd:date;  :birthInstant {birth_instant}^^xsd:dateTime; :age {age} .
 source		SELECT id, age, name, birth_date, birth_instant FROM "person";
+
+mappingId	event
+target		:events/{id} a :Event ; :title {title} ; :startTime {start}^^xsd:dateTime ; :duration {duration}^^xsd:duration .
+source		SELECT id, title, start, duration FROM "event";
+
 ]]

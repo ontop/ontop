@@ -528,6 +528,12 @@ public abstract class AbstractDBFunctionSymbolFactory implements DBFunctionSymbo
         DBTermType defaultIntervalType = dbTypeFactory.getDBIntervalType();
         DBTypeConversionFunctionSymbol intervalNormFunctionSymbol = createIntervalNormFunctionSymbol(defaultIntervalType);
         builder.put(defaultIntervalType, intervalNormFunctionSymbol);
+        DBTermType defaultYearMonthIntervalType = dbTypeFactory.getDBIntervalYearMonthType();
+        DBTypeConversionFunctionSymbol yearMonthIntervalNormFunctionSymbol = createIntervalNormFunctionSymbol(defaultYearMonthIntervalType);
+        builder.put(defaultYearMonthIntervalType, yearMonthIntervalNormFunctionSymbol);
+        DBTermType defaultDayTimeIntervalType = dbTypeFactory.getDBIntervalDayTimeType();
+        DBTypeConversionFunctionSymbol dayTimeIntervalNormFunctionSymbol = createIntervalNormFunctionSymbol(defaultDayTimeIntervalType);
+        builder.put(defaultDayTimeIntervalType, dayTimeIntervalNormFunctionSymbol);
 
         return builder.build();
     }

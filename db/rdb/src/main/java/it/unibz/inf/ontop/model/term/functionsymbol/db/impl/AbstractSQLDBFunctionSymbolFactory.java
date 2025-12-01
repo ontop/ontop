@@ -874,7 +874,7 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
 
     @Override
     protected String serializeIntervalNorm(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
-        throw new RuntimeException("Not yet implemented");
+        throw new UnsupportedOperationException("Conversion from INTERVAL to DURATION is not yet supported");
     }
 
     @Override

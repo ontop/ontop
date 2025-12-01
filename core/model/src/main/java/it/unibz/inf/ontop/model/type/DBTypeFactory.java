@@ -30,6 +30,10 @@ public interface DBTypeFactory {
 
     DBTermType getDBIntervalType();
 
+    DBTermType getDBIntervalYearMonthType();
+
+    DBTermType getDBIntervalDayTimeType();
+
     boolean supportsDBGeometryType();
 
     boolean supportsDBGeographyType();
