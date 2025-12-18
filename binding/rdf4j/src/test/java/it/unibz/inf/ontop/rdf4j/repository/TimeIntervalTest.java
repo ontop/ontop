@@ -1,13 +1,16 @@
 package it.unibz.inf.ontop.rdf4j.repository;
 
 import com.google.common.collect.ImmutableSet;
+import org.eclipse.rdf4j.query.QueryEvaluationException;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.IOException;
 import java.sql.SQLException;
+
+import static org.junit.Assert.assertThrows;
+import static org.junit.Assert.assertTrue;
 
 
 public class TimeIntervalTest extends AbstractRDF4JTest {
@@ -29,7 +32,7 @@ public class TimeIntervalTest extends AbstractRDF4JTest {
     @Test
     public void timestampConstantIntervalSumTest() {
         String sparql = "SELECT * WHERE {\n" +
-                "    BIND(\"2025-02-17T09:50:00\"^^xsd:dateTime + \"P1Y2M3DT4H5M6.5S\"^^xsd:duration as ?v) \n" +
+                "    BIND(\"2025-02-17T09:50:00Z\"^^xsd:dateTime + \"P1Y2M3DT4H5M6.5S\"^^xsd:duration as ?v) \n" +
                 "}";
         runQueryAndCompare(sparql, ImmutableSet.of( "2026-04-20T13:55:06.500Z"));
     }
@@ -47,7 +50,7 @@ public class TimeIntervalTest extends AbstractRDF4JTest {
     @Test
     public void intervalDifferenceTest() {
         String sparql = "SELECT * WHERE {\n" +
-                "    BIND(\"2025-02-17T09:50:00\"^^xsd:dateTime - \"PT15M\"^^xsd:duration as ?v) \n" +
+                "    BIND(\"2025-02-17T09:50:00Z\"^^xsd:dateTime - \"PT15M\"^^xsd:duration as ?v) \n" +
                 "}";
         runQueryAndCompare(sparql, ImmutableSet.of("2025-02-17T09:35:00.000Z"));
     }
@@ -55,7 +58,7 @@ public class TimeIntervalTest extends AbstractRDF4JTest {
     @Test
     public void negativeIntervalTest() {
         String sparql = "SELECT * WHERE {\n" +
-                "    BIND(\"2025-02-17T09:50:00\"^^xsd:dateTime + \"-PT15M\"^^xsd:duration as ?v) \n" +
+                "    BIND(\"2025-02-17T09:50:00Z\"^^xsd:dateTime + \"-PT15M\"^^xsd:duration as ?v) \n" +
                 "}";
         runQueryAndCompare(sparql, ImmutableSet.of("2025-02-17T09:35:00.000Z"));
     }
@@ -63,7 +66,7 @@ public class TimeIntervalTest extends AbstractRDF4JTest {
     @Test
     public void intervalSumArgumentsOrderTest() {
         String sparql = "SELECT * WHERE {\n" +
-                "    BIND(\"P1Y2M3DT4H5M6.5S\"^^xsd:duration + \"2025-02-17T09:50:00\"^^xsd:dateTime as ?v) \n" +
+                "    BIND(\"P1Y2M3DT4H5M6.5S\"^^xsd:duration + \"2025-02-17T09:50:00Z\"^^xsd:dateTime as ?v) \n" +
                 "}";
         runQueryAndCompare(sparql, ImmutableSet.of("2026-04-20T13:55:06.500Z"));
     }
@@ -89,47 +92,55 @@ public class TimeIntervalTest extends AbstractRDF4JTest {
     @Test
     public void multipleIntervalsSumTest() {
         String sparql = "SELECT * WHERE {\n" +
-                "    BIND(\"2025-02-17T09:50:00\"^^xsd:dateTime + \"P1Y2M3DT4H5M6.5S\"^^xsd:duration + \"PT15M\"^^xsd:duration as ?v) \n" +
+                "    BIND(\"2025-02-17T09:50Z\"^^xsd:dateTime + \"P1Y2M3DT4H5M6.5S\"^^xsd:duration + \"PT15M\"^^xsd:duration as ?v) \n" +
                 "}";
         runQueryAndCompare(sparql, ImmutableSet.of("2026-04-20T14:10:06.500Z"));
     }
 
     @Test
-    @Ignore("Conversion back to xsd:duration not yet implemented")
     public void multiplyIntervalTest() {
         String sparql = "SELECT * WHERE {\n" +
                 "    BIND(\"PT1H15M\"^^xsd:duration * 2 as ?v) \n" +
                 "}";
-        runQueryAndCompare(sparql, ImmutableSet.of("PT2H30M"));
+
+        QueryEvaluationException ex = assertThrows(QueryEvaluationException.class, () ->
+                runQueryAndCompare(sparql, ImmutableSet.of("PT2H30M")));
+        assertTrue(ex.getMessage().contains("Conversion from INTERVAL to DURATION is not yet supported"));
     }
 
     @Test
-    @Ignore("For now durations can only be constants")
     public void intervalVariableAdditionTest() {
         String sparql = "PREFIX : <http://vocabulary.example.org/>\n" +
                 "SELECT * WHERE {\n" +
                 "    ?p :duration ?dur .\n" +
-                "    BIND(\"2025-02-17T09:50:00\"^^xsd:dateTime + ?dur as ?v) \n" +
+                "    BIND(\"2025-02-17T09:50:00Z\"^^xsd:dateTime + ?dur as ?v) \n" +
                 "}";
-        runQueryAndCompare(sparql, ImmutableSet.of("2025-02-17T11:50:00", "2025-02-19T11:50:00"));
+
+        QueryEvaluationException ex = assertThrows(QueryEvaluationException.class, () ->
+                runQueryAndCompare(sparql, ImmutableSet.of("2025-02-17T11:20:00", "2025-02-19T22:50:00")));
+        assertTrue(ex.getMessage().contains("Duration arguments must be constants"));
     }
 
     @Test
-    @Ignore("For now durations can only be constants")
     public void intervalVariableTest() {
         String sparql = "PREFIX : <http://vocabulary.example.org/>\n" +
                 "SELECT * WHERE {\n" +
                 "    ?p :duration ?v .\n" +
                 "}";
-        runQueryAndCompare(sparql, ImmutableSet.of("PT2H", "PT2D12H"));
+
+        QueryEvaluationException ex = assertThrows(QueryEvaluationException.class, () ->
+                runQueryAndCompare(sparql, ImmutableSet.of("PT1H30M", "P2D12H")));
+        assertTrue(ex.getMessage().contains("Conversion from INTERVAL to DURATION is not yet supported"));
     }
 
     @Test
-    @Ignore("Conversion back to xsd:duration not yet implemented")
     public void timestampsDifferenceTest() {
         String sparql = "SELECT * WHERE {\n" +
                 "    BIND(\"2025-02-20T13:55:06.500Z\"^^xsd:dateTime - \"2025-02-17T09:50:00\"^^xsd:dateTime as ?v) \n" +
                 "}";
-        runQueryAndCompare(sparql, ImmutableSet.of("P3DT4H5M6.5S"));
+        
+        QueryEvaluationException ex = assertThrows(QueryEvaluationException.class, () ->
+                runQueryAndCompare(sparql, ImmutableSet.of("P3DT4H5M6.5S")));
+        assertTrue(ex.getMessage().contains("Conversion from INTERVAL to DURATION is not yet supported"));
     }
 }
