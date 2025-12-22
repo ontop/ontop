@@ -5,11 +5,13 @@ import com.google.common.collect.ImmutableMultiset;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.docker.lightweight.AbstractDockerRDF4JTest;
 import org.apache.commons.codec.digest.DigestUtils;
+import org.eclipse.rdf4j.query.QueryEvaluationException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import static org.apache.commons.codec.digest.MessageDigestAlgorithms.*;
+import static org.junit.Assert.assertThrows;
 
 public abstract class AbstractFunctionsTDEngineTest extends AbstractDockerRDF4JTest {
     protected static final String OBDA_FILE = "/tdengine/functions.obda";
@@ -1098,4 +1100,21 @@ public abstract class AbstractFunctionsTDEngineTest extends AbstractDockerRDF4JT
 
         executeAndCompareValues(query, ImmutableSet.of("\215.34\"^^xsd:decimal"));
     }
+
+    @Test
+    public void testDurationArithmetic() {
+        String sparql = "PREFIX  ns:  <http://example.org/ns#>\n" +
+                "SELECT ?v WHERE {\n" +
+                "    ?x ns:instant ?inst .\n" +
+                "    BIND(?inst + \"-P2MT15M\"^^xsd:duration as ?v) \n" +
+                "} ORDER BY ?year";
+
+
+        QueryEvaluationException ex = assertThrows(QueryEvaluationException.class, () ->
+                executeAndCompareValues(sparql, ImmutableSet.of("\"1970-09-05T07:35:00\"^^xsd:dateTime", "\"2011-10-08T11:15:00\"^^xsd:dateTime",
+                        "\"2014-04-05T16:32:52\"^^xsd:dateTime", "\"2015-07-21T09:08:06\"^^xsd:dateTime")));
+        Assertions.assertTrue(ex.getMessage().contains("TDengine does not support INTERVAL as a type"));
+
+    }
+
 }

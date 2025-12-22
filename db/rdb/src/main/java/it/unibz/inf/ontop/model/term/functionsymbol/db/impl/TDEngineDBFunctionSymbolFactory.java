@@ -208,4 +208,15 @@ public class TDEngineDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbol
         return String.format("TO_TIMESTAMP(%s, 'yyyy-mm-dd hh:mi:ss.ms.us.ns')", timestamp);
     }
 
+    @Override
+    protected String serializeIntervalDenorm(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        throw new UnsupportedOperationException("TDengine does not support INTERVAL as a type");
+    }
+
+    @Override
+    protected String serializeIntervalNorm(ImmutableList<? extends ImmutableTerm> terms,
+                                           Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        throw new UnsupportedOperationException("TDengine does not support INTERVAL as a type");
+    }
+
 }
