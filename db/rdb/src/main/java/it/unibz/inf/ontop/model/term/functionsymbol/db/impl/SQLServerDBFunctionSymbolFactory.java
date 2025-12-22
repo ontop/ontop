@@ -436,7 +436,7 @@ public class SQLServerDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbo
     @Override
     protected String serializeDaysBetween(ImmutableList<? extends ImmutableTerm> terms,
                                           Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
-        return String.format("DATEDIFF(DAY, %s, %s) - IIF(CAST(%s AS TIME) > CAST(%s AS TIME), 1, 0)",
+        return String.format("DATEDIFF(DAY, %s, %s) - IIF(CAST(CAST(%s AS DATETIME) AS TIME) > CAST(CAST(%s AS DATETIME) AS TIME), 1, 0)",
                 termConverter.apply(terms.get(1)),
                 termConverter.apply(terms.get(0)),
                 termConverter.apply(terms.get(1)),

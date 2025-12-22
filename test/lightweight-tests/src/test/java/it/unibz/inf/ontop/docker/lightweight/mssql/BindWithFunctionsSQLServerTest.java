@@ -94,17 +94,4 @@ public class BindWithFunctionsSQLServerTest extends AbstractBindTestWithFunction
         executeAndCompareValues(query, ImmutableSet.of("\"2\"^^xsd:integer", "\"1\"^^xsd:integer"));
     }
 
-    @Disabled("Temporary disabled due to changes in dateime serialization")
-    @Test
-    @Override
-    public void testDaysBetweenDate() {
-        super.testDaysBetweenDate();
-    }
-
-    @Disabled
-    @Test
-    @Override
-    public void testDurationArithmetic() {
-        super.testDurationArithmetic();
-    }
 }
