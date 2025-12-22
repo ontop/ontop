@@ -337,8 +337,10 @@ public class SnowflakeDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbo
 
     @Override
     protected String serializeIntervalDenorm(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
-        if (!(terms.get(0) instanceof DBConstant))
+        if (!(terms.get(0) instanceof DBConstant)) {
             throw new UnsupportedOperationException("Only constant intervals are supported");
+        }
+
         Interval interval = new Interval(((DBConstant) terms.get(0)).getValue());
         String intervalString;
         if (interval.isNegative()) {

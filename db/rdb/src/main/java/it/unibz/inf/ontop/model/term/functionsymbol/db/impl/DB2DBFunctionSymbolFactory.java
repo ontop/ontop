@@ -432,8 +432,10 @@ public class DB2DBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFacto
 
     @Override
     protected String serializeIntervalDenorm(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
-        if (!(terms.get(0) instanceof DBConstant))
+        if (!(terms.get(0) instanceof DBConstant)) {
             throw new UnsupportedOperationException("Only constant intervals are supported");
+        }
+
         Interval interval = new Interval(((DBConstant) terms.get(0)).getValue());
         String intervalString = String.format("INTERVAL '%d years %d months %d days %d hours %d minutes %d seconds %d milliseconds' ",
                 interval.getYears(),

@@ -601,21 +601,12 @@ public class PostgreSQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymb
 
     @Override
     protected String serializeIntervalDenorm(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
-        if (!(terms.get(0) instanceof DBConstant))
+        if (!(terms.get(0) instanceof DBConstant)) {
             throw new UnsupportedOperationException("Only constant intervals are supported");
-        Interval interval = new Interval(((DBConstant) terms.get(0)).getValue());
-        String intervalString = String.format("INTERVAL '%d years %d months %d days %d hours %d minutes %f seconds'",
-                interval.getYears(),
-                interval.getMonths(),
-                interval.getDays(),
-                interval.getHours(),
-                interval.getMinutes(),
-                interval.getTotalSeconds()
-        );
+        }
 
-        return interval.isNegative()
-                ? String.format("(-%s)", intervalString)
-                : intervalString;
+        Interval interval = new Interval(((DBConstant) terms.get(0)).getValue());
+        return interval.serializeAsFullInterval();
     }
 
 }

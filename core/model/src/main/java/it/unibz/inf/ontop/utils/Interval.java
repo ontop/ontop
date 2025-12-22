@@ -21,7 +21,9 @@ public class Interval {
 
 
     public Interval(String xsdLexicalValue) {
-        if (xsdLexicalValue == null) throw new IllegalArgumentException("Lexical value cannot be null");
+        if (xsdLexicalValue == null) {
+            throw new IllegalArgumentException("Lexical value cannot be null");
+        }
 
         Matcher matcher = PATTERN.matcher(xsdLexicalValue);
         if (!matcher.matches()) {
@@ -47,8 +49,29 @@ public class Interval {
         }
     }
 
-    private int parse(String group) {
-        return (group == null) ? 0 : Integer.parseInt(group);
+    public String serializeAsYearMonthDayTimeSum(String yearMonthKeyword, String dayTimeKeyword) {
+        String sign = this.isNegative() ? "-" : "";
+
+        String intervalYearMonth = (months == 0 && years == 0)
+                ? ""
+                : String.format("INTERVAL '%s%d-%d' %s", sign, years, months, yearMonthKeyword);
+
+        String intervalDayTime = (days == 0 && hours == 0 && minutes == 0 && getTotalSeconds() == 0)
+                ? ""
+                : String.format("INTERVAL '%s%d %d:%d:%f' %s", sign, days, hours, minutes, getTotalSeconds(), dayTimeKeyword);
+
+        return intervalYearMonth.isEmpty() || intervalDayTime.isEmpty()
+                ? String.format("%s%s", intervalYearMonth, intervalDayTime)
+                : String.format("%s + %s", intervalYearMonth, intervalDayTime);
+    }
+
+    public String serializeAsFullInterval() {
+        String interval = String.format("INTERVAL '%d years %d months %d days %d hours %d minutes %f seconds'",
+                years, months, days, hours, minutes, getTotalSeconds());
+
+        return this.isNegative()
+                ? String.format("(-%s)", interval)
+                : interval;
     }
 
     public int getYears() {
@@ -89,6 +112,10 @@ public class Interval {
                 "second", seconds,
                 "millisecond", milliseconds
         );
+    }
+
+    private int parse(String group) {
+        return (group == null) ? 0 : Integer.parseInt(group);
     }
 
 }
