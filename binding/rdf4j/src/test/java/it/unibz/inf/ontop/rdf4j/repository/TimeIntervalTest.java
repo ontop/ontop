@@ -92,7 +92,7 @@ public class TimeIntervalTest extends AbstractRDF4JTest {
     @Test
     public void multipleIntervalsSumTest() {
         String sparql = "SELECT * WHERE {\n" +
-                "    BIND(\"2025-02-17T09:50Z\"^^xsd:dateTime + \"P1Y2M3DT4H5M6.5S\"^^xsd:duration + \"PT15M\"^^xsd:duration as ?v) \n" +
+                "    BIND(\"2025-02-17T09:50:00Z\"^^xsd:dateTime + \"P1Y2M3DT4H5M6.5S\"^^xsd:duration + \"PT15M\"^^xsd:duration as ?v) \n" +
                 "}";
         runQueryAndCompare(sparql, ImmutableSet.of("2026-04-20T14:10:06.500Z"));
     }
@@ -138,7 +138,7 @@ public class TimeIntervalTest extends AbstractRDF4JTest {
         String sparql = "SELECT * WHERE {\n" +
                 "    BIND(\"2025-02-20T13:55:06.500Z\"^^xsd:dateTime - \"2025-02-17T09:50:00\"^^xsd:dateTime as ?v) \n" +
                 "}";
-        
+
         QueryEvaluationException ex = assertThrows(QueryEvaluationException.class, () ->
                 runQueryAndCompare(sparql, ImmutableSet.of("P3DT4H5M6.5S")));
         assertTrue(ex.getMessage().contains("Conversion from INTERVAL to DURATION is not yet supported"));

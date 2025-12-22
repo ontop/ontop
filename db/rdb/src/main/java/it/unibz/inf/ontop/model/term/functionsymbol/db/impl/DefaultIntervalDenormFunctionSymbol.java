@@ -17,7 +17,7 @@ public class DefaultIntervalDenormFunctionSymbol extends AbstractDBTypeConversio
 
     public DefaultIntervalDenormFunctionSymbol(DBTermType intervalType, DBTermType dbStringType,
                                                DBFunctionSymbolSerializer serializer) {
-        super("intervalDenorm", dbStringType, intervalType);
+        super("DENORM_" + intervalType, dbStringType, intervalType);
         this.dbStringType = dbStringType;
         this.serializer = serializer;
 

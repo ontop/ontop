@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.model.term.*;
 
 import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class Interval {
     private final int years;
@@ -14,66 +15,40 @@ public class Interval {
     private final int seconds;
     private final int milliseconds;
     private final boolean isNegative;
+    private static final Pattern PATTERN = Pattern.compile(
+            "^(-)?P(?=\\d|T\\d)(?:(\\d+)Y)?(?:(\\d+)M)?(?:(\\d+)D)?(?:T(?:(\\d+)H)?(?:(\\d+)M)?(?:(\\d+(?:\\.\\d+)?)S)?)?$"
+    );
 
 
-    public Interval(String sparqlInterval) {
-        int years = 0, months = 0, days = 0, hours = 0, minutes = 0, seconds = 0, milliseconds = 0;
+    public Interval(String xsdLexicalValue) {
+        if (xsdLexicalValue == null) throw new IllegalArgumentException("Lexical value cannot be null");
 
-        // Remove surrounding quotes if present
-        sparqlInterval = sparqlInterval.replaceAll("^'|'$", "");
-
-        // Check if interval is negative
-        boolean isNegative = sparqlInterval.startsWith("-");
-        if (isNegative) {
-            sparqlInterval = sparqlInterval.substring(1);
+        Matcher matcher = PATTERN.matcher(xsdLexicalValue);
+        if (!matcher.matches()) {
+            throw new IllegalArgumentException("Invalid xsd:duration: " + xsdLexicalValue);
         }
 
-        // Remove the leading P
-        String interval = sparqlInterval.substring(1);
+        this.isNegative = matcher.group(1) != null;
+        this.years = parse(matcher.group(2));
+        this.months = parse(matcher.group(3));
+        this.days = parse(matcher.group(4));
+        this.hours = parse(matcher.group(5));
+        this.minutes = parse(matcher.group(6));
 
-        // Split into date and time parts
-        String[] parts = interval.split("T");
-        String datePart = parts.length > 0 ? parts[0] : "";
-        String timePart = parts.length > 1 ? parts[1] : "";
-
-        if (!datePart.isEmpty()) {
-            Matcher yearMatcher = java.util.regex.Pattern.compile("(\\d+)Y").matcher(datePart);
-            if (yearMatcher.find()) years = Integer.parseInt(yearMatcher.group(1));
-
-            Matcher monthMatcher = java.util.regex.Pattern.compile("(\\d+)M").matcher(datePart);
-            if (monthMatcher.find()) months = Integer.parseInt(monthMatcher.group(1));
-
-            Matcher dayMatcher = java.util.regex.Pattern.compile("(\\d+)D").matcher(datePart);
-            if (dayMatcher.find()) days = Integer.parseInt(dayMatcher.group(1));
+        // Special handling for seconds and milliseconds
+        String secGroup = matcher.group(7);
+        if (secGroup != null) {
+            double s = Double.parseDouble(secGroup);
+            this.seconds = (int) s;
+            this.milliseconds = (int) Math.round((s - this.seconds) * 1000);
+        } else {
+            this.seconds = 0;
+            this.milliseconds = 0;
         }
+    }
 
-        if (!timePart.isEmpty()) {
-            Matcher hourMatcher = java.util.regex.Pattern.compile("(\\d+)H").matcher(timePart);
-            if (hourMatcher.find()) hours = Integer.parseInt(hourMatcher.group(1));
-
-            Matcher minuteMatcher = java.util.regex.Pattern.compile("(\\d+)M").matcher(timePart);
-            if (minuteMatcher.find()) minutes = Integer.parseInt(minuteMatcher.group(1));
-
-            Matcher secondMatcher = java.util.regex.Pattern.compile("(\\d+(?:\\.\\d+)?)S").matcher(timePart);
-            if (secondMatcher.find()) {
-                String secondStr = secondMatcher.group(1);
-                if (secondStr.contains(".")) {
-                    seconds = (int) Float.parseFloat(secondStr);
-                    milliseconds = (int) ((Float.parseFloat(secondStr) - seconds) * 1000);
-                } else {
-                    seconds = Integer.parseInt(secondStr);
-                }
-            }
-        }
-
-        this.years = years;
-        this.months = months;
-        this.days = days;
-        this.hours = hours;
-        this.minutes = minutes;
-        this.seconds = seconds;
-        this.milliseconds = milliseconds;
-        this.isNegative = isNegative;
+    private int parse(String group) {
+        return (group == null) ? 0 : Integer.parseInt(group);
     }
 
     public int getYears() {

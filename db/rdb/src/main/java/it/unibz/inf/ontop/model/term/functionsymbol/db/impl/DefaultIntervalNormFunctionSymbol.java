@@ -18,7 +18,7 @@ public class DefaultIntervalNormFunctionSymbol extends AbstractDBTypeConversionF
 
     public DefaultIntervalNormFunctionSymbol(DBTermType intervalType, DBTermType dbStringType,
                                              DBFunctionSymbolSerializer serializer) {
-        super("intervalNorm" + intervalType, intervalType, dbStringType);
+        super("NORM_" + intervalType, intervalType, dbStringType);
         this.dbStringType = dbStringType;
         this.intervalType = intervalType;
         this.serializer = serializer;

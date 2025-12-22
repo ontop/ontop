@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.model.term.functionsymbol.db.impl;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableTable;
 import com.google.common.collect.Maps;
+import it.unibz.inf.ontop.model.term.DBConstant;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
@@ -879,7 +880,9 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
 
     @Override
     protected String serializeIntervalDenorm(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
-        Interval interval = new Interval(termConverter.apply(terms.get(0)));
+        if (!(terms.get(0) instanceof DBConstant))
+            throw new UnsupportedOperationException("Only constant intervals are supported");
+        Interval interval = new Interval(((DBConstant) terms.get(0)).getValue());
         String intervalYearMonth;
         String intervalDayTime;
         if (interval.isNegative()) {
