@@ -223,6 +223,14 @@ public class MockupDBFunctionSymbolFactory extends AbstractDBFunctionSymbolFacto
         return createSimpleCastFunctionSymbol(dbTypeFactory.getDBHexBinaryType(), dbStringType);
     }
 
+    /**
+     * Too simplistic!
+     */
+    @Override
+    protected DBTypeConversionFunctionSymbol createIntervalNormFunctionSymbol(DBTermType intervalType) {
+        return createSimpleCastFunctionSymbol(dbTypeFactory.getDBIntervalType(), dbStringType);
+    }
+
     @Override
     protected DBTypeConversionFunctionSymbol createDateTimeDenormFunctionSymbol(DBTermType timestampType) {
         throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
@@ -235,6 +243,11 @@ public class MockupDBFunctionSymbolFactory extends AbstractDBFunctionSymbolFacto
 
     @Override
     protected DBTypeConversionFunctionSymbol createHexBinaryDenormFunctionSymbol(DBTermType binaryType) {
+        throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
+    }
+
+    @Override
+    protected DBTypeConversionFunctionSymbol createIntervalDenormFunctionSymbol(DBTermType intervalType) {
         throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
     }
 
@@ -452,6 +465,21 @@ public class MockupDBFunctionSymbolFactory extends AbstractDBFunctionSymbolFacto
     }
 
     @Override
+    protected String serializeTemporalBinaryOperator(String operator, ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
+    }
+
+    @Override
+    protected String serializeIntervalNorm(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
+    }
+
+    @Override
+    protected String serializeIntervalDenorm(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
+    }
+
+    @Override
     public DBFunctionSymbol getDBIfThenElse() {
         return new MockupDBIfElseNullFunctionSymbol(dbBooleanType, abstractRootDBType);
     }
@@ -623,7 +651,6 @@ public class MockupDBFunctionSymbolFactory extends AbstractDBFunctionSymbolFacto
     public DBBooleanFunctionSymbol getDBRegexpMatches3() {
         throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
     }
-
     @Override
     public DBFunctionSymbol getDBNow() {
         throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
@@ -977,7 +1004,5 @@ public class MockupDBFunctionSymbolFactory extends AbstractDBFunctionSymbolFacto
                                                             Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
         throw new UnsupportedOperationException("Operation not supported by the MockupDBFunctionSymbolFactory");
     }
-
-
 
 }

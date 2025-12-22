@@ -38,11 +38,6 @@ public class PostgresSelectFromWhereSerializer extends DefaultSelectFromWhereSer
             }
 
             @Override
-            protected String serializeDatetimeConstant(String datetime, DBTermType dbType) {
-                return String.format("CAST(%s AS %s)", serializeStringConstant(datetime), dbType.getCastName());
-            }
-
-            @Override
             protected String serializeBooleanConstant(DBConstant booleanConstant) {
                 String value = booleanConstant.getValue();
                 switch (value.toLowerCase()) {

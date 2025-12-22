@@ -64,6 +64,7 @@ public interface DBTermType extends TermType {
         UUID,
         JSON,
         ARRAY,
+        INTERVAL,
         OTHER
     }
 }

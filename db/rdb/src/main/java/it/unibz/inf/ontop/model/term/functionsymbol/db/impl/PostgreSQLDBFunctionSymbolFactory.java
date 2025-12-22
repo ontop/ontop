@@ -3,10 +3,12 @@ package it.unibz.inf.ontop.model.term.functionsymbol.db.impl;
 import com.google.common.collect.*;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.model.term.Constant;
+import it.unibz.inf.ontop.model.term.DBConstant;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.*;
 import it.unibz.inf.ontop.model.type.*;
+import it.unibz.inf.ontop.utils.Interval;
 
 import java.util.UUID;
 import java.util.function.Function;
@@ -595,6 +597,16 @@ public class PostgreSQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymb
             throw new IllegalArgumentException("PostgreSQL does not support DATE_TRUNC on 'millisecond' or 'microsend'. Use 'milliseconds' or 'microseconds' instead.");
         }
         return super.getDBDateTrunc(datePart);
+    }
+
+    @Override
+    protected String serializeIntervalDenorm(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        if (!(terms.get(0) instanceof DBConstant)) {
+            throw new UnsupportedOperationException("Only constant intervals are supported");
+        }
+
+        Interval interval = new Interval(((DBConstant) terms.get(0)).getValue());
+        return interval.serializeAsFullInterval();
     }
 
 }

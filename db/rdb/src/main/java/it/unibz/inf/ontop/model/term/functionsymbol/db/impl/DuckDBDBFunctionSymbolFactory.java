@@ -2,12 +2,14 @@ package it.unibz.inf.ontop.model.term.functionsymbol.db.impl;
 
 import com.google.common.collect.*;
 import com.google.inject.Inject;
+import it.unibz.inf.ontop.model.term.DBConstant;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.*;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.DBTypeFactory;
 import it.unibz.inf.ontop.model.type.TypeFactory;
+import it.unibz.inf.ontop.utils.Interval;
 import it.unibz.inf.ontop.model.vocabulary.SPARQL;
 
 import java.util.UUID;
@@ -298,5 +300,15 @@ public class DuckDBDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFa
             return dbDecimalType;
 
         return super.inferOutputTypeMathOperator(dbMathOperatorName, arg1Type, arg2Type);
+    }
+
+    @Override
+    protected String serializeIntervalDenorm(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        if (!(terms.get(0) instanceof DBConstant)) {
+            throw new UnsupportedOperationException("Only constant intervals are supported");
+        }
+
+        Interval interval = new Interval(((DBConstant) terms.get(0)).getValue());
+        return interval.serializeAsFullInterval();
     }
 }

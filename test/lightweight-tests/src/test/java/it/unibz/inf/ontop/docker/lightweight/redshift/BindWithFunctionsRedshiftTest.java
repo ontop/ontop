@@ -114,4 +114,10 @@ public class BindWithFunctionsRedshiftTest extends AbstractBindTestWithFunctions
     protected ImmutableSet<String> getSimpleDateTrunkExpectedValues() {
         return ImmutableSet.of("\"1970-01-01T00:00:00+00:00\"^^xsd:dateTime", "\"2011-01-01T00:00:00+00:00\"^^xsd:dateTime", "\"2014-01-01T00:00:00+00:00\"^^xsd:dateTime", "\"2015-01-01T00:00:00+00:00\"^^xsd:dateTime");
     }
+
+    @Override
+    protected ImmutableSet<String> getDurationArithmeticExpectedResults() {
+        return ImmutableSet.of("\"1970-09-05T07:35:00+00:00\"^^xsd:dateTime", "\"2011-10-08T11:15:00+00:00\"^^xsd:dateTime",
+                "\"2014-04-05T16:32:52+00:00\"^^xsd:dateTime", "\"2015-07-21T09:08:06+00:00\"^^xsd:dateTime" );
+    }
 }

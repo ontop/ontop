@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.model.term.functionsymbol.db.impl;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableTable;
 import com.google.common.collect.Maps;
+import it.unibz.inf.ontop.model.term.DBConstant;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
@@ -10,6 +11,7 @@ import it.unibz.inf.ontop.model.term.functionsymbol.InequalityLabel;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.*;
 import it.unibz.inf.ontop.model.type.*;
 import it.unibz.inf.ontop.model.type.impl.DatetimeDBTermType;
+import it.unibz.inf.ontop.utils.Interval;
 
 import java.util.Map;
 import java.util.Optional;
@@ -872,6 +874,26 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
     }
 
     @Override
+    protected String serializeIntervalNorm(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        throw new UnsupportedOperationException("Conversion from INTERVAL to DURATION is not yet supported");
+    }
+
+    @Override
+    protected String serializeIntervalDenorm(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        if (!(terms.get(0) instanceof DBConstant)) {
+            throw new UnsupportedOperationException("Only constant intervals are supported");
+        }
+
+        Interval interval = new Interval(((DBConstant) terms.get(0)).getValue());
+        return interval.serializeAsYearMonthDayTimeSum("YEAR TO MONTH", "DAY TO SECOND");
+
+    }
+    @Override
+    protected DBTypeConversionFunctionSymbol createIntervalNormFunctionSymbol(DBTermType intervalType) {
+        return new DefaultIntervalNormFunctionSymbol(intervalType, dbStringType, this::serializeIntervalNorm);
+    }
+
+    @Override
     protected DBTypeConversionFunctionSymbol createDateTimeDenormFunctionSymbol(DBTermType timestampType) {
         return new DefaultSQLTimestampISODenormFunctionSymbol(timestampType, dbStringType);
     }
@@ -884,6 +906,11 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
     @Override
     protected DBTypeConversionFunctionSymbol createHexBinaryDenormFunctionSymbol(DBTermType binaryType) {
         return new DefaultHexBinaryDenormFunctionSymbol(binaryType, dbStringType, this::serializeHexBinaryDenorm);
+    }
+
+    @Override
+    protected DBTypeConversionFunctionSymbol createIntervalDenormFunctionSymbol(DBTermType intervalType) {
+        return new DefaultIntervalDenormFunctionSymbol(intervalType, dbStringType, this::serializeIntervalDenorm);
     }
 
     @Override
@@ -1344,6 +1371,15 @@ public abstract class AbstractSQLDBFunctionSymbolFactory extends AbstractDBFunct
         return String.format("TIMESTAMPDIFF(MILLISECOND, %s, %s)",
                 termConverter.apply(terms.get(1)),
                 termConverter.apply(terms.get(0)));
+    }
+
+    @Override
+    protected String serializeTemporalBinaryOperator(String operator, ImmutableList<? extends ImmutableTerm> terms,
+                                                     Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        return String.format("(%s %s %s)",
+                termConverter.apply(terms.get(0)),
+                operator,
+                termConverter.apply(terms.get(1)));
     }
 
     /**

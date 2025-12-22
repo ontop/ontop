@@ -91,4 +91,10 @@ public class BindWithFunctionsPrestoTest extends AbstractBindTestWithFunctions {
     public void testCaseInsensitiveREGEX() {
         super.testCaseInsensitiveREGEX();
     }
+
+    @Override
+    protected ImmutableSet<String> getDurationArithmeticExpectedResults() {
+        return ImmutableSet.of("\"1970-09-05T07:35:00.000Z\"^^xsd:dateTime", "\"2011-10-08T11:15:00.000Z\"^^xsd:dateTime",
+                "\"2014-04-05T16:32:52.000Z\"^^xsd:dateTime", "\"2015-07-21T09:08:06.000Z\"^^xsd:dateTime" );
+    }
 }

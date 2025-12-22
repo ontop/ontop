@@ -45,7 +45,6 @@ public class H2SQLDBTypeFactory extends DefaultSQLDBTypeFactory {
          * H2GIS types
          */
         map.put(GEOMETRY_STR, new NonStringNonNumberNonBooleanNonDatetimeDBTermType(GEOMETRY_STR, rootAncestry, xsdString));
-
         return map;
     }
 

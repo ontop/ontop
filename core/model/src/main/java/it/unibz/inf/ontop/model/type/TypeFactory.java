@@ -69,9 +69,19 @@ public interface TypeFactory {
 
 	default RDFDatatype getXsdDate() { return getDatatype(XSD.DATE); }
 
+    default RDFDatatype getXsdTime() { return getDatatype(XSD.TIME); }
+
 	default RDFDatatype getXsdDatetimeStampDatatype() {
 		return getDatatype(XSD.DATETIMESTAMP);
 	}
+
+	default RDFDatatype getXsdDurationDatatype() {
+		return getDatatype(XSD.DURATION);
+	}
+
+    default RDFDatatype getXsdDayTimeDurationDatatype() { return getDatatype(XSD.DAYTIMEDURATION); }
+
+    default RDFDatatype getXsdYearMonthDurationDatatype() {return getDatatype(XSD.YEARMONTHDURATION); }
 
 	MetaRDFTermType getMetaRDFTermType();
 

@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.model.term.functionsymbol.db.impl;
 
 import com.google.common.collect.*;
 import com.google.inject.Inject;
+import it.unibz.inf.ontop.model.term.DBConstant;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.*;
@@ -9,6 +10,7 @@ import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.DBTypeFactory;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.model.vocabulary.SPARQL;
+import it.unibz.inf.ontop.utils.Interval;
 
 import java.util.function.Function;
 
@@ -331,5 +333,35 @@ public class SnowflakeDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbo
             throw new IllegalArgumentException(String.format("Snowflake does not support DATE_TRUNC on %s.", datePart));
         }
         return super.getDBDateTrunc(datePart);
+    }
+
+    @Override
+    protected String serializeIntervalDenorm(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        if (!(terms.get(0) instanceof DBConstant)) {
+            throw new UnsupportedOperationException("Only constant intervals are supported");
+        }
+
+        Interval interval = new Interval(((DBConstant) terms.get(0)).getValue());
+        String intervalString;
+        if (interval.isNegative()) {
+             intervalString = String.format("INTERVAL '-%d years, -%d months, -%d days, -%d hours, -%d minutes, -%f seconds'",
+                    interval.getYears(),
+                    interval.getMonths(),
+                    interval.getDays(),
+                    interval.getHours(),
+                    interval.getMinutes(),
+                    interval.getTotalSeconds()
+            );
+        } else {
+            intervalString = String.format("INTERVAL '%d years, %d months, %d days, %d hours, %d minutes, %f seconds'",
+                    interval.getYears(),
+                    interval.getMonths(),
+                    interval.getDays(),
+                    interval.getHours(),
+                    interval.getMinutes(),
+                    interval.getTotalSeconds()
+            );
+        }
+        return intervalString;
     }
 }

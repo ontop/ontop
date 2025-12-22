@@ -527,6 +527,9 @@ public interface TermFactory {
 	ImmutableFunctionalTerm getDBBinaryNumericFunctionalTerm(String dbNumericOperationName, DBTermType argumentType1, DBTermType argumentType2,
 															 ImmutableTerm dbTerm1, ImmutableTerm dbTerm2);
 
+    ImmutableFunctionalTerm getDBBinaryTemporalFunctionalTerm(String dbOperation, ImmutableList<ImmutableTerm> dbTerms,
+                                                              ImmutableList<DBTermType> argumentsTypes, DBTermType returnType);
+
 	ImmutableFunctionalTerm getUnaryLatelyTypedFunctionalTerm(
 			ImmutableTerm lexicalTerm, ImmutableTerm inputRDFTypeTerm, DBTermType targetType,
 			java.util.function.Function<DBTermType, Optional<DBFunctionSymbol>> dbFunctionSymbolFct);

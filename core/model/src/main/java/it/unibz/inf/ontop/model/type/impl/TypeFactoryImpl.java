@@ -41,7 +41,8 @@ public class TypeFactoryImpl implements TypeFactory {
 	private final ConcreteNumericRDFDatatype xsdUnsignedLongDatatype, xsdUnsignedIntDatatype, xsdUnsignedShortDatatype, xsdUnsignedByteDatatype;
 	private final RDFDatatype defaultUnsupportedDatatype, xsdStringDatatype, xsdBooleanDatatype, xsdBase64Datatype;
 	private final RDFDatatype xsdTimeDatatype, xsdDateDatatype, xsdDatetimeDatatype, xsdDatetimeStampDatatype, xsdGYearDatatype;
-	private final RDFDatatype temporalDatatype, numericOrTemporalDatatype;
+    private final RDFDatatype xsdDurationDatatype, xsdYearMonthDuration, xsdDayTimeDuration;
+	private final RDFDatatype numericOrTemporalDatatype, temporalDatatype;
 	private final DBTypeFactory dbTypeFactory;
 
 	@Inject
@@ -189,6 +190,18 @@ public class TypeFactoryImpl implements TypeFactory {
 				DBTypeFactory::getDBStringType);
 		registerDatatype(xsdGYearDatatype);
 
+		xsdDurationDatatype = createSimpleConcreteRDFDatatype(XSD.DURATION, temporalDatatype.getAncestry(),
+				DBTypeFactory::getDBIntervalType);
+		registerDatatype(xsdDurationDatatype);
+
+        xsdYearMonthDuration = createSimpleConcreteRDFDatatype(XSD.YEARMONTHDURATION, xsdDurationDatatype.getAncestry(),
+                DBTypeFactory::getDBIntervalYearMonthType);
+        registerDatatype(xsdYearMonthDuration);
+
+        xsdDayTimeDuration = createSimpleConcreteRDFDatatype(XSD.DAYTIMEDURATION, xsdDurationDatatype.getAncestry(),
+                DBTypeFactory::getDBIntervalDayTimeType);
+        registerDatatype(xsdDayTimeDuration);
+
 		xsdBase64Datatype = createSimpleConcreteRDFDatatype(XSD.BASE64BINARY, rdfsLiteralDatatype.getAncestry(),
 				// TODO: is there a better type
 				DBTypeFactory::getDBStringType);
@@ -231,7 +244,9 @@ public class TypeFactoryImpl implements TypeFactory {
 	}
 
 	@Override
-	public RDFDatatype getAbstractOntopNumericDatatype() { return numericDatatype; }
+	public RDFDatatype getAbstractOntopNumericDatatype() {
+        return numericDatatype;
+    }
 
 	@Override
 	public RDFDatatype getAbstractOntopDateOrDatetimeDatatype() {
@@ -244,7 +259,9 @@ public class TypeFactoryImpl implements TypeFactory {
 	}
 
 	@Override
-	public RDFDatatype getAbstractOntopNumericOrTemporalDatatype() { return numericOrTemporalDatatype; }
+	public RDFDatatype getAbstractOntopNumericOrTemporalDatatype() {
+        return numericOrTemporalDatatype;
+    }
 
 	@Override
 	public RDFDatatype getAbstractRDFSLiteral() {

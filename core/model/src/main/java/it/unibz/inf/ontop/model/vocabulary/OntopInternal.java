@@ -9,7 +9,6 @@ public class OntopInternal {
     private static final String PREFIX = "urn:it:unibz:inf:ontop:internal:";
 
 
-    // TODO: would it make sense to remove DATE_OR_DATETIME
     public static final IRI NUMERIC;
     public static final IRI DATE_OR_DATETIME;
     public static final IRI TEMPORAL;

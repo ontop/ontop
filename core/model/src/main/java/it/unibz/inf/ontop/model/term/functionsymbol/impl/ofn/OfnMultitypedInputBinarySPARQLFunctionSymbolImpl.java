@@ -95,7 +95,7 @@ public class OfnMultitypedInputBinarySPARQLFunctionSymbolImpl extends ReducibleP
 
         return termFactory.getConversion2RDFLexical(
                 lexicalTermFct.apply(termFactory, subLexicalTerms.get(1), subLexicalTerms.get(0),
-                        typeTerms.get(0), typeTerms.get(1)),
+                        typeTerms.get(1), typeTerms.get(0)),
                 targetType);
     }
 
