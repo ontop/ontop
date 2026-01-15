@@ -142,7 +142,7 @@ public class QueryLoggerImpl implements QueryLogger {
         this.classAndPropertyExtractor = classAndPropertyExtractor;
         this.relationNameExtractor = relationNameExtractor;
         this.queryTemplateExtractor = queryTemplateExtractor;
-        this.queryId = UUID.randomUUID();
+        this.queryId = queryContext.getQueryId();
         creationTime = System.currentTimeMillis();
         applicationName = settings.getApplicationName();
         reformulationTime = -1;

@@ -116,7 +116,7 @@ public class DefaultDescribeGraphResultSet implements GraphResultSet {
             do {
                 if (currentGraphResultSetIterator == null) {
                     if (constructQueryIterator.hasNext()) {
-                        QueryContext newQueryContext = queryContext.duplicateForNewQuery();
+                        QueryContext newQueryContext = queryContext.duplicateForNewQueryWithSameSalt();
                         QueryLogger constructQueryLogger = queryLoggerFactory.create(newQueryContext);
                         try {
                             GraphResultSet graphResultSet = constructQueryEvaluator.evaluate(constructQueryIterator.next(),

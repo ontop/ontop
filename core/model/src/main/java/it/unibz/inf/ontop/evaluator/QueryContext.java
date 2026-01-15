@@ -24,7 +24,9 @@ public interface QueryContext {
 
     ImmutableMap<String, String> getHttpHeaders();
 
-    QueryContext duplicateForNewQuery();
+    QueryContext duplicateForNewQueryWithSameSalt();
+
+    UUID getQueryId();
 
     interface Factory {
         QueryContext create(ImmutableMap<String, String> normalizedHttpHeaders);
