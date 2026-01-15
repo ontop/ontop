@@ -133,4 +133,6 @@ public interface FunctionSymbolFactory {
     FunctionSymbol getExtractLexicalTermFromRDFTerm();
 
     FunctionSymbol getIdentity();
+
+    FunctionSymbol getQueryId();
 }
