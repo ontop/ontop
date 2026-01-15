@@ -26,10 +26,12 @@ public class QueryContextImpl implements QueryContext {
     private final ImmutableSet<String> roles;
     private final ImmutableSet<String> groups;
     private final UUID salt;
+    private final ImmutableMap<String, String> httpHeaders;
 
     @AssistedInject
     protected QueryContextImpl(@Assisted ImmutableMap<String, String> normalizedHttpHeaders,
                                OntopModelSettings settings) {
+        this.httpHeaders = normalizedHttpHeaders;
         if (settings.isAuthorizationEnabled()) {
             var commaSplitter = Splitter.on(",");
             // TODO: validate user name
@@ -82,6 +84,17 @@ public class QueryContextImpl implements QueryContext {
     @Override
     public UUID getSalt() {
         return salt;
+    }
+
+    @Override
+    public ImmutableMap<String, String> getHttpHeaders() {
+        return httpHeaders;
+    }
+
+    @Override
+    public QueryContext duplicateForNewQuery() {
+        // TODO: implement correctly
+        return this;
     }
 
     @Override

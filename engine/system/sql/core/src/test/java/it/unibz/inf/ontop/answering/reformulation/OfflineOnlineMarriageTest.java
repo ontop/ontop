@@ -7,6 +7,7 @@ import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.answering.OntopQueryEngine;
 import it.unibz.inf.ontop.answering.connection.OntopConnection;
 import it.unibz.inf.ontop.answering.connection.OntopStatement;
+import it.unibz.inf.ontop.evaluator.QueryContext;
 import it.unibz.inf.ontop.query.KGQueryFactory;
 import it.unibz.inf.ontop.query.SelectQuery;
 import it.unibz.inf.ontop.query.resultset.OntopBinding;
@@ -84,10 +85,12 @@ public class OfflineOnlineMarriageTest {
 
         SelectQuery query = kgQueryFactory.createSelectQuery(PERSON_QUERY_STRING);
 
+        QueryContext queryContext = queryReformulator.getQueryContextFactory().create(ImmutableMap.of());
+
 
         IQ executableQuery = queryReformulator.reformulateIntoNativeQuery(query,
-                queryReformulator.getQueryContextFactory().create(ImmutableMap.of()),
-                queryReformulator.getQueryLoggerFactory().create(ImmutableMap.of()));
+                queryContext,
+                queryReformulator.getQueryLoggerFactory().create(queryContext));
         String sqlQuery = Optional.of(executableQuery.getTree())
                 .filter(t -> t instanceof UnaryIQTree)
                 .map(t -> ((UnaryIQTree) t).getChild().getRootNode())

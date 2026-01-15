@@ -22,6 +22,10 @@ public interface QueryContext {
 
     UUID getSalt();
 
+    ImmutableMap<String, String> getHttpHeaders();
+
+    QueryContext duplicateForNewQuery();
+
     interface Factory {
         QueryContext create(ImmutableMap<String, String> normalizedHttpHeaders);
     }
