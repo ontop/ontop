@@ -8,6 +8,7 @@ import com.google.common.hash.Hashing;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.answering.logging.QueryLogger;
+import it.unibz.inf.ontop.answering.logging.QueryLoggerSink;
 import it.unibz.inf.ontop.answering.logging.impl.ClassAndPropertyExtractor.ClassesAndProperties;
 import it.unibz.inf.ontop.answering.logging.impl.QueryTemplateExtractor.QueryTemplateExtraction;
 import it.unibz.inf.ontop.evaluator.QueryContext;
@@ -85,7 +86,6 @@ public class QueryLoggerImpl implements QueryLogger {
 
     private final UUID queryId;
     private final long creationTime;
-    private final PrintStream outputStream;
     private final ImmutableMap<String, String> httpHeaders;
     private final OntopReformulationSettings settings;
     private final boolean disabled;
@@ -94,6 +94,7 @@ public class QueryLoggerImpl implements QueryLogger {
     private final boolean isDecompositionEnabled;
     private final boolean isMergingEnabled;
     private final QueryContext queryContext;
+    private final QueryLoggerSink sink;
     private long reformulationTime;
     private long unblockedResulSetTime;
     private final ClassAndPropertyExtractor classAndPropertyExtractor;
@@ -124,18 +125,12 @@ public class QueryLoggerImpl implements QueryLogger {
 
     @AssistedInject
     protected QueryLoggerImpl(@Assisted QueryContext queryContext,
+                              QueryLoggerSink sink,
                               OntopReformulationSettings settings,
                               ClassAndPropertyExtractor classAndPropertyExtractor,
                               RelationNameExtractor relationNameExtractor,
                               QueryTemplateExtractor queryTemplateExtractor) {
-        this(System.out, queryContext, settings, classAndPropertyExtractor, relationNameExtractor, queryTemplateExtractor);
-    }
-
-    protected QueryLoggerImpl(PrintStream outputStream, QueryContext queryContext,
-                              OntopReformulationSettings settings,
-                              ClassAndPropertyExtractor classAndPropertyExtractor,
-                              RelationNameExtractor relationNameExtractor, QueryTemplateExtractor queryTemplateExtractor) {
-        this.outputStream = outputStream;
+        this.sink = sink;
         this.queryContext = queryContext;
         this.httpHeaders = queryContext.getHttpHeaders();
         this.settings = settings;
@@ -176,7 +171,7 @@ public class QueryLoggerImpl implements QueryLogger {
             } catch (IOException ex) {
                 REGULAR_LOGGER.error(OUTPUT_STREAM_JSON_ERROR + ex);
             }
-            outputStream.println(stringWriter);
+            sink.submit(stringWriter.toString());
         }
 
         if (isMergingEnabled) {
@@ -310,7 +305,7 @@ public class QueryLoggerImpl implements QueryLogger {
                 REGULAR_LOGGER.error(OUTPUT_STREAM_JSON_ERROR + e);
                 return;
             }
-            outputStream.println(stringWriter);
+            sink.submit(stringWriter.toString());
         }
     }
 
@@ -345,7 +340,7 @@ public class QueryLoggerImpl implements QueryLogger {
             } catch (IOException e) {
                 REGULAR_LOGGER.error(OUTPUT_STREAM_JSON_ERROR + e);
             }
-            outputStream.println(stringWriter);
+            sink.submit(stringWriter.toString());
         }
 
         if (isMergingEnabled) {
@@ -449,7 +444,7 @@ public class QueryLoggerImpl implements QueryLogger {
         } catch (IOException ex) {
             REGULAR_LOGGER.error(OUTPUT_STREAM_JSON_ERROR + ex);
         }
-        outputStream.println(stringWriter);
+        sink.submit(stringWriter.toString());
     }
 
     protected String serializeTimestamp(long time) {
@@ -478,6 +473,6 @@ public class QueryLoggerImpl implements QueryLogger {
         } catch (IOException e) {
             REGULAR_LOGGER.error(OUTPUT_STREAM_JSON_ERROR + e);
         }
-        outputStream.println(stringWriter);
+        sink.submit(stringWriter.toString());
     }
 }
