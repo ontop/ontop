@@ -8,7 +8,7 @@ import com.google.common.hash.Hashing;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.answering.logging.QueryLogger;
-import it.unibz.inf.ontop.answering.logging.QueryLoggerSink;
+import it.unibz.inf.ontop.answering.logging.QueryLogSink;
 import it.unibz.inf.ontop.answering.logging.impl.ClassAndPropertyExtractor.ClassesAndProperties;
 import it.unibz.inf.ontop.answering.logging.impl.QueryTemplateExtractor.QueryTemplateExtraction;
 import it.unibz.inf.ontop.evaluator.QueryContext;
@@ -25,13 +25,11 @@ import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
 import java.io.IOException;
-import java.io.PrintStream;
 import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
 import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -94,7 +92,7 @@ public class QueryLoggerImpl implements QueryLogger {
     private final boolean isDecompositionEnabled;
     private final boolean isMergingEnabled;
     private final QueryContext queryContext;
-    private final QueryLoggerSink sink;
+    private final QueryLogSink sink;
     private long reformulationTime;
     private long unblockedResulSetTime;
     private final ClassAndPropertyExtractor classAndPropertyExtractor;
@@ -125,7 +123,7 @@ public class QueryLoggerImpl implements QueryLogger {
 
     @AssistedInject
     protected QueryLoggerImpl(@Assisted QueryContext queryContext,
-                              QueryLoggerSink sink,
+                              QueryLogSink sink,
                               OntopReformulationSettings settings,
                               ClassAndPropertyExtractor classAndPropertyExtractor,
                               RelationNameExtractor relationNameExtractor,

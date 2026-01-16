@@ -1,6 +1,6 @@
 package it.unibz.inf.ontop.answering.logging;
 
 @FunctionalInterface
-public interface QueryLoggerSink {
+public interface QueryLogSink {
     void submit(String serializedQueryLogEntry);
 }
