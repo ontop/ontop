@@ -1,19 +1,19 @@
 #
 # ONTOP DOCKERFILE
 #
-# Multi-platform (linux, amd64/arm64), multi-stage dockerfile based on Eclipse Temurin JDK 11
+# Multi-platform (linux, amd64/arm64), multi-stage dockerfile based on Eclipse Temurin JDK 17
 # - use with 'docker buildx build client/docker/Dockerfile .' (from root folder)
 # - use with script 'build-image.sh' (call './build-image.sh --help' for instructions)
 #
 
 # JRE BUILD STAGE using 'jlink' to build a compact JRE with the only modules required by Ontop
-# - based on Eclipse Temurin JRE 11 (on Ubuntu 22.04 LTS 'jammy', for both amd64 and arm64)
+# - based on Eclipse Temurin JRE 17 (on Ubuntu 22.04 LTS 'jammy', for both amd64 and arm64)
 # - run './build-image.sh -d' to detect required Java modules to be used with '--add-modules'
 #   then manually add the following modules (for JMX and SSL/TLS to work properly)
 #   jdk.management.agent,jdk.crypto.cryptoki,jdk.crypto.ec
 # - pass --build-arg ONTOP_JRE_MODULES=<comma-separated-list> to override the set of modules,
 #   or use "ALL-MODULE-PATH" as value to include *all* JRE modules (34M image size increase)
-FROM eclipse-temurin:11-jammy AS jre-builder
+FROM eclipse-temurin:17-jammy AS jre-builder
 ARG ONTOP_JRE_MODULES=\
 "java.base,java.compiler,java.desktop,java.instrument,java.management.rmi,"\
 "java.naming,java.prefs,java.scripting,java.security.jgss,java.sql,"\
@@ -39,6 +39,8 @@ ENV PATH="${JAVA_HOME}/bin:/opt/ontop:${PATH}"
 COPY --from=jre-builder /jre ${JAVA_HOME}
 WORKDIR /opt/ontop
 RUN apt-get update && \
+    # Upgrade gpgv to resolve CVE CVE-2025-68973
+    apt-get upgrade -y gpgv && \
     apt-get install -y --no-install-recommends wget netcat jattach && \
     rm -rf /var/cache/apt/archives /var/lib/apt/lists /var/log/dpkg.log /var/log/lastlog /var/log/faillog && \
     groupadd -r ontop && \
@@ -60,9 +62,9 @@ HEALTHCHECK --interval=5s --timeout=5s --start-period=60s --retries=3 CMD [ "/bi
 
 # ONTOP BUILD STAGE triggered by 'ontop-image-from-sources' to compile with a Maven Docker image
 # - except for generated binaries, content here will not end up in the built Ontop image
-# - maven:3-eclipse-temurin-11 is based on the same Ubuntu 22.04 "jammy" used as base image
+# - maven:3-eclipse-temurin-17 is based on the same Ubuntu 22.04 "jammy" used as base image
 # - this stage runs only on the current platform as Java compiling is platform-independent
-FROM --platform=${BUILDPLATFORM} maven:3-eclipse-temurin-11 AS ontop-builder
+FROM --platform=${BUILDPLATFORM} maven:3-eclipse-temurin-17 AS ontop-builder
 WORKDIR /build
 COPY . ./
 RUN --mount=type=cache,target=/root/.m2 \
