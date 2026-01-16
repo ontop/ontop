@@ -1,7 +1,6 @@
 package it.unibz.inf.ontop.model.term.functionsymbol.impl;
 
 import com.google.common.collect.ImmutableBiMap;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableTable;
 import com.google.inject.Inject;
@@ -57,6 +56,7 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
 
     private final FunctionSymbol identityFunctionSymbol;
     private final SPARQLFunctionSymbol bnodeTolerantSPARQLStrFunctionSymbol;
+    private final FunctionSymbol queryIdFunctionSymbol;
 
     /**
      * Created in init()
@@ -66,7 +66,6 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
      * Created in init()
      */
     private ImmutableTable<String, Integer, SPARQLFunctionSymbol> distinctSparqlAggregateFunctionTable;
-
 
 
     @Inject
@@ -79,7 +78,6 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
 
         DBTypeFactory dbTypeFactory = typeFactory.getDBTypeFactory();
         this.dbStringType = dbTypeFactory.getDBStringType();
-
         this.dbBooleanType = dbTypeFactory.getDBBooleanType();
         this.metaRDFType = typeFactory.getMetaRDFTermType();
 
@@ -115,6 +113,7 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
         this.identityFunctionSymbol = new IdentityFunctionSymbol(dbTypeFactory.getAbstractRootDBType());
 
         this.bnodeTolerantSPARQLStrFunctionSymbol = new BNodeTolerantStrSPARQLFunctionSymbolImpl(abstractRDFType, xsdStringType);
+        this.queryIdFunctionSymbol = new QueryIdFunctionSymbol(dbStringType);
     }
 
     @Inject
@@ -251,6 +250,8 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
                         xsdDatetime, xsdDecimal, false, TermFactory::getDBMilliseconds),
                 new SimpleUnarySPARQLFunctionSymbolImpl("SP_MICROSECONDS", Ontop.MICROSECONDS_FROM_DATETIME,
                         xsdDatetime, xsdInteger, false, TermFactory::getDBMicroseconds),
+                new SimpleNullarySPARQLFunctionSymbolImpl("SP_QUERY_ID", Ontop.QUERY_ID,
+                        xsdString, termFactory -> termFactory.getImmutableFunctionalTerm(queryIdFunctionSymbol)),
 
                 new DateTruncSPARQLFunctionSymbolImpl(xsdDatetime,
                         xsdString, (t) -> dbFunctionSymbolFactory.getDBDateTrunc(t)),
@@ -721,5 +722,10 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
     @Override
     public SPARQLFunctionSymbol getBNodeTolerantSPARQLStrFunctionSymbol() {
         return bnodeTolerantSPARQLStrFunctionSymbol;
+    }
+
+    @Override
+    public FunctionSymbol getQueryId() {
+        return queryIdFunctionSymbol;
     }
 }

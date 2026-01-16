@@ -10,6 +10,7 @@ import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.answering.logging.QueryLogger;
 import it.unibz.inf.ontop.answering.logging.impl.ClassAndPropertyExtractor.ClassesAndProperties;
 import it.unibz.inf.ontop.answering.logging.impl.QueryTemplateExtractor.QueryTemplateExtraction;
+import it.unibz.inf.ontop.evaluator.QueryContext;
 import it.unibz.inf.ontop.evaluator.impl.QueryContextImpl;
 import it.unibz.inf.ontop.exception.OntopReformulationException;
 import it.unibz.inf.ontop.injection.OntopReformulationSettings;
@@ -92,6 +93,7 @@ public class QueryLoggerImpl implements QueryLogger {
     private final JsonFactory jsonFactory;
     private final boolean isDecompositionEnabled;
     private final boolean isMergingEnabled;
+    private final QueryContext queryContext;
     private long reformulationTime;
     private long unblockedResulSetTime;
     private final ClassAndPropertyExtractor classAndPropertyExtractor;
@@ -121,25 +123,26 @@ public class QueryLoggerImpl implements QueryLogger {
     private ImmutableMap<String, String> bindings;
 
     @AssistedInject
-    protected QueryLoggerImpl(@Assisted ImmutableMap<String, String> httpHeaders,
+    protected QueryLoggerImpl(@Assisted QueryContext queryContext,
                               OntopReformulationSettings settings,
                               ClassAndPropertyExtractor classAndPropertyExtractor,
                               RelationNameExtractor relationNameExtractor,
                               QueryTemplateExtractor queryTemplateExtractor) {
-        this(System.out, httpHeaders, settings, classAndPropertyExtractor, relationNameExtractor, queryTemplateExtractor);
+        this(System.out, queryContext, settings, classAndPropertyExtractor, relationNameExtractor, queryTemplateExtractor);
     }
 
-    protected QueryLoggerImpl(PrintStream outputStream, ImmutableMap<String, String> httpHeaders,
+    protected QueryLoggerImpl(PrintStream outputStream, QueryContext queryContext,
                               OntopReformulationSettings settings,
                               ClassAndPropertyExtractor classAndPropertyExtractor,
                               RelationNameExtractor relationNameExtractor, QueryTemplateExtractor queryTemplateExtractor) {
         this.outputStream = outputStream;
-        this.httpHeaders = httpHeaders;
+        this.queryContext = queryContext;
+        this.httpHeaders = queryContext.getHttpHeaders();
         this.settings = settings;
         this.classAndPropertyExtractor = classAndPropertyExtractor;
         this.relationNameExtractor = relationNameExtractor;
         this.queryTemplateExtractor = queryTemplateExtractor;
-        this.queryId = UUID.randomUUID();
+        this.queryId = queryContext.getQueryId();
         creationTime = System.currentTimeMillis();
         applicationName = settings.getApplicationName();
         reformulationTime = -1;

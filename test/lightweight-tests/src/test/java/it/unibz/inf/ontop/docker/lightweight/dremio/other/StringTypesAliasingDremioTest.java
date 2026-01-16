@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.docker.lightweight.dremio.other;
 
 import com.google.common.collect.ImmutableMap;
 import it.unibz.inf.ontop.answering.reformulation.QueryReformulator;
+import it.unibz.inf.ontop.evaluator.QueryContext;
 import it.unibz.inf.ontop.exception.OntopInvalidKGQueryException;
 import it.unibz.inf.ontop.exception.OntopReformulationException;
 import it.unibz.inf.ontop.exception.OntopUnsupportedKGQueryException;
@@ -86,9 +87,10 @@ public class StringTypesAliasingDremioTest {
 
     private String reformulate(String query) throws OntopUnsupportedKGQueryException, OntopInvalidKGQueryException, OntopReformulationException {
         QueryReformulator reformulator = repository.getOntopEngine().getQueryReformulator();
+        QueryContext queryContext = reformulator.getQueryContextFactory().create(ImmutableMap.of());
         return reformulator.reformulateIntoNativeQuery(kgQueryFactory.createSPARQLQuery(query),
-                        reformulator.getQueryContextFactory().create(ImmutableMap.of()),
-                        reformulator.getQueryLoggerFactory().create(ImmutableMap.of()))
+                        queryContext,
+                        reformulator.getQueryLoggerFactory().create(queryContext))
                 .toString();
     }
 }

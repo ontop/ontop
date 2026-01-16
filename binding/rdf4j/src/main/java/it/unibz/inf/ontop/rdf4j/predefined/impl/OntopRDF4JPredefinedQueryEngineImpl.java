@@ -307,8 +307,8 @@ public class OntopRDF4JPredefinedQueryEngineImpl implements OntopRDF4JPredefined
                 .newBindings(bindingSet);
 
         // TODO: shall we consider some HTTP headers?
-        QueryLogger tmpQueryLogger = queryLoggerFactory.create(ImmutableMap.of());
         QueryContext emptyQueryContext = queryContextFactory.create(ImmutableMap.of());
+        QueryLogger tmpQueryLogger = queryLoggerFactory.create(emptyQueryContext);
 
         LOGGER.debug("Generating the reference query for {} with ref parameters {}",
                 predefinedQuery.getId(),
@@ -319,7 +319,8 @@ public class OntopRDF4JPredefinedQueryEngineImpl implements OntopRDF4JPredefined
 
     private QueryLogger createQueryLogger(PredefinedQuery<?> predefinedQuery, ImmutableMap<String, String> bindings,
                                           ImmutableMap<String, String> httpHeaders) {
-        QueryLogger queryLogger = queryLoggerFactory.create(httpHeaders);
+        QueryContext queryContext = queryContextFactory.create(httpHeaders);
+        QueryLogger queryLogger = queryLoggerFactory.create(queryContext);
         queryLogger.setPredefinedQuery(predefinedQuery.getId(), bindings);
         return queryLogger;
     }

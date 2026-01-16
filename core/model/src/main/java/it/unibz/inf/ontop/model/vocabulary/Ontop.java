@@ -19,6 +19,7 @@ public class Ontop {
     public static final IRI MILLISECONDS_FROM_DATETIME;
     public static final IRI MICROSECONDS_FROM_DATETIME;
     public static final IRI DATE_TRUNC;
+    public static final IRI QUERY_ID;
 
     static {
         org.apache.commons.rdf.api.RDF factory = new SimpleRDF();
@@ -31,5 +32,6 @@ public class Ontop {
         MILLISECONDS_FROM_DATETIME = factory.createIRI(FUNCTION_PREFIX + "milliseconds-from-dateTime");
         MICROSECONDS_FROM_DATETIME = factory.createIRI(FUNCTION_PREFIX + "microseconds-from-dateTime");
         DATE_TRUNC = factory.createIRI(FUNCTION_PREFIX + "dateTrunc");
+        QUERY_ID = factory.createIRI(FUNCTION_PREFIX + "queryId");
     }
 }
