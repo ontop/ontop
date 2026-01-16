@@ -14,7 +14,7 @@ import java.util.Optional;
 import java.util.function.Function;
 
 
-public class SimpleNullarySPARQLFunctionSymbolImpl extends ReduciblePositiveAritySPARQLFunctionSymbolImpl {
+public class SimpleNullarySPARQLFunctionSymbolImpl extends SPARQLFunctionSymbolImpl {
 
     private final RDFTermType targetType;
     private final Function<TermFactory, ImmutableFunctionalTerm> dbFunctionalTermFct;
@@ -26,10 +26,23 @@ public class SimpleNullarySPARQLFunctionSymbolImpl extends ReduciblePositiveArit
         this.targetType = targetType;
         this.dbFunctionalTermFct = dbFunctionalTermFct;
     }
-    
+
     @Override
     public Optional<TermTypeInference> inferType(ImmutableList<? extends ImmutableTerm> terms) {
         return Optional.of(TermTypeInference.declareTermType(targetType));
+    }
+
+    @Override
+    protected ImmutableTerm buildTermAfterEvaluation(ImmutableList<ImmutableTerm> newTerms, TermFactory termFactory,
+                                                     VariableNullability variableNullability) {
+        var lexicalTerm = dbFunctionalTermFct.apply(termFactory);
+        return termFactory.getRDFFunctionalTerm(
+                lexicalTerm,
+                termFactory.getIfElseNull(
+                        termFactory.getDBIsNotNull(lexicalTerm),
+                        termFactory.getRDFTermTypeConstant(targetType)
+                )
+        );
     }
 
     @Override
@@ -38,21 +51,12 @@ public class SimpleNullarySPARQLFunctionSymbolImpl extends ReduciblePositiveArit
     }
 
     @Override
-    protected ImmutableTerm computeLexicalTerm(ImmutableList<ImmutableTerm> subLexicalTerms,
-                                               ImmutableList<ImmutableTerm> typeTerms, TermFactory termFactory,
-                                               ImmutableTerm returnedTypeTerm) {
-        return termFactory.getConversion2RDFLexical(dbFunctionalTermFct.apply(termFactory), targetType);
-    }
-
-    @Override
-    protected ImmutableTerm computeTypeTerm(ImmutableList<? extends ImmutableTerm> subLexicalTerms,
-                                            ImmutableList<ImmutableTerm> typeTerms, TermFactory termFactory,
-                                            VariableNullability variableNullability) {
-        return termFactory.getRDFTermTypeConstant(targetType);
-    }
-
-    @Override
     public boolean isAlwaysInjectiveInTheAbsenceOfNonInjectiveFunctionalTerms() {
+        return false;
+    }
+
+    @Override
+    protected boolean tolerateNulls() {
         return true;
     }
 }
