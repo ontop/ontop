@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.injection.impl;
 import com.google.common.collect.ImmutableList;
 import com.google.inject.Module;
 import it.unibz.inf.ontop.answering.logging.QueryLogger;
+import it.unibz.inf.ontop.answering.logging.QueryLogSink;
 import it.unibz.inf.ontop.answering.reformulation.generation.PostProcessingProjectionSplitter;
 import it.unibz.inf.ontop.iq.lens.LensUnfolder;
 import it.unibz.inf.ontop.injection.OntopReformulationConfiguration;
@@ -25,6 +26,7 @@ public class OntopTranslationModule extends OntopAbstractModule {
         bind(OntopReformulationSettings.class).toInstance(configuration.getSettings());
         bindFromSettings(PostProcessingProjectionSplitter.class);
         bindFromSettings(LensUnfolder.class);
+        bindFromSettings(QueryLogSink.class);
 
         Module queryLoggingModule = buildFactory(ImmutableList.of(QueryLogger.class), QueryLogger.Factory.class);
         install(queryLoggingModule);
