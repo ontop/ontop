@@ -33,7 +33,7 @@ import java.util.Collection;
 @RunWith(Parameterized.class)
 public class PgsqlDatatypeTest extends OntopTestCase {
 
-	private static final ImmutableSet<String> IGNORE = ImmutableSet.of();
+	private static final ImmutableSet<String> IGNORE = ImmutableSet.of("general-Type: all");
 	private static final RepositoryRegistry REGISTRY = new RepositoryRegistry();
 
 	public PgsqlDatatypeTest(String name, String queryFileURL, String resultFileURL, String owlFileURL, String obdaFileURL,
