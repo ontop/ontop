@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.rdf4j.repository;
 
 import com.google.common.collect.ImmutableSet;
 import org.eclipse.rdf4j.query.QueryEvaluationException;
+import org.eclipse.rdf4j.repository.RepositoryException;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -61,7 +62,7 @@ public class DestinationFullSQLReformulationTest extends AbstractRDF4JTest {
                 "}\n" +
                 "LIMIT 500\n";
 
-        String sql = reformulateIntoNativeQuery(sparql);
+        String sql = reformulateIntoNativeQuery(sparql, true);
         int count = runQueryAndCount(sparql);
 
         assertTrue(sql.toUpperCase().contains("UNION ALL"));
@@ -73,27 +74,26 @@ public class DestinationFullSQLReformulationTest extends AbstractRDF4JTest {
 
     /**
      * SPARQL query rejected because it is not strongly typed
-     * It was not normalized fully - 3 consecutive CONSTRUCT
      */
-    @Test(expected = QueryEvaluationException.class)
+    @Test(expected = RepositoryException.class)
     public void testSPO() {
-        int count = runQueryAndCount(
+        reformulateIntoNativeQuery(
                 "SELECT * WHERE {\n" +
                         "  ?s ?p ?o \n" +
                         "}\n" +
-                        "LIMIT 100000");
-        assertEquals(10, count);
+                        "LIMIT 100000",
+                true);
     }
 
     @Test
     public void testSPOWithFilter() {
-        int count = runQueryAndCount(
+        reformulateIntoNativeQuery(
                 "SELECT * WHERE {\n" +
                         "  ?s ?p ?o \n" +
                         "  FILTER (datatype(?o) = <http://www.w3.org/2001/XMLSchema#string>)" +
                         "}\n" +
-                        "LIMIT 10");
-        assertEquals(10, count);
+                        "LIMIT 10",
+                true);
     }
 
     @Test
@@ -110,7 +110,7 @@ public class DestinationFullSQLReformulationTest extends AbstractRDF4JTest {
                 "}\n" +
                 "LIMIT 1\n";
 
-        String sql = reformulateIntoNativeQuery(sparql);
+        String sql = reformulateIntoNativeQuery(sparql, true);
         runQueryAndCompare(sparql, ImmutableSet.of("eee"));
 
         assertTrue(sql.toUpperCase().contains("UNION ALL"));

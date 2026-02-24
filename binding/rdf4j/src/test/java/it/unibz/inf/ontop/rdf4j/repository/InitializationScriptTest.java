@@ -53,7 +53,7 @@ public class InitializationScriptTest  {
     public void testPrimaryKeyConstraintH2() {
         String sparqlQuery = "PREFIX : <http://example.org/>" +
                 "SELECT ?s WHERE { ?s :name ?o }";
-        String query = H2_CONNECTION.reformulateIntoNativeQuery(sparqlQuery);
+        String query = H2_CONNECTION.reformulateIntoNativeQuery(sparqlQuery, false);
         Assert.assertFalse(query.contains("DISTINCT"));
     }
 
@@ -77,7 +77,7 @@ public class InitializationScriptTest  {
     public void testPrimaryKeyConstraintDuckDB() {
         String sparqlQuery = "PREFIX : <http://example.org/>" +
                 "SELECT ?s WHERE { ?s :name ?o }";
-        String query = DUCKDB_CONNECTION.reformulateIntoNativeQuery(sparqlQuery);
+        String query = DUCKDB_CONNECTION.reformulateIntoNativeQuery(sparqlQuery, false);
         Assert.assertFalse(query.contains("DISTINCT"));
     }
 

@@ -28,18 +28,38 @@ public interface OntopRepositoryConnection extends org.eclipse.rdf4j.repository.
     /**
      * Renders the executable IQ, including the post-processing node and the native query
      */
-    String reformulate(String sparql, ImmutableMultimap<String, String> httpHeaders) throws RepositoryException;
+    String reformulate(String sparql, ImmutableMultimap<String, String> httpHeaders, boolean forNativeConsumption) throws RepositoryException;
 
+    @Deprecated(since = "5.6.0")
+    default String reformulate(String sparql, ImmutableMultimap<String, String> httpHeaders) throws RepositoryException {
+        return reformulate(sparql, httpHeaders, false);
+    }
+
+    @Deprecated(since = "5.6.0")
     default String reformulate(String sparql) throws RepositoryException {
-        return reformulate(sparql, ImmutableMultimap.of());
+        return reformulate(sparql, ImmutableMultimap.of(), false);
+    }
+
+    default String reformulate(String sparql, boolean forNativeConsumption) throws RepositoryException {
+        return reformulate(sparql, ImmutableMultimap.of(), forNativeConsumption);
     }
 
     /**
      * Renders the native query
      */
-    String reformulateIntoNativeQuery(String sparql, ImmutableMultimap<String, String> httpHeaders) throws RepositoryException;
+    String reformulateIntoNativeQuery(String sparql, ImmutableMultimap<String, String> httpHeaders, boolean forNativeConsumption) throws RepositoryException;
 
+    @Deprecated(since = "5.6.0")
+    default String reformulateIntoNativeQuery(String sparql, ImmutableMultimap<String, String> httpHeaders) throws RepositoryException {
+        return reformulateIntoNativeQuery(sparql, httpHeaders, false);
+    }
+
+    @Deprecated(since = "5.6.0")
     default String reformulateIntoNativeQuery(String sparql) throws RepositoryException {
-        return reformulateIntoNativeQuery(sparql, ImmutableMultimap.of());
+        return reformulateIntoNativeQuery(sparql, false);
+    }
+
+    default String reformulateIntoNativeQuery(String sparql, boolean forNativeConsumption) throws RepositoryException {
+        return reformulateIntoNativeQuery(sparql, ImmutableMultimap.of(), forNativeConsumption);
     }
 }

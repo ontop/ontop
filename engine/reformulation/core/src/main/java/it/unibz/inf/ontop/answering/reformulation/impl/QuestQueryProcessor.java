@@ -76,7 +76,8 @@ public class QuestQueryProcessor implements QueryReformulator {
 	}
 
 	@Override
-	public IQ reformulateIntoNativeQuery(KGQuery<?> inputQuery, QueryContext queryContext, QueryLogger queryLogger)
+	public IQ reformulateIntoNativeQuery(KGQuery<?> inputQuery, QueryContext queryContext, QueryLogger queryLogger,
+										 boolean forNativeConsumption)
 			throws OntopReformulationException {
 
 		long beginning = System.currentTimeMillis();
@@ -119,7 +120,7 @@ public class QuestQueryProcessor implements QueryReformulator {
 
 				queryLogger.setPlannedQuery(plannedQuery);
 
-				IQ executableQuery = generateExecutableQuery(plannedQuery);
+				IQ executableQuery = generateExecutableQuery(plannedQuery, forNativeConsumption);
 				queryCache.put(inputQuery, queryContext, executableQuery);
 				queryLogger.declareReformulationFinishedAndSerialize(executableQuery, false);
 				LOGGER.debug("Reformulation time: {} ms\n", System.currentTimeMillis() - beginning);
@@ -152,10 +153,10 @@ public class QuestQueryProcessor implements QueryReformulator {
 		}
 	}
 
-	protected IQ generateExecutableQuery(IQ iq) throws OntopReformulationException {
+	protected IQ generateExecutableQuery(IQ iq, boolean forNativeConsumption) throws OntopReformulationException {
 		LOGGER.debug("Producing the native query string...");
 
-		IQ executableQuery = datasourceQueryGenerator.generateSourceQuery(iq);
+		IQ executableQuery = datasourceQueryGenerator.generateSourceQuery(forNativeConsumption, iq);
 		LOGGER.debug("Resulting native query:\n{}\n", executableQuery);
 
 		return executableQuery;

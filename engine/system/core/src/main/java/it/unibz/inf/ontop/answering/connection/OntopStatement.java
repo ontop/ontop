@@ -26,7 +26,7 @@ public interface OntopStatement extends OBDAStatement {
 
     <R extends OBDAResultSet> String getRewritingRendering(KGQuery<R> inputQuery) throws OntopReformulationException;
 
-    <R extends OBDAResultSet> IQ getExecutableQuery(KGQuery<R> inputQuery, ImmutableMultimap<String, String> httpHeaders) throws OntopReformulationException;
+    <R extends OBDAResultSet> IQ getExecutableQuery(KGQuery<R> inputQuery, ImmutableMultimap<String, String> httpHeaders, boolean forNativeConsumption) throws OntopReformulationException;
 
     TupleResultSet executeSelectQuery(IQ executableQuery, QueryLogger queryLogger)
             throws OntopQueryEvaluationException;

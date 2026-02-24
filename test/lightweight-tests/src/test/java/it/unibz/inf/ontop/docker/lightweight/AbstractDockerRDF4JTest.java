@@ -142,7 +142,7 @@ public class AbstractDockerRDF4JTest {
     }
 
     protected String reformulate(String queryString) {
-        return REPO_CONNECTION.reformulate(queryString);
+        return REPO_CONNECTION.reformulate(queryString, false);
     }
 
     protected ImmutableList<String> runQuery(String queryString) {

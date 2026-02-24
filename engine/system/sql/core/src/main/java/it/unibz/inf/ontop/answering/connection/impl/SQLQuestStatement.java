@@ -120,7 +120,7 @@ public class SQLQuestStatement extends QuestStatement {
      */
     @Override
     public  <R extends OBDAResultSet>  int getTupleCount(KGQuery<R> inputQuery, ImmutableMultimap<String, String> httpHeaders) throws OntopReformulationException, OntopQueryEvaluationException {
-        IQ targetQuery = getExecutableQuery(inputQuery, httpHeaders);
+        IQ targetQuery = getExecutableQuery(inputQuery, httpHeaders, false);
         try {
             String sql = extractSQLQuery(targetQuery);
             String newsql = "SELECT count(*) FROM (" + sql + ") t1";

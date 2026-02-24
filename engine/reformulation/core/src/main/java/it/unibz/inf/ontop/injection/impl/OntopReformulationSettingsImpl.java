@@ -1,8 +1,6 @@
 package it.unibz.inf.ontop.injection.impl;
 
 import com.google.common.collect.ImmutableSet;
-import it.unibz.inf.ontop.answering.reformulation.QueryReformulator;
-import it.unibz.inf.ontop.answering.reformulation.impl.ToFullNativeQueryReformulator;
 import it.unibz.inf.ontop.injection.OntopOBDASettings;
 import it.unibz.inf.ontop.injection.OntopReformulationSettings;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
@@ -26,11 +24,6 @@ public class OntopReformulationSettingsImpl extends OntopKGQuerySettingsImpl imp
     private static Properties loadProperties(Properties userProperties) {
         Properties properties = loadDefaultRuntimeProperties();
         properties.putAll(userProperties);
-
-        if (Boolean.parseBoolean(userProperties.getProperty(REFORMULATE_TO_FULL_NATIVE_QUERY, "false"))
-            && (!userProperties.contains(QueryReformulator.class.getCanonicalName())))
-            properties.put(QueryReformulator.class.getCanonicalName(), ToFullNativeQueryReformulator.class.getCanonicalName());
-
         return properties;
     }
 
