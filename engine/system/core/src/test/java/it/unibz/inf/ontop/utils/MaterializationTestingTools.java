@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.inject.Injector;
 import it.unibz.inf.ontop.dbschema.impl.OfflineMetadataProviderBuilder;
 import it.unibz.inf.ontop.injection.*;
+import it.unibz.inf.ontop.iq.transform.QueryRenamer;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.template.Template;
 import it.unibz.inf.ontop.model.term.*;
@@ -21,7 +22,7 @@ public class MaterializationTestingTools {
     public static final TypeFactory TYPE_FACTORY;
     public static final SubstitutionFactory SUBSTITUTION_FACTORY;
     public static final RDF RDF_FACTORY;
-    public static final QueryTransformerFactory QUERY_TRANSFORMER_FACTORY;
+    public static final QueryRenamer QUERY_RENAMER;
     public static final CoreUtilsFactory CORE_UTILS_FACTORY;
     public static final CoreSingletons CORE_SINGLETONS;
 
@@ -40,7 +41,7 @@ public class MaterializationTestingTools {
         TYPE_FACTORY = injector.getInstance(TypeFactory.class);
         SUBSTITUTION_FACTORY = injector.getInstance(SubstitutionFactory.class);
         RDF_FACTORY = injector.getInstance(RDF.class);
-        QUERY_TRANSFORMER_FACTORY = injector.getInstance(QueryTransformerFactory.class);
+        QUERY_RENAMER = injector.getInstance(QueryRenamer.class);
         CORE_UTILS_FACTORY = injector.getInstance(CoreUtilsFactory.class);
         CORE_SINGLETONS = injector.getInstance(CoreSingletons.class);
 

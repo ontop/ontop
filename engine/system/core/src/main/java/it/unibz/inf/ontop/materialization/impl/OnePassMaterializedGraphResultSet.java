@@ -132,7 +132,7 @@ public class OnePassMaterializedGraphResultSet implements MaterializedGraphResul
 
             try {
                 tmpStatement = ontopConnection.createStatement();
-                QueryLogger queryLogger = queryLoggerFactory.create(ImmutableMap.of());
+                QueryLogger queryLogger = queryLoggerFactory.create(queryContext);
                 IQ nativeQuery = translateIntoNativeQuery(mappingClusterEntry, queryLogger, queryContext);
                 tmpContextResultSet = tmpStatement.executeSelectQuery(nativeQuery, queryLogger);
 
@@ -170,7 +170,7 @@ public class OnePassMaterializedGraphResultSet implements MaterializedGraphResul
 
                     try {
                         tmpStatement = ontopConnection.createStatement();
-                        QueryLogger queryLogger = queryLoggerFactory.create(ImmutableMap.of());
+                        QueryLogger queryLogger = queryLoggerFactory.create(queryContext);
                         IQ nativeQuery = translateIntoNativeQuery(mappingClusterEntry, queryLogger, queryContext);
                         tmpContextResultSet = tmpStatement.executeSelectQuery(nativeQuery, queryLogger);
                     } catch (OntopConnectionException e) {

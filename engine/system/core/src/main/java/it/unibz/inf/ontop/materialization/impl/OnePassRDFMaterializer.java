@@ -17,6 +17,7 @@ import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.optimizer.GeneralStructuralAndSemanticIQOptimizer;
 import it.unibz.inf.ontop.iq.planner.QueryPlanner;
+import it.unibz.inf.ontop.iq.transform.QueryRenamer;
 import it.unibz.inf.ontop.materialization.MappingEntryCluster;
 import it.unibz.inf.ontop.materialization.MaterializationParams;
 import it.unibz.inf.ontop.materialization.OntopRDFMaterializer;
@@ -48,7 +49,7 @@ public class OnePassRDFMaterializer implements OntopRDFMaterializer {
     private final QueryPlanner queryPlanner;
     private final QueryLogger.Factory queryLoggerFactory;
     private final QueryContext.Factory queryContextFactory;
-    private final QueryTransformerFactory queryTransformerFactory;
+    private final QueryRenamer queryRenamer;
     private final TermFactory termFactory;
 
     private final ImmutableMap<IRI, VocabularyEntry> vocabulary;
@@ -70,13 +71,15 @@ public class OnePassRDFMaterializer implements OntopRDFMaterializer {
         this.queryPlanner = injector.getInstance(QueryPlanner.class);
         this.queryLoggerFactory = injector.getInstance(QueryLogger.Factory.class);
         this.queryContextFactory = injector.getInstance(QueryContext.Factory.class);
-        this.queryTransformerFactory = injector.getInstance(QueryTransformerFactory.class);
+        this.queryRenamer = injector.getInstance(QueryRenamer.class);
         this.termFactory = injector.getInstance(TermFactory.class);
 
         Mapping saturatedMapping = specification.getSaturatedMapping();
         ImmutableList<IQ> mappingEntriesIQs = saturatedMapping.getRDFAtomPredicates().stream()
-                .map(saturatedMapping::getQueries)
-                .flatMap(Collection::stream)
+                .map(saturatedMapping::getMergedDefinitions)
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .map(IQ::normalizeForOptimization)
                 .map(iq -> removeDistincts(iq, materializationParams.areDuplicatesAllowed()))
                 .map(this::splitPotentialUnionNode)
                 .flatMap(Collection::stream)
@@ -212,7 +215,7 @@ public class OnePassRDFMaterializer implements OntopRDFMaterializer {
                         iqFactory,
                         termFactory,
                         substitutionFactory,
-                        queryTransformerFactory);
+                        queryRenamer);
             } else {
                 return new ComplexMappingEntryCluster(tree,
                         rdfTemplates,

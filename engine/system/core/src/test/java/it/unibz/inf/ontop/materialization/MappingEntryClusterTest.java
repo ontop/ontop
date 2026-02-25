@@ -175,7 +175,7 @@ public class MappingEntryClusterTest {
         MappingEntryCluster info = new FilterMappingEntryCluster(iq1.getTree(),
                 new RDFFactTemplatesImpl(ImmutableList.of(iq1.getProjectionAtom().getArguments())),
                 iq1.getVariableGenerator(),
-                IQ_FACTORY, TERM_FACTORY, SUBSTITUTION_FACTORY, QUERY_TRANSFORMER_FACTORY);
+                IQ_FACTORY, TERM_FACTORY, SUBSTITUTION_FACTORY, QUERY_RENAMER);
         assert !hasFilterNode(info.getIQTree());
 
     }
@@ -196,7 +196,7 @@ public class MappingEntryClusterTest {
         MappingEntryCluster info = new FilterMappingEntryCluster(iq1.getTree(),
                 new RDFFactTemplatesImpl(ImmutableList.of(iq1.getProjectionAtom().getArguments())),
                 iq1.getVariableGenerator(),
-                IQ_FACTORY, TERM_FACTORY, SUBSTITUTION_FACTORY, QUERY_TRANSFORMER_FACTORY);
+                IQ_FACTORY, TERM_FACTORY, SUBSTITUTION_FACTORY, QUERY_RENAMER);
 
         assert hasFilterNode(info.getIQTree());
 
@@ -220,7 +220,7 @@ public class MappingEntryClusterTest {
         MappingEntryCluster info = new FilterMappingEntryCluster(iq1.getTree(),
                 new RDFFactTemplatesImpl(ImmutableList.of(iq1.getProjectionAtom().getArguments())),
                 iq1.getVariableGenerator(),
-                IQ_FACTORY, TERM_FACTORY, SUBSTITUTION_FACTORY, QUERY_TRANSFORMER_FACTORY);
+                IQ_FACTORY, TERM_FACTORY, SUBSTITUTION_FACTORY, QUERY_RENAMER);
 
         assert !hasFilterNode(info.getIQTree());
     }
@@ -243,7 +243,7 @@ public class MappingEntryClusterTest {
         MappingEntryCluster info = new FilterMappingEntryCluster(iq1.getTree(),
                 new RDFFactTemplatesImpl(ImmutableList.of(iq1.getProjectionAtom().getArguments())),
                 iq1.getVariableGenerator(),
-                IQ_FACTORY, TERM_FACTORY, SUBSTITUTION_FACTORY, QUERY_TRANSFORMER_FACTORY);
+                IQ_FACTORY, TERM_FACTORY, SUBSTITUTION_FACTORY, QUERY_RENAMER);
 
         assert !hasFilterNode(info.getIQTree());
     }
@@ -277,12 +277,12 @@ public class MappingEntryClusterTest {
         MappingEntryCluster assertion1 = new FilterMappingEntryCluster(iq1.getTree(),
                 new RDFFactTemplatesImpl(ImmutableList.of(iq1.getProjectionAtom().getArguments())),
                 iq1.getVariableGenerator(),
-                IQ_FACTORY, TERM_FACTORY, SUBSTITUTION_FACTORY, QUERY_TRANSFORMER_FACTORY);
+                IQ_FACTORY, TERM_FACTORY, SUBSTITUTION_FACTORY, QUERY_RENAMER);
 
         MappingEntryCluster assertion2 = new FilterMappingEntryCluster(iq2.getTree(),
                 new RDFFactTemplatesImpl(ImmutableList.of(iq2.getProjectionAtom().getArguments())),
                 iq2.getVariableGenerator(),
-                IQ_FACTORY, TERM_FACTORY, SUBSTITUTION_FACTORY, QUERY_TRANSFORMER_FACTORY);
+                IQ_FACTORY, TERM_FACTORY, SUBSTITUTION_FACTORY, QUERY_RENAMER);
 
         Optional<MappingEntryCluster> mergedAssertion = assertion1.merge(assertion2);
         assert mergedAssertion.isEmpty();
@@ -317,12 +317,12 @@ public class MappingEntryClusterTest {
         MappingEntryCluster assertion1 = new FilterMappingEntryCluster(iq1.getTree(),
                 new RDFFactTemplatesImpl(ImmutableList.of(iq1.getProjectionAtom().getArguments())),
                 iq1.getVariableGenerator(),
-                IQ_FACTORY, TERM_FACTORY, SUBSTITUTION_FACTORY, QUERY_TRANSFORMER_FACTORY);
+                IQ_FACTORY, TERM_FACTORY, SUBSTITUTION_FACTORY, QUERY_RENAMER);
 
         MappingEntryCluster assertion2 = new FilterMappingEntryCluster(iq2.getTree(),
                 new RDFFactTemplatesImpl(ImmutableList.of(iq2.getProjectionAtom().getArguments())),
                 iq2.getVariableGenerator(),
-                IQ_FACTORY, TERM_FACTORY, SUBSTITUTION_FACTORY, QUERY_TRANSFORMER_FACTORY);
+                IQ_FACTORY, TERM_FACTORY, SUBSTITUTION_FACTORY, QUERY_RENAMER);
 
         Optional<MappingEntryCluster> mergedAssertion = assertion1.merge(assertion2);
         assert mergedAssertion.isPresent();
@@ -603,8 +603,8 @@ public class MappingEntryClusterTest {
                 SUBSTITUTION_FACTORY.getSubstitution(S1, generatePersonURI(PERSON_URI_TEMPLATE, ID1),
                         P1, getConstantIRI(WORKS_PROP),
                         O1, getRDFLiteral(ID2)));
-        IQTree joinSubtree =IQ_FACTORY.createNaryIQTree(IQ_FACTORY.createInnerJoinNode()
-                        .changeOptionalFilterCondition(Optional.of(TERM_FACTORY.getDBStartsWith(ImmutableList.of(NAME1, TERM_FACTORY.getDBStringConstant("A"))))),
+        IQTree joinSubtree =IQ_FACTORY.createNaryIQTree(IQ_FACTORY.createInnerJoinNode(
+                Optional.of(TERM_FACTORY.getDBStartsWith(ImmutableList.of(NAME1, TERM_FACTORY.getDBStringConstant("A"))))),
                 ImmutableList.of(ext1, ext2));
         IQ iq1 = IQ_FACTORY.createIQ(
                 ATOM_FACTORY.getDistinctTripleAtom(S1, P1, O1),
@@ -701,7 +701,7 @@ public class MappingEntryClusterTest {
         FilterMappingEntryCluster assertion2 = new FilterMappingEntryCluster(iq2.getTree(),
                 new RDFFactTemplatesImpl(ImmutableList.of(iq2.getProjectionAtom().getArguments())),
                 iq2.getVariableGenerator(),
-                IQ_FACTORY, TERM_FACTORY, SUBSTITUTION_FACTORY, QUERY_TRANSFORMER_FACTORY);
+                IQ_FACTORY, TERM_FACTORY, SUBSTITUTION_FACTORY, QUERY_RENAMER);
 
         Optional<MappingEntryCluster> mergedAssertion = assertion1.merge(assertion2);
         assert mergedAssertion.isPresent()
@@ -742,7 +742,7 @@ public class MappingEntryClusterTest {
         FilterMappingEntryCluster assertion2 = new FilterMappingEntryCluster(iq2.getTree(),
                 new RDFFactTemplatesImpl(ImmutableList.of(iq2.getProjectionAtom().getArguments())),
                 iq2.getVariableGenerator(),
-                IQ_FACTORY, TERM_FACTORY, SUBSTITUTION_FACTORY, QUERY_TRANSFORMER_FACTORY);
+                IQ_FACTORY, TERM_FACTORY, SUBSTITUTION_FACTORY, QUERY_RENAMER);
 
         Optional<MappingEntryCluster> mergedAssertion = assertion1.merge(assertion2);
         assert mergedAssertion.isPresent()

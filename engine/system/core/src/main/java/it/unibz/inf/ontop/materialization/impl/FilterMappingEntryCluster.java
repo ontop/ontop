@@ -2,11 +2,12 @@ package it.unibz.inf.ontop.materialization.impl;
 
 import com.google.common.collect.*;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
-import it.unibz.inf.ontop.injection.QueryTransformerFactory;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.iq.node.FilterNode;
+import it.unibz.inf.ontop.iq.node.UnaryOperatorNode;
+import it.unibz.inf.ontop.iq.transform.QueryRenamer;
 import it.unibz.inf.ontop.materialization.MappingEntryCluster;
 import it.unibz.inf.ontop.materialization.RDFFactTemplates;
 import it.unibz.inf.ontop.model.term.*;
@@ -27,7 +28,7 @@ import java.util.Optional;
 public class FilterMappingEntryCluster extends AbstractMappingEntryCluster implements MappingEntryCluster {
     private final ExtensionalDataNode dataNode;
     private final Optional<ImmutableExpression> filterCondition;
-    private final QueryTransformerFactory queryTransformerFactory;
+    private final QueryRenamer queryRenamer;
 
     public FilterMappingEntryCluster(IQTree originalTree,
                                      RDFFactTemplates rdfTemplates,
@@ -35,10 +36,10 @@ public class FilterMappingEntryCluster extends AbstractMappingEntryCluster imple
                                      IntermediateQueryFactory iqFactory,
                                      TermFactory termFactory,
                                      SubstitutionFactory substitutionFactory,
-                                     QueryTransformerFactory queryTransformerFactory) {
+                                     QueryRenamer queryRenamer) {
         super(originalTree, rdfTemplates, variableGenerator, iqFactory, substitutionFactory, termFactory);
 
-        this.queryTransformerFactory = queryTransformerFactory;
+        this.queryRenamer = queryRenamer;
         if (originalTree.getChildren().get(0).getRootNode() instanceof FilterNode) {
             IQTree filterSubtree = originalTree.getChildren().get(0);
             ImmutableExpression condition = ((FilterNode) filterSubtree.getRootNode()).getFilterCondition();
@@ -124,7 +125,7 @@ public class FilterMappingEntryCluster extends AbstractMappingEntryCluster imple
         if (allFilterVariablesInRDFTerms) {
             if (isNotNullFilterCondition(filterNode.getFilterCondition())
                     || isConjunctionOfNotNull) {
-                return tree.replaceSubTree(filterSubtree, filterSubtree.getChildren().get(0));
+                return iqFactory.createUnaryIQTree((UnaryOperatorNode) tree.getRootNode(), filterSubtree.getChildren().get(0));
             }
         }
 
@@ -163,14 +164,14 @@ public class FilterMappingEntryCluster extends AbstractMappingEntryCluster imple
                 .map(e -> Map.entry(e.getKey(), (Variable) e.getValue()))
                 .collect(substitutionFactory.toSubstitution());
 
-        IQTree renamedOtherFilter = queryTransformerFactory.createRenamer(renamingSubstitution.injective()).transform(otherFilterRenamed.tree);
+        IQTree renamedOtherFilter = queryRenamer.applyInDepthRenaming(renamingSubstitution.injective(), otherFilterRenamed.tree);
         var tmpCluster = new FilterMappingEntryCluster(renamedOtherFilter,
                 otherFilterRenamed.rdfTemplates,
                 otherFilterRenamed.variableGenerator,
                 otherFilterRenamed.iqFactory,
                 otherFilterRenamed.termFactory,
                 otherFilterRenamed.substitutionFactory,
-                queryTransformerFactory);
+                queryRenamer);
 
         return tmpCluster.filterCondition.isPresent() && filterCondition.equals(tmpCluster.filterCondition.get());
     }
@@ -234,7 +235,7 @@ public class FilterMappingEntryCluster extends AbstractMappingEntryCluster imple
                 iqFactory,
                 termFactory,
                 substitutionFactory,
-                queryTransformerFactory);
+                queryRenamer);
     }
 
 }
