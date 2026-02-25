@@ -121,6 +121,13 @@ public class BindWithFunctionsDenodoTest extends AbstractBindTestWithFunctions {
         super.testREGEX();
     }
 
+    @Disabled("Denodo does not allow the use of REGEXP_LIKE in the projection part.")
+    @Test
+    @Override
+    public void testCaseInsensitiveREGEX() {
+        super.testCaseInsensitiveREGEX();
+    }
+
     @Disabled("Denodo uses a different format for MD5, and does not support conversion to HEX.")
     @Test
     @Override

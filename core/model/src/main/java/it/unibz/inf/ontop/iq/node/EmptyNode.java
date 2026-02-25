@@ -1,8 +1,9 @@
 package it.unibz.inf.ontop.iq.node;
 
 import it.unibz.inf.ontop.iq.LeafIQTree;
-import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
-import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
+import it.unibz.inf.ontop.iq.visit.IQTreeVisitor;
+import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.substitution.InjectiveSubstitution;
 
 /**
  * Temporary QueryNode that says that replace a non-satisfied sub-tree.
@@ -12,7 +13,12 @@ import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
  * See IntermediateQueryFactory for creating a new instance.
  */
 public interface EmptyNode extends LeafIQTree {
+
     @Override
-    EmptyNode acceptNodeTransformer(HomogeneousQueryNodeTransformer transformer)
-            throws QueryNodeTransformationException;
+    EmptyNode applyFreshRenaming(InjectiveSubstitution<Variable> renamingSubstitution);
+
+    @Override
+    default <T> T acceptVisitor(IQTreeVisitor<T> visitor) {
+        return visitor.transformEmpty(this);
+    }
 }

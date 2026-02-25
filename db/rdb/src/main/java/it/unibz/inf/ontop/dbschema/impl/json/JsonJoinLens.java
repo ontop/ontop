@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.exception.MetadataExtractionException;
+import it.unibz.inf.ontop.injection.CoreSingletons;
 
 import javax.annotation.Nonnull;
 import java.util.List;
@@ -55,7 +56,9 @@ public class JsonJoinLens extends JsonBasicOrJoinLens {
      * TODO: consider implementing it (using FKs between parents)
      */
     @Override
-    public ImmutableList<ImmutableList<Attribute>> getAttributesIncludingParentOnes(Lens lens, ImmutableList<Attribute> parentAttributes) {
+    public ImmutableList<ImmutableList<Attribute>> getAttributesIncludingParentOnes(Lens lens,
+                                                                                    ImmutableList<Attribute> parentAttributes,
+                                                                                    CoreSingletons coreSingletons) {
         return ImmutableList.of();
     }
 

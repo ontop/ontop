@@ -3,12 +3,17 @@ package it.unibz.inf.ontop.iq.transformer.impl;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.injection.CoreSingletons;
+import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
+import it.unibz.inf.ontop.iq.BinaryNonCommutativeIQTree;
 import it.unibz.inf.ontop.iq.IQTree;
-import it.unibz.inf.ontop.iq.node.FilterNode;
-import it.unibz.inf.ontop.iq.node.InnerJoinNode;
-import it.unibz.inf.ontop.iq.node.LeftJoinNode;
+import it.unibz.inf.ontop.iq.NaryIQTree;
+import it.unibz.inf.ontop.iq.UnaryIQTree;
+import it.unibz.inf.ontop.iq.impl.IQTreeTools;
+import it.unibz.inf.ontop.iq.impl.NaryIQTreeTools;
+import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
 import it.unibz.inf.ontop.iq.transformer.BooleanExpressionPushDownTransformer;
+import it.unibz.inf.ontop.iq.visit.impl.DefaultIQTreeOptionalVisitingTransformer;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
@@ -16,142 +21,243 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import javax.inject.Inject;
 import java.util.Optional;
+import java.util.function.BiFunction;
 
-public class BooleanExpressionPushDownTransformerImpl extends DefaultRecursiveIQTreeVisitingTransformer
-        implements BooleanExpressionPushDownTransformer {
+public class BooleanExpressionPushDownTransformerImpl implements BooleanExpressionPushDownTransformer {
 
-    private final CoreSingletons coreSingletons;
     private final TermFactory termFactory;
+    private final IQTreeTools iqTreeTools;
+    private final IntermediateQueryFactory iqFactory;
+    private final Transformer transformer;
 
     @Inject
     protected BooleanExpressionPushDownTransformerImpl(CoreSingletons coreSingletons) {
-        super(coreSingletons);
-        this.coreSingletons = coreSingletons;
         this.termFactory = coreSingletons.getTermFactory();
+        this.iqTreeTools = coreSingletons.getIQTreeTools();
+        this.iqFactory = coreSingletons.getIQFactory();
+        this.transformer = new Transformer();
     }
 
     @Override
-    public IQTree transformFilter(IQTree tree, FilterNode rootNode, IQTree child) {
+    public IQTree transform(IQTree tree) {
+        return transformer.transform(tree);
+    }
 
-        ImmutableList<ImmutableExpression> subExpressions = rootNode.getFilterCondition().flattenAND()
-                .collect(ImmutableCollectors.toList());
 
-        ImmutableList.Builder<ImmutableExpression> nonPushedExpressionBuilder = ImmutableList.builder();
+    private class Transformer extends DefaultRecursiveIQTreeVisitingTransformer {
+        Transformer() {
+            super(BooleanExpressionPushDownTransformerImpl.this.iqFactory);
+        }
 
-        // Recursive. Non-final variable
-        IQTree currentChild = child.acceptTransformer(this);
+        @Override
+        public IQTree transformFilter(UnaryIQTree tree, FilterNode rootNode, IQTree child) {
 
-        for (ImmutableExpression subExpression : subExpressions) {
-            BooleanExpressionPusher newPusher = new BooleanExpressionPusher(subExpression, coreSingletons);
-            Optional<IQTree> optionalChild = currentChild.acceptVisitor(newPusher);
-            if (optionalChild.isPresent()) {
-                currentChild = optionalChild.get();
+            PushResult<IQTree> result = pushExpressionDown(
+                    transform(child),
+                    rootNode.getFilterCondition(),
+                    this::pushExpressionDown);
+
+            return iqTreeTools.unaryIQTreeBuilder()
+                    .append(iqTreeTools.createOptionalFilterNode(result.nonPushedExpression))
+                    .build(result.result);
+        }
+
+        /**
+         * Tries to push the left join condition on the right
+         */
+        @Override
+        public IQTree transformLeftJoin(BinaryNonCommutativeIQTree tree, LeftJoinNode rootNode, IQTree leftChild, IQTree rightChild) {
+
+            if (rootNode.getOptionalFilterCondition().isEmpty())
+                return super.transformLeftJoin(tree, rootNode, leftChild, rightChild);
+
+            IQTree transformedLeftChild = transform(leftChild);
+            IQTree transformedRightChild = transform(rightChild);
+
+            // Expressions involving variables not on the right are not pushed
+            PushResult<IQTree> result = pushExpressionDown(
+                    transformedRightChild,
+                    rootNode.getOptionalFilterCondition().get(),
+                    this::pushExpressionDownIfContainsVariables);
+
+            return iqTreeTools.createLeftJoinTree(result.nonPushedExpression, transformedLeftChild, result.result);
+        }
+
+        @Override
+        public IQTree transformInnerJoin(NaryIQTree tree, InnerJoinNode rootNode, ImmutableList<IQTree> children) {
+
+            if (rootNode.getOptionalFilterCondition().isEmpty())
+                return super.transformInnerJoin(tree, rootNode, children);
+
+            ImmutableList<IQTree> transformedChildren = NaryIQTreeTools.transformChildren(children, this::transform);
+
+            PushResult<ImmutableList<IQTree>> result = pushExpressionDown(
+                    transformedChildren,
+                    rootNode.getOptionalFilterCondition().get(),
+                    this::pushExpressionDownIfContainsVariables);
+
+            return iqTreeTools.createInnerJoinTree(result.nonPushedExpression, result.result);
+        }
+
+        private Optional<IQTree> pushExpressionDown(ImmutableExpression expression, IQTree child) {
+            return getTransformer(expression).transform(child);
+        }
+
+        private Optional<IQTree> pushExpressionDownIfContainsVariables(ImmutableExpression expression, IQTree tree) {
+            if (tree.getVariables().containsAll(expression.getVariables()))
+                return pushExpressionDown(expression, tree);
+            return Optional.empty();
+        }
+
+        private Optional<ImmutableList<IQTree>> pushExpressionDownIfContainsVariables(ImmutableExpression expression, ImmutableList<IQTree> list) {
+            return Optional.of(NaryIQTreeTools.transformChildren(list,
+                            tree -> pushExpressionDownIfContainsVariables(expression, tree)
+                                    .orElse(tree)))
+                    // If the expression could not be pushed down to any child, keep it in the inner join
+                    .filter(r -> !r.equals(list));
+        }
+
+        private <T> PushResult<T> pushExpressionDown(T initial, ImmutableExpression expression, BiFunction<ImmutableExpression, T, Optional<T>> function) {
+            ImmutableSet.Builder<ImmutableExpression> nonPushedExpressionBuilder = ImmutableSet.builder();
+            T result = initial; // non-final
+            for (ImmutableExpression exp : expression.flattenAND().collect(ImmutableCollectors.toList())) {
+                Optional<T> optionalResult = function.apply(exp, result);
+                if (optionalResult.isPresent())
+                    result = optionalResult.get();
+                else
+                    nonPushedExpressionBuilder.add(exp);
             }
-            else
-                nonPushedExpressionBuilder.add(subExpression);
+            return new PushResult<>(result, termFactory.getConjunction(nonPushedExpressionBuilder.build().stream()));
         }
-        IQTree newChild = currentChild;
-
-        return termFactory.getConjunction(nonPushedExpressionBuilder.build().stream())
-                .map(iqFactory::createFilterNode)
-                .map(n -> (IQTree) iqFactory.createUnaryIQTree(n, newChild))
-                .orElse(newChild);
     }
 
-    /**
-     * Tries to push the left join condition on the right
-     */
-    @Override
-    public IQTree transformLeftJoin(IQTree tree, LeftJoinNode rootNode, IQTree leftChild, IQTree rightChild) {
+    @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
+    private static final class PushResult<T> {
+        private final T result;
+        private final Optional<ImmutableExpression>  nonPushedExpression;
 
-        IQTree newLeftChild = leftChild.acceptTransformer(this);
-        IQTree selfTransformedRightChild = rightChild.acceptTransformer(this);
-
-        if (!rootNode.getOptionalFilterCondition().isPresent())
-            return leftChild.equals(newLeftChild) && rightChild.equals(selfTransformedRightChild)
-                    ? tree
-                    : iqFactory.createBinaryNonCommutativeIQTree(rootNode, newLeftChild, selfTransformedRightChild);
-
-        ImmutableList<ImmutableExpression> subExpressions = rootNode.getOptionalFilterCondition().get().flattenAND()
-                .collect(ImmutableCollectors.toList());
-
-        ImmutableList.Builder<ImmutableExpression> nonPushedExpressionBuilder = ImmutableList.builder();
-
-        // Recursive. Non-final variable
-        IQTree currentRightChild = selfTransformedRightChild;
-        ImmutableSet<Variable> rightChildVariables = rightChild.getVariables();
-
-        for (ImmutableExpression subExpression : subExpressions) {
-            ImmutableSet<Variable> subExpressionVariables = subExpression.getVariableStream()
-                    .collect(ImmutableCollectors.toSet());
-
-            if (rightChildVariables.containsAll(subExpressionVariables)) {
-
-                BooleanExpressionPusher newPusher = new BooleanExpressionPusher(subExpression, coreSingletons);
-                Optional<IQTree> optionalChild = currentRightChild.acceptVisitor(newPusher);
-                if (optionalChild.isPresent()) {
-                    currentRightChild = optionalChild.get();
-                } else
-                    nonPushedExpressionBuilder.add(subExpression);
-            }
-            // Expression involving variables not on the right
-            else
-                nonPushedExpressionBuilder.add(subExpression);
+        private PushResult(T result, Optional<ImmutableExpression> nonPushedExpression) {
+            this.result = result;
+            this.nonPushedExpression = nonPushedExpression;
         }
-
-        LeftJoinNode newLeftJoinNode = termFactory.getConjunction(nonPushedExpressionBuilder.build().stream())
-                .map(iqFactory::createLeftJoinNode)
-                .orElseGet(iqFactory::createLeftJoinNode);
-
-        return iqFactory.createBinaryNonCommutativeIQTree(newLeftJoinNode, newLeftChild, currentRightChild);
     }
 
-    @Override
-    public IQTree transformInnerJoin(IQTree tree, InnerJoinNode rootNode, ImmutableList<IQTree> children) {
+    private BooleanExpressionPusher getTransformer(ImmutableExpression expression) {
+        return new BooleanExpressionPusher(expression);
+    }
 
-        ImmutableList<IQTree> selfTransformedChildren = children.stream()
-                .map(this::transform)
-                .collect(ImmutableCollectors.toList());
+    private class BooleanExpressionPusher extends DefaultIQTreeOptionalVisitingTransformer<IQTree> {
 
-        if (!rootNode.getOptionalFilterCondition().isPresent())
-            return selfTransformedChildren.equals(children)
-                    ? tree
-                    : iqFactory.createNaryIQTree(rootNode, selfTransformedChildren);
+        private final ImmutableExpression expressionToPushDown;
 
-        ImmutableList<ImmutableExpression> subExpressions = rootNode.getOptionalFilterCondition().get().flattenAND()
-                .collect(ImmutableCollectors.toList());
-
-        ImmutableSet.Builder<ImmutableExpression> nonPushedExpressionBuilder = ImmutableSet.builder();
-
-        // Recursive. Non-final variable
-        ImmutableList<IQTree> currentChildren = selfTransformedChildren;
-
-        for (ImmutableExpression subExpression : subExpressions) {
-            ImmutableSet<Variable> subExpressionVariables = subExpression.getVariableStream()
-                    .collect(ImmutableCollectors.toSet());
-
-            BooleanExpressionPusher newPusher = new BooleanExpressionPusher(subExpression, coreSingletons);
-
-            ImmutableList<IQTree> updatedChildren = currentChildren.stream()
-                    .map(c -> c.getVariables().containsAll(subExpressionVariables)
-                            ? c.acceptVisitor(newPusher).orElse(c)
-                            : c)
-                    .collect(ImmutableCollectors.toList());
-
-            /*
-             * If the expression could not be pushed down to any child, keep it in the inner join
-             */
-            if (currentChildren.equals(updatedChildren))
-                nonPushedExpressionBuilder.add(subExpression);
-
-            currentChildren = updatedChildren;
+        BooleanExpressionPusher(ImmutableExpression expressionToPushDown) {
+            this.expressionToPushDown = expressionToPushDown;
         }
 
-        InnerJoinNode newInnerJoinNode = termFactory.getConjunction(nonPushedExpressionBuilder.build().stream())
-                .map(iqFactory::createInnerJoinNode)
-                .orElseGet(iqFactory::createInnerJoinNode);
+        @Override
+        public Optional<IQTree> transformConstruction(UnaryIQTree tree, ConstructionNode rootNode, IQTree child) {
+            ImmutableExpression newExpression = rootNode.getSubstitution().apply(expressionToPushDown);
+            return getTransformer(newExpression).transformPassingUnaryNode(rootNode, child);
+        }
 
-        return iqFactory.createNaryIQTree(newInnerJoinNode, currentChildren);
+        @Override
+        public Optional<IQTree> transformAggregation(UnaryIQTree tree, AggregationNode aggregationNode, IQTree child) {
+            ImmutableSet<Variable> expressionVariables = expressionToPushDown.getVariables();
+            return aggregationNode.getGroupingVariables().containsAll(expressionVariables)
+                    ? transformPassingUnaryNode(aggregationNode, child)
+                    : Optional.empty();
+        }
 
+        /**
+         * NB: focuses on the expressionToPushDown, NOT on pushing down its own expression
+         */
+        @Override
+        public Optional<IQTree> transformFilter(UnaryIQTree tree, FilterNode rootNode, IQTree child) {
+            Optional<IQTree> newChild = transform(child);
+
+            UnaryIQTree newTree = newChild
+                    .map(c -> iqFactory.createUnaryIQTree(rootNode, c))
+                    .orElseGet(() -> wrapInFilter(
+                            termFactory.getConjunction(
+                                    rootNode.getFilterCondition(), expressionToPushDown), child));
+
+            return Optional.of(newTree);
+        }
+
+        @Override
+        public Optional<IQTree> transformFlatten(UnaryIQTree tree, FlattenNode rootNode, IQTree child) {
+            Optional<Variable> indexVariable = rootNode.getIndexVariable();
+            return expressionToPushDown.getVariableStream()
+                    .anyMatch(v -> v.equals(rootNode.getOutputVariable()) ||
+                            (indexVariable.isPresent() && v.equals(indexVariable.get())))
+                    ? Optional.empty()
+                    : transformPassingUnaryNode(rootNode, child);
+        }
+
+        @Override
+        public Optional<IQTree> transformDistinct(UnaryIQTree tree, DistinctNode rootNode, IQTree child) {
+            return transformPassingUnaryNode(rootNode, child);
+        }
+
+        @Override
+        public Optional<IQTree> transformSlice(UnaryIQTree tree, SliceNode sliceNode, IQTree child) {
+            // blocks
+            return done();
+        }
+
+        @Override
+        public Optional<IQTree> transformOrderBy(UnaryIQTree tree, OrderByNode rootNode, IQTree child) {
+            return transformPassingUnaryNode(rootNode, child);
+        }
+
+        private Optional<IQTree> transformPassingUnaryNode(UnaryOperatorNode rootNode, IQTree child) {
+            IQTree newChild = transform(child)
+                    .orElseGet(() -> wrapInFilter(expressionToPushDown, child));
+
+            return Optional.of(iqFactory.createUnaryIQTree(rootNode, newChild));
+        }
+
+        /**
+         * Only pushes on the left
+         *
+         * TODO: consider pushing on the right safe expressions
+         */
+        @Override
+        public Optional<IQTree> transformLeftJoin(BinaryNonCommutativeIQTree tree, LeftJoinNode rootNode, IQTree leftChild, IQTree rightChild) {
+            return leftChild.getVariables().containsAll(expressionToPushDown.getVariables())
+                ? transform(leftChild)
+                        .map(l -> iqFactory.createBinaryNonCommutativeIQTree(rootNode, l, rightChild))
+                : Optional.empty();
+        }
+
+        @Override
+        public Optional<IQTree> transformInnerJoin(NaryIQTree tree, InnerJoinNode rootNode, ImmutableList<IQTree> children) {
+            ImmutableSet<Variable> expressionVariables = expressionToPushDown.getVariables();
+
+            ImmutableList<IQTree> newChildren = NaryIQTreeTools.transformChildren(children,
+                    c -> c.getVariables().containsAll(expressionVariables)
+                            ? transform(c).orElse(c)
+                            : c);
+
+            InnerJoinNode newJoinNode = newChildren.equals(children)
+                    // Refused by the children
+                    ? iqFactory.createInnerJoinNode(iqTreeTools.getConjunction(rootNode.getOptionalFilterCondition(), expressionToPushDown))
+                    : rootNode;
+
+            return Optional.of(iqFactory.createNaryIQTree(newJoinNode, newChildren));
+        }
+
+        @Override
+        public Optional<IQTree> transformUnion(NaryIQTree tree, UnionNode rootNode, ImmutableList<IQTree> children) {
+            ImmutableList<IQTree> newChildren = NaryIQTreeTools.transformChildren(children,
+                    c -> transform(c)
+                            .orElseGet(() -> wrapInFilter(expressionToPushDown, c)));
+
+            return Optional.of(iqFactory.createNaryIQTree(rootNode, newChildren));
+        }
+
+        private UnaryIQTree wrapInFilter(ImmutableExpression expression, IQTree child) {
+            return iqFactory.createUnaryIQTree(iqFactory.createFilterNode(expression), child);
+        }
     }
 }

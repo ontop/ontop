@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.google.common.collect.*;
 import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.exception.MetadataExtractionException;
+import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import javax.annotation.Nonnull;
@@ -47,18 +48,19 @@ public class JsonBasicLens extends JsonBasicOrJoinLens {
      */
     @Override
     public ImmutableList<ImmutableList<Attribute>> getAttributesIncludingParentOnes(Lens lens,
-                                                                                    ImmutableList<Attribute> parentAttributes) {
-        if (filterExpression != null && (!filterExpression.isEmpty()))
+                                                                                    ImmutableList<Attribute> parentAttributes,
+                                                                                    CoreSingletons coreSingletons) {
+        if (!filterExpression.isEmpty())
             // TODO: log a warning
             return ImmutableList.of();
 
-        return getDerivedFromParentAttributes(lens, parentAttributes);
+        return getDerivedFromParentAttributes(lens, parentAttributes, coreSingletons);
     }
 
     public boolean propagateUniqueConstraintsUp(Lens relation, ImmutableList<NamedRelationDefinition> parents,
                                                 QuotedIDFactory idFactory) throws MetadataExtractionException {
         //There is no guarantee a UC will hold in the parent if the lens performed a filter.
-        if(filterExpression != null && !filterExpression.isEmpty())
+        if(!filterExpression.isEmpty())
             return false;
 
         ImmutableList<UniqueConstraint> ucs = relation.getUniqueConstraints();

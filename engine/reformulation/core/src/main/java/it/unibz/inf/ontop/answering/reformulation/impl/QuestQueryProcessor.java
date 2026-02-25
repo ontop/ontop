@@ -44,6 +44,7 @@ public class QuestQueryProcessor implements QueryReformulator {
 	private final QueryPlanner queryPlanner;
 	private final QueryLogger.Factory queryLoggerFactory;
 	private final QueryContext.Factory queryContextFactory;
+	private final NodeInGraphOptimizer nodeInGraphOptimizer;
 
 	@AssistedInject
 	protected QuestQueryProcessor(@Assisted OBDASpecification obdaSpecification,
@@ -54,6 +55,7 @@ public class QuestQueryProcessor implements QueryReformulator {
 								KGQueryFactory kgQueryFactory,
 								KGQueryTranslator inputQueryTranslator,
 								GeneralStructuralAndSemanticIQOptimizer generalOptimizer,
+								NodeInGraphOptimizer nodeInGraphOptimizer,
 								QueryPlanner queryPlanner,
 								QueryLogger.Factory queryLoggerFactory,
 								QueryContext.Factory queryContextFactory) {
@@ -63,6 +65,7 @@ public class QuestQueryProcessor implements QueryReformulator {
 		this.queryPlanner = queryPlanner;
 		this.queryLoggerFactory = queryLoggerFactory;
 		this.queryContextFactory = queryContextFactory;
+		this.nodeInGraphOptimizer = nodeInGraphOptimizer;
 
 		this.rewriter.setTBox(obdaSpecification.getSaturatedTBox());
 		this.queryUnfolder = queryUnfolderFactory.create(obdaSpecification.getSaturatedMapping());
@@ -70,8 +73,6 @@ public class QuestQueryProcessor implements QueryReformulator {
 
 		this.inputQueryTranslator = inputQueryTranslator;
 		this.queryCache = queryCache;
-
-		LOGGER.info("Ontop has completed the setup and it is ready for query answering!");
 	}
 
 	@Override
@@ -99,8 +100,11 @@ public class QuestQueryProcessor implements QueryReformulator {
                 IQ rewrittenIQ = rewriter.rewrite(convertedIQ);
                 LOGGER.debug("Rewritten IQ:\n{}\n", rewrittenIQ);
 
+				IQ simplifiedQuery = nodeInGraphOptimizer.optimize(rewrittenIQ);
+				LOGGER.debug("IQ after nodeInGraph simplification:\n{}\n", simplifiedQuery);
+
                 LOGGER.debug("Start the unfolding...");
-                IQ unfoldedIQ = queryUnfolder.optimize(rewrittenIQ);
+                IQ unfoldedIQ = queryUnfolder.optimize(simplifiedQuery);
                 if (unfoldedIQ.getTree().isDeclaredAsEmpty()) {
 					queryLogger.declareReformulationFinishedAndSerialize(unfoldedIQ, false);
                 	LOGGER.debug("Reformulation time: {} ms\n", System.currentTimeMillis() - beginning);
@@ -109,7 +113,7 @@ public class QuestQueryProcessor implements QueryReformulator {
 
 				LOGGER.debug("Unfolded query:\n{}\n", unfoldedIQ);
 
-                IQ optimizedQuery = generalOptimizer.optimize(unfoldedIQ, queryContext);
+				IQ optimizedQuery = generalOptimizer.optimize(unfoldedIQ, queryContext);
 				IQ plannedQuery = queryPlanner.optimize(optimizedQuery);
 				LOGGER.debug("Planned query:\n{}\n", plannedQuery);
 
@@ -131,7 +135,7 @@ public class QuestQueryProcessor implements QueryReformulator {
 			queryLogger.declareReformulationException(reformulationException);
 			throw reformulationException;
 		}
-		catch (OntopUnsupportedKGQueryException e) {
+		catch (OntopUnsupportedKGQueryException | OntopUnsupportedKGQueryRuntimeException e) {
 			OntopUnsupportedInputQueryException reformulationException = new OntopUnsupportedInputQueryException(e.getMessage());
 			queryLogger.declareReformulationException(reformulationException);
 			throw reformulationException;

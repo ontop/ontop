@@ -71,6 +71,13 @@ public class BindWithFunctionsCDataDynamoDBTest extends AbstractBindTestWithFunc
     @Test
     @Disabled("REGEX is not yet supported")
     @Override
+    public void testCaseInsensitiveREGEX() {
+        super.testCaseInsensitiveREGEX();
+    }
+
+    @Test
+    @Disabled("REGEX is not yet supported")
+    @Override
     public void testREPLACE() {
         super.testREPLACE();
     }
@@ -231,5 +238,11 @@ public class BindWithFunctionsCDataDynamoDBTest extends AbstractBindTestWithFunc
     protected ImmutableList<String> getStrExpectedValues() {
         return ImmutableList.of("\"1970-11-05T07:50:00+01:00\"^^xsd:string", "\"2011-12-08T11:30:00+01:00\"^^xsd:string",
                 "\"2014-06-05T16:47:52+02:00\"^^xsd:string", "\"2015-09-21T09:23:06+02:00\"^^xsd:string");
+    }
+
+    @Override
+    protected ImmutableSet<String> getDurationArithmeticExpectedResults() {
+        return ImmutableSet.of("\"1970-09-05T07:35:00+01:00\"^^xsd:dateTime", "\"2011-10-08T11:15:00+01:00\"^^xsd:dateTime",
+                "\"2014-04-05T16:32:52+02:00\"^^xsd:dateTime", "\"2015-07-21T09:08:06+02:00\"^^xsd:dateTime" );
     }
 }

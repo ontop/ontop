@@ -4,41 +4,31 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
+import it.unibz.inf.ontop.iq.DownPropagation;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.IQTreeCache;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.exception.InvalidIntermediateQueryException;
-import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.node.normalization.DistinctNormalizer;
 import it.unibz.inf.ontop.iq.request.FunctionalDependencies;
 import it.unibz.inf.ontop.iq.request.VariableNonRequirement;
-import it.unibz.inf.ontop.iq.transform.IQTreeExtendedTransformer;
-import it.unibz.inf.ontop.iq.transform.IQTreeVisitingTransformer;
-import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
-import it.unibz.inf.ontop.iq.visit.IQVisitor;
 import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.InjectiveSubstitution;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
-import java.util.Optional;
 
 
 public class DistinctNodeImpl extends QueryModifierNodeImpl implements DistinctNode {
 
     private static final String DISTINCT_NODE_STR = "DISTINCT";
+
     private final DistinctNormalizer normalizer;
 
     @Inject
-    private DistinctNodeImpl(IntermediateQueryFactory iqFactory, DistinctNormalizer normalizer) {
-        super(iqFactory);
+    private DistinctNodeImpl(IntermediateQueryFactory iqFactory, DistinctNormalizer normalizer, TermFactory termFactory) {
+        super(iqFactory, termFactory);
         this.normalizer = normalizer;
-    }
-
-    @Override
-    public IQTree normalizeForOptimization(IQTree child, VariableGenerator variableGenerator, IQTreeCache treeCache) {
-        return normalizer.normalizeForOptimization(this, child, variableGenerator, treeCache);
     }
 
     /**
@@ -51,46 +41,28 @@ public class DistinctNodeImpl extends QueryModifierNodeImpl implements DistinctN
     }
 
     @Override
-    public IQTree applyDescendingSubstitution(Substitution<? extends VariableOrGroundTerm> descendingSubstitution,
-                                              Optional<ImmutableExpression> constraint, IQTree child,
-                                              VariableGenerator variableGenerator) {
-        return iqFactory.createUnaryIQTree(this,
-                child.applyDescendingSubstitution(descendingSubstitution, constraint, variableGenerator));
+    public IQTree normalizeForOptimization(IQTree child, VariableGenerator variableGenerator, IQTreeCache treeCache) {
+        return normalizer.normalizeForOptimization(this, child, variableGenerator, treeCache);
     }
 
     @Override
-    public IQTree applyDescendingSubstitutionWithoutOptimizing(
-            Substitution<? extends VariableOrGroundTerm> descendingSubstitution, IQTree child,
-            VariableGenerator variableGenerator) {
-        return iqFactory.createUnaryIQTree(this,
-                child.applyDescendingSubstitutionWithoutOptimizing(descendingSubstitution, variableGenerator));
+    public DistinctNode applyFreshRenaming(InjectiveSubstitution<Variable> renamingSubstitution) {
+        return this;
     }
 
     @Override
-    public IQTree applyFreshRenaming(InjectiveSubstitution<Variable> renamingSubstitution, IQTree child, IQTreeCache treeCache) {
-        IQTree newChild = child.applyFreshRenaming(renamingSubstitution);
-        IQTreeCache newTreeCache = treeCache.applyFreshRenaming(renamingSubstitution);
-        return iqFactory.createUnaryIQTree(this, newChild, newTreeCache);
+    public IQTree propagateDownConstraint(DownPropagation dp, IQTree child) {
+        return iqFactory.createUnaryIQTree(this, dp.propagate(child));
+    }
+
+    @Override
+    public IQTree applyDescendingSubstitution(DownPropagation dp, IQTree child) {
+        return iqFactory.createUnaryIQTree(this, dp.propagate(child));
     }
 
     @Override
     public boolean isDistinct(IQTree tree, IQTree child) {
         return true;
-    }
-
-    @Override
-    public IQTree acceptTransformer(IQTree tree, IQTreeVisitingTransformer transformer, IQTree child) {
-        return transformer.transformDistinct(tree, this, child);
-    }
-
-    @Override
-    public <T> IQTree acceptTransformer(IQTree tree, IQTreeExtendedTransformer<T> transformer, IQTree child, T context) {
-        return transformer.transformDistinct(tree, this, child, context);
-    }
-
-    @Override
-    public <T> T acceptVisitor(IQVisitor<T> visitor, IQTree child) {
-        return visitor.visitDistinct(this, child);
     }
 
     @Override
@@ -129,36 +101,15 @@ public class DistinctNodeImpl extends QueryModifierNodeImpl implements DistinctN
     @Override
     public VariableNonRequirement computeVariableNonRequirement(IQTree child) {
         var childVariableNonRequirement = child.getVariableNonRequirement();
-
         if (childVariableNonRequirement.isEmpty())
             return childVariableNonRequirement;
 
-        ImmutableSet<Variable> requiredByDistinct = inferNewUC(child);
-        if (requiredByDistinct.isEmpty())
-            return childVariableNonRequirement;
-
-        return childVariableNonRequirement
-                .filter((v, conds) -> !requiredByDistinct.contains(v));
+        return childVariableNonRequirement.withRequiredVariables(inferNewUC(child));
     }
 
     @Override
     public ImmutableSet<Variable> inferStrictDependents(UnaryIQTree tree, IQTree child) {
         return child.inferStrictDependents();
-    }
-
-    @Override
-    public void acceptVisitor(QueryNodeVisitor visitor) {
-        visitor.visit(this);
-    }
-
-    @Override
-    public DistinctNode acceptNodeTransformer(HomogeneousQueryNodeTransformer transformer) throws QueryNodeTransformationException {
-        return transformer.transform(this);
-    }
-
-    @Override
-    public ImmutableSet<Variable> getLocalVariables() {
-        return ImmutableSet.of();
     }
 
     @Override

@@ -26,10 +26,19 @@ public class QueryContextImpl implements QueryContext {
     private final ImmutableSet<String> roles;
     private final ImmutableSet<String> groups;
     private final UUID salt;
+    private final ImmutableMap<String, String> httpHeaders;
+    private final OntopModelSettings settings;
+    private final UUID queryId;
 
     @AssistedInject
     protected QueryContextImpl(@Assisted ImmutableMap<String, String> normalizedHttpHeaders,
                                OntopModelSettings settings) {
+        this(normalizedHttpHeaders, settings, UUID.randomUUID());
+    }
+
+    protected QueryContextImpl(ImmutableMap<String, String> normalizedHttpHeaders,
+                             OntopModelSettings settings, UUID salt) {
+        this.httpHeaders = normalizedHttpHeaders;
         if (settings.isAuthorizationEnabled()) {
             var commaSplitter = Splitter.on(",");
             // TODO: validate user name
@@ -48,7 +57,9 @@ public class QueryContextImpl implements QueryContext {
             groups = ImmutableSet.of();
         }
 
-        this.salt = UUID.randomUUID();
+        this.salt = salt;
+        this.settings = settings;
+        this.queryId = UUID.randomUUID();
     }
 
     @Override
@@ -82,6 +93,21 @@ public class QueryContextImpl implements QueryContext {
     @Override
     public UUID getSalt() {
         return salt;
+    }
+
+    @Override
+    public ImmutableMap<String, String> getHttpHeaders() {
+        return httpHeaders;
+    }
+
+    @Override
+    public QueryContext duplicateForNewQueryWithSameSalt() {
+        return new QueryContextImpl(httpHeaders, settings, salt);
+    }
+
+    @Override
+    public UUID getQueryId() {
+        return queryId;
     }
 
     @Override

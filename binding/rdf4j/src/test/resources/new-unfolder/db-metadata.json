@@ -1,0 +1,377 @@
+{
+  "relations" : [ {
+    "uniqueConstraints" : [ {
+      "name" : "CONSTRAINT_4",
+      "determinants" : [ "\"H_ID\"" ],
+      "isPrimaryKey" : true
+    } ],
+    "columns" : [ {
+      "name" : "\"H_ID\"",
+      "isNullable" : false,
+      "datatype" : "VARCHAR(100)"
+    }, {
+      "name" : "\"NAME_EN\"",
+      "isNullable" : false,
+      "datatype" : "CLOB"
+    }, {
+      "name" : "\"NAME_IT\"",
+      "isNullable" : true,
+      "datatype" : "CLOB"
+    }, {
+      "name" : "\"NAME_DE\"",
+      "isNullable" : false,
+      "datatype" : "CLOB"
+    }, {
+      "name" : "\"TELEPHONE\"",
+      "isNullable" : true,
+      "datatype" : "CLOB"
+    }, {
+      "name" : "\"EMAIL\"",
+      "isNullable" : true,
+      "datatype" : "CLOB"
+    }, {
+      "name" : "\"H_TYPE\"",
+      "isNullable" : false,
+      "datatype" : "CLOB"
+    }, {
+      "name" : "\"LATITUDE\"",
+      "isNullable" : true,
+      "datatype" : "DOUBLE"
+    }, {
+      "name" : "\"LONGITUDE\"",
+      "isNullable" : true,
+      "datatype" : "DOUBLE"
+    }, {
+      "name" : "\"ALTITUDE\"",
+      "isNullable" : true,
+      "datatype" : "DOUBLE"
+    }, {
+      "name" : "\"CATEGORY\"",
+      "isNullable" : true,
+      "datatype" : "CLOB"
+    }, {
+      "name" : "\"M_ID\"",
+      "isNullable" : false,
+      "datatype" : "CLOB"
+    } ],
+    "name" : [ "\"source1_hospitality\"" ],
+    "otherNames" : [ [ "\"PUBLIC\"", "\"source1_hospitality\"" ], [ "\"DEST_INTERNSHIP\"", "\"PUBLIC\"", "\"source1_hospitality\"" ] ]
+  }, {
+    "uniqueConstraints" : [ {
+      "name" : "CONSTRAINT_3",
+      "determinants" : [ "\"ID\"" ],
+      "isPrimaryKey" : true
+    } ],
+    "columns" : [ {
+      "name" : "\"ID\"",
+      "isNullable" : false,
+      "datatype" : "VARCHAR(100)"
+    }, {
+      "name" : "\"ENGLISH_TITLE\"",
+      "isNullable" : true,
+      "datatype" : "CLOB"
+    }, {
+      "name" : "\"GERMAN_TITLE\"",
+      "isNullable" : false,
+      "datatype" : "CLOB"
+    }, {
+      "name" : "\"ITALIAN_TITLE\"",
+      "isNullable" : false,
+      "datatype" : "CLOB"
+    }, {
+      "name" : "\"ACCO_TYPE\"",
+      "isNullable" : false,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"GUEST_NB\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"GERMAN_DESCRIPTION\"",
+      "isNullable" : true,
+      "datatype" : "CLOB"
+    }, {
+      "name" : "\"ITALIAN_DESCRIPTION\"",
+      "isNullable" : true,
+      "datatype" : "CLOB"
+    }, {
+      "name" : "\"HOTEL\"",
+      "isNullable" : false,
+      "datatype" : "CLOB"
+    } ],
+    "name" : [ "\"source2_accommodation\"" ],
+    "otherNames" : [ [ "\"PUBLIC\"", "\"source2_accommodation\"" ], [ "\"DEST_INTERNSHIP\"", "\"PUBLIC\"", "\"source2_accommodation\"" ] ]
+  }, {
+    "uniqueConstraints" : [ {
+      "name" : "CONSTRAINT_C8",
+      "determinants" : [ "\"ID\"" ],
+      "isPrimaryKey" : true
+    } ],
+    "columns" : [ {
+      "name" : "\"ID\"",
+      "isNullable" : false,
+      "datatype" : "VARCHAR(250)"
+    }, {
+      "name" : "\"RATING\"",
+      "isNullable" : false,
+      "datatype" : "INTEGER"
+    } ],
+    "name" : [ "\"rating\"" ],
+    "otherNames" : [ [ "\"PUBLIC\"", "\"rating\"" ], [ "\"DEST_INTERNSHIP\"", "\"PUBLIC\"", "\"rating\"" ] ]
+  }, {
+    "uniqueConstraints" : [ {
+      "name" : "CONSTRAINT_4E",
+      "determinants" : [ "\"ID\"" ],
+      "isPrimaryKey" : true
+    } ],
+    "columns" : [ {
+      "name" : "\"ID\"",
+      "isNullable" : false,
+      "datatype" : "VARCHAR(100)"
+    }, {
+      "name" : "\"ENGLISH\"",
+      "isNullable" : false,
+      "datatype" : "CLOB"
+    }, {
+      "name" : "\"ITALIAN\"",
+      "isNullable" : false,
+      "datatype" : "CLOB"
+    }, {
+      "name" : "\"GERMAN\"",
+      "isNullable" : false,
+      "datatype" : "CLOB"
+    }, {
+      "name" : "\"HTYPE\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"LAT\"",
+      "isNullable" : false,
+      "datatype" : "DOUBLE"
+    }, {
+      "name" : "\"LONG\"",
+      "isNullable" : false,
+      "datatype" : "DOUBLE"
+    }, {
+      "name" : "\"ALT\"",
+      "isNullable" : false,
+      "datatype" : "DOUBLE"
+    }, {
+      "name" : "\"CAT\"",
+      "isNullable" : false,
+      "datatype" : "CLOB"
+    }, {
+      "name" : "\"MUN\"",
+      "isNullable" : false,
+      "datatype" : "INTEGER"
+    } ],
+    "name" : [ "\"source2_hotels\"" ],
+    "otherNames" : [ [ "\"PUBLIC\"", "\"source2_hotels\"" ], [ "\"DEST_INTERNSHIP\"", "\"PUBLIC\"", "\"source2_hotels\"" ] ]
+  }, {
+    "uniqueConstraints" : [ {
+      "name" : "CONSTRAINT_9",
+      "determinants" : [ "\"ID\"" ],
+      "isPrimaryKey" : true
+    } ],
+    "columns" : [ {
+      "name" : "\"ID\"",
+      "isNullable" : false,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"PERIOD\"",
+      "isNullable" : false,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"TIMESTAMP\"",
+      "isNullable" : false,
+      "datatype" : "TIMESTAMP"
+    }, {
+      "name" : "\"NAME\"",
+      "isNullable" : false,
+      "datatype" : "CLOB"
+    }, {
+      "name" : "\"DOUBLE_VALUE\"",
+      "isNullable" : false,
+      "datatype" : "DOUBLE"
+    }, {
+      "name" : "\"PLATFORM_ID\"",
+      "isNullable" : false,
+      "datatype" : "INTEGER"
+    } ],
+    "name" : [ "\"source3_weather_measurement\"" ],
+    "otherNames" : [ [ "\"PUBLIC\"", "\"source3_weather_measurement\"" ], [ "\"DEST_INTERNSHIP\"", "\"PUBLIC\"", "\"source3_weather_measurement\"" ] ]
+  }, {
+    "uniqueConstraints" : [ {
+      "name" : "CONSTRAINT_F8",
+      "determinants" : [ "\"ID\"" ],
+      "isPrimaryKey" : true
+    } ],
+    "columns" : [ {
+      "name" : "\"ID\"",
+      "isNullable" : false,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"X\"",
+      "isNullable" : false,
+      "datatype" : "CLOB"
+    }, {
+      "name" : "\"Y\"",
+      "isNullable" : false,
+      "datatype" : "CLOB"
+    }, {
+      "name" : "\"Z\"",
+      "isNullable" : false,
+      "datatype" : "CLOB"
+    } ],
+    "name" : [ "\"source2_xyz\"" ],
+    "otherNames" : [ [ "\"PUBLIC\"", "\"source2_xyz\"" ], [ "\"DEST_INTERNSHIP\"", "\"PUBLIC\"", "\"source2_xyz\"" ] ]
+  }, {
+    "uniqueConstraints" : [ {
+      "name" : "CONSTRAINT_F",
+      "determinants" : [ "\"ID\"" ],
+      "isPrimaryKey" : true
+    } ],
+    "columns" : [ {
+      "name" : "\"ID\"",
+      "isNullable" : false,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"X\"",
+      "isNullable" : false,
+      "datatype" : "CLOB"
+    }, {
+      "name" : "\"Y\"",
+      "isNullable" : false,
+      "datatype" : "CLOB"
+    }, {
+      "name" : "\"Z\"",
+      "isNullable" : false,
+      "datatype" : "CLOB"
+    } ],
+    "name" : [ "\"source1_xyz\"" ],
+    "otherNames" : [ [ "\"PUBLIC\"", "\"source1_xyz\"" ], [ "\"DEST_INTERNSHIP\"", "\"PUBLIC\"", "\"source1_xyz\"" ] ]
+  }, {
+    "uniqueConstraints" : [ {
+      "name" : "CONSTRAINT_C",
+      "determinants" : [ "\"M_ID\"" ],
+      "isPrimaryKey" : true
+    }, {
+      "name" : "CONSTRAINT_INDEX_C",
+      "determinants" : [ "\"ISTAT\"" ],
+      "isPrimaryKey" : false
+    } ],
+    "columns" : [ {
+      "name" : "\"M_ID\"",
+      "isNullable" : false,
+      "datatype" : "VARCHAR(100)"
+    }, {
+      "name" : "\"ISTAT\"",
+      "isNullable" : false,
+      "datatype" : "VARCHAR(100)"
+    }, {
+      "name" : "\"NAME_EN\"",
+      "isNullable" : false,
+      "datatype" : "CLOB"
+    }, {
+      "name" : "\"NAME_IT\"",
+      "isNullable" : false,
+      "datatype" : "CLOB"
+    }, {
+      "name" : "\"NAME_DE\"",
+      "isNullable" : false,
+      "datatype" : "CLOB"
+    }, {
+      "name" : "\"POPULATION\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"LATITUDE\"",
+      "isNullable" : true,
+      "datatype" : "DOUBLE"
+    }, {
+      "name" : "\"LONGITUDE\"",
+      "isNullable" : true,
+      "datatype" : "DOUBLE"
+    }, {
+      "name" : "\"ALTITUDE\"",
+      "isNullable" : true,
+      "datatype" : "DOUBLE"
+    } ],
+    "name" : [ "\"source1_municipalities\"" ],
+    "otherNames" : [ [ "\"PUBLIC\"", "\"source1_municipalities\"" ], [ "\"DEST_INTERNSHIP\"", "\"PUBLIC\"", "\"source1_municipalities\"" ] ]
+  }, {
+    "uniqueConstraints" : [ {
+      "name" : "CONSTRAINT_38",
+      "determinants" : [ "\"ID\"" ],
+      "isPrimaryKey" : true
+    } ],
+    "columns" : [ {
+      "name" : "\"ID\"",
+      "isNullable" : false,
+      "datatype" : "VARCHAR(250)"
+    }, {
+      "name" : "\"ASSOCIATED_VALUE\"",
+      "isNullable" : false,
+      "datatype" : "VARCHAR(250)"
+    } ],
+    "name" : [ "\"concat_test\"" ],
+    "otherNames" : [ [ "\"PUBLIC\"", "\"concat_test\"" ], [ "\"DEST_INTERNSHIP\"", "\"PUBLIC\"", "\"concat_test\"" ] ]
+  }, {
+    "uniqueConstraints" : [ {
+      "name" : "CONSTRAINT_6",
+      "determinants" : [ "\"R_ID\"" ],
+      "isPrimaryKey" : true
+    } ],
+    "columns" : [ {
+      "name" : "\"R_ID\"",
+      "isNullable" : false,
+      "datatype" : "VARCHAR(100)"
+    }, {
+      "name" : "\"NAME_EN\"",
+      "isNullable" : false,
+      "datatype" : "CLOB"
+    }, {
+      "name" : "\"NAME_DE\"",
+      "isNullable" : false,
+      "datatype" : "CLOB"
+    }, {
+      "name" : "\"NAME_IT\"",
+      "isNullable" : false,
+      "datatype" : "CLOB"
+    }, {
+      "name" : "\"ROOM_UNITS\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"R_TYPE\"",
+      "isNullable" : false,
+      "datatype" : "CLOB"
+    }, {
+      "name" : "\"CAPACITY\"",
+      "isNullable" : true,
+      "datatype" : "INTEGER"
+    }, {
+      "name" : "\"DESCRIPTION_DE\"",
+      "isNullable" : true,
+      "datatype" : "CLOB"
+    }, {
+      "name" : "\"DESCRIPTION_IT\"",
+      "isNullable" : true,
+      "datatype" : "CLOB"
+    }, {
+      "name" : "\"H_ID\"",
+      "isNullable" : true,
+      "datatype" : "CLOB"
+    } ],
+    "name" : [ "\"source1_rooms\"" ],
+    "otherNames" : [ [ "\"PUBLIC\"", "\"source1_rooms\"" ], [ "\"DEST_INTERNSHIP\"", "\"PUBLIC\"", "\"source1_rooms\"" ] ]
+  } ],
+  "metadata" : {
+    "dbmsProductName" : "H2",
+    "dbmsVersion" : "1.4.196 (2017-06-10)",
+    "driverName" : "H2 JDBC Driver",
+    "driverVersion" : "1.4.196 (2017-06-10)",
+    "quotationString" : "\"",
+    "extractionTime" : "2024-07-15T09:44:58"
+  }
+}

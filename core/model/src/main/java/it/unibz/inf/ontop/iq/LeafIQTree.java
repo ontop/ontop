@@ -1,8 +1,8 @@
 package it.unibz.inf.ontop.iq;
 
-import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
 import it.unibz.inf.ontop.iq.node.ExplicitVariableProjectionNode;
-import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
+import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.substitution.InjectiveSubstitution;
 
 public interface LeafIQTree extends IQTree, ExplicitVariableProjectionNode {
 
@@ -10,6 +10,5 @@ public interface LeafIQTree extends IQTree, ExplicitVariableProjectionNode {
     LeafIQTree getRootNode();
 
     @Override
-    LeafIQTree acceptNodeTransformer(HomogeneousQueryNodeTransformer transformer)
-            throws QueryNodeTransformationException;
+    LeafIQTree applyFreshRenaming(InjectiveSubstitution<Variable> renamingSubstitution);
 }

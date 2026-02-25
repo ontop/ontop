@@ -6,22 +6,17 @@ import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.dbschema.impl.DatabaseTableDefinition;
 import it.unibz.inf.ontop.dbschema.impl.OfflineMetadataProviderBuilder;
 import it.unibz.inf.ontop.exception.InvalidQueryException;
+import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.type.DBTermType;
+import it.unibz.inf.ontop.spec.sqlparser.exception.QueryParseException;
 import it.unibz.inf.ontop.spec.sqlparser.exception.UnsupportedSelectQueryException;
-import net.sf.jsqlparser.JSQLParserException;
-import org.junit.Test;
-
-import java.util.List;
+import org.junit.jupiter.api.Test;
 
 import static it.unibz.inf.ontop.spec.sqlparser.SQLTestingTools.*;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
-/**
- * Created by Roman Kontchakov on 01/11/2016.
- * -
- */
 public class SelectQueryParserTest {
 
     private NamedRelationDefinition TABLE_P, TABLE_Q, TABLE_R, TABLE_SP, TABLE_SQ;
@@ -33,13 +28,15 @@ public class SelectQueryParserTest {
     private static final String A3 = "A3";
     private static final String B1 = "B1";
     private static final String B2 = "B2";
+    private static final String B3 = "B3";
     private static final String C1 = "C1";
     private static final String C2 = "C2";
     private static final String C3 = "C3";
     private static final String D1 = "D1";
     private static final String D2 = "D2";
+    private static final String D3 = "D3";
 
-    private RAExpression parse(String sql) throws JSQLParserException, InvalidQueryException, UnsupportedSelectQueryException {
+    private RAExpression parse(String sql) throws QueryParseException, InvalidQueryException, UnsupportedSelectQueryException {
 
         OfflineMetadataProviderBuilder builder = createMetadataProviderBuilder();
         integerDBType = builder.getDBTypeFactory().getDBLargeIntegerType();
@@ -79,201 +76,273 @@ public class SelectQueryParserTest {
         return parser.parse(sql);
     }
 
-
     @Test
     public void inner_join_on_same_table_test() throws Exception {
         RAExpression re = parse("SELECT p1.A, p2.B FROM P p1 INNER JOIN P p2 on p1.A = p2.A ");
-        System.out.println(re);
 
-        assertEquals(ImmutableList.of(eqOf(A1, A2)), re.getFilterAtoms());
-        assertMatches(ImmutableList.of(dataAtomOf(TABLE_P, A1, B1), dataAtomOf(TABLE_P, A2, B2)), re.getDataAtoms());
+        assertEquals(join(eqOf(A1, A2), dataAtomOf(TABLE_P, A1, B1), dataAtomOf(TABLE_P, A2, B2)), re.getIQTree());
+    }
+
+    private IQTree join(ImmutableExpression exp, IQTree tree1, IQTree tree2) {
+        return IQ_FACTORY.createUnaryIQTree(IQ_FACTORY.createFilterNode(exp),
+                IQ_FACTORY.createNaryIQTree(IQ_FACTORY.createInnerJoinNode(),
+                        ImmutableList.of(tree1, tree2)));
     }
 
 
-    @Test(expected = InvalidQueryException.class)
+    @Test
     public void inner_join_on_inner_join_ambiguity_test() throws Exception {
         // common column name "A" appears more than once in left table
-        parse("SELECT A, C FROM P INNER JOIN Q on P.A =  Q.A NATURAL JOIN R");
+        var ex = assertThrows(InvalidQueryException.class, () ->
+                parse("SELECT A, C FROM P INNER JOIN Q on P.A = Q.A NATURAL JOIN R"));
+
+        assertEquals("Attribute A is ambiguous with attributes", ex.getMessage().substring(0, ex.getMessage().indexOf(": {")));
     }
 
 
-    @Test(expected = InvalidQueryException.class)
+    @Test
     public void inner_join_on_inner_join_ambiguity2_test() throws Exception {
         // column reference "a" is ambiguous
-        RAExpression re = parse("SELECT A, P.B, R.C, D FROM P NATURAL JOIN Q INNER JOIN R on Q.C =  R.C");
+        var ex = assertThrows(InvalidQueryException.class, () ->
+                parse("SELECT A, P.B, R.C, D FROM P NATURAL JOIN Q INNER JOIN R on Q.C = R.C"));
+
+        assertEquals("Unable to find attribute A (available attributes are [P.A, Q.A, R.A, P.B, R.B, Q.C, R.C, D, R.D]) (from A)", ex.getMessage());
     }
 
-    @Test(expected = InvalidQueryException.class)
+    @Test
     public void inner_join_on_inner_join_test() throws Exception {
-        // common column name "A" appears more than once in left table
-        parse("SELECT A, P.B, R.C, D FROM P NATURAL JOIN Q INNER JOIN R on Q.C =  R.C");
+        RAExpression re = parse("SELECT P.A, P.B, R.C, D FROM P NATURAL JOIN Q INNER JOIN R on Q.C = R.C");
+
+        assertEquals(join(eqOf(C2, C3),
+                        join(eqOf(A1, A2), dataAtomOf(TABLE_P, A1, B1), dataAtomOf(TABLE_Q, A2, C2)),
+                dataAtomOf(TABLE_R, A3, B3, C3, D3)),
+                re.getIQTree());
+    }
+
+    @Test
+    public void inner_join_on_inner_join_test2() throws Exception {
+        RAExpression re = parse("SELECT Q.A, P.B, R.C, D FROM P NATURAL JOIN Q INNER JOIN R on Q.C = R.C");
+
+        assertEquals(join(eqOf(C2, C3),
+                        join(eqOf(A1, A2), dataAtomOf(TABLE_P, A1, B1), dataAtomOf(TABLE_Q, A2, C2)),
+                        dataAtomOf(TABLE_R, A3, B3, C3, D3)),
+                re.getIQTree());
     }
 
     @Test
     public void subjoin_test() throws Exception {
         RAExpression re = parse("SELECT S.A, S.C FROM R JOIN (P NATURAL JOIN Q) AS S ON R.A = S.A");
-        System.out.println(re);
 
-        assertEquals(ImmutableList.of(eqOf(A2, A3), eqOf(A1, A2)), re.getFilterAtoms());
-        assertMatches(ImmutableList.of(dataAtomOf(TABLE_R, A1, B1, C1, D1),
-                dataAtomOf(TABLE_P, A2, B2), dataAtomOf(TABLE_Q, A3, C3)), re.getDataAtoms());
+        assertEquals(join(eqOf(A1, A2), dataAtomOf(TABLE_R, A1, B1, C1, D1),
+                        join(eqOf(A2, A3), dataAtomOf(TABLE_P, A2, B2), dataAtomOf(TABLE_Q, A3, C3))),
+                re.getIQTree());
     }
 
     @Test
     public void select_one_no_from() throws Exception {
         RAExpression re = parse("SELECT 1");
 
-        assertEquals(ImmutableMap.of(), re.getAttributes().asMap());
-        assertEquals(ImmutableList.of(), re.getFilterAtoms());
-        assertMatches(ImmutableList.of(), re.getDataAtoms());
+        assertEquals(RAExpressionAttributes.ofUnqualifiedAttributesMap(ImmutableMap.of()), re.getAttributes());
+        assertEquals(IQ_FACTORY.createTrueNode(), re.getIQTree());
     }
 
     @Test
     public void select_one_no_from_alias() throws Exception {
         RAExpression re = parse("SELECT 1 AS A");
 
-        assertEquals(ImmutableMap.of(new QualifiedAttributeID(null, idfac.createAttributeID("A")), TERM_FACTORY.getDBConstant("1", integerDBType)), re.getAttributes().asMap());
-        assertEquals(ImmutableList.of(), re.getFilterAtoms());
-        assertMatches(ImmutableList.of(), re.getDataAtoms());
+        assertEquals(RAExpressionAttributes.ofUnqualifiedAttributesMap(ImmutableMap.of(idfac.createAttributeID("A"), SQLTestingTools.TERM_FACTORY.getDBConstant("1", integerDBType))), re.getAttributes());
+        assertEquals(IQ_FACTORY.createTrueNode(), re.getIQTree());
     }
 
     @Test
     public void select_one_from() throws Exception {
         RAExpression re = parse("SELECT 1 FROM Q");
-        assertEquals(ImmutableMap.of(), re.getAttributes().asMap());
-        assertEquals(ImmutableList.of(), re.getFilterAtoms());
-        assertMatches(ImmutableList.of(dataAtomOf(TABLE_Q, A1, C1)), re.getDataAtoms());
+
+        assertEquals(RAExpressionAttributes.ofUnqualifiedAttributesMap(ImmutableMap.of()), re.getAttributes());
+        assertEquals(dataAtomOf(TABLE_Q, A1, C1), re.getIQTree());
     }
 
     @Test
     public void select_one_from_alias() throws Exception {
         RAExpression re = parse("SELECT 1 AS A FROM Q");
 
-        assertEquals(ImmutableMap.of(new QualifiedAttributeID(null, idfac.createAttributeID("A")), TERM_FACTORY.getDBConstant("1", integerDBType)), re.getAttributes().asMap());
-        assertEquals(ImmutableList.of(), re.getFilterAtoms());
-        assertMatches(ImmutableList.of(dataAtomOf(TABLE_Q, A1, C1)), re.getDataAtoms());
+        assertEquals(RAExpressionAttributes.ofUnqualifiedAttributesMap(ImmutableMap.of(idfac.createAttributeID("A"), SQLTestingTools.TERM_FACTORY.getDBConstant("1", integerDBType))), re.getAttributes());
+        assertEquals(dataAtomOf(TABLE_Q, A1, C1), re.getIQTree());
     }
 
-    @Test(expected = InvalidQueryException.class)
+    @Test
     public void select_missing_column_test2() throws Exception {
-        parse("SELECT R FROM Q");
+        var ex = assertThrows(InvalidQueryException.class, () ->
+                parse("SELECT R FROM Q"));
+
+        assertEquals("Unable to find attribute R (available attributes are [A, Q.A, C, Q.C]) (from R)", ex.getMessage());
     }
 
     @Test
     public void select_natural_join_schema() throws Exception {
         RAExpression re = parse("SELECT A FROM S.PP NATURAL JOIN S.QQ");
-        System.out.println(re);
 
-        assertEquals(ImmutableList.of(eqOf(A1, A2)), re.getFilterAtoms());
-        assertMatches(ImmutableList.of(dataAtomOf(TABLE_SP, A1, B1), dataAtomOf(TABLE_SQ, A2, C2)), re.getDataAtoms());
+        assertEquals(join(eqOf(A1, A2), dataAtomOf(TABLE_SP, A1, B1), dataAtomOf(TABLE_SQ, A2, C2)), re.getIQTree());
     }
 
-    @Test(expected = UnsupportedSelectQueryException.class)
+    @Test
     public void select_apply() throws Exception {
-        RAExpression re = parse("SELECT A FROM P APPLY Q");
+        var ex = assertThrows(UnsupportedSelectQueryException.class, () ->
+                parse("SELECT A FROM P APPLY Q"));
+
+        assertEquals("APPLY is not supported APPLY Q", ex.getMessage());
     }
 
-    @Test(expected = UnsupportedSelectQueryException.class)
+    @Test
     public void select_cross_apply() throws Exception {
-        RAExpression re = parse("SELECT A FROM P CROSS APPLY Q");
+        var ex = assertThrows(UnsupportedSelectQueryException.class, () ->
+                parse("SELECT A FROM P CROSS APPLY Q"));
+
+        assertEquals("APPLY is not supported CROSS APPLY Q", ex.getMessage());
     }
 
-    @Test(expected = UnsupportedSelectQueryException.class) // is valid in MS SQL Server
+    @Test // is valid in MS SQL Server
     public void select_outer_apply() throws Exception {
-        RAExpression re = parse("SELECT A FROM P OUTER APPLY Q");
+        var ex = assertThrows(UnsupportedSelectQueryException.class, () ->
+                parse("SELECT A FROM P OUTER APPLY Q"));
+
+        assertEquals("APPLY is not supported OUTER APPLY Q", ex.getMessage());
     }
 
-    @Test(expected = UnsupportedSelectQueryException.class)
+    @Test
     public void select_straight() throws Exception {
-        RAExpression re = parse("SELECT A FROM P STRAIGHT_JOIN Q");
+        var ex = assertThrows(UnsupportedSelectQueryException.class, () ->
+                parse("SELECT A FROM P STRAIGHT_JOIN Q"));
+
+        assertEquals("STRAIGHT_JOIN is not supported STRAIGHT_JOIN Q", ex.getMessage());
     }
 
-    @Test(expected = UnsupportedSelectQueryException.class)
+    @Test
     public void select_straight_on() throws Exception {
-        RAExpression re = parse("SELECT A FROM P STRAIGHT_JOIN Q ON (P.A = Q.A)");
-    }
+        var ex = assertThrows(UnsupportedSelectQueryException.class, () ->
+                parse("SELECT A FROM P STRAIGHT_JOIN Q ON (P.A = Q.A)"));
 
-    @Test(expected = UnsupportedSelectQueryException.class)
+        assertEquals("STRAIGHT_JOIN is not supported STRAIGHT_JOIN Q ON (P.A = Q.A)", ex.getMessage());    }
+
+    @Test
     public void select_straight_using() throws Exception {
-        RAExpression re = parse("SELECT A FROM P STRAIGHT_JOIN Q USING (A)");
+        var ex = assertThrows(UnsupportedSelectQueryException.class, () ->
+                parse("SELECT A FROM P STRAIGHT_JOIN Q USING (A)"));
+
+        assertEquals("STRAIGHT_JOIN is not supported STRAIGHT_JOIN Q USING (A)", ex.getMessage());
     }
 
-    @Test(expected = UnsupportedSelectQueryException.class)
+    @Test
     public void select_within() throws Exception {
-        RAExpression re = parse("SELECT A FROM P INNER JOIN Q WITHIN (1 HOURS) ON P.A = Q.A");
+        var ex = assertThrows(UnsupportedSelectQueryException.class, () ->
+                parse("SELECT A FROM P INNER JOIN Q WITHIN (1 HOURS) ON P.A = Q.A"));
+
+        assertEquals("WITHIN WINDOW is not supported INNER JOIN Q WITHIN (1 HOURS) ON P.A = Q.A", ex.getMessage());
     }
 
-    @Test(expected = UnsupportedSelectQueryException.class)
+    @Test
     public void select_oracle_hint() throws Exception {
-        RAExpression re = parse("SELECT /*+ value  */ A FROM P");
+        var ex = assertThrows(UnsupportedSelectQueryException.class, () ->
+                parse("SELECT /*+ value  */ A FROM P"));
+
+        assertEquals("Oracle hints are not supported SELECT /*+ value */ A FROM P", ex.getMessage());
     }
 
-    @Test(expected = UnsupportedSelectQueryException.class)
+    @Test
     public void select_skip() throws Exception {
-        RAExpression re = parse("SELECT SKIP 1 A FROM P");
+        var ex = assertThrows(UnsupportedSelectQueryException.class, () ->
+                parse("SELECT SKIP 1 A FROM P"));
+
+        assertEquals("SKIP / FIRST are not supported SELECT SKIP 1 A FROM P", ex.getMessage());
     }
 
-    @Test(expected = UnsupportedSelectQueryException.class)
+    @Test
     public void select_first() throws Exception {
-        RAExpression re = parse("SELECT FIRST 10 A FROM P");
+        var ex = assertThrows(UnsupportedSelectQueryException.class, () ->
+                parse("SELECT FIRST 10 A FROM P"));
+
+        assertEquals("SKIP / FIRST are not supported SELECT FIRST 10 A FROM P", ex.getMessage());
     }
 
-    @Test(expected = UnsupportedSelectQueryException.class)
+    @Test
     public void select_top() throws Exception {
-        RAExpression re = parse("SELECT TOP 10 A FROM P");
+        var ex = assertThrows(UnsupportedSelectQueryException.class, () ->
+                parse("SELECT TOP 10 A FROM P"));
+
+        assertEquals("TOP is not supported SELECT TOP 10 A FROM P", ex.getMessage());
     }
 
-    @Test(expected = UnsupportedSelectQueryException.class)
+    @Test
     public void select_sql_no_cache() throws Exception {
-        RAExpression re = parse("SELECT SQL_NO_CACHE A FROM P");
+        var ex = assertThrows(UnsupportedSelectQueryException.class, () ->
+                parse("SELECT SQL_NO_CACHE A FROM P"));
+
+        assertEquals("MySQL SQL_NO_CACHE/SQL_CACHE is not supported SELECT SQL_NO_CACHE A FROM P", ex.getMessage());
     }
 
-    @Test(expected = UnsupportedSelectQueryException.class)
+    @Test
     public void select_sql_cal_found_rows() throws Exception {
-        RAExpression re = parse("SELECT SQL_CALC_FOUND_ROWS A FROM P");
+        var ex = assertThrows(UnsupportedSelectQueryException.class, () ->
+                parse("SELECT SQL_CALC_FOUND_ROWS A FROM P"));
+
+        assertEquals("MySQL SQL_CALC_FOUND_ROWS is not supported SELECT SQL_CALC_FOUND_ROWS A FROM P", ex.getMessage());
     }
 
     // JSQLParser apparently allows more weird combinations like this
-    @Test(expected = InvalidQueryException.class)
+    @Test
     public void select_left_simple() throws Exception {
-        RAExpression re = parse("SELECT * FROM P LEFT, Q");
-        System.out.println(re);
+        var ex = assertThrows(InvalidQueryException.class, () ->
+                parse("SELECT * FROM P LEFT, Q"));
+
+        assertEquals("Invalid simple join (from Q)", ex.getMessage());
     }
 
-    @Test(expected = InvalidQueryException.class)
+    @Test
     public void select_simple_on() throws Exception {
-        RAExpression re = parse("SELECT * FROM P, Q ON P.A = Q.A");
-        System.out.println(re);
+        var ex = assertThrows(InvalidQueryException.class, () ->
+                parse("SELECT * FROM P, Q ON P.A = Q.A"));
+
+        assertEquals("Invalid simple join (from Q ON P.A = Q.A)", ex.getMessage());
     }
 
-    @Test(expected = InvalidQueryException.class)
+    @Test
     public void select_simple_using() throws Exception {
-        RAExpression re = parse("SELECT * FROM P, Q USING (A)");
-        System.out.println(re);
+        var ex = assertThrows(InvalidQueryException.class, () ->
+                parse("SELECT * FROM P, Q USING (A)"));
+
+        assertEquals("Invalid simple join (from Q USING (A))", ex.getMessage());
     }
 
-    @Test(expected = UnsupportedSelectQueryException.class)
+    @Test
     public void select_left_semi_join_on() throws Exception {
-        RAExpression re = parse("SELECT * FROM P LEFT SEMI JOIN Q ON P.A = Q.A");
-        System.out.println(re);
+        var ex = assertThrows(UnsupportedSelectQueryException.class, () ->
+                parse("SELECT * FROM P LEFT SEMI JOIN Q ON P.A = Q.A"));
+
+        assertEquals("LEFT/RIGHT/FULL OUTER JOINs are not supported LEFT SEMI JOIN Q ON P.A = Q.A", ex.getMessage());
     }
 
-    @Test(expected = InvalidQueryException.class)
+    @Test
     public void select_left_semi_join_using() throws Exception {
-        RAExpression re = parse("SELECT * FROM P LEFT SEMI JOIN Q USING (A)");
-        System.out.println(re);
+        var ex = assertThrows(InvalidQueryException.class, () ->
+                parse("SELECT * FROM P LEFT SEMI JOIN Q USING (A)"));
+
+        assertEquals("Invalid SEMI JOIN (from LEFT SEMI JOIN Q USING (A))", ex.getMessage());
     }
 
-    @Test(expected = UnsupportedSelectQueryException.class)
+    @Test
     public void select_column_alias() throws Exception {
-        RAExpression re = parse("SELECT * FROM P AS PP(AA, BB)");
-        System.out.println(re);
+        var ex = assertThrows(UnsupportedSelectQueryException.class, () ->
+                parse("SELECT * FROM P AS PP(AA, BB)"));
+
+        assertEquals("Alias columns are not supported  AS PP(AA, BB)", ex.getMessage());
     }
 
-    @Test(expected = UnsupportedSelectQueryException.class)
+    @Test
     public void select_from_values() throws Exception {
-        RAExpression re = parse("SELECT * FROM (VALUES(1,2,3)) QQ(A,B,C)");
-        System.out.println(re);
+        var ex = assertThrows(UnsupportedSelectQueryException.class, () ->
+                parse("SELECT * FROM (VALUES(1,2,3)) QQ(A,B,C)"));
+
+        assertEquals("ValuesLists are not supported (VALUES (1, 2, 3)) QQ(A, B, C)", ex.getMessage());
     }
 
 
@@ -284,14 +353,16 @@ public class SelectQueryParserTest {
     public void select_simple_join() throws Exception {
         RAExpression re = parse("SELECT * FROM P, Q");
 
-        assertEquals(ImmutableList.of(), re.getFilterAtoms());
-        assertMatches(ImmutableList.of(dataAtomOf(TABLE_P, A1, B1), dataAtomOf(TABLE_Q, A2, C2)), re.getDataAtoms());
+        assertEquals(IQ_FACTORY.createNaryIQTree(IQ_FACTORY.createInnerJoinNode(), ImmutableList.of(dataAtomOf(TABLE_P, A1, B1), dataAtomOf(TABLE_Q, A2, C2))), re.getIQTree());
     }
 
-    @Test(expected = UnsupportedSelectQueryException.class)
+    @Test
     public void select_simple_outer_join() throws Exception {
         // special case in JSQLParser - no clue what it may even mean
-        RAExpression re = parse("SELECT * FROM P, OUTER Q");
+        var ex = assertThrows(UnsupportedSelectQueryException.class, () ->
+                parse("SELECT * FROM P, OUTER Q"));
+
+        assertEquals("Simple OUTER JOINs are not supported OUTER Q", ex.getMessage());
     }
 
     // ----------------------------------------------------------
@@ -300,273 +371,392 @@ public class SelectQueryParserTest {
     @Test
     public void select_natural_join() throws Exception {
         RAExpression re = parse("SELECT A FROM P NATURAL JOIN Q");
-        System.out.println(re);
 
-        assertEquals(ImmutableList.of(eqOf(A1, A2)), re.getFilterAtoms());
-        assertMatches(ImmutableList.of(dataAtomOf(TABLE_P, A1, B1), dataAtomOf(TABLE_Q, A2, C2)), re.getDataAtoms());
+        assertEquals(join(eqOf(A1, A2), dataAtomOf(TABLE_P, A1, B1), dataAtomOf(TABLE_Q, A2, C2)), re.getIQTree());
     }
 
     @Test
     public void select_cross_join() throws Exception {
         RAExpression re = parse("SELECT * FROM P CROSS JOIN Q");
-        assertEquals(ImmutableList.of(), re.getFilterAtoms());
-        assertMatches(ImmutableList.of(dataAtomOf(TABLE_P, A1, B1), dataAtomOf(TABLE_Q, A2, C2)), re.getDataAtoms());
+
+        assertEquals(IQ_FACTORY.createNaryIQTree(IQ_FACTORY.createInnerJoinNode(), ImmutableList.of(dataAtomOf(TABLE_P, A1, B1), dataAtomOf(TABLE_Q, A2, C2))), re.getIQTree());
     }
 
     @Test
     public void select_join_on() throws Exception {
         RAExpression re = parse("SELECT * FROM P JOIN Q ON P.A = Q.A");
 
-        assertEquals(ImmutableList.of(eqOf(A1, A2)), re.getFilterAtoms());
-        assertMatches(ImmutableList.of(dataAtomOf(TABLE_P, A1, B1), dataAtomOf(TABLE_Q, A2, C2)), re.getDataAtoms());
+        assertEquals(join(eqOf(A1, A2), dataAtomOf(TABLE_P, A1, B1), dataAtomOf(TABLE_Q, A2, C2)), re.getIQTree());
     }
 
     @Test
     public void select_inner_join_on() throws Exception {
         RAExpression re = parse("SELECT * FROM P INNER JOIN Q ON P.A = Q.A");
 
-        assertEquals(ImmutableList.of(eqOf(A1, A2)), re.getFilterAtoms());
-        assertMatches(ImmutableList.of(dataAtomOf(TABLE_P, A1, B1), dataAtomOf(TABLE_Q, A2, C2)), re.getDataAtoms());
+        assertEquals(join(eqOf(A1, A2), dataAtomOf(TABLE_P, A1, B1), dataAtomOf(TABLE_Q, A2, C2)), re.getIQTree());
     }
 
     @Test
     public void select_join_using() throws Exception {
         RAExpression re = parse("SELECT * FROM P JOIN Q USING(A)");
 
-        assertEquals(ImmutableList.of(eqOf(A1, A2)), re.getFilterAtoms());
-        assertMatches(ImmutableList.of(dataAtomOf(TABLE_P, A1, B1), dataAtomOf(TABLE_Q, A2, C2)), re.getDataAtoms());
+        assertEquals(join(eqOf(A1, A2), dataAtomOf(TABLE_P, A1, B1), dataAtomOf(TABLE_Q, A2, C2)), re.getIQTree());
     }
 
     @Test
     public void select_inner_join_using() throws Exception {
         RAExpression re = parse("SELECT * FROM P INNER JOIN Q USING(A)");
 
-        assertEquals(ImmutableList.of(eqOf(A1, A2)), re.getFilterAtoms());
-        assertMatches(ImmutableList.of(dataAtomOf(TABLE_P, A1, B1), dataAtomOf(TABLE_Q, A2, C2)), re.getDataAtoms());
+        assertEquals(join(eqOf(A1, A2), dataAtomOf(TABLE_P, A1, B1), dataAtomOf(TABLE_Q, A2, C2)), re.getIQTree());
     }
 
 
-    @Test(expected = UnsupportedSelectQueryException.class)
+    @Test
     public void select_outer_join_using() throws Exception {
-        parse("SELECT * FROM P OUTER JOIN Q USING(A)");
+        var ex = assertThrows(UnsupportedSelectQueryException.class, () ->
+                parse("SELECT * FROM P OUTER JOIN Q USING(A)"));
+
+        assertEquals("LEFT/RIGHT/FULL OUTER JOINs are not supported OUTER JOIN Q USING (A)", ex.getMessage());
     }
 
-    @Test(expected = UnsupportedSelectQueryException.class)
+    @Test
     public void select_outer_join_on() throws Exception {
-        parse("SELECT * FROM P OUTER JOIN Q ON P.A = Q.A");
+        var ex = assertThrows(UnsupportedSelectQueryException.class, () ->
+                parse("SELECT * FROM P OUTER JOIN Q ON P.A = Q.A"));
+
+        assertEquals("LEFT/RIGHT/FULL OUTER JOINs are not supported OUTER JOIN Q ON P.A = Q.A", ex.getMessage());
     }
 
-    // Invalid queries
-    @Test(expected = InvalidQueryException.class)
+    @Test
     public void select_outer_join() throws Exception {
-        parse("SELECT * FROM P OUTER JOIN Q");
+        var ex = assertThrows(InvalidQueryException.class, () ->
+                parse("SELECT * FROM P OUTER JOIN Q"));
+
+        assertEquals("[INNER|OUTER] JOIN requires either ON or USING (from OUTER JOIN Q)", ex.getMessage());
     }
 
 
     // -----------------------------------------------
     // invalid combinations for JSQLParser
 
-    @Test(expected = JSQLParserException.class)
+    @Test
     public void select_natural_outer_join() throws Exception {
-        parse("SELECT * FROM P NATURAL OUTER JOIN Q");
+        var ex = assertThrows(QueryParseException.class, () ->
+                parse("SELECT * FROM P NATURAL OUTER JOIN Q"));
+
+        assertTrue(ex.getOriginalMessage().startsWith("Encountered unexpected token: \"NATURAL\""));
     }
 
-    @Test(expected = JSQLParserException.class)
+    @Test
     public void select_cross_outer_join() throws Exception {
-        parse("SELECT * FROM P CROSS OUTER JOIN Q");
+        var ex = assertThrows(QueryParseException.class, () ->
+                parse("SELECT * FROM P CROSS OUTER JOIN Q"));
+
+        assertTrue(ex.getOriginalMessage().startsWith("Encountered unexpected token: \"CROSS\""));
     }
 
-    @Test(expected = JSQLParserException.class)
+    @Test
     public void select_natural_inner_join() throws Exception {
-        parse("SELECT * FROM P NATURAL INNER JOIN Q");
+        var ex = assertThrows(QueryParseException.class, () ->
+                parse("SELECT * FROM P NATURAL INNER JOIN Q"));
+
+        assertTrue(ex.getOriginalMessage().startsWith("Encountered unexpected token: \"NATURAL\""));
     }
 
-    @Test(expected = JSQLParserException.class)
+    @Test
     public void select_cross_inner_join() throws Exception {
-        parse("SELECT * FROM P CROSS INNER JOIN Q");
+        var ex = assertThrows(QueryParseException.class, () ->
+                parse("SELECT * FROM P CROSS INNER JOIN Q"));
+
+        assertTrue(ex.getOriginalMessage().startsWith("Encountered unexpected token: \"CROSS\""));
     }
 
-    @Test(expected = JSQLParserException.class)
+    @Test
     public void select_right_inner_join() throws Exception {
-        parse("SELECT * FROM P RIGHT INNER JOIN Q");
+        var ex = assertThrows(QueryParseException.class, () ->
+                parse("SELECT * FROM P RIGHT INNER JOIN Q"));
+
+        assertTrue(ex.getOriginalMessage().startsWith("Encountered unexpected token: \"RIGHT\""));
     }
 
-    @Test(expected = JSQLParserException.class)
+    @Test
     public void select_full_inner_join() throws Exception {
-        parse("SELECT * FROM P FULL INNER JOIN Q");
+        var ex = assertThrows(QueryParseException.class, () ->
+                parse("SELECT * FROM P FULL INNER JOIN Q"));
+
+        assertTrue(ex.getOriginalMessage().startsWith("Encountered unexpected token: \"FULL\""));
     }
 
-    @Test(expected = JSQLParserException.class)
+    @Test
     public void select_left_inner_join() throws Exception {
-        parse("SELECT * FROM P LEFT INNER JOIN Q");
+        var ex = assertThrows(QueryParseException.class, () ->
+                parse("SELECT * FROM P LEFT INNER JOIN Q"));
+
+        assertTrue(ex.getOriginalMessage().startsWith("Encountered unexpected token: \"LEFT\""));
     }
 
-    @Test(expected = JSQLParserException.class)
+    @Test
     public void select_natural_outer_join_on() throws Exception {
-        parse("SELECT * FROM P NATURAL OUTER JOIN Q ON P.A = Q.A");
+        var ex = assertThrows(QueryParseException.class, () ->
+                parse("SELECT * FROM P NATURAL OUTER JOIN Q ON P.A = Q.A"));
+
+        assertTrue(ex.getOriginalMessage().startsWith("Encountered unexpected token: \"NATURAL\""));
     }
 
-    @Test(expected = JSQLParserException.class)
+    @Test
     public void select_cross_outer_join_on() throws Exception {
-        parse("SELECT * FROM P CROSS OUTER JOIN Q ON P.A = Q.A");
+        var ex = assertThrows(QueryParseException.class, () ->
+                parse("SELECT * FROM P CROSS OUTER JOIN Q ON P.A = Q.A"));
+
+        assertTrue(ex.getOriginalMessage().startsWith("Encountered unexpected token: \"CROSS\""));
     }
 
-    @Test(expected = JSQLParserException.class)
+    @Test
     public void select_natural_inner_join_on() throws Exception {
-        parse("SELECT * FROM P NATURAL INNER JOIN Q ON P.A = Q.A");
+        var ex = assertThrows(QueryParseException.class, () ->
+                parse("SELECT * FROM P NATURAL INNER JOIN Q ON P.A = Q.A"));
+
+        assertTrue(ex.getOriginalMessage().startsWith("Encountered unexpected token: \"NATURAL\""));
     }
 
-    @Test(expected = JSQLParserException.class)
+    @Test
     public void select_cross_inner_join_on() throws Exception {
-        parse("SELECT * FROM P CROSS INNER JOIN Q ON P.A = Q.A");
+        var ex = assertThrows(QueryParseException.class, () ->
+                parse("SELECT * FROM P CROSS INNER JOIN Q ON P.A = Q.A"));
+
+        assertTrue(ex.getOriginalMessage().startsWith("Encountered unexpected token: \"CROSS\""));
     }
 
-    @Test(expected = JSQLParserException.class)
+    @Test
     public void select_right_inner_join_on() throws Exception {
-        parse("SELECT * FROM P RIGHT INNER JOIN Q ON P.A = Q.A");
+        var ex = assertThrows(QueryParseException.class, () ->
+                parse("SELECT * FROM P RIGHT INNER JOIN Q ON P.A = Q.A"));
+
+        assertTrue(ex.getOriginalMessage().startsWith("Encountered unexpected token: \"RIGHT\""));
     }
 
-    @Test(expected = JSQLParserException.class)
+    @Test
     public void select_full_inner_join_on() throws Exception {
-        parse("SELECT * FROM P FULL INNER JOIN Q ON P.A = Q.A");
+        var ex = assertThrows(QueryParseException.class, () ->
+                parse("SELECT * FROM P FULL INNER JOIN Q ON P.A = Q.A"));
+
+        assertTrue(ex.getOriginalMessage().startsWith("Encountered unexpected token: \"FULL\""));
     }
 
-    @Test(expected = JSQLParserException.class)
+    @Test
     public void select_left_inner_join_on() throws Exception {
-        parse("SELECT * FROM P LEFT INNER JOIN Q ON P.A = Q.A");
+        var ex = assertThrows(QueryParseException.class, () ->
+                parse("SELECT * FROM P LEFT INNER JOIN Q ON P.A = Q.A"));
+
+        assertTrue(ex.getOriginalMessage().startsWith("Encountered unexpected token: \"LEFT\""));
     }
 
-    @Test(expected = JSQLParserException.class)
+    @Test
     public void select_natural_outer_join_using() throws Exception {
-        parse("SELECT * FROM P NATURAL OUTER JOIN Q USING(A)");
+        var ex = assertThrows(QueryParseException.class, () ->
+                parse("SELECT * FROM P NATURAL OUTER JOIN Q USING(A)"));
+
+        assertTrue(ex.getOriginalMessage().startsWith("Encountered unexpected token: \"NATURAL\""));
     }
 
-    @Test(expected = JSQLParserException.class)
+    @Test
     public void select_cross_outer_join_using() throws Exception {
-        parse("SELECT * FROM P CROSS OUTER JOIN Q USING(A)");
+        var ex = assertThrows(QueryParseException.class, () ->
+                parse("SELECT * FROM P CROSS OUTER JOIN Q USING(A)"));
+
+        assertTrue(ex.getOriginalMessage().startsWith("Encountered unexpected token: \"CROSS\""));
     }
 
-    @Test(expected = JSQLParserException.class)
+    @Test
     public void select_natural_inner_join_using() throws Exception {
-        parse("SELECT * FROM P NATURAL INNER JOIN Q USING(A)");
+        var ex = assertThrows(QueryParseException.class, () ->
+                parse("SELECT * FROM P NATURAL INNER JOIN Q USING(A)"));
+
+        assertTrue(ex.getOriginalMessage().startsWith("Encountered unexpected token: \"NATURAL\""));
     }
 
-    @Test(expected = JSQLParserException.class)
+    @Test
     public void select_cross_inner_join_using() throws Exception {
-        parse("SELECT * FROM P CROSS INNER JOIN Q USING(A)");
+        var ex = assertThrows(QueryParseException.class, () ->
+                parse("SELECT * FROM P CROSS INNER JOIN Q USING(A)"));
+
+        assertTrue(ex.getOriginalMessage().startsWith("Encountered unexpected token: \"CROSS\""));
     }
 
-    @Test(expected = JSQLParserException.class)
+    @Test
     public void select_right_inner_join_using() throws Exception {
-        parse("SELECT * FROM P RIGHT INNER JOIN Q USING(A)");
+        var ex = assertThrows(QueryParseException.class, () ->
+                parse("SELECT * FROM P RIGHT INNER JOIN Q USING(A)"));
+
+        assertTrue(ex.getOriginalMessage().startsWith("Encountered unexpected token: \"RIGHT\""));
     }
 
-    @Test(expected = JSQLParserException.class)
+    @Test
     public void select_full_inner_join_using() throws Exception {
-        parse("SELECT * FROM P FULL INNER JOIN Q USING(A)");
+        var ex = assertThrows(QueryParseException.class, () ->
+                parse("SELECT * FROM P FULL INNER JOIN Q USING(A)"));
+
+        assertTrue(ex.getOriginalMessage().startsWith("Encountered unexpected token: \"FULL\""));
     }
 
-    @Test(expected = JSQLParserException.class)
+    @Test
     public void select_left_inner_join_using() throws Exception {
-        parse("SELECT * FROM P LEFT INNER JOIN Q USING(A)");
+        var ex = assertThrows(QueryParseException.class, () ->
+                parse("SELECT * FROM P LEFT INNER JOIN Q USING(A)"));
+
+        assertTrue(ex.getOriginalMessage().startsWith("Encountered unexpected token: \"LEFT\""));
     }
 
 
     // -------------------------------------------------------
     // invalid combinations of join modifiers (see SQL standard)
 
-    @Test(expected = InvalidQueryException.class)
+    @Test
     public void select_join() throws Exception {
-        parse("SELECT * FROM P JOIN Q"); // requires on or using
+        var ex = assertThrows(InvalidQueryException.class, () ->
+                parse("SELECT * FROM P JOIN Q"));
+
+        assertEquals("[INNER|OUTER] JOIN requires either ON or USING (from JOIN Q)", ex.getMessage());
     }
 
-    @Test(expected = InvalidQueryException.class)
+    @Test
     public void select_right_join() throws Exception {
-        parse("SELECT * FROM P RIGHT JOIN Q");
+        var ex = assertThrows(InvalidQueryException.class, () ->
+                parse("SELECT * FROM P RIGHT JOIN Q"));
+
+        assertEquals("[INNER|OUTER] JOIN requires either ON or USING (from RIGHT JOIN Q)", ex.getMessage());
     }
 
-    @Test(expected = InvalidQueryException.class)
+    @Test
     public void select_full_join() throws Exception {
-        parse("SELECT * FROM P FULL JOIN Q");
+        var ex = assertThrows(InvalidQueryException.class, () ->
+                parse("SELECT * FROM P FULL JOIN Q"));
+
+        assertEquals("[INNER|OUTER] JOIN requires either ON or USING (from FULL JOIN Q)", ex.getMessage());
     }
 
-    @Test(expected = InvalidQueryException.class)
+    @Test
     public void select_left_join() throws Exception {
-        parse("SELECT * FROM P LEFT JOIN Q");
+        var ex = assertThrows(InvalidQueryException.class, () ->
+                parse("SELECT * FROM P LEFT JOIN Q"));
+
+        assertEquals("[INNER|OUTER] JOIN requires either ON or USING (from LEFT JOIN Q)", ex.getMessage());
     }
 
-    @Test(expected = InvalidQueryException.class)
+    @Test
     public void select_right_outer_join() throws Exception {
-        parse("SELECT * FROM P RIGHT OUTER JOIN Q");
+        var ex = assertThrows(InvalidQueryException.class, () ->
+                parse("SELECT * FROM P RIGHT OUTER JOIN Q"));
+
+        assertEquals("[INNER|OUTER] JOIN requires either ON or USING (from RIGHT OUTER JOIN Q)", ex.getMessage());
     }
 
-    @Test(expected = InvalidQueryException.class)
+    @Test
     public void select_full_outer_join() throws Exception {
-        parse("SELECT * FROM P FULL OUTER JOIN Q");
+        var ex = assertThrows(InvalidQueryException.class, () ->
+                parse("SELECT * FROM P FULL OUTER JOIN Q"));
+
+        assertEquals("[INNER|OUTER] JOIN requires either ON or USING (from FULL OUTER JOIN Q)", ex.getMessage());
     }
 
-    @Test(expected = InvalidQueryException.class)
+    @Test
     public void select_left_outer_join() throws Exception {
-        parse("SELECT * FROM P LEFT OUTER JOIN Q");
+        var ex = assertThrows(InvalidQueryException.class, () ->
+                parse("SELECT * FROM P LEFT OUTER JOIN Q"));
+
+        assertEquals("[INNER|OUTER] JOIN requires either ON or USING (from LEFT OUTER JOIN Q)", ex.getMessage());
     }
 
-    @Test(expected = InvalidQueryException.class)
+    @Test
     public void select_inner_join() throws Exception {
-        parse("SELECT * FROM P INNER JOIN Q"); // requires on or using
+        var ex = assertThrows(InvalidQueryException.class, () ->
+                parse("SELECT * FROM P INNER JOIN Q"));
+
+        assertEquals("[INNER|OUTER] JOIN requires either ON or USING (from INNER JOIN Q)", ex.getMessage());
     }
 
-    @Test(expected = InvalidQueryException.class)
+    @Test
     public void select_natural_join_on() throws Exception {
-        parse("SELECT * FROM P NATURAL JOIN Q ON P.A = Q.A");
+        var ex = assertThrows(InvalidQueryException.class, () ->
+                parse("SELECT * FROM P NATURAL JOIN Q ON P.A = Q.A"));
+
+        assertEquals("NATURAL JOIN cannot have USING/ON conditions (from NATURAL JOIN Q ON P.A = Q.A)", ex.getMessage());
     }
 
-    @Test(expected = InvalidQueryException.class)
+    @Test
     public void select_cross_join_on() throws Exception {
-        parse("SELECT * FROM P CROSS JOIN Q ON P.A = Q.A");
+        var ex = assertThrows(InvalidQueryException.class, () ->
+                parse("SELECT * FROM P CROSS JOIN Q ON P.A = Q.A"));
+
+        assertEquals("CROSS JOIN cannot have USING/ON conditions (from CROSS JOIN Q ON P.A = Q.A)", ex.getMessage());
     }
 
-    @Test(expected = InvalidQueryException.class)
+    @Test
     public void select_natural_join_using() throws Exception {
-        parse("SELECT * FROM P NATURAL JOIN Q USING(A)");
+        var ex = assertThrows(InvalidQueryException.class, () ->
+                parse("SELECT * FROM P NATURAL JOIN Q USING(A)"));
+
+        assertEquals("NATURAL JOIN cannot have USING/ON conditions (from NATURAL JOIN Q USING (A))", ex.getMessage());
     }
 
-    @Test(expected = InvalidQueryException.class)
+    @Test
     public void select_cross_join_using() throws Exception {
-        parse("SELECT * FROM P CROSS JOIN Q USING(A)");
+        var ex = assertThrows(InvalidQueryException.class, () ->
+                parse("SELECT * FROM P CROSS JOIN Q USING(A)"));
+
+        assertEquals("CROSS JOIN cannot have USING/ON conditions (from CROSS JOIN Q USING (A))", ex.getMessage());
     }
 
 
     // ---------------------------------------------------
     // Unsupported - non-CQ in the mapping
 
-    @Test(expected = UnsupportedSelectQueryException.class)
+    @Test
     public void select_right_join_on() throws Exception {
-        parse( "SELECT * FROM P RIGHT JOIN Q ON P.A = Q.A");
+        var ex = assertThrows(UnsupportedSelectQueryException.class, () ->
+                parse( "SELECT * FROM P RIGHT JOIN Q ON P.A = Q.A"));
+
+        assertEquals("LEFT/RIGHT/FULL OUTER JOINs are not supported RIGHT JOIN Q ON P.A = Q.A", ex.getMessage());
     }
 
-    @Test(expected = UnsupportedSelectQueryException.class)
+    @Test
     public void select_full_join_on() throws Exception {
-        parse( "SELECT * FROM P FULL JOIN Q ON P.A = Q.A");
+        var ex = assertThrows(UnsupportedSelectQueryException.class, () ->
+                parse( "SELECT * FROM P FULL JOIN Q ON P.A = Q.A"));
+
+        assertEquals("LEFT/RIGHT/FULL OUTER JOINs are not supported FULL JOIN Q ON P.A = Q.A", ex.getMessage());
     }
 
-    @Test(expected = UnsupportedSelectQueryException.class)
+    @Test
     public void select_left_join_on() throws Exception {
-        parse( "SELECT * FROM P LEFT JOIN Q ON P.A = Q.A");
+        var ex = assertThrows(UnsupportedSelectQueryException.class, () ->
+                parse( "SELECT * FROM P LEFT JOIN Q ON P.A = Q.A"));
+
+        assertEquals("LEFT/RIGHT/FULL OUTER JOINs are not supported LEFT JOIN Q ON P.A = Q.A", ex.getMessage());
     }
 
-    @Test(expected = UnsupportedSelectQueryException.class)
+    @Test
     public void select_right_outer_join_on() throws Exception {
-        parse( "SELECT * FROM P RIGHT OUTER JOIN Q ON P.A = Q.A");
+        var ex = assertThrows(UnsupportedSelectQueryException.class, () ->
+                parse( "SELECT * FROM P RIGHT OUTER JOIN Q ON P.A = Q.A"));
+
+        assertEquals("LEFT/RIGHT/FULL OUTER JOINs are not supported RIGHT OUTER JOIN Q ON P.A = Q.A", ex.getMessage());
     }
 
-    @Test(expected = UnsupportedSelectQueryException.class)
+    @Test
     public void select_full_outer_join_on() throws Exception {
-        parse( "SELECT * FROM P FULL OUTER JOIN Q ON P.A = Q.A");
+        var ex = assertThrows(UnsupportedSelectQueryException.class, () ->
+                parse( "SELECT * FROM P FULL OUTER JOIN Q ON P.A = Q.A"));
+
+        assertEquals("LEFT/RIGHT/FULL OUTER JOINs are not supported FULL OUTER JOIN Q ON P.A = Q.A", ex.getMessage());
     }
 
-    @Test(expected = UnsupportedSelectQueryException.class)
+    @Test
     public void select_left_outer_join_on() throws Exception {
-        parse( "SELECT * FROM P LEFT OUTER JOIN Q ON P.A = Q.A");
+        var ex = assertThrows(UnsupportedSelectQueryException.class, () ->
+                parse( "SELECT * FROM P LEFT OUTER JOIN Q ON P.A = Q.A"));
+
+        assertEquals("LEFT/RIGHT/FULL OUTER JOINs are not supported LEFT OUTER JOIN Q ON P.A = Q.A", ex.getMessage());
     }
 
     // -------------------------------------------------
@@ -575,50 +765,39 @@ public class SelectQueryParserTest {
     @Test
     public void join_using_2_test() throws Exception {
         RAExpression re = parse("SELECT A, B FROM P INNER JOIN R USING (A,B)");
-        System.out.println(re);
-        assertEquals(ImmutableList.of(eqOf(A1, A2), eqOf(B1, B2)), re.getFilterAtoms());
-        assertMatches(ImmutableList.of(dataAtomOf(TABLE_P, A1, B1), dataAtomOf(TABLE_R, A2, B2, C2, D2)), re.getDataAtoms());
+
+        assertEquals(join(TERM_FACTORY.getConjunction(eqOf(A1, A2), eqOf(B1, B2)), dataAtomOf(TABLE_P, A1, B1), dataAtomOf(TABLE_R, A2, B2, C2, D2)), re.getIQTree());
     }
 
     @Test
     public void select_join_2_test() throws Exception {
         RAExpression re = parse("SELECT a.A, b.B FROM P AS a JOIN R AS b ON (a.A = b.B)");
 
-        assertEquals(ImmutableList.of(eqOf(A1, B2)), re.getFilterAtoms());
-        assertMatches(ImmutableList.of(dataAtomOf(TABLE_P, A1, B1), dataAtomOf(TABLE_R, A2, B2, C2, D2)), re.getDataAtoms());
+        assertEquals(join(eqOf(A1, B2), dataAtomOf(TABLE_P, A1, B1), dataAtomOf(TABLE_R, A2, B2, C2, D2)), re.getIQTree());
     }
 
-
-
-    // SUB SELECT TESTS
     @Test
     public void sub_select_one_test() throws Exception {
         String  query = "SELECT * FROM (SELECT * FROM P) AS S";
         RAExpression re = parse(query);
-        System.out.print(re);
 
-        assertEquals(ImmutableList.of(), re.getFilterAtoms());
-        assertMatches(ImmutableList.of(dataAtomOf(TABLE_P, A1, B1)), re.getDataAtoms());
+        assertEquals(dataAtomOf(TABLE_P, A1, B1), re.getIQTree());
     }
 
     @Test
     public void sub_select_two_test() throws Exception {
         String  query = "SELECT * FROM (SELECT * FROM (SELECT * FROM P) AS T) AS S";
         RAExpression re = parse(query);
-        System.out.print(re);
 
-        assertEquals(ImmutableList.of(), re.getFilterAtoms());
-        assertMatches(ImmutableList.of(dataAtomOf(TABLE_P, A1, B1)), re.getDataAtoms());
+        assertEquals(dataAtomOf(TABLE_P, A1, B1), re.getIQTree());
     }
 
     @Test
     public void sub_select_one_simple_join_internal_test() throws Exception {
         String  query = "SELECT * FROM (SELECT * FROM P, Q) AS S";
         RAExpression re = parse(query);
-        System.out.print(re);
 
-        assertEquals(ImmutableList.of(), re.getFilterAtoms());
-        assertMatches(ImmutableList.of(dataAtomOf(TABLE_P, A1, B1), dataAtomOf(TABLE_Q, A2, C2)), re.getDataAtoms());
+        assertEquals(IQ_FACTORY.createNaryIQTree(IQ_FACTORY.createInnerJoinNode(), ImmutableList.of(dataAtomOf(TABLE_P, A1, B1), dataAtomOf(TABLE_Q, A2, C2))), re.getIQTree());
     }
 
 
@@ -626,14 +805,11 @@ public class SelectQueryParserTest {
     public void sub_select_one_simple_join_test() throws Exception {
         String  query = "SELECT * FROM (SELECT * FROM P) AS S, Q";
         RAExpression re = parse(query);
-        System.out.print(re);
 
-        assertEquals(ImmutableList.of(), re.getFilterAtoms());
-        assertMatches(ImmutableList.of(dataAtomOf(TABLE_P, A1, B1), dataAtomOf(TABLE_Q, A2, C2)), re.getDataAtoms());
+        assertEquals(IQ_FACTORY.createNaryIQTree(IQ_FACTORY.createInnerJoinNode(), ImmutableList.of(dataAtomOf(TABLE_P, A1, B1), dataAtomOf(TABLE_Q, A2, C2))), re.getIQTree());
     }
 
 
-    // END SUB SELECT TESTS
 
     private ImmutableExpression eqOf(String var1, String var2) {
         return TERM_FACTORY.getNotYetTypedEquality(TERM_FACTORY.getVariable(var1), TERM_FACTORY.getVariable(var2));
@@ -647,11 +823,5 @@ public class SelectQueryParserTest {
     private ExtensionalDataNode dataAtomOf(RelationDefinition table, String var1, String var2, String var3, String var4) {
         return IQ_FACTORY.createExtensionalDataNode(table,
                 ImmutableMap.of(0, TERM_FACTORY.getVariable(var1), 1, TERM_FACTORY.getVariable(var2), 2, TERM_FACTORY.getVariable(var3), 3, TERM_FACTORY.getVariable(var4)));
-    }
-
-    private static void assertMatches(ImmutableList<ExtensionalDataNode> list0, List<ExtensionalDataNode> list) {
-        assertEquals(list0.size(), list.size());
-        list0.forEach(a -> assertTrue(list.stream()
-                .anyMatch(b -> b.equals(a))));
     }
 }

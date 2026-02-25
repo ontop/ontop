@@ -6,16 +6,11 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
-import it.unibz.inf.ontop.iq.IQ;
-import it.unibz.inf.ontop.iq.IQTree;
-import it.unibz.inf.ontop.iq.UnaryIQTree;
-import it.unibz.inf.ontop.iq.node.ConstructionNode;
-import it.unibz.inf.ontop.iq.node.EmptyNode;
-import it.unibz.inf.ontop.iq.node.NativeNode;
-import it.unibz.inf.ontop.iq.node.QueryNode;
+import it.unibz.inf.ontop.iq.*;
+import it.unibz.inf.ontop.iq.impl.IQTreeTools;
+import it.unibz.inf.ontop.iq.node.*;
+import it.unibz.inf.ontop.iq.visit.impl.AbstractIQTreeGenericVisitingTransformer;
 import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.substitution.Substitution;
-import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,12 +23,13 @@ public class ReferenceValueReplacer {
     private static final Logger LOGGER = LoggerFactory.getLogger(ReferenceValueReplacer.class);
     private final IntermediateQueryFactory iqFactory;
     private final TermFactory termFactory;
+    private final IQTreeTools iqTreeTools;
 
     @Inject
-    protected ReferenceValueReplacer(IntermediateQueryFactory iqFactory, TermFactory termFactory,
-                                     SubstitutionFactory substitutionFactory) {
+    protected ReferenceValueReplacer(IntermediateQueryFactory iqFactory, TermFactory termFactory, IQTreeTools iqTreeTools) {
         this.iqFactory = iqFactory;
         this.termFactory = termFactory;
+        this.iqTreeTools = iqTreeTools;
     }
 
     /**
@@ -54,92 +50,70 @@ public class ReferenceValueReplacer {
 
         LOGGER.debug("Reference values to be replaced: {}", referenceToInputMap);
 
-        IQTree newTree = transform(referenceIq.getTree(), referenceToInputMap);
+        IQTree newTree = referenceIq.getTree().acceptVisitor(new AbstractIQTreeGenericVisitingTransformer<>() {
+            @Override
+            protected IQTree done() {
+                throw new MinorOntopInternalBugException("Expected only ConstructionNodes, NativeNodes and EmptyNodes");
+            }
+
+            @Override
+            public IQTree transformConstruction(UnaryIQTree tree1, ConstructionNode node, IQTree child) {
+                var newConstructionNode = iqTreeTools.replaceSubstitution(
+                        node, s -> s.transform(this::transformTerm));
+
+                return iqFactory.createUnaryIQTree(newConstructionNode, transform(child));
+            }
+
+            @Override
+            public IQTree transformEmpty(EmptyNode node) {
+                return node;
+            }
+
+            private ImmutableTerm transformTerm(ImmutableTerm term) {
+                if (term instanceof RDFConstant) {
+                    RDFConstant constant = (RDFConstant) term;
+                    String initialValue = constant.getValue();
+                    String newValue = replaceString(constant.getValue());
+                    if (initialValue.equals(newValue))
+                        return constant;
+
+                    return termFactory.getRDFConstant(newValue, constant.getType());
+                }
+                else if (term instanceof DBConstant) {
+                    DBConstant constant = (DBConstant) term;
+                    String initialValue = constant.getValue();
+                    String newValue = replaceString(constant.getValue());
+                    if (initialValue.equals(newValue))
+                        return constant;
+
+                    return termFactory.getDBConstant(newValue, constant.getType());
+                }
+                else if (term instanceof ImmutableFunctionalTerm) {
+                    ImmutableFunctionalTerm functionalTerm = (ImmutableFunctionalTerm) term;
+
+                    ImmutableList<? extends ImmutableTerm> initialTerms = functionalTerm.getTerms();
+
+                    ImmutableList<ImmutableTerm> newTerms = initialTerms.stream()
+                            .map(this::transformTerm)
+                            .collect(ImmutableCollectors.toList());
+
+                    return initialTerms.equals(newTerms)
+                            ? functionalTerm
+                            : termFactory.getImmutableFunctionalTerm(functionalTerm.getFunctionSymbol(), newTerms);
+                }
+                else
+                    return term;
+            }
+
+            private String replaceString(String str) {
+                return referenceToInputMap.entrySet().stream()
+                        .reduce(str, (s, e) -> s.replaceAll(e.getKey(), e.getValue()),
+                                (s1, s2) -> {
+                                    throw new MinorOntopInternalBugException("Not expected to be run in //");
+                                });
+            }
+        });
 
         return iqFactory.createIQ(referenceIq.getProjectionAtom(), newTree);
-    }
-
-    /**
-     * Only applies transformations to construct nodes and native nodes
-     */
-    private IQTree transform(IQTree tree, ImmutableMap<String, String> referenceToInputMap) {
-        QueryNode rootNode = tree.getRootNode();
-
-        if (rootNode instanceof ConstructionNode) {
-            ConstructionNode constructionNode = (ConstructionNode)rootNode;
-
-            ConstructionNode newConstructionNode = constructionNode.getSubstitution().isEmpty()
-                ? constructionNode
-                : iqFactory.createConstructionNode(
-                        constructionNode.getVariables(),
-                        constructionNode.getSubstitution().transform(t -> transformTerm(t, referenceToInputMap)));
-
-            return iqFactory.createUnaryIQTree(
-                    newConstructionNode,
-                    transform(((UnaryIQTree) tree).getChild(), referenceToInputMap));
-
-        }
-        else if (rootNode instanceof NativeNode) {
-            return transformNativeNode((NativeNode) rootNode, referenceToInputMap);
-        }
-        else if (rootNode instanceof EmptyNode) {
-            return tree;
-        }
-        else
-            throw new IllegalArgumentException("Was only expecting construction nodes and native nodes");
-    }
-
-    private ImmutableTerm transformTerm(ImmutableTerm term, ImmutableMap<String, String> referenceToInputMap) {
-        if (term instanceof RDFConstant) {
-            RDFConstant constant = (RDFConstant) term;
-            String initialValue = constant.getValue();
-            String newValue = replaceString(constant.getValue(), referenceToInputMap);
-            if (initialValue.equals(newValue))
-                return constant;
-
-            return termFactory.getRDFConstant(newValue, constant.getType());
-        }
-        else if (term instanceof DBConstant) {
-            DBConstant constant = (DBConstant) term;
-            String initialValue = constant.getValue();
-            String newValue = replaceString(constant.getValue(), referenceToInputMap);
-            if (initialValue.equals(newValue))
-                return constant;
-
-            return termFactory.getDBConstant(newValue, constant.getType());
-        }
-        else if (term instanceof ImmutableFunctionalTerm) {
-            ImmutableFunctionalTerm functionalTerm = (ImmutableFunctionalTerm) term;
-
-            ImmutableList<? extends ImmutableTerm> initialTerms = functionalTerm.getTerms();
-
-            ImmutableList<ImmutableTerm> newTerms = initialTerms.stream()
-                    .map(t -> transformTerm(t, referenceToInputMap))
-                    .collect(ImmutableCollectors.toList());
-
-            return initialTerms.equals(newTerms)
-                    ? functionalTerm
-                    : termFactory.getImmutableFunctionalTerm(functionalTerm.getFunctionSymbol(), newTerms);
-        }
-        else
-            return term;
-    }
-
-    private String replaceString(String str, ImmutableMap<String, String> referenceToInputMap) {
-        return referenceToInputMap.entrySet().stream()
-                .reduce(str, (s, e) -> s.replaceAll(e.getKey(), e.getValue()),
-                        (s1, s2) -> {
-                            throw new MinorOntopInternalBugException("Not expected to be run in //");
-                        });
-    }
-
-    private IQTree transformNativeNode(NativeNode nativeNode, ImmutableMap<String, String> referenceToInputMap) {
-        String newQueryString = replaceString(nativeNode.getNativeQueryString(), referenceToInputMap);
-
-        return iqFactory.createNativeNode(nativeNode.getVariables(),
-                nativeNode.getTypeMap(),
-                nativeNode.getColumnNames(),
-                newQueryString,
-                nativeNode.getVariableNullability());
     }
 }

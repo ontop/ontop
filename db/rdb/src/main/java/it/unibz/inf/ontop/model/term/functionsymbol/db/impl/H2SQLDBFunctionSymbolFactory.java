@@ -10,7 +10,6 @@ import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBTypeConversionFunctionSymbol;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.DBTypeFactory;
-import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 
 import java.util.Optional;
@@ -56,27 +55,6 @@ public class H2SQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFac
 
         DBTermType timestampTZ = dbTypeFactory.getDBTermType(TIMESTAMP_WITH_TIME_ZONE_STR);
         builder.put(timestampTZ, createDateTimeNormFunctionSymbol(timestampTZ));
-
-        return builder.build();
-    }
-
-    /**
-     * Ensure geometries are recast back from text.
-     *
-     * At moment only WKT is supported, but in the future GML could also be.
-     * It is therefore important to consider the target datatype for choosing the right normalization.
-     *
-     */
-    @Override
-    protected ImmutableTable<DBTermType, RDFDatatype, DBTypeConversionFunctionSymbol> createNormalizationTable() {
-        DBTypeFactory dbTypeFactory = typeFactory.getDBTypeFactory();
-        ImmutableTable.Builder<DBTermType, RDFDatatype, DBTypeConversionFunctionSymbol> builder = ImmutableTable.builder();
-
-        //GEOMETRY
-        DBTermType defaultDBGeometryType = dbTypeFactory.getDBGeometryType();
-        DBTypeConversionFunctionSymbol geometryNormFunctionSymbol = createGeometryNormFunctionSymbol(defaultDBGeometryType);
-        // For WKT
-        builder.put(defaultDBGeometryType,typeFactory.getWktLiteralDatatype(), geometryNormFunctionSymbol);
 
         return builder.build();
     }

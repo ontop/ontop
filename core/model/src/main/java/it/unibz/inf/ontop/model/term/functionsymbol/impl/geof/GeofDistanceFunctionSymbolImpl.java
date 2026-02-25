@@ -8,6 +8,7 @@ import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbolFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBFunctionSymbolFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBMathBinaryOperator;
 import it.unibz.inf.ontop.model.term.functionsymbol.impl.FunctionSymbolFactoryImpl;
+import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.DBTypeFactory;
 import it.unibz.inf.ontop.model.type.ObjectRDFType;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
@@ -46,8 +47,9 @@ public class GeofDistanceFunctionSymbolImpl extends AbstractGeofDoubleFunctionSy
         IRI srid0 = wktLiteralValues.get(0).getSRID();
         IRI srid1 = wktLiteralValues.get(1).getSRID();
 
-        ImmutableTerm geom0 = wktLiteralValues.get(0).getGeometry();
-        ImmutableTerm geom1 = wktLiteralValues.get(1).getGeometry();
+        DBTermType geometryType = termFactory.getTypeFactory().getDBTypeFactory().getDBGeometryType();
+        ImmutableTerm geom0 = termFactory.getConversionFromRDFLexical2DB(geometryType, wktLiteralValues.get(0).getGeometry());
+        ImmutableTerm geom1 = termFactory.getConversionFromRDFLexical2DB(geometryType, wktLiteralValues.get(1).getGeometry());
 
         DistanceUnit inputUnit = GeoUtils.getUnitFromSRID(srid0.getIRIString());
         DistanceUnit outputUnit = DistanceUnit.findByIRI(((DBConstant) subLexicalTerms.get(2)).getValue());

@@ -5,14 +5,15 @@ import com.google.inject.Singleton;
 import it.unibz.inf.ontop.generation.algebra.SelectFromWhereWithModifiers;
 import it.unibz.inf.ontop.generation.serializer.SelectFromWhereSerializer;
 import it.unibz.inf.ontop.dbschema.DBParameters;
+import it.unibz.inf.ontop.injection.OntopSQLCoreSettings;
 import it.unibz.inf.ontop.model.term.TermFactory;
 
 @Singleton
 public class SapHanaSelectFromWhereSerializer extends DefaultSelectFromWhereSerializer implements SelectFromWhereSerializer {
 
     @Inject
-    private SapHanaSelectFromWhereSerializer(TermFactory termFactory) {
-        super(new DefaultSQLTermSerializer(termFactory));
+    private SapHanaSelectFromWhereSerializer(TermFactory termFactory, OntopSQLCoreSettings settings) {
+        super(new DefaultSQLTermSerializer(termFactory), settings);
     }
 
     @Override

@@ -1,10 +1,11 @@
 package it.unibz.inf.ontop.iq.node;
 
-import java.util.Optional;
-
-import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
-import it.unibz.inf.ontop.model.term.ImmutableExpression;
-import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
+import com.google.common.collect.ImmutableList;
+import it.unibz.inf.ontop.iq.IQTree;
+import it.unibz.inf.ontop.iq.NaryIQTree;
+import it.unibz.inf.ontop.iq.visit.IQTreeVisitor;
+import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.substitution.InjectiveSubstitution;
 
 /**
  * See IntermediateQueryFactory for creating a new instance.
@@ -12,9 +13,10 @@ import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
 public interface InnerJoinNode extends InnerJoinLikeNode {
 
     @Override
-    InnerJoinNode acceptNodeTransformer(HomogeneousQueryNodeTransformer transformer)
-            throws QueryNodeTransformationException;
+    InnerJoinNode applyFreshRenaming(InjectiveSubstitution<Variable> renamingSubstitution);
 
     @Override
-    InnerJoinNode changeOptionalFilterCondition(Optional<ImmutableExpression> newOptionalFilterCondition);
+    default <T> T acceptVisitor(NaryIQTree tree, IQTreeVisitor<T> visitor, ImmutableList<IQTree> children) {
+        return visitor.transformInnerJoin(tree, this, children);
+    }
 }

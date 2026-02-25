@@ -2,10 +2,13 @@ package it.unibz.inf.ontop.model.term.functionsymbol.db.impl;
 
 import com.google.common.collect.*;
 import com.google.inject.Inject;
+import it.unibz.inf.ontop.model.term.Constant;
+import it.unibz.inf.ontop.model.term.DBConstant;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.*;
 import it.unibz.inf.ontop.model.type.*;
+import it.unibz.inf.ontop.utils.Interval;
 
 import java.util.UUID;
 import java.util.function.Function;
@@ -103,24 +106,6 @@ public class PostgreSQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymb
                 (terms, termConverter, termFactory) -> String.format(
                         "REGEXP_REPLACE(CAST(%s AS TEXT),'([-+]\\d\\d)$', '\\1:00')", termConverter.apply(terms.get(0))));
         builder.put(timeTZType, timeTZNormFunctionSymbol);
-
-        return builder.build();
-    }
-
-    @Override
-    protected ImmutableTable<DBTermType, RDFDatatype, DBTypeConversionFunctionSymbol> createNormalizationTable() {
-        ImmutableTable.Builder<DBTermType, RDFDatatype, DBTypeConversionFunctionSymbol> builder = ImmutableTable.builder();
-        builder.putAll(super.createNormalizationTable());
-
-        //GEOMETRY
-        DBTermType defaultDBGeometryType = dbTypeFactory.getDBGeometryType();
-        DBTypeConversionFunctionSymbol geometryNormFunctionSymbol = createGeometryNormFunctionSymbol(defaultDBGeometryType);
-        builder.put(defaultDBGeometryType,typeFactory.getWktLiteralDatatype(), geometryNormFunctionSymbol);
-
-        //GEOGRAPHY - Data type exclusive to PostGIS
-        DBTermType defaultDBGeographyType = dbTypeFactory.getDBGeographyType();
-        DBTypeConversionFunctionSymbol geographyNormFunctionSymbol = createGeometryNormFunctionSymbol(defaultDBGeographyType);
-        builder.put(defaultDBGeographyType,typeFactory.getWktLiteralDatatype(), geographyNormFunctionSymbol);
 
         return builder.build();
     }
@@ -409,13 +394,19 @@ public class PostgreSQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymb
                      * Normalizes the flag
                      *   - DOT_ALL: s -> n
                      */
-                    ImmutableTerm flagTerm = termFactory.getDBReplace(terms.get(2),
-                            termFactory.getDBStringConstant("s"),
-                            termFactory.getDBStringConstant("n"));
+                    ImmutableTerm flagsTerm;
+                    if (terms.get(2) instanceof Constant) {
+                        Constant flagsConstant = (Constant) terms.get(2);
+                        flagsTerm = termFactory.getDBStringConstant(flagsConstant.getValue().replace("s", "n"));
+                    } else {
+                        flagsTerm = termFactory.getDBReplace(terms.get(2),
+                                termFactory.getDBStringConstant("s"),
+                                termFactory.getDBStringConstant("n"));
+                    }
 
                     ImmutableTerm extendedPatternTerm = termFactory.getNullRejectingDBConcatFunctionalTerm(ImmutableList.of(
                             termFactory.getDBStringConstant("(?"),
-                            flagTerm,
+                            flagsTerm,
                             termFactory.getDBStringConstant(")"),
                             terms.get(1)))
                             .simplify();
@@ -606,6 +597,16 @@ public class PostgreSQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymb
             throw new IllegalArgumentException("PostgreSQL does not support DATE_TRUNC on 'millisecond' or 'microsend'. Use 'milliseconds' or 'microseconds' instead.");
         }
         return super.getDBDateTrunc(datePart);
+    }
+
+    @Override
+    protected String serializeIntervalDenorm(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        if (!(terms.get(0) instanceof DBConstant)) {
+            throw new UnsupportedOperationException("Only constant intervals are supported");
+        }
+
+        Interval interval = new Interval(((DBConstant) terms.get(0)).getValue());
+        return interval.serializeAsFullInterval();
     }
 
 }

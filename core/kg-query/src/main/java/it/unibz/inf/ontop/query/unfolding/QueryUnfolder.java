@@ -5,7 +5,6 @@ import it.unibz.inf.ontop.spec.mapping.Mapping;
 
 /**
  * TODO: explain
- *
  * See QueryUnfolder.Factory for creating a new instance.
  */
 public interface QueryUnfolder extends IQOptimizer {

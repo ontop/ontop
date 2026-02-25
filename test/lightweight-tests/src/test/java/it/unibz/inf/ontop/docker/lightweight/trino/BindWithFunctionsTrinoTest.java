@@ -1,10 +1,8 @@
 package it.unibz.inf.ontop.docker.lightweight.trino;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMultiset;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.docker.lightweight.AbstractBindTestWithFunctions;
-import it.unibz.inf.ontop.docker.lightweight.SnowflakeLightweightTest;
 import it.unibz.inf.ontop.docker.lightweight.TrinoLightweightTest;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -63,15 +61,6 @@ public class BindWithFunctionsTrinoTest extends AbstractBindTestWithFunctions {
         super.testSecondsBetweenMappingInput();
     }
 
-    @Disabled("Since Trino does not have unique constraint information, a 'DISTINCT' must be enforced. This DISTINCT" +
-            "causes the remaining query to be packed into a sub-query, including the 'ORDER BY'. Selecting from sub" +
-            "queries does not conserve order in Trino, so while the results are correct, they are in the wrong order")
-    @Test
-    @Override
-    public void testREPLACE() {
-        super.testREPLACE();
-    }
-
     @Disabled("Trino does not support SHA384")
     @Test
     @Override
@@ -94,5 +83,18 @@ public class BindWithFunctionsTrinoTest extends AbstractBindTestWithFunctions {
     @Override
     protected ImmutableSet<String> getStatisticalAttributesExpectedResults() {
         return ImmutableSet.of("\"215.340000000000000000\"^^xsd:decimal");
+    }
+
+    @Disabled("Trino does not support REGEXP_LIKE with three arguments")
+    @Test
+    @Override
+    public void testCaseInsensitiveREGEX() {
+        super.testCaseInsensitiveREGEX();
+    }
+
+    @Override
+    protected ImmutableSet<String> getDurationArithmeticExpectedResults() {
+        return ImmutableSet.of("\"1970-09-05T07:35:00.000Z\"^^xsd:dateTime", "\"2011-10-08T11:15:00.000Z\"^^xsd:dateTime",
+                "\"2014-04-05T16:32:52.000Z\"^^xsd:dateTime", "\"2015-07-21T09:08:06.000Z\"^^xsd:dateTime" );
     }
 }

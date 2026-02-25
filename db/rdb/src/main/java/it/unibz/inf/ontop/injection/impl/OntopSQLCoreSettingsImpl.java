@@ -27,6 +27,8 @@ public class OntopSQLCoreSettingsImpl extends OntopOBDASettingsImpl implements O
     private static final String DEFAULT_FILE = "sql-default.properties";
     private final String jdbcUrl;
     private final String jdbcDriver;
+    private final String ctePrefix;
+    private final boolean useCTEs;
 
     /**
      * Beware: immutable class!
@@ -43,6 +45,8 @@ public class OntopSQLCoreSettingsImpl extends OntopOBDASettingsImpl implements O
 
         jdbcUrl = getRequiredProperty(OntopSQLCoreSettings.JDBC_URL);
         jdbcDriver = getRequiredProperty(OntopSQLCoreSettings.JDBC_DRIVER);
+        useCTEs = getRequiredBoolean(ONTOP_USE_COMMON_TABLE_EXPRESSIONS_FOR_BLACK_BOX_VIEWS_IF_SUPPORTED);
+        ctePrefix = getRequiredProperty(ONTOP_COMMON_TABLE_EXPRESSIONS_PREFIX);
     }
 
     static Properties loadSQLCoreProperties(Properties userProperties) {
@@ -132,5 +136,15 @@ public class OntopSQLCoreSettingsImpl extends OntopOBDASettingsImpl implements O
     @Override
     public String getJdbcDriver() {
         return jdbcDriver;
+    }
+
+    @Override
+    public boolean useCommonTableExpressionsForBlackViewsIfSupported() {
+        return useCTEs;
+    }
+
+    @Override
+    public String getOntopCommonTableExpressionsPrefix() {
+        return ctePrefix;
     }
 }

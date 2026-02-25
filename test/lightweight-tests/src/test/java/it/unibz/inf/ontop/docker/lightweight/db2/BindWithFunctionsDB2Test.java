@@ -162,4 +162,10 @@ public class BindWithFunctionsDB2Test extends AbstractBindTestWithFunctions {
     protected ImmutableSet<String> getStatisticalAttributesExpectedResults() {
         return ImmutableSet.of("\"207.00000000000000000000000000\"^^xsd:decimal");
     }
+
+    @Override
+    protected ImmutableSet<String> getDurationArithmeticExpectedResults() {
+        return ImmutableSet.of("\"1970-09-05T07:35:00.000000\"^^xsd:dateTime", "\"2011-10-08T11:15:00.000000\"^^xsd:dateTime",
+                "\"2014-04-05T16:32:52.000000\"^^xsd:dateTime", "\"2015-07-21T09:08:06.000000\"^^xsd:dateTime" );
+    }
 }

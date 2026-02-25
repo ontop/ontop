@@ -2,11 +2,11 @@ package it.unibz.inf.ontop.dbschema;
 
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.Collection;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class BasicViewWithConstraintsProfWithDuplicatesTest {
     private static final String VIEW_FILE = "src/test/resources/prof/prof-basic-views-with-constraints-duplicateUCFD.json";

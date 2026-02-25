@@ -60,7 +60,7 @@ public class SQLServerDBMetadataProvider extends AbstractDBMetadataProvider {
 
     @Override
     protected String makeQueryMinimizeResultSet(String query) {
-        return String.format("SELECT * FROM (%s) subQ ORDER BY (SELECT NULL) OFFSET 0 ROWS FETCH NEXT 1 ROWS ONLY", query);
+        return String.format("SELECT * FROM %s subQ ORDER BY (SELECT NULL) OFFSET 0 ROWS FETCH NEXT 1 ROWS ONLY", query);
     }
 
 

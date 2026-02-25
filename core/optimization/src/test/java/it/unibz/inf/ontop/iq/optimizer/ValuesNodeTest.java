@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.iq.IQTree;
+import it.unibz.inf.ontop.iq.DownPropagation;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.iq.node.FilterNode;
@@ -11,8 +12,11 @@ import it.unibz.inf.ontop.iq.node.ValuesNode;
 import it.unibz.inf.ontop.model.template.Template;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.Substitution;
+import it.unibz.inf.ontop.utils.VariableGenerator;
 import org.junit.Ignore;
 import org.junit.Test;
+
+import java.util.Optional;
 
 import static it.unibz.inf.ontop.NoDependencyTestDBMetadata.TABLE1_AR1;
 import static it.unibz.inf.ontop.NoDependencyTestDBMetadata.TABLE1_AR2;
@@ -93,7 +97,7 @@ public class ValuesNodeTest {
     }
 
     @Test
-    public void test6substitutionNoChange() {
+    public void test6substitutionNoChange() throws DownPropagation.InconsistentDownPropagationException {
         IQTree initialTree = IQ_FACTORY
                 .createValuesNode(ImmutableList.of(X), ImmutableList.of(ImmutableList.of(ONE_STR), ImmutableList.of(TWO_STR)));
         Substitution<VariableOrGroundTerm> substitution = SUBSTITUTION_FACTORY.getSubstitution(Y, ONE_STR);
@@ -104,7 +108,7 @@ public class ValuesNodeTest {
     }
 
     @Test
-    public void test7substitutionConstant() {
+    public void test7substitutionConstant() throws DownPropagation.InconsistentDownPropagationException {
         IQTree initialTree = IQ_FACTORY
                 .createValuesNode(ImmutableList.of(X, Y), ImmutableList.of(
                         ImmutableList.of(ONE_STR, TWO_STR),
@@ -120,7 +124,7 @@ public class ValuesNodeTest {
     }
 
     @Test
-    public void test8substitutionFunction() {
+    public void test8substitutionFunction() throws DownPropagation.InconsistentDownPropagationException {
         // Test handling of GroundFunctionalTerm
         IQTree initialTree = IQ_FACTORY
                 .createValuesNode(ImmutableList.of(X), ImmutableList.of(ImmutableList.of(ONE_STR), ImmutableList.of(TWO_STR)));
@@ -136,7 +140,7 @@ public class ValuesNodeTest {
     }
 
     @Test
-    public void test9substitutionVariable() {
+    public void test9substitutionVariable() throws DownPropagation.InconsistentDownPropagationException {
         // Test handling of GroundFunctionalTerm
         IQTree initialTree = IQ_FACTORY
                 .createValuesNode(ImmutableList.of(X, Y, Z), ImmutableList.of(
@@ -151,7 +155,7 @@ public class ValuesNodeTest {
     }
 
     @Test
-    public void test10trivialSubstitutionVariable() {
+    public void test10trivialSubstitutionVariable() throws DownPropagation.InconsistentDownPropagationException {
         // Test handling of GroundFunctionalTerm
         IQTree initialTree = IQ_FACTORY
                 .createValuesNode(ImmutableList.of(X), ImmutableList.of(
@@ -166,7 +170,7 @@ public class ValuesNodeTest {
     }
 
     @Test
-    public void test11substitutionTriple() {
+    public void test11substitutionTriple() throws DownPropagation.InconsistentDownPropagationException {
         // Test handling of GroundFunctionalTerm & NonFunctionalTerm
         IQTree initialTree = IQ_FACTORY
                 .createValuesNode(ImmutableList.of(X, Y, Z, W), ImmutableList.of(
@@ -667,15 +671,15 @@ public class ValuesNodeTest {
 
     private Boolean baseTestApplyDescSubstitution(IQTree initialTree,
                                                   Substitution<VariableOrGroundTerm> substitution,
-                                                  IQTree expectedTree) {
+                                                  IQTree expectedTree) throws DownPropagation.InconsistentDownPropagationException {
         System.out.println('\n' + "Tree before applying descending substitution without optimizing:");
         System.out.println(initialTree);
         System.out.println('\n' + "Substitution:");
         System.out.println(substitution);
         System.out.println('\n' + "Expected tree:");
         System.out.println(expectedTree);
-        IQTree resultingTree = initialTree.applyDescendingSubstitutionWithoutOptimizing(substitution,
-                CORE_UTILS_FACTORY.createVariableGenerator(initialTree.getKnownVariables()));
+        IQTree resultingTree = initialTree.applyDescendingSubstitution(IQ_TREE_TOOLS.createDownPropagation(substitution, Optional.empty(), initialTree.getVariables(),
+                CORE_UTILS_FACTORY.createVariableGenerator(initialTree.getKnownVariables())));
         System.out.println('\n' + "Resulting tree:");
         System.out.println(resultingTree);
         return resultingTree.equals(expectedTree);
@@ -687,9 +691,11 @@ public class ValuesNodeTest {
         System.out.println(initialTree);
         System.out.println('\n' + "Expected tree:");
         System.out.println(expectedTree);
-        IQTree resultingTree = initialTree.propagateDownConstraint(
-                ((FilterNode) initialTree.getRootNode()).getFilterCondition(),
-                CORE_UTILS_FACTORY.createVariableGenerator(initialTree.getKnownVariables()));
+        ImmutableExpression constraint = ((FilterNode) initialTree.getRootNode()).getFilterCondition();
+        ImmutableSet<Variable> variables = initialTree.getVariables();
+        VariableGenerator variableGenerator = CORE_UTILS_FACTORY.createVariableGenerator(initialTree.getKnownVariables());
+        DownPropagation dp = IQ_TREE_TOOLS.createDownPropagation(Optional.of(constraint), variables, variableGenerator);
+        IQTree resultingTree = dp.propagate(initialTree);
         System.out.println('\n' + "Resulting tree:");
         System.out.println(resultingTree);
         return resultingTree.equals(expectedTree);

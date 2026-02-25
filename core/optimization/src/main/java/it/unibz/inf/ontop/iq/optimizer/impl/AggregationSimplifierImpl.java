@@ -4,9 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.injection.CoreSingletons;
-import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.injection.OptimizationSingletons;
-import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
@@ -14,7 +12,7 @@ import it.unibz.inf.ontop.iq.node.AggregationNode;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.QueryNode;
 import it.unibz.inf.ontop.iq.optimizer.AggregationSimplifier;
-import it.unibz.inf.ontop.iq.transform.IQTreeTransformer;
+import it.unibz.inf.ontop.iq.transform.IQTreeVariableGeneratorTransformer;
 import it.unibz.inf.ontop.iq.transformer.impl.RDFTypeDependentSimplifyingTransformer;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
@@ -29,63 +27,54 @@ import it.unibz.inf.ontop.utils.VariableGenerator;
 import javax.inject.Inject;
 import java.util.Optional;
 
-public class AggregationSimplifierImpl implements AggregationSimplifier {
+public class AggregationSimplifierImpl extends AbstractIQOptimizer implements AggregationSimplifier {
 
-    private final IntermediateQueryFactory iqFactory;
     private final OptimizationSingletons optimizationSingletons;
-
+    private final TermFactory termFactory;
     private final IQTreeTools iqTreeTools;
 
+    private final IQTreeVariableGeneratorTransformer transformer;
+
     @Inject
-    private AggregationSimplifierImpl(IntermediateQueryFactory iqFactory, OptimizationSingletons optimizationSingletons, IQTreeTools iqTreeTools) {
-        this.iqFactory = iqFactory;
+    private AggregationSimplifierImpl(OptimizationSingletons optimizationSingletons) {
+        // no equality check
+        super(optimizationSingletons.getCoreSingletons().getIQFactory());
         this.optimizationSingletons = optimizationSingletons;
-        this.iqTreeTools = iqTreeTools;
+        CoreSingletons coreSingletons = optimizationSingletons.getCoreSingletons();
+        this.termFactory = coreSingletons.getTermFactory();
+        this.iqTreeTools = coreSingletons.getIQTreeTools();
+
+        this.transformer = IQTreeVariableGeneratorTransformer.of(
+                IQTreeVariableGeneratorTransformer.of(AggregationSimplifyingTransformer::new),
+                IQTree::normalizeForOptimization);
     }
 
     @Override
-    public IQ optimize(IQ query) {
-        VariableGenerator variableGenerator = query.getVariableGenerator();
-        IQTreeTransformer transformer = createTransformer(variableGenerator);
-        IQTree newTree = transformer.transform(query.getTree())
-                .normalizeForOptimization(variableGenerator);
-        return iqFactory.createIQ(query.getProjectionAtom(), newTree);
-    }
-
-    protected IQTreeTransformer createTransformer(VariableGenerator variableGenerator) {
-        return new AggregationSimplifyingTransformer(variableGenerator, optimizationSingletons, iqTreeTools);
+    protected IQTreeVariableGeneratorTransformer getTransformer() {
+        return transformer;
     }
 
     /**
      * Recursive
      */
-    protected static class AggregationSimplifyingTransformer extends RDFTypeDependentSimplifyingTransformer {
+    private class AggregationSimplifyingTransformer extends RDFTypeDependentSimplifyingTransformer {
 
-        private final VariableGenerator variableGenerator;
-        private final TermFactory termFactory;
-        private final IQTreeTools iqTreeTools;
-
-        protected AggregationSimplifyingTransformer(VariableGenerator variableGenerator,
-                                                    OptimizationSingletons optimizationSingletons, IQTreeTools iqTreeTools) {
-            super(optimizationSingletons);
-            this.variableGenerator = variableGenerator;
-            CoreSingletons coreSingletons = optimizationSingletons.getCoreSingletons();
-            this.termFactory = coreSingletons.getTermFactory();
-            this.iqTreeTools = iqTreeTools;
+        AggregationSimplifyingTransformer(VariableGenerator variableGenerator) {
+            super(optimizationSingletons, variableGenerator);
         }
 
         @Override
-        public IQTree transformAggregation(IQTree tree, AggregationNode rootNode, IQTree child) {
+        public IQTree transformAggregation(UnaryIQTree tree, AggregationNode rootNode, IQTree child) {
             // In case of aggregation nodes in the sub-tree
-            IQTree normalizedChild = child.acceptTransformer(this)
+            IQTree normalizedChild = transform(child)
                     .normalizeForOptimization(variableGenerator);
 
             QueryNode newChildRoot = normalizedChild.getRootNode();
 
             // May need to renormalize the tree (RECURSIVE)
             if ((newChildRoot instanceof ConstructionNode) && (!child.getRootNode().equals(newChildRoot)))
-                return transform(
-                        iqFactory.createUnaryIQTree(rootNode, normalizedChild).normalizeForOptimization(variableGenerator));
+                return transform(iqFactory.createUnaryIQTree(rootNode, normalizedChild)
+                        .normalizeForOptimization(variableGenerator));
 
             Substitution<ImmutableFunctionalTerm> initialSubstitution = rootNode.getSubstitution();
 
@@ -99,23 +88,23 @@ public class AggregationSimplifierImpl implements AggregationSimplifier {
                             .flatTransform(simplificationMap::get, d -> d.getDecomposition().getSubstitution())
                             .build();
 
-            AggregationNode newNode = iqFactory.createAggregationNode(rootNode.getGroupingVariables(), newAggregationSubstitution);
-
             IQTree pushDownChildTree = pushDownDefinitions(
                     normalizedChild,
                     simplificationMap.values().stream()
                             .flatMap(s -> s.getPushDownRequests().stream()));
-            UnaryIQTree newAggregationTree = iqFactory.createUnaryIQTree(newNode, pushDownChildTree);
 
             // Substitution of the new parent construction node (containing typically the RDF function)
             Substitution<ImmutableTerm> parentSubstitution = initialSubstitution.builder()
                     .transformOrRemove(simplificationMap::get, d -> d.getDecomposition().getLiftableTerm())
                     .build();
 
-            return iqTreeTools.createConstructionNodeTreeIfNontrivial(newAggregationTree, parentSubstitution, rootNode::getVariables);
+            return iqTreeTools.unaryIQTreeBuilder()
+                    .append(iqTreeTools.createOptionalConstructionNode(rootNode::getVariables, parentSubstitution))
+                    .append(iqFactory.createAggregationNode(rootNode.getGroupingVariables(), newAggregationSubstitution))
+                    .build(pushDownChildTree);
         }
 
-        protected Optional<AggregationSimplification> simplifyAggregationFunctionalTerm(ImmutableFunctionalTerm aggregationFunctionalTerm,
+        private Optional<AggregationSimplification> simplifyAggregationFunctionalTerm(ImmutableFunctionalTerm aggregationFunctionalTerm,
                                                                                         IQTree child, boolean hasGroupBy) {
             FunctionSymbol functionSymbol = aggregationFunctionalTerm.getFunctionSymbol();
 
@@ -161,12 +150,12 @@ public class AggregationSimplifierImpl implements AggregationSimplifier {
             return Optional.empty();
         }
 
-        protected boolean isRDFFunctionalTerm(ImmutableTerm term) {
+        private boolean isRDFFunctionalTerm(ImmutableTerm term) {
             return (term instanceof ImmutableFunctionalTerm)
                     && (((ImmutableFunctionalTerm) term).getFunctionSymbol() instanceof RDFTermFunctionSymbol);
         }
 
-        protected ImmutableTerm extractRDFTermTypeTerm(ImmutableTerm rdfTerm) {
+        private ImmutableTerm extractRDFTermTypeTerm(ImmutableTerm rdfTerm) {
             if (isRDFFunctionalTerm(rdfTerm))
                 return ((ImmutableFunctionalTerm)rdfTerm).getTerm(1);
             else if (rdfTerm instanceof RDFConstant)

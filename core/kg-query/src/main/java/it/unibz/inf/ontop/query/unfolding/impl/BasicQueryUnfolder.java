@@ -2,26 +2,24 @@ package it.unibz.inf.ontop.query.unfolding.impl;
 
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
+import it.unibz.inf.ontop.exception.OntopUnsupportedKGQueryRuntimeException;
+import it.unibz.inf.ontop.iq.impl.IQTreeTools;
+import it.unibz.inf.ontop.iq.optimizer.impl.AbstractIQOptimizer;
+import it.unibz.inf.ontop.iq.optimizer.impl.AbstractQueryMergingTransformer;
+import it.unibz.inf.ontop.iq.transform.IQTreeVariableGeneratorTransformer;
+import it.unibz.inf.ontop.model.atom.*;
 import it.unibz.inf.ontop.query.unfolding.QueryUnfolder;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
-import it.unibz.inf.ontop.injection.QueryTransformerFactory;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.node.IntensionalDataNode;
-import it.unibz.inf.ontop.iq.optimizer.impl.AbstractIntensionalQueryMerger;
 import it.unibz.inf.ontop.iq.tools.UnionBasedQueryMerger;
-import it.unibz.inf.ontop.model.atom.AtomFactory;
-import it.unibz.inf.ontop.model.atom.AtomPredicate;
-import it.unibz.inf.ontop.model.atom.DataAtom;
-import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.vocabulary.RDF;
 import it.unibz.inf.ontop.spec.mapping.Mapping;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
-import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
@@ -30,51 +28,65 @@ import java.util.Optional;
 /**
  * See {@link QueryUnfolder.Factory} for creating a new instance.
  */
-public class BasicQueryUnfolder extends AbstractIntensionalQueryMerger implements QueryUnfolder {
+public class BasicQueryUnfolder extends AbstractIQOptimizer implements QueryUnfolder {
 
     private final Mapping mapping;
     private final SubstitutionFactory substitutionFactory;
-    private final QueryTransformerFactory transformerFactory;
-    private final AtomFactory atomFactory;
     private final UnionBasedQueryMerger queryMerger;
-    private final CoreUtilsFactory coreUtilsFactory;
+    private final IQTreeTools iqTreeTools;
+
+    private final IQTreeVariableGeneratorTransformer transformer;
 
     /**
      * See {@link QueryUnfolder.Factory#create(Mapping)}
      */
     @AssistedInject
-    private BasicQueryUnfolder(@Assisted Mapping mapping, IntermediateQueryFactory iqFactory,
-                               SubstitutionFactory substitutionFactory, QueryTransformerFactory transformerFactory,
-                               UnionBasedQueryMerger queryMerger, CoreUtilsFactory coreUtilsFactory,
-                               AtomFactory atomFactory) {
+    private BasicQueryUnfolder(@Assisted Mapping mapping,
+                               IntermediateQueryFactory iqFactory,
+                               SubstitutionFactory substitutionFactory,
+                               UnionBasedQueryMerger queryMerger,
+                               IQTreeTools iqTreeTools) {
         super(iqFactory);
         this.mapping = mapping;
         this.substitutionFactory = substitutionFactory;
-        this.transformerFactory = transformerFactory;
         this.queryMerger = queryMerger;
-        this.coreUtilsFactory = coreUtilsFactory;
-        this.atomFactory = atomFactory;
+        this.iqTreeTools = iqTreeTools;
+
+        this.transformer = IQTreeVariableGeneratorTransformer.of(BasicQueryUnfoldingTransformer::new);
     }
 
     @Override
-    protected QueryMergingTransformer createTransformer(ImmutableSet<Variable> knownVariables) {
-        return new BasicQueryUnfoldingTransformer(coreUtilsFactory.createVariableGenerator(knownVariables));
+    protected IQTreeVariableGeneratorTransformer getTransformer() {
+        return transformer;
     }
 
-    protected class BasicQueryUnfoldingTransformer extends AbstractIntensionalQueryMerger.QueryMergingTransformer {
 
-        protected BasicQueryUnfoldingTransformer(VariableGenerator variableGenerator) {
-            super(variableGenerator, BasicQueryUnfolder.this.iqFactory, substitutionFactory, atomFactory, transformerFactory);
+    private class BasicQueryUnfoldingTransformer extends AbstractQueryMergingTransformer {
+
+        BasicQueryUnfoldingTransformer(VariableGenerator variableGenerator) {
+            super(variableGenerator,
+                    BasicQueryUnfolder.this.iqFactory,
+                    BasicQueryUnfolder.this.substitutionFactory,
+                    BasicQueryUnfolder.this.iqTreeTools);
         }
 
         @Override
         protected Optional<IQ> getDefinition(IntensionalDataNode dataNode) {
             DataAtom<AtomPredicate> atom = dataNode.getProjectionAtom();
-            return Optional.of(atom)
-                    .map(DataAtom::getPredicate)
-                    .filter(p -> p instanceof RDFAtomPredicate)
-                    .map(p -> (RDFAtomPredicate) p)
-                    .flatMap(p -> getDefinition(p, atom.getArguments()));
+            AtomPredicate atomPredicate = atom.getPredicate();
+
+            if (atomPredicate instanceof RDFAtomPredicate) {
+                return Optional.of((RDFAtomPredicate) atomPredicate)
+                        .flatMap(p -> getDefinition(p, atom.getArguments()));
+            }
+            if (atomPredicate instanceof NodeInGraphPredicate) {
+                // TODO: in the case of a constant node but a variable graph, shall we list all the possible graphs?
+                throw new OntopUnsupportedKGQueryRuntimeException(
+                        "Unfolding NodeInGraphPredicate is not supported. " +
+                                "Please consider joining the variables of ZeroOrOne or ZeroOrMore property paths " +
+                                "with triple or quad patterns over the same graphs (default or named).");
+            }
+            return Optional.empty();
         }
 
         private Optional<IQ> getDefinition(RDFAtomPredicate predicate,
@@ -100,7 +112,7 @@ public class BasicQueryUnfolder extends AbstractIntensionalQueryMerger implement
         }
 
         private Optional<IQ> getStarDefinition(RDFAtomPredicate predicate) {
-            return queryMerger.mergeDefinitions(mapping.getQueries(predicate));
+            return mapping.getMergedDefinitions(predicate);
         }
 
         @Override

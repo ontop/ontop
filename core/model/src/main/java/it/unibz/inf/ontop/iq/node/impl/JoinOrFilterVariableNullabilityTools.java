@@ -1,35 +1,30 @@
 package it.unibz.inf.ontop.iq.node.impl;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Maps;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.evaluator.TermNullabilityEvaluator;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
+import it.unibz.inf.ontop.iq.impl.NaryIQTreeTools;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.utils.CoreUtilsFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
-import java.util.Collection;
-import java.util.Map;
 import java.util.Optional;
 
 public class JoinOrFilterVariableNullabilityTools {
 
     private final TermNullabilityEvaluator nullabilityEvaluator;
     private final CoreUtilsFactory coreUtilsFactory;
-    private final IQTreeTools iqTreeTools;
 
     @Inject
     private JoinOrFilterVariableNullabilityTools(TermNullabilityEvaluator nullabilityEvaluator,
-                                                 CoreUtilsFactory coreUtilsFactory, IQTreeTools iqTreeTools) {
+                                                 CoreUtilsFactory coreUtilsFactory) {
         this.nullabilityEvaluator = nullabilityEvaluator;
         this.coreUtilsFactory = coreUtilsFactory;
-        this.iqTreeTools = iqTreeTools;
     }
 
     public VariableNullability getChildrenVariableNullability(ImmutableList<IQTree> children) {
@@ -39,24 +34,16 @@ public class JoinOrFilterVariableNullabilityTools {
     public VariableNullability getVariableNullability(ImmutableList<IQTree> children,
                                                       Optional<ImmutableExpression> joiningCondition) {
 
-        ImmutableMap<Variable, Collection<IQTree>> variableProvenanceMap = children.stream()
-                .flatMap(c -> c.getVariables().stream()
-                        .map(v -> Maps.immutableEntry(v, c)))
-                .collect(ImmutableCollectors.toMultimap())
-                .asMap();
-
-        ImmutableSet<Variable> coOccuringVariables = variableProvenanceMap.entrySet().stream()
-                .filter(e -> e.getValue().size() > 1)
-                .map(Map.Entry::getKey)
+        ImmutableSet<Variable> coOccurringVariables = NaryIQTreeTools.coOccurringVariablesStream(children)
                 .collect(ImmutableCollectors.toSet());
 
         ImmutableSet<ImmutableSet<Variable>> nullableGroups = children.stream()
                 .flatMap(c -> c.getVariableNullability().getNullableGroups().stream())
                 .filter(g -> g.stream()
-                        .noneMatch(coOccuringVariables::contains))
+                        .noneMatch(coOccurringVariables::contains))
                 .collect(ImmutableCollectors.toSet());
 
-        ImmutableSet<Variable> scope =  iqTreeTools.getChildrenVariables(children);
+        ImmutableSet<Variable> scope = NaryIQTreeTools.projectedVariables(children);
 
         return joiningCondition
                 .map(e -> updateWithFilter(e, nullableGroups, scope))

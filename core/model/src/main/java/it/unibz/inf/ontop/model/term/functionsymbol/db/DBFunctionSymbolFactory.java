@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.model.term.functionsymbol.db;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.model.template.Template;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.InequalityLabel;
@@ -229,6 +230,7 @@ public interface DBFunctionSymbolFactory {
 
     DBMathBinaryOperator getDBMathBinaryOperator(String dbMathOperatorName, DBTermType arg1Type, DBTermType arg2Type);
 
+    DBFunctionSymbol getDBTemporalBinaryOperator(String operator, ImmutableList<DBTermType> argumentsTerms, DBTermType dbResultType);
     /**
      * Please use getDBMathBinaryOperator(...) if you know the type
      */
@@ -426,4 +428,7 @@ public interface DBFunctionSymbolFactory {
     DBBooleanFunctionSymbol getOntopContainsRole();
     DBBooleanFunctionSymbol getOntopContainsGroup();
     DBBooleanFunctionSymbol getOntopContainsRoleOrGroup();
+
+    ImmutableSet<ObjectStringTemplateFunctionSymbol> getObjectTemplates();
+
 }

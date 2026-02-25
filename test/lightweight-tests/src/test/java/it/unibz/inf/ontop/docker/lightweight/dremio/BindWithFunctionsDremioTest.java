@@ -12,8 +12,6 @@ import org.junit.jupiter.api.Test;
 import java.io.IOException;
 import java.sql.SQLException;
 
-import static org.junit.Assert.assertEquals;
-
 /**
  * Class to test if functions on Strings and Numerics in SPARQL are working properly.
  *
@@ -72,5 +70,12 @@ public class BindWithFunctionsDremioTest extends AbstractBindTestWithFunctions {
     @Override
     protected ImmutableSet<String> getStatisticalAttributesExpectedResults() {
         return ImmutableSet.of("\"215.340000\"^^xsd:decimal");
+    }
+
+    @Disabled("Dremio does not support REGEXP_LIKE with three arguments")
+    @Test
+    @Override
+    public void testCaseInsensitiveREGEX() {
+        super.testCaseInsensitiveREGEX();
     }
 }

@@ -36,7 +36,6 @@ public class OntopSQLCoreModule extends OntopAbstractModule {
         Module sqlAlgebraFactory = buildFactory(
                 ImmutableList.of(
                         SelectFromWhereWithModifiers.class,
-                        SQLSerializedQuery.class,
                         SQLTable.class,
                         SQLInnerJoinExpression.class,
                         SQLLeftJoinExpression.class,

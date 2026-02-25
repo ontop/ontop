@@ -55,6 +55,8 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
     private final SPARQLFunctionSymbol iriNoBaseFunctionSymbol;
 
     private final FunctionSymbol identityFunctionSymbol;
+    private final SPARQLFunctionSymbol bnodeTolerantSPARQLStrFunctionSymbol;
+    private final FunctionSymbol queryIdFunctionSymbol;
 
     /**
      * Created in init()
@@ -64,7 +66,6 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
      * Created in init()
      */
     private ImmutableTable<String, Integer, SPARQLFunctionSymbol> distinctSparqlAggregateFunctionTable;
-
 
 
     @Inject
@@ -77,7 +78,6 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
 
         DBTypeFactory dbTypeFactory = typeFactory.getDBTypeFactory();
         this.dbStringType = dbTypeFactory.getDBStringType();
-
         this.dbBooleanType = dbTypeFactory.getDBBooleanType();
         this.metaRDFType = typeFactory.getMetaRDFTermType();
 
@@ -104,10 +104,16 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
         this.notYetTypedEqualityFunctionSymbol = new NotYetTypedEqualityFunctionSymbolImpl(
                 dbTypeFactory.getAbstractRootDBType(), dbBooleanType);
 
-        this.iriNoBaseFunctionSymbol = new IriSPARQLFunctionSymbolImpl(typeFactory.getAbstractRDFTermType(),
-                typeFactory.getXsdStringDatatype(), typeFactory.getIRITermType());
-        this.extractLexicalTermFunctionSymbol = new ExtractLexicalTermFunctionSymbolImpl(typeFactory.getAbstractRDFTermType(), dbStringType);
+        var xsdStringType = typeFactory.getXsdStringDatatype();
+        var abstractRDFType = typeFactory.getAbstractRDFTermType();
+
+        this.iriNoBaseFunctionSymbol = new IriSPARQLFunctionSymbolImpl(abstractRDFType,
+                xsdStringType, typeFactory.getIRITermType());
+        this.extractLexicalTermFunctionSymbol = new ExtractLexicalTermFunctionSymbolImpl(abstractRDFType, dbStringType);
         this.identityFunctionSymbol = new IdentityFunctionSymbol(dbTypeFactory.getAbstractRootDBType());
+
+        this.bnodeTolerantSPARQLStrFunctionSymbol = new BNodeTolerantStrSPARQLFunctionSymbolImpl(abstractRDFType, xsdStringType);
+        this.queryIdFunctionSymbol = new QueryIdFunctionSymbol(dbStringType);
     }
 
     @Inject
@@ -135,6 +141,7 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
         RDFDatatype xsdDatetime = typeFactory.getXsdDatetimeDatatype();
         RDFDatatype xsdDate = typeFactory.getXsdDate();
         RDFDatatype abstractNumericType = typeFactory.getAbstractOntopNumericDatatype();
+        RDFDatatype abstractNumericOrTemporalType = typeFactory.getAbstractOntopNumericOrTemporalDatatype();
         RDFDatatype dateOrDatetime = typeFactory.getAbstractOntopDateOrDatetimeDatatype();
 
         DBTypeFactory dbTypeFactory = typeFactory.getDBTypeFactory();
@@ -178,10 +185,10 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
                 new Sha256SPARQLFunctionSymbolImpl(xsdString),
                 new Sha384SPARQLFunctionSymbolImpl(xsdString),
                 new Sha512SPARQLFunctionSymbolImpl(xsdString),
-                new NumericBinarySPARQLFunctionSymbolImpl("SP_MULTIPLY", SPARQL.NUMERIC_MULTIPLY, abstractNumericType),
-                new NumericBinarySPARQLFunctionSymbolImpl("SP_ADD", SPARQL.NUMERIC_ADD, abstractNumericType),
-                new NumericBinarySPARQLFunctionSymbolImpl("SP_SUBSTRACT", SPARQL.NUMERIC_SUBTRACT, abstractNumericType),
-                new DivideSPARQLFunctionSymbolImpl(abstractNumericType, xsdDecimal),
+                new BinaryArithmeticSPARQLFunctionSymbolImpl("SP_MULTIPLY", SPARQL.MULTIPLY, abstractNumericOrTemporalType, typeFactory),
+                new BinaryArithmeticSPARQLFunctionSymbolImpl("SP_ADD", SPARQL.ADD, abstractNumericOrTemporalType, typeFactory),
+                new BinaryArithmeticSPARQLFunctionSymbolImpl("SP_SUBSTRACT", SPARQL.SUBTRACT, abstractNumericOrTemporalType, typeFactory),
+                new DivideSPARQLFunctionSymbolImpl(abstractNumericType, xsdDecimal, typeFactory),
                 new NonStrictEqSPARQLFunctionSymbolImpl(abstractRDFType, xsdBoolean, dbBoolean),
                 new LessThanSPARQLFunctionSymbolImpl(abstractRDFType, xsdBoolean, dbBoolean),
                 new GreaterThanSPARQLFunctionSymbolImpl(abstractRDFType, xsdBoolean, dbBoolean),
@@ -243,6 +250,8 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
                         xsdDatetime, xsdDecimal, false, TermFactory::getDBMilliseconds),
                 new SimpleUnarySPARQLFunctionSymbolImpl("SP_MICROSECONDS", Ontop.MICROSECONDS_FROM_DATETIME,
                         xsdDatetime, xsdInteger, false, TermFactory::getDBMicroseconds),
+                new SimpleNullarySPARQLFunctionSymbolImpl("SP_QUERY_ID", Ontop.QUERY_ID,
+                        xsdString, termFactory -> termFactory.getImmutableFunctionalTerm(queryIdFunctionSymbol)),
 
                 new DateTruncSPARQLFunctionSymbolImpl(xsdDatetime,
                         xsdString, (t) -> dbFunctionSymbolFactory.getDBDateTrunc(t)),
@@ -683,11 +692,6 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
     }
 
     @Override
-    public FunctionSymbol getBinaryNumericLexicalFunctionSymbol(String dbNumericOperationName) {
-        return new BinaryNumericLexicalFunctionSymbolImpl(dbNumericOperationName, dbStringType, metaRDFType);
-    }
-
-    @Override
     public FunctionSymbol getUnaryLatelyTypedFunctionSymbol(Function<DBTermType, Optional<DBFunctionSymbol>> dbFunctionSymbolFct,
                                                             DBTermType targetType) {
         return new UnaryLatelyTypedFunctionSymbolImpl(dbStringType, metaRDFType, targetType, dbFunctionSymbolFct);
@@ -715,4 +719,13 @@ public class FunctionSymbolFactoryImpl implements FunctionSymbolFactory {
         return identityFunctionSymbol;
     }
 
+    @Override
+    public SPARQLFunctionSymbol getBNodeTolerantSPARQLStrFunctionSymbol() {
+        return bnodeTolerantSPARQLStrFunctionSymbol;
+    }
+
+    @Override
+    public FunctionSymbol getQueryId() {
+        return queryIdFunctionSymbol;
+    }
 }

@@ -5,12 +5,12 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class BasicLensPropagateFKUpTest {
     private static final String LENS_FILE = "src/test/resources/propagate-fk-up/lenses.json";
@@ -172,6 +172,4 @@ public class BasicLensPropagateFKUpTest {
             return ImmutableSet.of(targetRelation.hashCode(), mappedColumns.hashCode()).hashCode();
         }
     }
-
-
 }

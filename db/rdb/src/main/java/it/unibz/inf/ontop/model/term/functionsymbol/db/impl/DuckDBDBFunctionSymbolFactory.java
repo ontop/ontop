@@ -2,12 +2,15 @@ package it.unibz.inf.ontop.model.term.functionsymbol.db.impl;
 
 import com.google.common.collect.*;
 import com.google.inject.Inject;
+import it.unibz.inf.ontop.model.term.DBConstant;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.*;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.DBTypeFactory;
 import it.unibz.inf.ontop.model.type.TypeFactory;
+import it.unibz.inf.ontop.utils.Interval;
+import it.unibz.inf.ontop.model.vocabulary.SPARQL;
 
 import java.util.UUID;
 import java.util.function.Function;
@@ -18,6 +21,7 @@ import static it.unibz.inf.ontop.model.type.impl.DuckDBDBTypeFactory.*;
 public class DuckDBDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFactory {
 
     private static final String UUID_STRING_STR = "UUID";
+    private static final String NOT_YET_SUPPORTED_MSG = "Not yet supported for DuckDB";
 
     private DBFunctionSymbol charLengthFunctionSymbol;
     private DBFunctionSymbol regexpLikeFunctionSymbol;
@@ -129,13 +133,6 @@ public class DuckDBDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFa
         return String.format("(LPAD(EXTRACT(TIMEZONE_HOUR FROM %s)::text,2,'0') || ':' || LPAD(EXTRACT(TIMEZONE_MINUTE FROM %s)::text,2,'0'))", str, str);
     }
 
-
-
-
-
-
-
-
     @Override
     protected DBConcatFunctionSymbol createNullRejectingDBConcat(int arity) {
         return createDBConcatOperator(arity);
@@ -160,6 +157,11 @@ public class DuckDBDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFa
     @Override
     public DBBooleanFunctionSymbol getDBRegexpMatches2() {
         return (DBBooleanFunctionSymbol) this.regexpLikeFunctionSymbol;
+    }
+
+    @Override
+    public DBBooleanFunctionSymbol getDBRegexpMatches3() {
+        throw new UnsupportedOperationException(REGEXP_LIKE_STR + "3: " + NOT_YET_SUPPORTED_MSG);
     }
 
     @Override
@@ -200,9 +202,6 @@ public class DuckDBDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFa
 
         };
     }
-
-
-
 
     @Override
     protected String serializeWeeksBetween(ImmutableList<? extends ImmutableTerm> terms,
@@ -293,5 +292,23 @@ public class DuckDBDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFa
     @Override
     protected DBFunctionSymbol createDBSample(DBTermType termType) {
         return new DBSampleFunctionSymbolImpl(termType, "FIRST");
+    }
+
+    @Override
+    protected DBTermType inferOutputTypeMathOperator(String dbMathOperatorName, DBTermType arg1Type, DBTermType arg2Type) {
+        if (dbMathOperatorName.equals(SPARQL.DIVIDE))
+            return dbDecimalType;
+
+        return super.inferOutputTypeMathOperator(dbMathOperatorName, arg1Type, arg2Type);
+    }
+
+    @Override
+    protected String serializeIntervalDenorm(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        if (!(terms.get(0) instanceof DBConstant)) {
+            throw new UnsupportedOperationException("Only constant intervals are supported");
+        }
+
+        Interval interval = new Interval(((DBConstant) terms.get(0)).getValue());
+        return interval.serializeAsFullInterval();
     }
 }

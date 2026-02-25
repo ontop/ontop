@@ -1,0 +1,96 @@
+package it.unibz.inf.ontop.iq.optimizer.impl;
+
+import com.google.common.collect.*;
+import it.unibz.inf.ontop.injection.CoreSingletons;
+import it.unibz.inf.ontop.iq.IQTree;
+import it.unibz.inf.ontop.iq.impl.NaryIQTreeTools;
+import it.unibz.inf.ontop.iq.node.*;
+import it.unibz.inf.ontop.iq.transform.IQTreeTransformer;
+import it.unibz.inf.ontop.iq.transform.IQTreeVariableGeneratorTransformer;
+import it.unibz.inf.ontop.iq.transform.impl.AbstractDelegatingIQTreeVariableGeneratorTransformer;
+import it.unibz.inf.ontop.iq.visit.IQTreeVisitor;
+import it.unibz.inf.ontop.iq.visitor.RequiredExtensionalDataNodeExtractor;
+import it.unibz.inf.ontop.model.term.ImmutableExpression;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
+
+import javax.inject.Inject;
+import java.util.Optional;
+import java.util.stream.Stream;
+
+import static it.unibz.inf.ontop.iq.impl.UnaryIQTreeTools.UnaryIQTreeDecomposition;
+
+public class BelowDistinctJoinWithClassUnionOptimizer extends AbstractDelegatingIQTreeVariableGeneratorTransformer implements IQTreeVariableGeneratorTransformer {
+
+    private final IQTreeVariableGeneratorTransformer lookForDistinctTransformer;
+    private final CoreSingletons coreSingletons;
+    private final RequiredExtensionalDataNodeExtractor requiredExtensionalDataNodeExtractor;
+
+    @Inject
+    protected BelowDistinctJoinWithClassUnionOptimizer(CoreSingletons coreSingletons,
+                                                       RequiredExtensionalDataNodeExtractor requiredExtensionalDataNodeExtractor) {
+        this.coreSingletons = coreSingletons;
+        this.requiredExtensionalDataNodeExtractor = requiredExtensionalDataNodeExtractor;
+        this.lookForDistinctTransformer = IQTreeVariableGeneratorTransformer.of(new CaseInsensitiveIQTreeTransformerAdapter(coreSingletons.getIQFactory()) {
+            private final IQTreeVisitor<IQTree> transformer = new BelowDistinctTransformer(IQTreeTransformer.of(this), iqFactory, new JoinWithClassUnionTransformer());
+
+            @Override
+            protected IQTree transformCardinalityInsensitiveTree(IQTree tree) {
+                return tree.acceptVisitor(transformer);
+            }
+        });
+    }
+
+    @Override
+    protected IQTreeVariableGeneratorTransformer getTransformer() {
+        return lookForDistinctTransformer;
+    }
+
+    private class JoinWithClassUnionTransformer extends AbstractBelowDistinctInnerJoinTransformer {
+
+        JoinWithClassUnionTransformer() {
+            super(BelowDistinctJoinWithClassUnionOptimizer.this.coreSingletons);
+        }
+
+        /**
+         * Should not return any false positives
+         */
+        @Override
+        protected boolean isDetectedAsRedundant(IQTree child, Stream<IQTree> otherChildrenStream) {
+            ImmutableSet<IQTree> otherChildren = otherChildrenStream.collect(ImmutableCollectors.toSet());
+
+            var union = NaryIQTreeTools.UnionDecomposition.of(child);
+            if (union.isPresent())
+                return union.getChildren().stream()
+                    .flatMap(c -> extractExtensionalNode(c).stream())
+                    .anyMatch(c -> otherChildren.stream()
+                            .flatMap(requiredExtensionalDataNodeExtractor::transform)
+                            .anyMatch(o -> isDetectedAsRedundant(c, o)));
+            return false;
+        }
+
+        private Optional<ExtensionalDataNode> extractExtensionalNode(IQTree child) {
+            /*
+             * Filters just make much the variables are non-null can be eliminating,
+             * because we are interested in cases where we join over these variables
+             */
+            var filter = UnaryIQTreeDecomposition.of(child, FilterNode.class);
+            if (filter.isPresent()) {
+                VariableNullability variableNullability = coreSingletons.getCoreUtilsFactory()
+                        .createEmptyVariableNullability(child.getVariables());
+
+                ImmutableExpression filterCondition = filter.getNode().getFilterCondition();
+
+                return filterCondition.evaluate2VL(variableNullability)
+                        .getValue()
+                        .filter(b -> b.equals(ImmutableExpression.Evaluation.BooleanValue.TRUE))
+                        // Continue to the child
+                        .flatMap(b -> extractExtensionalNode(filter.getChild()));
+            }
+
+            if (child instanceof ExtensionalDataNode)
+                return Optional.of((ExtensionalDataNode) child);
+
+            return Optional.empty();
+        }
+    }
+}

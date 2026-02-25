@@ -9,10 +9,13 @@ import it.unibz.inf.ontop.dbschema.*;
 import it.unibz.inf.ontop.dbschema.impl.DatabaseTableDefinition;
 import it.unibz.inf.ontop.dbschema.impl.OfflineMetadataProviderBuilder;
 import it.unibz.inf.ontop.injection.*;
+import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.iq.optimizer.*;
 import it.unibz.inf.ontop.iq.tools.UnionBasedQueryMerger;
+import it.unibz.inf.ontop.iq.transform.QueryRenamer;
 import it.unibz.inf.ontop.iq.transformer.BooleanExpressionPushDownTransformer;
+import it.unibz.inf.ontop.iq.transformer.ExplicitEqualityTransformer;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.term.*;
@@ -33,14 +36,15 @@ import java.util.stream.IntStream;
 public class OptimizationTestingTools {
 
     public static final IntermediateQueryFactory IQ_FACTORY;
+    public static final IQTreeTools IQ_TREE_TOOLS;
     public static final JoinLikeOptimizer JOIN_LIKE_OPTIMIZER;
     public static final AtomFactory ATOM_FACTORY;
     public static final TypeFactory TYPE_FACTORY;
     public static final TermFactory TERM_FACTORY;
     public static final FunctionSymbolFactory FUNCTION_SYMBOL_FACTORY;
     public static final SubstitutionFactory SUBSTITUTION_FACTORY;
-    public static final QueryTransformerFactory TRANSFORMER_FACTORY;
-    public static final OptimizerFactory OPTIMIZER_FACTORY;
+    public static final QueryRenamer QUERY_RENAMER;
+    public static final ExplicitEqualityTransformer EXPLICIT_EQUALITY_TRANSFORMER;
     public static final CoreUtilsFactory CORE_UTILS_FACTORY;
     public static final BooleanExpressionPushDownTransformer PUSH_DOWN_BOOLEAN_EXPRESSION_TRANSFORMER;
     public static final DBConstant TRUE, FALSE;
@@ -115,6 +119,7 @@ public class OptimizationTestingTools {
 
         Injector injector = defaultConfiguration.getInjector();
         IQ_FACTORY = injector.getInstance(IntermediateQueryFactory.class);
+        IQ_TREE_TOOLS = injector.getInstance(IQTreeTools.class);
         JOIN_LIKE_OPTIMIZER = injector.getInstance(JoinLikeOptimizer.class);
         ATOM_FACTORY = injector.getInstance(AtomFactory.class);
         TYPE_FACTORY = injector.getInstance(TypeFactory.class);
@@ -123,9 +128,9 @@ public class OptimizationTestingTools {
         SUBSTITUTION_FACTORY = injector.getInstance(SubstitutionFactory.class);
         CORE_UTILS_FACTORY = injector.getInstance(CoreUtilsFactory.class);
         UNION_AND_BINDING_LIFT_OPTIMIZER = injector.getInstance(UnionAndBindingLiftOptimizer.class);
+        EXPLICIT_EQUALITY_TRANSFORMER = injector.getInstance(ExplicitEqualityTransformer.class);
         PUSH_DOWN_BOOLEAN_EXPRESSION_TRANSFORMER = injector.getInstance(BooleanExpressionPushDownTransformer.class);
-        TRANSFORMER_FACTORY = injector.getInstance(QueryTransformerFactory.class);
-        OPTIMIZER_FACTORY = injector.getInstance(OptimizerFactory.class);
+        QUERY_RENAMER = injector.getInstance(QueryRenamer.class);
         CORE_SINGLETONS = injector.getInstance(CoreSingletons.class);
         GENERAL_STRUCTURAL_AND_SEMANTIC_IQ_OPTIMIZER = injector.getInstance(GeneralStructuralAndSemanticIQOptimizer.class);
 
@@ -148,7 +153,7 @@ public class OptimizationTestingTools {
         Z = TERM_FACTORY.getVariable("z");
         A = TERM_FACTORY.getVariable("a");
         AGGV = TERM_FACTORY.getVariable("aggv");
-        AGGVF0 = TERM_FACTORY.getVariable("aggvf0");
+        AGGVF0 = TERM_FACTORY.getVariable("aggvf2");
         AF0 = TERM_FACTORY.getVariable("af0");
         AF1 = TERM_FACTORY.getVariable("af1");
         B = TERM_FACTORY.getVariable("b");

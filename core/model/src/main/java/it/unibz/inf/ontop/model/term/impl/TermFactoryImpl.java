@@ -453,16 +453,6 @@ public class TermFactoryImpl implements TermFactory {
 	}
 
 	@Override
-	public ImmutableFunctionalTerm getBinaryNumericLexicalFunctionalTerm(String dbNumericOperationName,
-																		 ImmutableTerm lexicalTerm1,
-																		 ImmutableTerm lexicalTerm2,
-																		 ImmutableTerm rdfTypeTerm) {
-		return getImmutableFunctionalTerm(
-				functionSymbolFactory.getBinaryNumericLexicalFunctionSymbol(dbNumericOperationName),
-				lexicalTerm1, lexicalTerm2, rdfTypeTerm);
-	}
-
-	@Override
 	public ImmutableFunctionalTerm getDBBinaryNumericFunctionalTerm(String dbNumericOperationName,  DBTermType dbNumericType,
 																	ImmutableTerm dbTerm1, ImmutableTerm dbTerm2) {
 		return getImmutableFunctionalTerm(
@@ -477,6 +467,14 @@ public class TermFactoryImpl implements TermFactory {
 				dbFunctionSymbolFactory.getDBMathBinaryOperator(dbNumericOperationName, argumentType1, argumentType2),
 				dbTerm1, dbTerm2);
 	}
+
+    @Override
+    public ImmutableFunctionalTerm getDBBinaryTemporalFunctionalTerm(String dbArithmeticOperationName, ImmutableList<ImmutableTerm> dbTerms,
+                                                                     ImmutableList<DBTermType> argumentsTypes, DBTermType returnType) {
+        return getImmutableFunctionalTerm(
+                dbFunctionSymbolFactory.getDBTemporalBinaryOperator(dbArithmeticOperationName, argumentsTypes, returnType),
+                dbTerms.get(0), dbTerms.get(1));
+    }
 
 	@Override
 	public ImmutableFunctionalTerm getUnaryLatelyTypedFunctionalTerm(ImmutableTerm lexicalTerm,
@@ -1392,7 +1390,7 @@ public class TermFactoryImpl implements TermFactory {
 		return getImmutableFunctionalTerm(dbFunctionSymbolFactory.getDBDateTrunc(datePart), dbDatetimeTerm, datePartTerm);
 	}
 
-    @Override
+	@Override
     public ImmutableFunctionalTerm getIdentityFunctionalTerm(ImmutableTerm term) {
 		return getImmutableFunctionalTerm(functionSymbolFactory.getIdentity(), term);
     }

@@ -84,7 +84,7 @@ public class JsonDatabaseTable extends JsonOpenObject {
                     idFactory.createAttributeID(attribute.name),
                     attribute.datatype != null
                             ? dbTypeFactory.getDBTermType(attribute.datatype)
-                            :dbTypeFactory.getAbstractRootDBType(),
+                            : dbTypeFactory.getAbstractRootDBType(),
                     attribute.isNullable);
 
         ImmutableList<RelationID> allIDs = Stream.concat(Stream.of(name), otherNames.stream())

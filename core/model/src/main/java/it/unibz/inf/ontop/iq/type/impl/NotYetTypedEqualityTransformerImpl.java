@@ -10,9 +10,7 @@ import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.NotYetTypedEqualityFunctionSymbol;
 import it.unibz.inf.ontop.model.type.DBTermType;
-import it.unibz.inf.ontop.model.type.TermType;
 import it.unibz.inf.ontop.iq.type.NotYetTypedEqualityTransformer;
-import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import javax.inject.Inject;
 import java.util.Optional;
@@ -24,11 +22,10 @@ public class NotYetTypedEqualityTransformerImpl implements NotYetTypedEqualityTr
 
     @Inject
     protected NotYetTypedEqualityTransformerImpl(IntermediateQueryFactory iqFactory,
-                                                 SingleTermTypeExtractor typeExtractor,
-                                                 TermFactory termFactory) {
-        this.expressionTransformer = new ExpressionTransformer(iqFactory,
-                                                                typeExtractor,
-                                                                termFactory);
+                                                 TermFactory termFactory,
+                                                 SingleTermTypeExtractor typeExtractor) {
+        this.expressionTransformer = new ExpressionTransformer(iqFactory, termFactory, typeExtractor)
+                .treeTransformer();
     }
 
     @Override
@@ -36,18 +33,9 @@ public class NotYetTypedEqualityTransformerImpl implements NotYetTypedEqualityTr
         return expressionTransformer.transform(tree);
     }
 
-
-    protected static class ExpressionTransformer extends AbstractExpressionTransformer {
-
-        protected ExpressionTransformer(IntermediateQueryFactory iqFactory,
-                                        SingleTermTypeExtractor typeExtractor,
-                                        TermFactory termFactory) {
-            super(iqFactory, typeExtractor, termFactory);
-        }
-
-        @Override
-        protected boolean isFunctionSymbolToReplace(FunctionSymbol functionSymbol) {
-            return functionSymbol instanceof NotYetTypedEqualityFunctionSymbol;
+    private static class ExpressionTransformer extends AbstractTypedTermTransformer {
+        ExpressionTransformer(IntermediateQueryFactory iqFactory, TermFactory termFactory, SingleTermTypeExtractor typeExtractor) {
+            super(iqFactory, termFactory, typeExtractor);
         }
 
         /**
@@ -56,36 +44,29 @@ public class NotYetTypedEqualityTransformerImpl implements NotYetTypedEqualityTr
          * Essential for integers and strings as these kinds of types are often used to build IRIs.
          */
         @Override
-        protected ImmutableFunctionalTerm replaceFunctionSymbol(FunctionSymbol functionSymbol,
+        protected Optional<ImmutableFunctionalTerm> replaceFunctionSymbol(FunctionSymbol functionSymbol,
                                                                 ImmutableList<ImmutableTerm> newTerms, IQTree tree) {
-            if (newTerms.size() != 2)
-                throw new MinorOntopInternalBugException("Was expecting the not yet typed equalities to be binary");
+            if (functionSymbol instanceof NotYetTypedEqualityFunctionSymbol) {
+                if (newTerms.size() != 2)
+                    throw new MinorOntopInternalBugException("Was expecting the not yet typed equalities to be binary");
 
-            ImmutableTerm term1 = newTerms.get(0);
-            ImmutableTerm term2 = newTerms.get(1);
+                ImmutableTerm term1 = newTerms.get(0);
+                ImmutableTerm term2 = newTerms.get(1);
 
-            ImmutableList<Optional<TermType>> extractedTypes = newTerms.stream()
-                    .map(t -> typeExtractor.extractSingleTermType(t, tree))
-                    .collect(ImmutableCollectors.toList());
+                Optional<DBTermType> optionalType1 = getDBTermType(term1, tree);
+                Optional<DBTermType> optionalType2 = getDBTermType(term2, tree);
 
-            if (extractedTypes.stream()
-                    .allMatch(type -> type
-                            .filter(t -> t instanceof DBTermType)
-                            .isPresent())) {
-                ImmutableList<DBTermType> types = extractedTypes.stream()
-                        .map(Optional::get)
-                        .map(t -> (DBTermType) t)
-                        .collect(ImmutableCollectors.toList());
+                if (optionalType1.isPresent() && optionalType2.isPresent()) {
+                    DBTermType type1 = optionalType1.get();
+                    DBTermType type2 = optionalType2.get();
 
-                DBTermType type1 = types.get(0);
-                DBTermType type2 = types.get(1);
-
-                return type1.equals(type2)
-                        ? transformSameTypeEquality(type1, term1, term2, tree)
-                        : transformDifferentTypesEquality(type1, type2, term1, term2);
+                    return Optional.of(type1.equals(type2)
+                            ? transformSameTypeEquality(type1, term1, term2, tree)
+                            : transformDifferentTypesEquality(type1, type2, term1, term2));
+                }
+                return Optional.of(termFactory.getDBNonStrictDefaultEquality(term1, term2));
             }
-            else
-                return termFactory.getDBNonStrictDefaultEquality(term1, term2);
+            return Optional.empty();
         }
 
         private ImmutableExpression transformSameTypeEquality(DBTermType type, ImmutableTerm term1, ImmutableTerm term2,
@@ -111,7 +92,7 @@ public class NotYetTypedEqualityTransformerImpl implements NotYetTypedEqualityTr
             }
         }
 
-        protected ImmutableExpression transformDifferentTypesEquality(DBTermType type1, DBTermType type2,
+        private ImmutableExpression transformDifferentTypesEquality(DBTermType type1, DBTermType type2,
                                                                       ImmutableTerm term1, ImmutableTerm term2) {
             /*
              * If not type declares that the equality cannot be reduced to a strict equality
@@ -169,7 +150,7 @@ public class NotYetTypedEqualityTransformerImpl implements NotYetTypedEqualityTr
          * Constants in the mapping are indeed uncontrolled and may have a different lexical value
          * that the ones returned by the DB, which would make the test fail.
          */
-        protected boolean areIndependentFromConstants(ImmutableTerm term1, ImmutableTerm term2, IQTree tree) {
+        private boolean areIndependentFromConstants(ImmutableTerm term1, ImmutableTerm term2, IQTree tree) {
             return !((term1 instanceof DBConstant) || (term2 instanceof DBConstant));
         }
 

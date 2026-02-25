@@ -1,13 +1,15 @@
 package it.unibz.inf.ontop.iq.node;
 
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
-import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
-import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
+import it.unibz.inf.ontop.iq.IQTree;
+import it.unibz.inf.ontop.iq.UnaryIQTree;
+import it.unibz.inf.ontop.iq.visit.IQTreeVisitor;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
+import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.substitution.InjectiveSubstitution;
 import it.unibz.inf.ontop.substitution.Substitution;
 
 /**
- * Head node an IntermediateQuery
  *
  * TODO: further explain
  *
@@ -20,6 +22,11 @@ public interface ConstructionNode extends ExtendedProjectionNode {
     Substitution<ImmutableTerm> getSubstitution();
 
     @Override
-    ConstructionNode acceptNodeTransformer(HomogeneousQueryNodeTransformer transformer)
-            throws QueryNodeTransformationException;
+    ConstructionNode applyFreshRenaming(InjectiveSubstitution<Variable> renamingSubstitution);
+
+    @Override
+    default <T> T acceptVisitor(UnaryIQTree tree, IQTreeVisitor<T> visitor, IQTree child) {
+        return visitor.transformConstruction(tree, this, child);
+    }
+
 }

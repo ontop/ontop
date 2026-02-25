@@ -22,6 +22,10 @@ public interface OntopOBDASettings extends OntopModelSettings {
      */
     boolean exposeSystemTables();
 
+    /**
+     * The SQL script that is executed each time a new connection is created.
+     */
+    String initScript();
     //--------------------------
     // Keys
     //--------------------------
@@ -31,4 +35,5 @@ public interface OntopOBDASettings extends OntopModelSettings {
     String IGNORE_INVALID_MAPPING_ENTRIES = "ontop.ignoreInvalidMappingEntries";
     String IGNORE_INVALID_LENS_ENTRIES = "ontop.ignoreInvalidLensEntries";
     String EXPOSE_SYSTEM_TABLES = "ontop.exposeSystemTables";
+    String INIT_SCRIPT = "jdbc.initScript";
 }

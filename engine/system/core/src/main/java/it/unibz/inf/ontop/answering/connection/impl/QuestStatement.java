@@ -244,7 +244,7 @@ public abstract class QuestStatement implements OntopStatement {
 																			  QueryContext queryContext, Evaluator<R, Q> evaluator)
 			throws OntopReformulationException, OntopQueryEvaluationException {
 
-		QueryLogger queryLogger = queryLoggerFactory.create(normalizedHttpHeaders);
+		QueryLogger queryLogger = queryLoggerFactory.create(queryContext);
 		queryLogger.setSparqlQuery(inputQuery.getOriginalString());
 
 		CountDownLatch monitor = new CountDownLatch(1);
@@ -320,8 +320,9 @@ public abstract class QuestStatement implements OntopStatement {
 	@Override
 	public  <R extends OBDAResultSet>  IQ getExecutableQuery(KGQuery<R> inputQuery, ImmutableMultimap<String, String> httpHeaders) throws OntopReformulationException {
 		ImmutableMap<String, String> normalizedHttpHeaders = normalizeHttpHeaders(httpHeaders);
-		return engine.reformulateIntoNativeQuery(inputQuery, queryContextFactory.create(normalizedHttpHeaders),
-				queryLoggerFactory.create(normalizedHttpHeaders));
+		QueryContext queryContext = queryContextFactory.create(normalizedHttpHeaders);
+
+		return engine.reformulateIntoNativeQuery(inputQuery, queryContext, queryLoggerFactory.create(queryContext));
 	}
 
 }

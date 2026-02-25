@@ -1,6 +1,5 @@
 package it.unibz.inf.ontop.iq;
 
-import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.substitution.InjectiveSubstitution;
 

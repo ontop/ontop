@@ -1,11 +1,13 @@
 package it.unibz.inf.ontop.iq.node;
 
 import com.google.common.collect.ImmutableSet;
-import it.unibz.inf.ontop.iq.exception.QueryNodeTransformationException;
-import it.unibz.inf.ontop.iq.transform.node.HomogeneousQueryNodeTransformer;
+import it.unibz.inf.ontop.iq.IQTree;
+import it.unibz.inf.ontop.iq.UnaryIQTree;
+import it.unibz.inf.ontop.iq.visit.IQTreeVisitor;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.TermType;
+import it.unibz.inf.ontop.substitution.InjectiveSubstitution;
 
 import java.util.Optional;
 
@@ -57,9 +59,6 @@ import java.util.Optional;
  */
 public interface FlattenNode extends UnaryOperatorNode {
 
-    @Override
-    FlattenNode acceptNodeTransformer(HomogeneousQueryNodeTransformer transformer) throws QueryNodeTransformationException;
-
     Variable getFlattenedVariable();
 
     DBTermType getFlattenedType();
@@ -76,4 +75,12 @@ public interface FlattenNode extends UnaryOperatorNode {
      * Set of variables returned by a tree with this node as root, given the variables provided by the children
      */
     ImmutableSet<Variable> getVariables(ImmutableSet<Variable> childVariables);
+
+    @Override
+    FlattenNode applyFreshRenaming(InjectiveSubstitution<Variable> renamingSubstitution);
+
+    @Override
+    default <T> T acceptVisitor(UnaryIQTree tree, IQTreeVisitor<T> visitor, IQTree child) {
+        return visitor.transformFlatten(tree, this, child);
+    }
 }

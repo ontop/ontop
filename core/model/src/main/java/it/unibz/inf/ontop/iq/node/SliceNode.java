@@ -1,8 +1,13 @@
 package it.unibz.inf.ontop.iq.node;
 
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
+import it.unibz.inf.ontop.iq.IQTree;
+import it.unibz.inf.ontop.iq.UnaryIQTree;
+import it.unibz.inf.ontop.iq.visit.IQTreeVisitor;
+import it.unibz.inf.ontop.model.term.Variable;
+import it.unibz.inf.ontop.substitution.InjectiveSubstitution;
 
-import java.util.Optional;
+import java.util.OptionalLong;
 
 /**
  * See {@link IntermediateQueryFactory#createSliceNode} for creating a new instance.
@@ -17,5 +22,13 @@ public interface SliceNode extends QueryModifierNode {
     /**
      * Length of the slice
      */
-    Optional<Long> getLimit();
+    OptionalLong getLimit();
+
+    @Override
+    SliceNode applyFreshRenaming(InjectiveSubstitution<Variable> freshRenamingSubstitution);
+
+    @Override
+    default <T> T acceptVisitor(UnaryIQTree tree, IQTreeVisitor<T> visitor, IQTree child) {
+        return visitor.transformSlice(tree, this, child);
+    }
 }

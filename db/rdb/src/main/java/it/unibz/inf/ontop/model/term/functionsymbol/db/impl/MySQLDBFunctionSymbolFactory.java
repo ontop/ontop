@@ -14,6 +14,7 @@ import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.DBTypeFactory;
 import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.model.vocabulary.SPARQL;
+import it.unibz.inf.ontop.utils.Interval;
 
 
 import java.util.HashMap;
@@ -112,7 +113,7 @@ public class MySQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFac
 
     @Override
     protected DBTermType inferOutputTypeMathOperator(String dbMathOperatorName, DBTermType arg1Type, DBTermType arg2Type) {
-        if (dbMathOperatorName.equals(SPARQL.NUMERIC_DIVIDE))
+        if (dbMathOperatorName.equals(SPARQL.DIVIDE))
             return dbDecimalType;
 
         return super.inferOutputTypeMathOperator(dbMathOperatorName, arg1Type, arg2Type);
@@ -531,5 +532,15 @@ public class MySQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbolFac
             throw new UnsupportedOperationException("This dialect does not allow the use of DISTINCT with the variance function.");
         }
         return super.getNullIgnoringDBVariance(dbType, isPop, false);
+    }
+
+    @Override
+    protected String serializeIntervalDenorm(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
+        if (!(terms.get(0) instanceof DBConstant)) {
+            throw new UnsupportedOperationException("Only constant intervals are supported");
+        }
+
+        Interval interval = new Interval(((DBConstant) terms.get(0)).getValue());
+        return interval.serializeAsYearMonthDayTimeSum("YEAR_MONTH", "DAY_MICROSECOND");
     }
 }

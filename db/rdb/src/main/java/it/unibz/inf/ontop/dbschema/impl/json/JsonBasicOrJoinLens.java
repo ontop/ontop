@@ -12,24 +12,19 @@ import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
-import it.unibz.inf.ontop.iq.node.ConstructionNode;
+import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.normalization.ConstructionSubstitutionNormalizer;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.spec.sqlparser.ExpressionParser;
-import it.unibz.inf.ontop.spec.sqlparser.JSqlParserTools;
 import it.unibz.inf.ontop.spec.sqlparser.RAExpressionAttributes;
+import it.unibz.inf.ontop.spec.sqlparser.exception.UnsupportedSelectQueryException;
 import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
-import net.sf.jsqlparser.JSQLParserException;
-import net.sf.jsqlparser.statement.select.PlainSelect;
-import net.sf.jsqlparser.statement.select.Select;
-import net.sf.jsqlparser.statement.select.SelectExpressionItem;
-import net.sf.jsqlparser.statement.select.SelectItem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,12 +45,14 @@ public abstract class JsonBasicOrJoinLens extends JsonBasicOrJoinOrNestedLens {
 
     protected JsonBasicOrJoinLens(List<String> name, @Nullable UniqueConstraints uniqueConstraints,
                                   @Nullable OtherFunctionalDependencies otherFunctionalDependencies,
-                                  @Nullable ForeignKeys foreignKeys, @Nullable NonNullConstraints nonNullConstraints,
+                                  @Nullable ForeignKeys foreignKeys,
+                                  @Nullable NonNullConstraints nonNullConstraints,
                                   @Nullable IRISafeConstraints iriSafeConstraints,
-                                  @Nullable Columns columns, @Nonnull String filterExpression) {
+                                  @Nullable Columns columns,
+                                  @Nullable String filterExpression) {
         super(name, uniqueConstraints, otherFunctionalDependencies, foreignKeys, nonNullConstraints, iriSafeConstraints);
         this.columns = columns == null ? new Columns(new ArrayList<>(), new ArrayList<>()) : columns;
-        this.filterExpression = filterExpression;
+        this.filterExpression = filterExpression == null ? "" : filterExpression;
     }
 
     @Override
@@ -115,7 +112,8 @@ public abstract class JsonBasicOrJoinLens extends JsonBasicOrJoinOrNestedLens {
 
         insertForeignKeys(relation, metadataLookupForFK,
                 (foreignKeys != null) ? foreignKeys.added : ImmutableList.of(),
-                baseRelations);
+                baseRelations,
+                coreSingletons);
     }
 
     private IQ createIQ(RelationID relationId, ImmutableList<ParentDefinition> parentDefinitions, DBParameters dbParameters)
@@ -128,6 +126,7 @@ public abstract class JsonBasicOrJoinLens extends JsonBasicOrJoinOrNestedLens {
         IntermediateQueryFactory iqFactory = coreSingletons.getIQFactory();
         AtomFactory atomFactory = coreSingletons.getAtomFactory();
         SubstitutionFactory substitutionFactory = coreSingletons.getSubstitutionFactory();
+        IQTreeTools iqTreeTools = coreSingletons.getIQTreeTools();
 
         // cannot use the keySet of substitutionMap because need to createAttributeVariableMap first
         ImmutableSet<Variable> addedVariables = columns.added.stream()
@@ -151,33 +150,29 @@ public abstract class JsonBasicOrJoinLens extends JsonBasicOrJoinOrNestedLens {
                 .map(a -> getVariable(a, idFactory, termFactory))
                 .collect(ImmutableCollectors.toSet());
 
-        ImmutableList<Variable> projectedVariables = extractRelationVariables(addedVariables, hiddenVariables, parentDefinitions, termFactory);
+        ImmutableList<Variable> projectedVariablesList = extractRelationVariables(addedVariables, hiddenVariables, parentDefinitions, termFactory);
+        ImmutableSet<Variable> projectedVariables = ImmutableSet.copyOf(projectedVariablesList);
 
-        ConstructionSubstitutionNormalizer.ConstructionSubstitutionNormalization normalization =
-                substitutionNormalizer.normalizeSubstitution(substitution,
-                        ImmutableSet.copyOf(projectedVariables));
+        ImmutableList<IQTree> parents = parentDefinitions.stream()
+                .map(p -> iqFactory.createExtensionalDataNode(p.relation, p.getArgumentMap()))
+                .collect(ImmutableCollectors.toList());
 
-        IQTree parentTree = createParentTree(parentDefinitions, iqFactory);
+        IQTree parentTree = iqTreeTools.createOptionalInnerJoinTree(Optional.empty(), parents)
+                .orElseThrow(() -> new MetadataExtractionException("At least one base relation was expected"));
 
-        ConstructionNode constructionNode = normalization.generateTopConstructionNode()
-                // In case, we reintroduce a ConstructionNode to get rid of unnecessary variables from the parent relation
-                // It may be eliminated by the IQ normalization
-                .orElseGet(() -> iqFactory.createConstructionNode(ImmutableSet.copyOf(projectedVariables)));
+        Optional<ImmutableExpression> optionalFilterCondition = extractFilter(parentAttributeMap, idFactory, coreSingletons).stream()
+                .reduce(termFactory::getConjunction);
 
-        ImmutableList<ImmutableExpression> filterConditions = extractFilter(parentAttributeMap, idFactory, coreSingletons);
+        IQTree filterTree = iqTreeTools.unaryIQTreeBuilder()
+                .append(iqTreeTools.createOptionalFilterNode(optionalFilterCondition))
+                .build(parentTree);
 
-        IQTree updatedParentDataNode = filterConditions.stream()
-                .reduce(termFactory::getConjunction)
-                .map(iqFactory::createFilterNode)
-                .map(f -> normalization.updateChild(iqFactory.createUnaryIQTree(f, parentTree), variableGenerator))
-                .orElse(normalization.updateChild(parentTree, variableGenerator));
-
-        IQTree iqTreeBeforeIRISafeConstraints = iqFactory.createUnaryIQTree(constructionNode, updatedParentDataNode);
+        IQTree iqTreeBeforeIRISafeConstraints = substitutionNormalizer.createNormalizedConstructionTree(substitution, projectedVariables, filterTree);
 
         IQTree iqTree = addIRISafeConstraints(iqTreeBeforeIRISafeConstraints, dbParameters);
 
-        AtomPredicate tmpPredicate = createTemporaryPredicate(relationId, projectedVariables.size(), coreSingletons);
-        DistinctVariableOnlyDataAtom projectionAtom = atomFactory.getDistinctVariableOnlyDataAtom(tmpPredicate, projectedVariables);
+        AtomPredicate tmpPredicate = createTemporaryPredicate(relationId, projectedVariablesList.size(), coreSingletons);
+        DistinctVariableOnlyDataAtom projectionAtom = atomFactory.getDistinctVariableOnlyDataAtom(tmpPredicate, projectedVariablesList);
 
         return iqFactory.createIQ(projectionAtom, iqTree)
                 .normalizeForOptimization();
@@ -216,24 +211,6 @@ public abstract class JsonBasicOrJoinLens extends JsonBasicOrJoinOrNestedLens {
                                                                                               MetadataLookup parentCacheMetadataLookup)
             throws MetadataExtractionException;
 
-    private IQTree createParentTree(Collection<ParentDefinition> parentArgumentTable,
-                                    IntermediateQueryFactory iqFactory) throws MetadataExtractionException {
-        ImmutableList<IQTree> parents = parentArgumentTable.stream()
-                .map(p -> iqFactory.createExtensionalDataNode(p.relation, p.getArgumentMap()))
-                .collect(ImmutableCollectors.toList());
-
-        switch (parents.size()) {
-            case 0:
-                throw new MetadataExtractionException("At least one base relation was expected");
-            case 1:
-                return parents.get(0);
-            default:
-                return iqFactory.createNaryIQTree(
-                        iqFactory.createInnerJoinNode(),
-                        parents);
-        }
-    }
-
     private ImmutableList<Variable> extractRelationVariables(ImmutableSet<Variable> addedVariables, ImmutableSet<Variable> hiddenVariables,
                                                              ImmutableList<ParentDefinition> parentDefinitions, TermFactory termFactory) {
 
@@ -253,25 +230,16 @@ public abstract class JsonBasicOrJoinLens extends JsonBasicOrJoinOrNestedLens {
 
         RawQuotedIDFactory idFactory = new RawQuotedIDFactory(quotedIdFactory);
 
-        ImmutableMap<QuotedID, Collection<Variable>> map = parentDefinitionMap.stream()
-                .flatMap(p -> p.attributeVariableMap.entrySet().stream()
-                        .map(e -> Maps.immutableEntry(
-                                idFactory.createAttributeID(p.getPrefixedAttributeName(e.getKey())),
-                                e.getValue())))
-                .collect(ImmutableCollectors.toMultimap()).asMap();
-
-        ImmutableSet<QuotedID> conflictingAttributeIds = map.entrySet().stream()
-                .filter(e -> e.getValue().size() > 1)
-                .map(Map.Entry::getKey)
-                .collect(ImmutableCollectors.toSet());
-
-        if (!conflictingAttributeIds.isEmpty())
-            throw new ConflictingVariableInJoinViewException(conflictingAttributeIds);
-
-        return new RAExpressionAttributes(map.entrySet().stream()
-                .collect(ImmutableCollectors.toMap(
-                        e -> new QualifiedAttributeID(null, e.getKey()),
-                        e -> e.getValue().iterator().next())), null);
+        try {
+            return RAExpressionAttributes.of(parentDefinitionMap.stream()
+                    .flatMap(p -> p.attributeVariableMap.entrySet().stream()
+                            .map(e -> Maps.immutableEntry(
+                                    idFactory.createAttributeID(p.getPrefixedAttributeName(e.getKey())),
+                                    e.getValue()))));
+        }
+        catch (RAExpressionAttributes.DuplicateAttrbuteEntriesException e) {
+            throw new ConflictingVariableInJoinViewException(e.getDuplicates());
+        }
     }
 
     private ImmutableTerm extractExpression(AddColumns column,
@@ -281,34 +249,25 @@ public abstract class JsonBasicOrJoinLens extends JsonBasicOrJoinOrNestedLens {
 
         try {
             ExpressionParser parser = new ExpressionParser(quotedIdFactory, coreSingletons);
-            net.sf.jsqlparser.expression.Expression exp;
-            String sqlQuery = "SELECT " + column.expression + " FROM fakeTable";
-            Select statement = JSqlParserTools.parse(sqlQuery, !quotedIdFactory.supportsSquareBracketQuotation());
-            SelectItem si = ((PlainSelect) statement.getSelectBody()).getSelectItems().get(0);
-            exp = ((SelectExpressionItem) si).getExpression();
-            return parser.parseTerm(exp, parentAttributeMap);
+            return parser.parseTerm(column.expression, parentAttributeMap);
         }
+        // TODO: why all exceptions?
         catch (Exception e) {
             throw new MetadataExtractionException("Unsupported expression for " + column.name + " in " + name + ":\n" + e, e);
         }
     }
 
-    private ImmutableList<ImmutableExpression> extractFilter(RAExpressionAttributes parentAttributeMap,
+    private Optional<ImmutableExpression> extractFilter(RAExpressionAttributes parentAttributeMap,
                                                              QuotedIDFactory quotedIdFactory,
                                                              CoreSingletons coreSingletons) throws MetadataExtractionException {
-        if (filterExpression == null || filterExpression.isEmpty())
-            return ImmutableList.of();
+        if (filterExpression.isEmpty())
+            return Optional.empty();
 
         try {
-            String sqlQuery = "SELECT * FROM fakeTable WHERE " + filterExpression;
             ExpressionParser parser = new ExpressionParser(quotedIdFactory, coreSingletons);
-            Select statement = JSqlParserTools.parse(sqlQuery, !quotedIdFactory.supportsSquareBracketQuotation());
-            PlainSelect plainSelect = (PlainSelect) statement.getSelectBody();
-            return plainSelect.getWhere() == null
-                    ? ImmutableList.of()
-                    : parser.parseBooleanExpression(plainSelect.getWhere(), parentAttributeMap);
+            return Optional.of(parser.parseBooleanExpression(filterExpression, parentAttributeMap));
         }
-        catch (InvalidQueryException | JSQLParserException e) {
+        catch (InvalidQueryException | UnsupportedSelectQueryException e) {
             throw new MetadataExtractionException("Unsupported filter expression for " + ":\n" + e);
         }
     }
@@ -337,7 +296,6 @@ public abstract class JsonBasicOrJoinLens extends JsonBasicOrJoinOrNestedLens {
         public final String name;
         @Nonnull
         public final String expression;
-
 
         @JsonCreator
         public AddColumns(@JsonProperty("name") String name,

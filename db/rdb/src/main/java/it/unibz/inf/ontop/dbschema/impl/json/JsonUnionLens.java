@@ -15,16 +15,13 @@ import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
-import it.unibz.inf.ontop.iq.node.ConstructionNode;
-import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
-import it.unibz.inf.ontop.iq.node.UnionNode;
+import it.unibz.inf.ontop.iq.impl.IQTreeTools;
+import it.unibz.inf.ontop.iq.impl.NaryIQTreeTools;
 import it.unibz.inf.ontop.iq.node.normalization.ConstructionSubstitutionNormalizer;
-import it.unibz.inf.ontop.iq.transform.impl.DefaultRecursiveIQTreeVisitingTransformer;
 import it.unibz.inf.ontop.iq.type.NotYetTypedEqualityTransformer;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.atom.AtomPredicate;
 import it.unibz.inf.ontop.model.atom.DistinctVariableOnlyDataAtom;
-import it.unibz.inf.ontop.model.term.DBConstant;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
@@ -81,7 +78,7 @@ public class JsonUnionLens extends JsonLens {
 
         IQ iq = createIQ(relationId, dbParameters, parentCacheMetadataLookup);
 
-        int maxParentLevel = extractMaxParentLevel(iq, dbParameters.getCoreSingletons());
+        int maxParentLevel = Lens.getMaxLevel(iq.getTree());
 
         // For added columns the termtype, quoted ID and nullability all need to come from the IQ
         RelationDefinition.AttributeListBuilder attributeBuilder = createAttributeBuilder(iq, dbParameters);
@@ -94,12 +91,6 @@ public class JsonUnionLens extends JsonLens {
                 dbParameters.getCoreSingletons());
     }
 
-    private int extractMaxParentLevel(IQ iq, CoreSingletons coreSingletons) {
-        LevelExtractor transformer = new LevelExtractor(coreSingletons);
-        // Side-effect (cheap but good enough implementation)
-        transformer.transform(iq.getTree());
-        return transformer.getMaxLevel();
-    }
 
     @Override
     public void insertIntegrityConstraints(Lens relation,
@@ -116,7 +107,8 @@ public class JsonUnionLens extends JsonLens {
     }
 
     @Override
-    public ImmutableList<ImmutableList<Attribute>> getAttributesIncludingParentOnes(Lens lens, ImmutableList<Attribute> parentAttributes) {
+    public ImmutableList<ImmutableList<Attribute>> getAttributesIncludingParentOnes(Lens lens, ImmutableList<Attribute> parentAttributes,
+                                                                                    CoreSingletons coreSingletons) {
         return ImmutableList.of();
     }
 
@@ -179,6 +171,7 @@ public class JsonUnionLens extends JsonLens {
         TermFactory termFactory = coreSingletons.getTermFactory();
         IntermediateQueryFactory iqFactory = coreSingletons.getIQFactory();
         AtomFactory atomFactory = coreSingletons.getAtomFactory();
+        IQTreeTools iqTreeTools = coreSingletons.getIQTreeTools();
 
         //Get list of all projected variables (including provenance column, if applicable)
         ImmutableMap<String, Variable> projectedVariablesMap = this.extractProjectedVariables(dbParameters, parentCacheMetadataLookup);
@@ -205,27 +198,23 @@ public class JsonUnionLens extends JsonLens {
 
         //Add provenance column to each child
         ImmutableList<IQTree> extendedChildren;
-        if(includesProvenanceColumn()) {
-            extendedChildren = children.stream().map(
+        if (includesProvenanceColumn()) {
+            extendedChildren = NaryIQTreeTools.transformChildren(children,
                     child -> addConstantColumn(
                             termFactory.getVariable(getProvenanceColumn(quotedIDFactory)),
                             quotedIDFactory.createRelationID(unionRelations.get(children.indexOf(child)).toArray(new String[0]))
                                     .getComponents().reverse().stream().map(QuotedID::getName).collect(Collectors.joining(".")),
                             child,
-                            coreSingletons
-                    )
-            ).collect(ImmutableCollectors.toList());
-        } else {
+                            coreSingletons));
+        }
+        else {
             extendedChildren = children;
         }
 
-
         //Create union of children
-        UnionNode union = iqFactory.createUnionNode(allProjectedVariables);
-        IQTree iqTree = iqFactory.createNaryIQTree(union, extendedChildren);
-
-        if (this.makeDistinct)
-            iqTree = iqFactory.createUnaryIQTree(iqFactory.createDistinctNode(), iqTree);
+        IQTree iqTree = iqTreeTools.unaryIQTreeBuilder()
+                .append(iqTreeTools.createOptionalDistinctNode(this.makeDistinct))
+                .build(iqTreeTools.createUnionTree(allProjectedVariables, extendedChildren));
 
         NotYetTypedEqualityTransformer notYetTypedEqualityTransformer = coreSingletons.getNotYetTypedEqualityTransformer();
         IQTree transformedTree = notYetTypedEqualityTransformer.transform(iqTree);
@@ -241,18 +230,13 @@ public class JsonUnionLens extends JsonLens {
 
     private IQTree addConstantColumn(Variable variable, String value, IQTree child, CoreSingletons coreSingletons) {
         SubstitutionFactory substitutionFactory = coreSingletons.getSubstitutionFactory();
-        IntermediateQueryFactory iqFactory = coreSingletons.getIQFactory();
         ConstructionSubstitutionNormalizer substitutionNormalizer = coreSingletons.getConstructionSubstitutionNormalizer();
         TermFactory termFactory = coreSingletons.getTermFactory();
 
-        DBConstant provenanceValue = termFactory.getDBStringConstant(value);
-        Substitution<ImmutableTerm> substitution = substitutionFactory.getSubstitution(variable, provenanceValue);
-        ImmutableSet<Variable> allProjectedVariables = Sets.union(child.getKnownVariables(), ImmutableSet.of(variable)).immutableCopy();
-        ConstructionSubstitutionNormalizer.ConstructionSubstitutionNormalization normalization =
-                substitutionNormalizer.normalizeSubstitution(substitution,
-                        allProjectedVariables);
-        ConstructionNode constructionNode = normalization.generateTopConstructionNode().get();
-        return iqFactory.createUnaryIQTree(constructionNode, child);
+        Substitution<ImmutableTerm> substitution = substitutionFactory.getSubstitution(variable, termFactory.getDBStringConstant(value));
+        ImmutableSet<Variable> allProjectedVariables = Sets.union(child.getKnownVariables(), substitution.getDomain()).immutableCopy();
+
+        return substitutionNormalizer.createNormalizedConstructionTree(substitution, allProjectedVariables, child);
     }
 
     private AtomPredicate createTemporaryPredicate(RelationID relationId, int arity, CoreSingletons coreSingletons) {
@@ -383,29 +367,5 @@ public class JsonUnionLens extends JsonLens {
 
     private String getProvenanceColumn(QuotedIDFactory quotedIDFactory) {
         return quotedIDFactory.createAttributeID(this.provenanceColumn).getName();
-    }
-
-    private static class LevelExtractor extends DefaultRecursiveIQTreeVisitingTransformer {
-        // Non-final
-        int maxLevel;
-
-        public int getMaxLevel() {
-            return maxLevel;
-        }
-
-        public LevelExtractor(CoreSingletons coreSingletons) {
-            super(coreSingletons);
-            maxLevel = 0;
-        }
-
-        @Override
-        public IQTree transformExtensionalData(ExtensionalDataNode dataNode) {
-            RelationDefinition parentRelation = dataNode.getRelationDefinition();
-            int level = (parentRelation instanceof Lens)
-                    ? ((Lens) parentRelation).getLevel()
-                    : 0;
-            maxLevel = Math.max(maxLevel, level);
-            return dataNode;
-        }
     }
 }

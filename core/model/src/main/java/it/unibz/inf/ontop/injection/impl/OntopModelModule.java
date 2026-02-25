@@ -17,6 +17,7 @@ import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.node.normalization.*;
 import it.unibz.inf.ontop.iq.tools.ProjectionDecomposer;
 import it.unibz.inf.ontop.iq.tools.TypeConstantDictionary;
+import it.unibz.inf.ontop.iq.tools.UnionBasedQueryMerger;
 import it.unibz.inf.ontop.iq.transform.NoNullValueEnforcer;
 import it.unibz.inf.ontop.iq.transform.QueryRenamer;
 import it.unibz.inf.ontop.iq.type.NotYetTypedBinaryMathOperationTransformer;
@@ -59,12 +60,15 @@ public class OntopModelModule extends OntopAbstractModule {
         bindFromSettings(AtomFactory.class);
         bindFromSettings(SubstitutionFactory.class);
         bindFromSettings(HomomorphismFactory.class);
+        bindFromSettings(QueryRenamer.class);
 
         bindFromSettings(TermNullabilityEvaluator.class);
         bindFromSettings(NoNullValueEnforcer.class);
         bindFromSettings(ExpressionNormalizer.class);
         bindFromSettings(ConditionSimplifier.class);
         bindFromSettings(ConstructionSubstitutionNormalizer.class);
+        bindFromSettings(ConstructionNormalizer.class);
+        bindFromSettings(SliceNormalizer.class);
         bindFromSettings(FilterNormalizer.class);
         bindFromSettings(FlattenNormalizer.class);
         bindFromSettings(InnerJoinNormalizer.class);
@@ -72,6 +76,7 @@ public class OntopModelModule extends OntopAbstractModule {
         bindFromSettings(OrderByNormalizer.class);
         bindFromSettings(DistinctNormalizer.class);
         bindFromSettings(AggregationNormalizer.class);
+        bindFromSettings(UnionNormalizer.class);
         bindFromSettings(NotRequiredVariableRemover.class);
         bindFromSettings(NotYetTypedEqualityTransformer.class);
         bindFromSettings(NotYetTypedBinaryMathOperationTransformer.class);
@@ -84,6 +89,7 @@ public class OntopModelModule extends OntopAbstractModule {
         bindFromSettings(DatabaseInfoSupplier.class);
 
         bind(CoreSingletons.class).to(CoreSingletonsImpl.class);
+        bindFromSettings(UnionBasedQueryMerger.class);
 
         Module utilsModule = buildFactory(
                 ImmutableList.of(
@@ -121,11 +127,6 @@ public class OntopModelModule extends OntopAbstractModule {
                 IQ.class,
                 IQTreeCache.class);
         install(iqFactoryModule);
-
-        Module queryTransformerModule = buildFactory(ImmutableList.of(
-                        QueryRenamer.class),
-                QueryTransformerFactory.class);
-        install(queryTransformerModule);
 
         String idFactoryType = QuotedIDFactory.getIDFactoryType(SQLStandardQuotedIDFactory.class);
         bindFromSettings(Key.get(QuotedIDFactory.class, Names.named(idFactoryType)), SQLStandardQuotedIDFactory.class);

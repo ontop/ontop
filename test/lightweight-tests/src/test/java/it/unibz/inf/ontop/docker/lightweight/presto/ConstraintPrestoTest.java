@@ -10,8 +10,8 @@ public class ConstraintPrestoTest extends AbstractConstraintTest {
 
     private static final String PROPERTIES_FILE = "/dbconstraints/dbconstraints-presto.properties";
 
-    public ConstraintPrestoTest(String method) {
-        super(method, PROPERTIES_FILE);
+    public ConstraintPrestoTest() {
+        super(PROPERTIES_FILE);
     }
 
 }

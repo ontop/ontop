@@ -6,31 +6,26 @@ import com.google.inject.Singleton;
 import it.unibz.inf.ontop.dbschema.RelationDefinition;
 import it.unibz.inf.ontop.dbschema.UniqueConstraint;
 import it.unibz.inf.ontop.injection.CoreSingletons;
-import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
-import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.IQTree;
+import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.ExtensionalDataNode;
 import it.unibz.inf.ontop.iq.node.VariableNullability;
 import it.unibz.inf.ontop.iq.node.impl.JoinOrFilterVariableNullabilityTools;
 import it.unibz.inf.ontop.iq.node.normalization.impl.RightProvenanceNormalizer;
-import it.unibz.inf.ontop.iq.optimizer.LeftJoinIQOptimizer;
+import it.unibz.inf.ontop.iq.transform.IQTreeVariableGeneratorTransformer;
 import it.unibz.inf.ontop.model.term.*;
-import it.unibz.inf.ontop.substitution.Substitution;
-import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
-import java.util.Collection;
 import java.util.Optional;
 import java.util.function.Supplier;
 
 @Singleton
-public class CardinalitySensitiveJoinTransferLJOptimizer implements LeftJoinIQOptimizer {
+public class CardinalitySensitiveJoinTransferLJOptimizer implements IQTreeVariableGeneratorTransformer {
 
     private final RequiredExtensionalDataNodeExtractor requiredDataNodeExtractor;
     private final RightProvenanceNormalizer rightProvenanceNormalizer;
     private final CoreSingletons coreSingletons;
-    private final IntermediateQueryFactory iqFactory;
     private final JoinOrFilterVariableNullabilityTools variableNullabilityTools;
 
     @Inject
@@ -41,36 +36,29 @@ public class CardinalitySensitiveJoinTransferLJOptimizer implements LeftJoinIQOp
         this.requiredDataNodeExtractor = requiredDataNodeExtractor;
         this.rightProvenanceNormalizer = rightProvenanceNormalizer;
         this.coreSingletons = coreSingletons;
-        this.iqFactory = coreSingletons.getIQFactory();
         this.variableNullabilityTools = variableNullabilityTools;
     }
 
     @Override
-    public IQ optimize(IQ query) {
-        IQTree initialTree = query.getTree();
-
-        Transformer transformer = new Transformer(initialTree::getVariableNullability,
-                query.getVariableGenerator(),
-                requiredDataNodeExtractor,
-                rightProvenanceNormalizer,
-                coreSingletons, variableNullabilityTools);
-
-        IQTree newTree = initialTree.acceptTransformer(transformer);
-
-        return newTree.equals(initialTree)
-                ? query
-                : iqFactory.createIQ(query.getProjectionAtom(), newTree);
+    public IQTree transform(IQTree tree, VariableGenerator variableGenerator) {
+        return transformWithVariableNullability(tree, tree::getVariableNullability, variableGenerator);
     }
 
-    protected static class Transformer extends AbstractJoinTransferLJTransformer {
-        private final TermFactory termFactory;
+    private IQTree transformWithVariableNullability(IQTree tree, Supplier<VariableNullability> variableNullabilitySupplier, VariableGenerator variableGenerator) {
+        return tree.acceptVisitor(new Transformer(variableNullabilitySupplier, variableGenerator));
+    }
 
-        protected Transformer(Supplier<VariableNullability> variableNullabilitySupplier,
-                              VariableGenerator variableGenerator, RequiredExtensionalDataNodeExtractor requiredDataNodeExtractor,
-                              RightProvenanceNormalizer rightProvenanceNormalizer,
-                              CoreSingletons coreSingletons, JoinOrFilterVariableNullabilityTools variableNullabilityTools) {
-            super(variableNullabilitySupplier, variableGenerator, requiredDataNodeExtractor, rightProvenanceNormalizer, variableNullabilityTools, coreSingletons);
-            this.termFactory = coreSingletons.getTermFactory();
+    private class Transformer extends AbstractJoinTransferLJTransformer {
+
+        Transformer(Supplier<VariableNullability> variableNullabilitySupplier,
+                              VariableGenerator variableGenerator) {
+            super(t -> transformWithVariableNullability(t, t::getVariableNullability, variableGenerator),
+                    variableNullabilitySupplier,
+                    variableGenerator,
+                    CardinalitySensitiveJoinTransferLJOptimizer.this.requiredDataNodeExtractor,
+                    CardinalitySensitiveJoinTransferLJOptimizer.this.rightProvenanceNormalizer,
+                    CardinalitySensitiveJoinTransferLJOptimizer.this.variableNullabilityTools,
+                    CardinalitySensitiveJoinTransferLJOptimizer.this.coreSingletons);
         }
 
 
@@ -84,15 +72,11 @@ public class CardinalitySensitiveJoinTransferLJOptimizer implements LeftJoinIQOp
             // Unique constraints
             ImmutableList<UniqueConstraint> uniqueConstraints = rightRelation.getUniqueConstraints();
             if (!uniqueConstraints.isEmpty()) {
-                ImmutableSet<ExtensionalDataNode> sameRelationLeftNodes = Optional.ofNullable(leftMultimap.get(rightRelation))
-                        .stream()
-                        .flatMap(Collection::stream)
-                        .collect(ImmutableCollectors.toSet());
+                ImmutableSet<ExtensionalDataNode> sameRelationLeftNodes = ImmutableSet.copyOf(leftMultimap.get(rightRelation));
 
                 Optional<ImmutableList<Integer>> matchingIndexes = uniqueConstraints.stream()
                         .map(uc -> matchUniqueConstraint(uc, sameRelationLeftNodes, rightArgumentMap))
-                        .filter(Optional::isPresent)
-                        .map(Optional::get)
+                        .flatMap(Optional::stream)
                         .findAny();
 
                 if (matchingIndexes.isPresent())
@@ -104,8 +88,7 @@ public class CardinalitySensitiveJoinTransferLJOptimizer implements LeftJoinIQOp
                     .flatMap(leftRelation -> leftRelation.getForeignKeys().stream()
                             .filter(fk -> fk.getReferencedRelation().equals(rightRelation))
                             .map(fk -> matchForeignKey(fk, leftMultimap.get(leftRelation), rightArgumentMap))
-                            .filter(Optional::isPresent)
-                            .map(Optional::get))
+                            .flatMap(Optional::stream))
                     .findAny()
                     .map(indexes -> new SelectedNode(indexes, rightDataNode));
         }
@@ -114,35 +97,17 @@ public class CardinalitySensitiveJoinTransferLJOptimizer implements LeftJoinIQOp
          * Keeps passing the non-nullability constraints down below the construction node
          */
         @Override
-        public IQTree transformConstruction(IQTree tree, ConstructionNode rootNode, IQTree child) {
-            var childVariableNullabilitySupplier = computeChildVariableNullabilityFromConstructionParent(tree, rootNode, child);
-
+        public IQTree transformConstruction(UnaryIQTree tree, ConstructionNode rootNode, IQTree child) {
             return transformUnaryNode(tree, rootNode, child,
-                    t -> transformBySearchingWithNewVariableNullabilitySupplier(t, childVariableNullabilitySupplier));
+                    t -> transformWithVariableNullability(t,
+                            () -> computeChildVariableNullabilityFromConstructionParent(tree, rootNode, child), variableGenerator));
         }
 
-        @Override
-        protected IQTree transformBySearchingFromScratch(IQTree tree) {
-            return transformBySearchingWithNewVariableNullabilitySupplier(tree, tree::getVariableNullability);
-        }
-
-        protected IQTree transformBySearchingWithNewVariableNullabilitySupplier(IQTree tree,
-                                                                                Supplier<VariableNullability> variableNullabilitySupplier) {
-            Transformer newTransformer = new Transformer(variableNullabilitySupplier, variableGenerator, requiredDataNodeExtractor,
-                    rightProvenanceNormalizer, coreSingletons, variableNullabilityTools);
-            return tree.acceptTransformer(newTransformer);
-        }
 
         @Override
         protected IQTree preTransformLJRightChild(IQTree rightChild, Optional<ImmutableExpression> ljCondition, ImmutableSet<Variable> leftVariables) {
-            Supplier<VariableNullability> variableNullabilitySupplier =
-                    () -> computeRightChildVariableNullability(rightChild, ljCondition);
-
-            Transformer newTransformer = new Transformer(variableNullabilitySupplier, variableGenerator, requiredDataNodeExtractor,
-                    rightProvenanceNormalizer, coreSingletons, variableNullabilityTools);
-            return rightChild.acceptTransformer(newTransformer);
+            return transformWithVariableNullability(rightChild,
+                    () -> computeRightChildVariableNullability(rightChild, ljCondition), variableGenerator);
         }
     }
-
-
 }

@@ -7,18 +7,18 @@ import it.unibz.inf.ontop.dbschema.QualifiedAttributeID;
 import it.unibz.inf.ontop.generation.algebra.SQLFlattenExpression;
 import it.unibz.inf.ontop.generation.algebra.SelectFromWhereWithModifiers;
 import it.unibz.inf.ontop.generation.serializer.SelectFromWhereSerializer;
+import it.unibz.inf.ontop.injection.OntopSQLCoreSettings;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.model.type.DBTermType;
-import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Optional;
 
 public class RedshiftSelectFromWhereSerializer extends PostgresSelectFromWhereSerializer {
 
     @Inject
-    protected RedshiftSelectFromWhereSerializer(TermFactory termFactory) {
-        super(termFactory);
+    protected RedshiftSelectFromWhereSerializer(TermFactory termFactory, OntopSQLCoreSettings settings) {
+        super(termFactory, settings);
     }
 
     @Override
@@ -52,26 +52,17 @@ public class RedshiftSelectFromWhereSerializer extends PostgresSelectFromWhereSe
                                                                   Optional<Variable> indexVar, DBTermType flattenedType,
                                                                   ImmutableMap<Variable, QualifiedAttributeID> allColumnIDs,
                                                                   QuerySerialization subQuerySerialization) {
-                        //We build the query string of the form SELECT <outputVar> FROM <subquery>, <flattenedVar> AS <outputVar> [AT <indexVar>
-                        StringBuilder builder = new StringBuilder();
-
-                        builder.append(
-                                String.format(
-                                        "%s, %s AS %s %s",
-                                        subQuerySerialization.getString(),
-                                        allColumnIDs.get(flattenedVar).getSQLRendering(),
-                                        allColumnIDs.get(outputVar).getSQLRendering(),
-                                        indexVar.map(v -> String.format(" AT %s",
-                                                        allColumnIDs.get(v).getSQLRendering()))
-                                                .orElse("")
-                                ));
+                        // SELECT <outputVar> FROM <subquery>, <flattenedVar> AS <outputVar> [AT <indexVar>
+                        String string = String.format("%s, %s AS %s %s",
+                                subQuerySerialization.getString(),
+                                serializeTerm(flattenedVar, allColumnIDs),
+                                serializeTerm(outputVar, allColumnIDs),
+                                serializeOptionalTerm("AT %s", indexVar, allColumnIDs));
 
                         return new QuerySerializationImpl(
-                                builder.toString(),
-                                allColumnIDs.entrySet().stream()
-                                        .filter(e -> e.getKey() != flattenedVar)
-                                        .collect(ImmutableCollectors.toMap())
-                        );
+                                string,
+                                getFlattenAllColumnIDs(flattenedVar, allColumnIDs),
+                                subQuerySerialization.getCTEMap());
                     }
                 });
     }

@@ -1,9 +1,9 @@
 package it.unibz.inf.ontop.iq.optimizer.impl.lj;
 
 
-import it.unibz.inf.ontop.iq.BinaryNonCommutativeIQTree;
+import com.google.common.collect.ImmutableList;
+import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
-import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 
@@ -11,11 +11,19 @@ import javax.inject.Inject;
 import javax.inject.Singleton;
 import java.util.stream.Stream;
 
+import static it.unibz.inf.ontop.iq.impl.UnaryIQTreeTools.UnaryIQTreeDecomposition;
+import static it.unibz.inf.ontop.iq.impl.BinaryNonCommutativeIQTreeTools.LeftJoinDecomposition;
+import static it.unibz.inf.ontop.iq.impl.NaryIQTreeTools.InnerJoinDecomposition;
+
+
 @Singleton
 public class RequiredExtensionalDataNodeExtractor {
 
+    private final IntermediateQueryFactory iqFactory;
+
     @Inject
-    protected RequiredExtensionalDataNodeExtractor() {
+    private RequiredExtensionalDataNodeExtractor(IntermediateQueryFactory iqFactory) {
+        this.iqFactory = iqFactory;
     }
 
     /**
@@ -25,26 +33,79 @@ public class RequiredExtensionalDataNodeExtractor {
      * (but won't fail if it is not the case)
      *
      */
-    public Stream<ExtensionalDataNode> extractSomeRequiredNodes(IQTree tree, boolean fromLeft) {
-        QueryNode root = tree.getRootNode();
+    public Stream<ExtensionalDataNode> extractSomeRequiredNodesFromLeft(IQTree tree) {
 
         if (tree instanceof ExtensionalDataNode)
             return Stream.of((ExtensionalDataNode) tree);
 
-        if (root instanceof InnerJoinNode)
-            return tree.getChildren().stream()
-                    .flatMap(tree1 -> extractSomeRequiredNodes(tree1, fromLeft));
+        var join = InnerJoinDecomposition.of(tree);
+        if (join.isPresent())
+            return join.getChildren().stream()
+                    .flatMap(this::extractSomeRequiredNodesFromLeft);
+
+        var leftJoin = LeftJoinDecomposition.of(tree);
+        if (leftJoin.isPresent())
+            return extractSomeRequiredNodesFromLeft(leftJoin.leftChild());
+
+        return extractOtherType(tree);
+    }
+
+    public IQTree replaceNodeOnTheLeft(IQTree tree, ExtensionalDataNode node, ExtensionalDataNode newNode) {
+
+        if (tree.equals(node))
+            return newNode;
+
+        var join = InnerJoinDecomposition.of(tree);
+        if (join.isPresent()) {
+            ImmutableList.Builder<IQTree> childrenBuilder = ImmutableList.builder();
+            // mutable
+            boolean same = true;
+
+            for (IQTree child : join.getChildren()) {
+                IQTree newChild = same
+                        ? replaceNodeOnTheLeft(child, node, newNode)
+                        : child;
+
+                childrenBuilder.add(newChild);
+                same = same && child == newChild;
+            }
+
+            if (same)
+                return tree;
+
+            return iqFactory.createNaryIQTree(join.getNode(), childrenBuilder.build());
+        }
+
+        var leftJoin = LeftJoinDecomposition.of(tree);
+        if (leftJoin.isPresent()) {
+            IQTree newLeftChild = replaceNodeOnTheLeft(leftJoin.leftChild(), node, newNode);
+            if (newLeftChild == leftJoin.leftChild())
+                return tree;
+            return iqFactory.createBinaryNonCommutativeIQTree(leftJoin.getNode(), newLeftChild, leftJoin.rightChild());
+        }
+
+        return tree;
+    }
+
+    public Stream<ExtensionalDataNode> extractSomeRequiredNodesFromRight(IQTree tree) {
+
+        if (tree instanceof ExtensionalDataNode)
+            return Stream.of((ExtensionalDataNode) tree);
+
+        var join = InnerJoinDecomposition.of(tree);
+        if (join.isPresent())
+            return join.getChildren().stream()
+                    .flatMap(this::extractSomeRequiredNodesFromRight);
 
         /*
          * TODO: see how to safely extract data nodes in the fromRight case
          */
-        if (fromLeft && (root instanceof LeftJoinNode))
-            return extractSomeRequiredNodes(((BinaryNonCommutativeIQTree) tree).getLeftChild(), true);
-
         // Usually at the top of the right child of a LJ, with a substitution with ground terms (normally provenance constants)
-        if ((!fromLeft) && (root instanceof ConstructionNode)
-                && ((ConstructionNode) root).getSubstitution().rangeAllMatch(ImmutableTerm::isGround))
-            return extractSomeRequiredNodes(((UnaryIQTree) tree).getChild(), false);
+        var construction = UnaryIQTreeDecomposition.of(tree, ConstructionNode.class);
+        if (construction.isPresent()
+                && construction.getNode().getSubstitution()
+                .rangeAllMatch(ImmutableTerm::isGround))
+            return extractSomeRequiredNodesFromRight(construction.getChild());
 
         return extractOtherType(tree);
     }
@@ -55,6 +116,4 @@ public class RequiredExtensionalDataNodeExtractor {
     protected Stream<ExtensionalDataNode> extractOtherType(IQTree tree) {
         return Stream.empty();
     }
-
-
 }

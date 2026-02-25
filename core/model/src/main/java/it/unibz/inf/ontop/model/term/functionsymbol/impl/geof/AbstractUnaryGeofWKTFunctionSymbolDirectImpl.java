@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.model.term.functionsymbol.impl.geof;
 import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.TermFactory;
+import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.type.TermType;
 import org.apache.commons.rdf.api.IRI;
@@ -18,9 +19,10 @@ public abstract class AbstractUnaryGeofWKTFunctionSymbolDirectImpl extends Abstr
     protected ImmutableTerm computeDBTerm(ImmutableList<ImmutableTerm> subLexicalTerms, ImmutableList<ImmutableTerm> typeTerms, TermFactory termFactory) {
         WKTLiteralValue v0 = GeoUtils.extractWKTLiteralValue(termFactory, subLexicalTerms.get(0));
 
-        // TODO: do we need to put the SRID back ??
-        // TODO: do we need to wrap into a ST_ASTEXT ??
-        return termFactory.getDBAsText(getDBFunction(termFactory).apply(v0.getGeometry()).simplify());
+        DBTermType geometryType = termFactory.getTypeFactory().getDBTypeFactory().getDBGeometryType();
+
+        ImmutableTerm input0 = termFactory.getConversionFromRDFLexical2DB(geometryType, v0.getGeometry());
+        return termFactory.getDBAsText(getDBFunction(termFactory).apply(input0).simplify());
     }
 
     abstract public Function<ImmutableTerm, ImmutableTerm> getDBFunction(TermFactory termFactory);

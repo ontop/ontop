@@ -8,8 +8,10 @@ import com.google.common.hash.Hashing;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.answering.logging.QueryLogger;
+import it.unibz.inf.ontop.answering.logging.QueryLogSink;
 import it.unibz.inf.ontop.answering.logging.impl.ClassAndPropertyExtractor.ClassesAndProperties;
 import it.unibz.inf.ontop.answering.logging.impl.QueryTemplateExtractor.QueryTemplateExtraction;
+import it.unibz.inf.ontop.evaluator.QueryContext;
 import it.unibz.inf.ontop.evaluator.impl.QueryContextImpl;
 import it.unibz.inf.ontop.exception.OntopReformulationException;
 import it.unibz.inf.ontop.injection.OntopReformulationSettings;
@@ -23,13 +25,11 @@ import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
 import java.io.IOException;
-import java.io.PrintStream;
 import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
 import java.sql.Timestamp;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.Collection;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -84,7 +84,6 @@ public class QueryLoggerImpl implements QueryLogger {
 
     private final UUID queryId;
     private final long creationTime;
-    private final PrintStream outputStream;
     private final ImmutableMap<String, String> httpHeaders;
     private final OntopReformulationSettings settings;
     private final boolean disabled;
@@ -92,6 +91,8 @@ public class QueryLoggerImpl implements QueryLogger {
     private final JsonFactory jsonFactory;
     private final boolean isDecompositionEnabled;
     private final boolean isMergingEnabled;
+    private final QueryContext queryContext;
+    private final QueryLogSink sink;
     private long reformulationTime;
     private long unblockedResulSetTime;
     private final ClassAndPropertyExtractor classAndPropertyExtractor;
@@ -121,25 +122,20 @@ public class QueryLoggerImpl implements QueryLogger {
     private ImmutableMap<String, String> bindings;
 
     @AssistedInject
-    protected QueryLoggerImpl(@Assisted ImmutableMap<String, String> httpHeaders,
+    protected QueryLoggerImpl(@Assisted QueryContext queryContext,
+                              QueryLogSink sink,
                               OntopReformulationSettings settings,
                               ClassAndPropertyExtractor classAndPropertyExtractor,
                               RelationNameExtractor relationNameExtractor,
                               QueryTemplateExtractor queryTemplateExtractor) {
-        this(System.out, httpHeaders, settings, classAndPropertyExtractor, relationNameExtractor, queryTemplateExtractor);
-    }
-
-    protected QueryLoggerImpl(PrintStream outputStream, ImmutableMap<String, String> httpHeaders,
-                              OntopReformulationSettings settings,
-                              ClassAndPropertyExtractor classAndPropertyExtractor,
-                              RelationNameExtractor relationNameExtractor, QueryTemplateExtractor queryTemplateExtractor) {
-        this.outputStream = outputStream;
-        this.httpHeaders = httpHeaders;
+        this.sink = sink;
+        this.queryContext = queryContext;
+        this.httpHeaders = queryContext.getHttpHeaders();
         this.settings = settings;
         this.classAndPropertyExtractor = classAndPropertyExtractor;
         this.relationNameExtractor = relationNameExtractor;
         this.queryTemplateExtractor = queryTemplateExtractor;
-        this.queryId = UUID.randomUUID();
+        this.queryId = queryContext.getQueryId();
         creationTime = System.currentTimeMillis();
         applicationName = settings.getApplicationName();
         reformulationTime = -1;
@@ -173,7 +169,7 @@ public class QueryLoggerImpl implements QueryLogger {
             } catch (IOException ex) {
                 REGULAR_LOGGER.error(OUTPUT_STREAM_JSON_ERROR + ex);
             }
-            outputStream.println(stringWriter);
+            sink.submit(stringWriter.toString());
         }
 
         if (isMergingEnabled) {
@@ -307,7 +303,7 @@ public class QueryLoggerImpl implements QueryLogger {
                 REGULAR_LOGGER.error(OUTPUT_STREAM_JSON_ERROR + e);
                 return;
             }
-            outputStream.println(stringWriter);
+            sink.submit(stringWriter.toString());
         }
     }
 
@@ -342,7 +338,7 @@ public class QueryLoggerImpl implements QueryLogger {
             } catch (IOException e) {
                 REGULAR_LOGGER.error(OUTPUT_STREAM_JSON_ERROR + e);
             }
-            outputStream.println(stringWriter);
+            sink.submit(stringWriter.toString());
         }
 
         if (isMergingEnabled) {
@@ -446,7 +442,7 @@ public class QueryLoggerImpl implements QueryLogger {
         } catch (IOException ex) {
             REGULAR_LOGGER.error(OUTPUT_STREAM_JSON_ERROR + ex);
         }
-        outputStream.println(stringWriter);
+        sink.submit(stringWriter.toString());
     }
 
     protected String serializeTimestamp(long time) {
@@ -475,6 +471,6 @@ public class QueryLoggerImpl implements QueryLogger {
         } catch (IOException e) {
             REGULAR_LOGGER.error(OUTPUT_STREAM_JSON_ERROR + e);
         }
-        outputStream.println(stringWriter);
+        sink.submit(stringWriter.toString());
     }
 }

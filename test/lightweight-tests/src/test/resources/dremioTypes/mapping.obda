@@ -1,0 +1,20 @@
+[PrefixDeclaration]
+xsd:    http://www.w3.org/2001/XMLSchema#
+rdfs:   http://www.w3.org/2000/01/rdf-schema#
+voc:    http://vocabulary.example.org/
+
+[MappingDeclaration] @collection [[
+
+mappingId employee
+target voc:{employee} a voc:Employee ; rdfs:label {employee} .
+source SELECT "employee" FROM "lenses"."employee" ;
+
+mappingId worksAt
+target voc:{employee} voc:worksAt voc:{department} .
+source SELECT "employee", "department" FROM "lenses"."department" ;
+
+mappingId department
+target voc:{department} a voc:Department ; rdfs:label {department} .
+source SELECT "department" FROM "lenses"."department" ;
+
+]]

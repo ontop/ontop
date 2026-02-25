@@ -1,0 +1,17 @@
+[PrefixDeclaration]
+:   http://example.org/tde
+ns:  http://example.org/ns#
+dc:  http://purl.org/dc/elements/1.1/
+time: http://www.w3.org/2006/time#
+
+
+[MappingDeclaration] @collection [[
+mappingId	electricity-mapping
+target	:{ts} a ns:ElectricityMeasurement ; ns:current {curr} ; ns:voltage {voltage} ; ns:phase {phase} ; dc:description {description} ; dc:location {location} ; :group {group_id}; ns:instant {ts} .
+source	SELECT ts, curr, voltage, phase, description, location, group_id from db_functions.electricity
+
+mappingId water-mapping
+target   :{ts} a ns:WaterMeasurement ; ns:flow {flow} ; ns:pressure {pressure} ; dc:location {location}@en ; :group {group_id} ; ns:isAbove {above}; ns:instantTz {ts} .
+source   SELECT ts, flow, pressure, above, location, group_id from db_functions.water
+]]
+

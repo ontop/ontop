@@ -61,15 +61,6 @@ public class BindWithFunctionsPrestoTest extends AbstractBindTestWithFunctions {
         super.testSecondsBetweenMappingInput();
     }
 
-    @Disabled("Since Presto does not have unique constraint information, a 'DISTINCT' must be enforced. This DISTINCT" +
-            "causes the remaining query to be packed into a sub-query, including the 'ORDER BY'. Selecting from sub" +
-            "queries does not conserve order in Presto, so while the results are correct, they are in the wrong order")
-    @Test
-    @Override
-    public void testREPLACE() {
-        super.testREPLACE();
-    }
-
     @Disabled("Presto does not support SHA384")
     @Test
     @Override
@@ -92,5 +83,18 @@ public class BindWithFunctionsPrestoTest extends AbstractBindTestWithFunctions {
     @Override
     protected ImmutableSet<String> getStatisticalAttributesExpectedResults() {
         return ImmutableSet.of("\"215.340000000000000000\"^^xsd:decimal");
+    }
+
+    @Disabled("Presto does not support REGEXP_LIKE with three arguments")
+    @Test
+    @Override
+    public void testCaseInsensitiveREGEX() {
+        super.testCaseInsensitiveREGEX();
+    }
+
+    @Override
+    protected ImmutableSet<String> getDurationArithmeticExpectedResults() {
+        return ImmutableSet.of("\"1970-09-05T07:35:00.000Z\"^^xsd:dateTime", "\"2011-10-08T11:15:00.000Z\"^^xsd:dateTime",
+                "\"2014-04-05T16:32:52.000Z\"^^xsd:dateTime", "\"2015-07-21T09:08:06.000Z\"^^xsd:dateTime" );
     }
 }

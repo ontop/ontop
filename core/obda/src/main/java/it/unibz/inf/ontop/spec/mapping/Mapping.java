@@ -1,19 +1,17 @@
 package it.unibz.inf.ontop.spec.mapping;
 
 
-import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
+import it.unibz.inf.ontop.model.term.functionsymbol.db.ObjectStringTemplateFunctionSymbol;
+import it.unibz.inf.ontop.utils.VariableGenerator;
 import org.apache.commons.rdf.api.IRI;
 
 import java.util.Optional;
 
 /**
  * TODO: explain
- *
- * For more complex indexing schemes (and a richer set of methods), feel free to create your own interface/class
- * for your specific needs (e.g. advanced query unfolding)
  *
  * Immutable
  *
@@ -25,6 +23,7 @@ public interface Mapping {
      * rdfAtomPredicate indicates if it is a triple, a quad (or something else)
      */
     Optional<IQ> getRDFPropertyDefinition(RDFAtomPredicate rdfAtomPredicate, IRI propertyIRI);
+
     Optional<IQ> getRDFClassDefinition(RDFAtomPredicate rdfAtomPredicate, IRI classIRI);
 
     /**
@@ -34,7 +33,7 @@ public interface Mapping {
 
     /**
      * Properties used to define triples, quads, etc.
-     *
+     * <p>
      * Does NOT contain rdf:type
      */
     ImmutableSet<IRI> getRDFProperties(RDFAtomPredicate rdfAtomPredicate);
@@ -44,5 +43,52 @@ public interface Mapping {
      */
     ImmutableSet<IRI> getRDFClasses(RDFAtomPredicate rdfAtomPredicate);
 
-    ImmutableCollection<IQ> getQueries(RDFAtomPredicate rdfAtomPredicate);
+    /**
+     * Returns no IQ if no definition is compatible with the template at the given position
+     */
+    Optional<IQ> getCompatibleDefinitions(RDFAtomPredicate rdfAtomPredicate,
+                                          RDFAtomIndexPattern RDFAtomIndexPattern,
+                                          ObjectStringTemplateFunctionSymbol templateFunctionSymbol,
+                                          VariableGenerator variableGenerator);
+
+    Optional<IQ> getMergedDefinitions(RDFAtomPredicate rdfAtomPredicate);
+
+    Optional<IQ> getMergedClassDefinitions(RDFAtomPredicate rdfAtomPredicate);
+
+    /**
+     * For generic triple/quad patterns like ?s ?p ?o, ?s a ?c, etc.
+     */
+    enum RDFAtomIndexPattern {
+        /**
+         * Subject of ?s ?p ?o or ?s ?p ?o ?g
+         */
+        SUBJECT_OF_ALL_DEFINITIONS(0, false),
+        /**
+         * Object of ?s ?p ?o or ?s ?p ?o ?g
+         */
+        OBJECT_OF_ALL_DEFINITIONS(2, true),
+        /**
+         * Subject of ?s a ?c or ?s a ?c ?g
+         */
+        SUBJECT_OF_ALL_CLASSES(0, false);
+
+        private final int position;
+        private final boolean canBeLiteral;
+
+        RDFAtomIndexPattern(int position, boolean canBeLiteral) {
+            this.position = position;
+            this.canBeLiteral = canBeLiteral;
+        }
+
+        /**
+         * Starts with 0
+         */
+        public int getPosition() {
+            return position;
+        }
+
+        public boolean canBeLiteral() {
+            return canBeLiteral;
+        }
+    }
 }

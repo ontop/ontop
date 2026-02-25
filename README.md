@@ -47,7 +47,7 @@ License
 The Ontop framework is available under the Apache License, Version 2.0
 
 ```
-  Copyright (C) 2009 - 2024 Free University of Bozen-Bolzano
+  Copyright (C) 2009 - 2025 Free University of Bozen-Bolzano
 
   Licensed under the Apache License, Version 2.0 (the "License");
   you may not use this file except in compliance with the License.
@@ -69,4 +69,4 @@ All documentation is licensed under the
 Organizations
 -------------
 Ontop is backed by the [Free University of Bozen-Bolzano](https://www.inf.unibz.it/krdb/) and [Ontopic s.r.l.](https://ontopic.ai). 
-It also receives regular important contributions from [Birkbeck, University of London](http://www.bbk.ac.uk/) and the [University of Bergen](https://www.uib.no).
+It also receives regular important contributions from [Birkbeck, University of London](http://www.bbk.ac.uk/) and [Southeast University](https://www.seu.edu.cn).

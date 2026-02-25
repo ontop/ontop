@@ -28,11 +28,6 @@ public class LeftJoinProfPrestoTest extends AbstractLeftJoinProfTest {
     }
 
     @Override
-    protected ImmutableList<String> getExpectedValuesAvgStudents1() {
-        return  ImmutableList.of("\"11.2\"^^xsd:decimal");
-    }
-
-    @Override
     protected ImmutableList<String> getExpectedValuesAvgStudents2() {
         return   ImmutableList.of("\"10.333333333333334\"^^xsd:decimal","\"12.0\"^^xsd:decimal", "\"13.0\"^^xsd:decimal");
     }
@@ -64,10 +59,6 @@ public class LeftJoinProfPrestoTest extends AbstractLeftJoinProfTest {
     @Disabled("This test requires integrity constraints that are not currently supported by presto.")
     @Test
     public void testCourseJoinOnLeft1() { super.testCourseJoinOnLeft1(); }
-
-    @Disabled("This test requires integrity constraints that are not currently supported by presto.")
-    @Test
-    public void testCourseJoinOnLeft2() { super.testCourseJoinOnLeft2(); }
 
     @Disabled("This test requires integrity constraints that are not currently supported by presto.")
     @Test
@@ -112,21 +103,6 @@ public class LeftJoinProfPrestoTest extends AbstractLeftJoinProfTest {
     @Disabled("This test requires integrity constraints that are not currently supported by presto.")
     @Test
     public void testUselessRightPart2() { super.testUselessRightPart2(); }
-
-    @Disabled("This test requires avoiding applying ORDER BY to a sub-query")
-    @Test
-    @Override
-    public void testDistinctAsGroupBy1() {
-        super.testDistinctAsGroupBy1();
-    }
-
-    @Disabled("This test requires integrity constraints that are not currently supported by presto.")
-    @Test
-    public void testMinusMultitypedAvg() { super.testMinusMultitypedAvg(); }
-
-    @Disabled("This test requires integrity constraints that are not currently supported by presto.")
-    @Test
-    public void testMinusMultitypedSum() { super.testMinusMultitypedSum(); }
 
     @Disabled("This test throws an exception with presto, because the order by clause cannot be pulled out from the distinct.")
     @Override

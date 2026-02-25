@@ -7,88 +7,52 @@ import com.google.inject.Inject;
 import it.unibz.inf.ontop.generation.algebra.*;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
+import it.unibz.inf.ontop.iq.BinaryNonCommutativeIQTree;
 import it.unibz.inf.ontop.iq.IQTree;
+import it.unibz.inf.ontop.iq.NaryIQTree;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
+import it.unibz.inf.ontop.iq.impl.IQTreeTools;
+import it.unibz.inf.ontop.iq.impl.NaryIQTreeTools;
 import it.unibz.inf.ontop.iq.node.*;
+import it.unibz.inf.ontop.iq.visit.IQTreeVisitor;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.util.Optional;
+import java.util.OptionalLong;
 import java.util.stream.IntStream;
+
+import static it.unibz.inf.ontop.iq.impl.UnaryIQTreeTools.UnaryIQTreeDecomposition;
 
 public class IQTree2SelectFromWhereConverterImpl implements IQTree2SelectFromWhereConverter {
 
     private final SQLAlgebraFactory sqlAlgebraFactory;
     private final SubstitutionFactory substitutionFactory;
-    private final IntermediateQueryFactory iqFactory;
+    private final IQTreeTools iqTreeTools;
 
     @Inject
     private IQTree2SelectFromWhereConverterImpl(SQLAlgebraFactory sqlAlgebraFactory,
                                                 SubstitutionFactory substitutionFactory,
-                                                IntermediateQueryFactory iqFactory) {
+                                                IQTreeTools iqTreeTools) {
         this.sqlAlgebraFactory = sqlAlgebraFactory;
         this.substitutionFactory = substitutionFactory;
-        this.iqFactory = iqFactory;
+        this.iqTreeTools = iqTreeTools;
     }
 
     @Override
     public SelectFromWhereWithModifiers convert(IQTree tree, ImmutableSortedSet<Variable> signature) {
 
-        QueryNode rootNode = tree.getRootNode();
-        Optional<SliceNode> sliceNode = Optional.of(rootNode)
-                .filter(n -> n instanceof SliceNode)
-                .map(n -> (SliceNode) n);
+        var slice = UnaryIQTreeDecomposition.of(tree, SliceNode.class);
+        var distinct = UnaryIQTreeDecomposition.of(slice, DistinctNode.class);
+        var construction = UnaryIQTreeDecomposition.of(distinct, ConstructionNode.class);
+        var orderBy = UnaryIQTreeDecomposition.of(construction, OrderByNode.class);
+        var aggregation = UnaryIQTreeDecomposition.of(orderBy, AggregationNode.class);
+        var filter = UnaryIQTreeDecomposition.of(aggregation, FilterNode.class);
 
-        IQTree firstNonSliceTree = sliceNode
-                .map(n -> ((UnaryIQTree) tree).getChild())
-                .orElse(tree);
-
-        Optional<DistinctNode> distinctNode = Optional.of(firstNonSliceTree)
-                .map(IQTree::getRootNode)
-                .filter(n -> n instanceof DistinctNode)
-                .map(n -> (DistinctNode) n);
-
-        IQTree firstNonSliceDistinctTree = distinctNode
-                .map(n -> ((UnaryIQTree) firstNonSliceTree).getChild())
-                .orElse(firstNonSliceTree);
-
-        Optional<ConstructionNode> constructionNode = Optional.of(firstNonSliceDistinctTree)
-                .map(IQTree::getRootNode)
-                .filter(n -> n instanceof ConstructionNode)
-                .map(n -> (ConstructionNode) n);
-
-        IQTree firstNonSliceDistinctConstructionTree = constructionNode
-                .map(n -> ((UnaryIQTree) firstNonSliceDistinctTree).getChild())
-                .orElse(firstNonSliceDistinctTree);
-
-        Optional<OrderByNode> orderByNode = Optional.of(firstNonSliceDistinctConstructionTree)
-                .map(IQTree::getRootNode)
-                .filter(n -> n instanceof OrderByNode)
-                .map(n -> (OrderByNode) n);
-
-        IQTree firstNonSliceDistinctConstructionOrderByTree = orderByNode
-                .map(n -> ((UnaryIQTree) firstNonSliceDistinctConstructionTree).getChild())
-                .orElse(firstNonSliceDistinctConstructionTree);
-
-        Optional<AggregationNode> aggregationNode = Optional.of(firstNonSliceDistinctConstructionOrderByTree)
-                .map(IQTree::getRootNode)
-                .filter(n -> n instanceof AggregationNode)
-                .map(n -> (AggregationNode) n);
-
-        IQTree firstNonSliceDistinctConstructionOrderByAggregationTree = aggregationNode
-                .map(n -> ((UnaryIQTree) firstNonSliceDistinctConstructionOrderByTree).getChild())
-                .orElse(firstNonSliceDistinctConstructionOrderByTree);
-
-        Optional<FilterNode> filterNode = Optional.of(firstNonSliceDistinctConstructionOrderByAggregationTree)
-                .map(IQTree::getRootNode)
-                .filter(n -> n instanceof FilterNode)
-                .map(n -> (FilterNode) n);
-
-        IQTree childTree = filterNode
-                .map(n -> ((UnaryIQTree) firstNonSliceDistinctConstructionOrderByAggregationTree).getChild())
-                .orElse(firstNonSliceDistinctConstructionOrderByAggregationTree);
+        Optional<ConstructionNode> constructionNode = construction.getOptionalNode();
+        Optional<AggregationNode> aggregationNode = aggregation.getOptionalNode();
 
         Substitution<ImmutableTerm> substitution = constructionNode
                 .map(c -> aggregationNode
@@ -101,27 +65,30 @@ public class IQTree2SelectFromWhereConverterImpl implements IQTree2SelectFromWhe
                         .map(substitutionFactory::<ImmutableTerm>covariantCast)
                         .orElseGet(substitutionFactory::getSubstitution));
 
+        IQTree childTree = filter.getTail();
         SQLExpression fromExpression = convertIntoFromExpression(childTree);
 
         /*
          * Where expression: from the filter node or from the top inner join of the child tree
          */
-        Optional<ImmutableExpression> whereExpression = filterNode
-                .map(JoinOrFilterNode::getOptionalFilterCondition)
-                .orElseGet(() -> Optional.of(childTree.getRootNode())
-                        .filter(n -> n instanceof InnerJoinNode)
-                        .map(n -> (InnerJoinNode) n)
+        Optional<ImmutableExpression> whereExpression = filter.getOptionalNode()
+                .map(FilterNode::getOptionalFilterCondition)
+                .orElseGet(() -> NaryIQTreeTools.InnerJoinDecomposition.of(childTree)
+                        .getOptionalNode()
                         .flatMap(JoinOrFilterNode::getOptionalFilterCondition));
 
-        ImmutableList<SQLOrderComparator> comparators = extractComparators(orderByNode, aggregationNode);
+        ImmutableList<SQLOrderComparator> comparators = extractComparators(orderBy.getOptionalNode(), aggregationNode);
 
+        Optional<SliceNode> sliceNode = slice.getOptionalNode();
         return sqlAlgebraFactory.createSelectFromWhere(signature, substitution, fromExpression, whereExpression,
                 aggregationNode
                         .map(AggregationNode::getGroupingVariables)
                         .orElseGet(ImmutableSet::of),
-                distinctNode.isPresent(),
+                distinct.getOptionalNode().isPresent(),
                 sliceNode
-                        .flatMap(SliceNode::getLimit),
+                        .map(SliceNode::getLimit)
+                        .filter(OptionalLong::isPresent)
+                        .map(OptionalLong::getAsLong),
                 sliceNode
                         .map(SliceNode::getOffset)
                         .filter(o -> o > 0),
@@ -152,100 +119,129 @@ public class IQTree2SelectFromWhereConverterImpl implements IQTree2SelectFromWhe
      *
      */
     private SQLExpression convertIntoFromExpression(IQTree tree) {
-        QueryNode rootNode = tree.getRootNode();
-        if (rootNode instanceof InnerJoinNode) {
-            InnerJoinNode innerJoinNode = (InnerJoinNode) rootNode;
+        var join = NaryIQTreeTools.InnerJoinDecomposition.of(tree);
+        if (join.isPresent()) {
             // Removes the joining condition
-            InnerJoinNode newInnerJoinNode = innerJoinNode.changeOptionalFilterCondition(Optional.empty());
-
-            return convertIntoOrdinaryExpression(iqFactory.createNaryIQTree(newInnerJoinNode,
-                    tree.getChildren()));
+            return convertIntoOrdinaryExpression(
+                    iqTreeTools.createInnerJoinTree(join.getChildren()));
         }
         else
             return convertIntoOrdinaryExpression(tree);
     }
 
-    /**
-     * TODO: use an IQVisitor
-     */
     private SQLExpression convertIntoOrdinaryExpression(IQTree tree) {
-        QueryNode rootNode = tree.getRootNode();
-        if (rootNode instanceof NativeNode) {
-            NativeNode nativeNode = (NativeNode) rootNode;
-            String sqlQuery = nativeNode.getNativeQueryString();
-            return sqlAlgebraFactory.createSQLSerializedQuery(sqlQuery, nativeNode.getColumnNames());
-        }
-        else if (rootNode instanceof  ExtensionalDataNode){
-            ExtensionalDataNode extensionalDataNode = (ExtensionalDataNode) rootNode;
+        return tree.acceptVisitor(new IQTreeVisitor<>() {
+            @Override
+            public SQLExpression transformIntensionalData(IntensionalDataNode dataNode) {
+                throw new MinorOntopInternalBugException("unexpected intensional data node: " + dataNode);
+            }
 
-            return sqlAlgebraFactory.createSQLTable(extensionalDataNode.getRelationDefinition(),
-                    extensionalDataNode.getArgumentMap());
-        }
-        else if (rootNode instanceof InnerJoinNode){
-            ImmutableList<SQLExpression> joinedExpressions = tree.getChildren().stream()
-                    .map(this::convertIntoFromExpression)
-                    .collect(ImmutableCollectors.toList());
+            @Override
+            public SQLExpression transformExtensionalData(ExtensionalDataNode extensionalDataNode) {
+                return sqlAlgebraFactory.createSQLTable(extensionalDataNode.getRelationDefinition(),
+                        extensionalDataNode.getArgumentMap());
+            }
 
-            return sqlAlgebraFactory.createSQLNaryJoinExpression(joinedExpressions);
-        }
-        else if (rootNode instanceof LeftJoinNode){
-            LeftJoinNode leftJoinNode = (LeftJoinNode) rootNode;
-            IQTree leftSubTree = tree.getChildren().get(0);
-            IQTree rightSubTree = tree.getChildren().get(1);
+            @Override
+            public SQLExpression transformEmpty(EmptyNode node) {
+                throw new MinorOntopInternalBugException("unexpected empty node"  + node);
+            }
 
-            SQLExpression leftExpression = getSubExpressionOfLeftJoinExpression(leftSubTree);
-            SQLExpression rightExpression = getSubExpressionOfLeftJoinExpression(rightSubTree);
+            @Override
+            public SQLExpression transformTrue(TrueNode node) {
+                return sqlAlgebraFactory.createSQLOneTupleDummyQueryExpression();
+            }
 
-            /*
-             * Where expression: from the filter node or from the top inner join of the child tree
-             */
-            Optional<ImmutableExpression> joinCondition = leftJoinNode.getOptionalFilterCondition();
+            @Override
+            public SQLExpression transformValues(ValuesNode valuesNode) {
+                return sqlAlgebraFactory.createSQLValues(valuesNode.getOrderedVariables(), valuesNode.getValues());
+            }
 
-            return sqlAlgebraFactory.createSQLLeftJoinExpression(leftExpression, rightExpression, joinCondition);
-        }
-        else if (rootNode instanceof UnionNode){
-            UnionNode unionNode = (UnionNode) rootNode;
-            ImmutableSortedSet<Variable> signature = ImmutableSortedSet.copyOf(tree.getVariables());
-            ImmutableList<SQLExpression> subExpressions = tree.getChildren().stream()
-                    .map(e-> convert(e, signature))
-                    .collect(ImmutableCollectors.toList());
-            return sqlAlgebraFactory.createSQLUnionExpression(subExpressions,unionNode.getVariables());
-        }
-        else if (rootNode instanceof TrueNode){
-            return sqlAlgebraFactory.createSQLOneTupleDummyQueryExpression();
-        }
-        else if (rootNode instanceof ExtendedProjectionNode || rootNode instanceof QueryModifierNode){
-            ImmutableSortedSet<Variable> signature = ImmutableSortedSet.copyOf(tree.getVariables());
-            return convert(tree, signature);
-        }
-        else if (rootNode instanceof ValuesNode) {
-            ValuesNode valuesNode = (ValuesNode) rootNode;
-            return sqlAlgebraFactory.createSQLValues(valuesNode.getOrderedVariables(), valuesNode.getValues());
-        }
-        else if (rootNode instanceof FlattenNode) {
-            FlattenNode flattenNode = (FlattenNode) rootNode;
-            IQTree subtree = tree.getChildren().get(0);
-            return sqlAlgebraFactory.createSQLFlattenExpression(
-                    convert(
-                            subtree,
-                            ImmutableSortedSet.copyOf(subtree.getVariables())
-                    ),
-                    flattenNode.getFlattenedVariable(),
-                    flattenNode.getOutputVariable(),
-                    flattenNode.getIndexVariable(),
-                    flattenNode.getFlattenedType()
-            );
-        }
-        else
-            throw new RuntimeException("TODO: support arbitrary relations");
+            @Override
+            public SQLExpression transformConstruction(UnaryIQTree tree, ConstructionNode rootNode, IQTree child) {
+                return convert(tree, getSignature(tree));
+            }
+
+            @Override
+            public SQLExpression transformAggregation(UnaryIQTree tree, AggregationNode aggregationNode, IQTree child) {
+                return convert(tree, getSignature(tree));
+            }
+
+            @Override
+            public SQLExpression transformFilter(UnaryIQTree tree, FilterNode rootNode, IQTree child) {
+                return convert(tree, getSignature(tree));
+            }
+
+            @Override
+            public SQLExpression transformFlatten(UnaryIQTree tree, FlattenNode flattenNode, IQTree child) {
+                IQTree subtree = tree.getChild();
+                return sqlAlgebraFactory.createSQLFlattenExpression(
+                        convert(subtree, getSignature(subtree)),
+                        flattenNode.getFlattenedVariable(),
+                        flattenNode.getOutputVariable(),
+                        flattenNode.getIndexVariable(),
+                        flattenNode.getFlattenedType());
+            }
+
+            @Override
+            public SQLExpression transformDistinct(UnaryIQTree tree, DistinctNode rootNode, IQTree child) {
+                return convert(tree, getSignature(tree));
+            }
+
+            @Override
+            public SQLExpression transformSlice(UnaryIQTree tree, SliceNode sliceNode, IQTree child) {
+                return convert(tree, getSignature(tree));
+            }
+
+            @Override
+            public SQLExpression transformOrderBy(UnaryIQTree tree, OrderByNode rootNode, IQTree child) {
+                return convert(tree, getSignature(tree));
+            }
+
+            @Override
+            public SQLExpression transformLeftJoin(BinaryNonCommutativeIQTree tree, LeftJoinNode leftJoinNode, IQTree leftChild, IQTree rightChild) {
+                SQLExpression leftExpression = getSubExpressionOfLeftJoinExpression(leftChild);
+                SQLExpression rightExpression = getSubExpressionOfLeftJoinExpression(rightChild);
+
+                /*
+                 * Where expression: from the filter node or from the top inner join of the child tree
+                 */
+                Optional<ImmutableExpression> joinCondition = leftJoinNode.getOptionalFilterCondition();
+
+                return sqlAlgebraFactory.createSQLLeftJoinExpression(leftExpression, rightExpression, joinCondition);
+            }
+
+            @Override
+            public SQLExpression transformInnerJoin(NaryIQTree tree, InnerJoinNode rootNode, ImmutableList<IQTree> children) {
+                ImmutableList<SQLExpression> joinedExpressions = NaryIQTreeTools.transformChildren(
+                        tree.getChildren(),
+                        c -> convertIntoFromExpression(c));
+
+                return sqlAlgebraFactory.createSQLNaryJoinExpression(joinedExpressions);
+            }
+
+            @Override
+            public SQLExpression transformUnion(NaryIQTree tree, UnionNode unionNode, ImmutableList<IQTree> children) {
+                ImmutableSortedSet<Variable> signature = getSignature(tree);
+                ImmutableList<SQLExpression> subExpressions = NaryIQTreeTools.transformChildren(
+                        tree.getChildren(),
+                        c -> convert(c, signature));
+                return sqlAlgebraFactory.createSQLUnionExpression(subExpressions, unionNode.getVariables());
+            }
+
+            private ImmutableSortedSet<Variable> getSignature(IQTree tree) {
+                return ImmutableSortedSet.copyOf(tree.getVariables());
+            }
+        });
     }
 
-    private SQLExpression getSubExpressionOfLeftJoinExpression(IQTree tree){
-        if (tree.getRootNode() instanceof InnerJoinNode){
-            ImmutableList<IQTree> children = tree.getChildren();
+    private SQLExpression getSubExpressionOfLeftJoinExpression(IQTree tree) {
+        var join = NaryIQTreeTools.InnerJoinDecomposition.of(tree);
+        if (join.isPresent()) {
+            ImmutableList<IQTree> children = join.getChildren();
             int arity = children.size();
 
-            Optional<ImmutableExpression> filterCondition = ((InnerJoinNode) tree.getRootNode()).getOptionalFilterCondition();
+            Optional<ImmutableExpression> joinCondition = join.joinCondition();
 
             return IntStream.range(1, arity)
                     .boxed()
@@ -253,7 +249,7 @@ public class IQTree2SelectFromWhereConverterImpl implements IQTree2SelectFromWhe
                             (e, i) -> sqlAlgebraFactory.createSQLInnerJoinExpression(
                                     e,
                                     convertIntoOrdinaryExpression(children.get(i)),
-                                    filterCondition
+                                    joinCondition
                                             // We only consider the joining condition when reaching the ultimate child
                                             .filter(c -> i == (arity - 1))),
                             (e1, e2) -> { throw new MinorOntopInternalBugException("Unexpected");});

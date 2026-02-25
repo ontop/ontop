@@ -9,6 +9,4 @@ public interface SQLNaryJoinExpression extends SQLExpression {
 
     ImmutableList <SQLExpression> getJoinedExpressions();
 
-    Optional<ImmutableExpression> getFilterCondition();
-
 }

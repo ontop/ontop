@@ -11,9 +11,12 @@ import it.unibz.inf.ontop.injection.ReformulationFactory;
 import it.unibz.inf.ontop.answering.connection.DBConnector;
 import it.unibz.inf.ontop.answering.connection.OntopConnection;
 import it.unibz.inf.ontop.spec.OBDASpecification;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class OntopQueryEngineImpl implements OntopQueryEngine {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(OntopQueryEngineImpl.class);
     private final DBConnector dbConnector;
     private final QueryReformulator queryReformulator;
 
@@ -23,6 +26,7 @@ public class OntopQueryEngineImpl implements OntopQueryEngine {
                                  OntopSystemFactory systemFactory) {
         queryReformulator = translationFactory.create(obdaSpecification);
         dbConnector = systemFactory.create(queryReformulator);
+        LOGGER.info("Ontop has completed the setup and it is ready for query answering!");
     }
 
     @Override

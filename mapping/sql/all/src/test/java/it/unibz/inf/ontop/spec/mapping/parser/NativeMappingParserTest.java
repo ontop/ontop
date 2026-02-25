@@ -88,83 +88,161 @@ public class NativeMappingParserTest {
 
     @Test
     public void testLoadWithBlankMappingId() {
-        assertThrows(InvalidMappingException.class,
-                () -> mappingParser.parse(new File(ROOT + "SchoolBadFile5.obda")),
-                "\n" +
+        var ex = assertThrows(InvalidMappingException.class,
+                () -> mappingParser.parse(new File(ROOT + "SchoolBadFile5.obda")));
+        assertEquals("\n" +
                         "The syntax of the mapping is invalid (and therefore cannot be processed). Problems:\n" +
                         "\n" +
-                        "Line 10: Mapping ID is missing\n");
+                        "Line 10: Mapping ID is missing\n", ex.getMessage());
+    }
+
+    @Test
+    public void testLoadMultilineWithBlankMappingId() {
+        var ex = assertThrows(InvalidMappingException.class,
+                () -> mappingParser.parse(new File(ROOT + "SchoolBadFile5m.obda")));
+        assertEquals("\n" +
+                        "The syntax of the mapping is invalid (and therefore cannot be processed). Problems:\n" +
+                        "\n" +
+                        "Line 10: Mapping ID is missing\n", ex.getMessage());
     }
 
     @Test
     public void testLoadWithBlankTargetQuery() {
-        assertThrows(InvalidMappingException.class,
-                () -> mappingParser.parse(new File(ROOT + "SchoolBadFile6.obda")),
-                "\n" +
+        var ex = assertThrows(InvalidMappingException.class,
+                () -> mappingParser.parse(new File(ROOT + "SchoolBadFile6.obda")));
+        assertEquals("\n" +
                         "The syntax of the mapping is invalid (and therefore cannot be processed). Problems:\n" +
                         "\n" +
                         "MappingId = 'M2'\n" +
-                        "Line 15: Target is missing\n" +
-                        "\n");
+                        "Line 15: Target query is missing\n", ex.getMessage());
+    }
+
+    @Test
+    public void testLoadWithMissingTargetQuery() {
+        var ex = assertThrows(InvalidMappingException.class,
+                () -> mappingParser.parse(new File(ROOT + "SchoolBadFile6m.obda")));
+        assertEquals("\n" +
+                        "The syntax of the mapping is invalid (and therefore cannot be processed). Problems:\n" +
+                        "\n" +
+                        "MappingId = 'M2'\n" +
+                        "Line 16: Target is missing\n", ex.getMessage());
     }
 
     @Test
     public void testLoadWithBlankSourceQuery()  {
-        assertThrows(InvalidMappingException.class,
-                () -> mappingParser.parse(new File(ROOT + "SchoolBadFile7.obda")),
-                "\n" +
+        var ex = assertThrows(InvalidMappingException.class,
+                () -> mappingParser.parse(new File(ROOT + "SchoolBadFile7.obda")));
+        assertEquals("\n" +
                         "The syntax of the mapping is invalid (and therefore cannot be processed). Problems:\n" +
                         "\n" +
                         "MappingId = 'M3'\n" +
-                        "Line 20: Source query is missing\n" +
-                        "\n");
+                        "Line 20: Source query is missing\n", ex.getMessage());
+    }
+
+    @Test
+    public void testLoadWithMissingSourceQuery()  {
+        var ex = assertThrows(InvalidMappingException.class,
+                () -> mappingParser.parse(new File(ROOT + "SchoolBadFile7m.obda")));
+        assertEquals("\n" +
+                        "The syntax of the mapping is invalid (and therefore cannot be processed). Problems:\n" +
+                        "\n" +
+                        "MappingId = 'M3'\n" +
+                        "Line 24: Source is missing\n", ex.getMessage());
     }
 
     @Test
     public void testLoadWithBadTargetQuery() {
-        assertThrows(InvalidMappingException.class,
-                () -> mappingParser.parse(new File(ROOT + "SchoolBadFile8.obda")),
-                "\n" +
+        var ex = assertThrows(InvalidMappingException.class,
+                () -> mappingParser.parse(new File(ROOT + "SchoolBadFile8.obda")));
+        assertEquals("\n" +
                         "The syntax of the mapping is invalid (and therefore cannot be processed). Problems:\n" +
                         "\n" +
                         "MappingId = 'M1'\n" +
-                        "Line 12: Invalid target: ':P{id} :Student ; :firstName {fname} ; :lastName {lname} ; :age {age}^^xsd:integer .'\n" +
+                        "Line 14: Invalid target: ':P{id} :Student ; :firstName {fname} ; :lastName {lname} ; :age {age}^^xsd:integer .'\n" +
                         "Debug information\n" +
                         "extraneous input ';' expecting {'true', 'false', 'TRUE', 'True', 'FALSE', 'False', ENCLOSED_COLUMN_NAME, IRIREF, PNAME_LN, BLANK_NODE_LABEL, INTEGER, DECIMAL, DOUBLE, STRING_LITERAL_QUOTE, ANON}\n" +
                         "MappingId = 'M2'\n" +
-                        "Line 17: Invalid target: ':C{id} a :Course ; :title {title} ; :hasLecturer :L{id} ; description {description}@en-US .'\n" +
+                        "Line 19: Invalid target: ':C{id} a :Course ; :title {title} ; :hasLecturer :L{id} ; description {description}@en-US .'\n" +
                         "Debug information\n" +
-                        "mismatched input 'description' expecting {'.', ';', 'a', IRIREF, PNAME_LN}\n");
+                        "mismatched input 'description' expecting {'.', ';', 'a', IRIREF, PNAME_LN}", ex.getMessage());
+    }
+
+    @Test
+    public void testLoadWithBadMultilineTargetQuery() {
+        var ex = assertThrows(InvalidMappingException.class,
+                () -> mappingParser.parse(new File(ROOT + "SchoolBadFile8m.obda")));
+        assertEquals("\n" +
+                "The syntax of the mapping is invalid (and therefore cannot be processed). Problems:\n" +
+                "\n" +
+                "MappingId = 'M1'\n" +
+                "Line 17: Invalid target: ':P{id} :Student ; :firstName {fname} ; :lastName {lname} ; :age {age}^^xsd:integer .'\n" +
+                "Debug information\n" +
+                "extraneous input ';' expecting {'true', 'false', 'TRUE', 'True', 'FALSE', 'False', ENCLOSED_COLUMN_NAME, IRIREF, PNAME_LN, BLANK_NODE_LABEL, INTEGER, DECIMAL, DOUBLE, STRING_LITERAL_QUOTE, ANON}\n" +
+                "MappingId = 'M2'\n" +
+                "Line 25: Invalid target: ':C{id} a :Course ; :title {title} ; :hasLecturer :L{id} ; description {description}@en-US .'\n" +
+                "Debug information\n" +
+                "mismatched input 'description' expecting {'.', ';', 'a', IRIREF, PNAME_LN}", ex.getMessage());
     }
 
     @Test
     public void testLoadWithPredicateDeclarations()  {
-        assertThrows(MappingIOException.class,
-                () -> mappingParser.parse(new File(ROOT + "SchoolBadFile9.obda")),
-                "java.io.IOException: ERROR reading SchoolBadFile9.obda at line: 9\n" +
-                        "MESSAGE: The tag [ClassDeclaration] is no longer supported. You may safely remove the content from the file.\n");
+        var ex = assertThrows(MappingIOException.class,
+                () -> mappingParser.parse(new File(ROOT + "SchoolBadFile9.obda")));
+        assertEquals("java.io.IOException: ERROR reading SchoolBadFile9.obda at line: 9\n" +
+                        "MESSAGE: The tag [ClassDeclaration] is no longer supported. You may safely remove the content from the file.", ex.getMessage());
     }
 
     @Test
     public void testLoadWithAllMistakes() {
-            assertThrows(InvalidMappingException.class,
-                    () -> mappingParser.parse(new File(ROOT + "SchoolBadFile10.obda")),
-                    "\n" +
+            var ex = assertThrows(InvalidMappingException.class,
+                    () -> mappingParser.parse(new File(ROOT + "SchoolBadFile10.obda")));
+            assertEquals("\n" +
                             "The syntax of the mapping is invalid (and therefore cannot be processed). Problems:\n" +
                             "\n" +
                             "Line 11: Mapping ID is missing\n" +
                             "\n" +
                             "MappingId = 'M2'\n" +
-                            "Line 17: Target is missing\n" +
+                            "Line 17: Target query is missing\n" +
                             "\n" +
                             "MappingId = 'M3'\n" +
-                            "Line 23: Source query is missing\n" +
-                            "\n");
+                            "Line 23: Source query is missing\n", ex.getMessage());
     }
 
     @Test
     public void testLoadConcat() throws Exception {
-        mappingParser.parse(new File(ROOT2 + "mapping-northwind.obda"));
+        var mapping = mappingParser.parse(new File(ROOT2 + "mapping-northwind.obda"));
+        assertEquals(7, mapping.getTripleMaps().get(0).getTargetAtoms().size());
+    }
+
+    @Test
+    public void testLoadMultiline() throws Exception {
+        var mapping = mappingParser.parse(new File(ROOT2 + "mapping-northwind-multiline.obda"));
+        assertEquals(7, mapping.getTripleMaps().get(0).getTargetAtoms().size());
+    }
+
+    @Test
+    public void testLoadMultilineWithMultilineTargetNoSpace() throws Exception {
+        var mapping = mappingParser.parse(new File(ROOT2 + "mapping-northwind-multiline-m.obda"));
+        assertEquals(7, mapping.getTripleMaps().get(0).getTargetAtoms().size());
+    }
+
+    @Test
+    public void testLoadMultilineWithMultilineTarget() throws Exception {
+        var mapping = mappingParser.parse(new File(ROOT2 + "mapping-northwind-multiline-m2.obda"));
+        assertEquals(7, mapping.getTripleMaps().get(0).getTargetAtoms().size());
+    }
+
+    @Test
+    public void testLoadMultilineWithMultilineTargetNotLast() throws Exception {
+        var mapping = mappingParser.parse(new File(ROOT2 + "mapping-northwind-multiline-m3.obda"));
+        assertEquals(7, mapping.getTripleMaps().get(0).getTargetAtoms().size());
+    }
+
+    @Test
+    public void testLoadMultilineWithMultilineTargetNotLastNpSpace() throws Exception {
+        var ex = assertThrows(MappingIOException.class, () -> mappingParser.parse(new File(ROOT2 + "mapping-northwind-multiline-m4.obda")));
+        assertEquals("java.io.IOException: ERROR reading mapping-northwind-multiline-m4.obda at line: 11\n" +
+                "MESSAGE: Unknown parameter name \"NORTHWIND.EMPLOYEES\" at line: 11.", ex.getMessage());
     }
 
     @Test
@@ -174,10 +252,10 @@ public class NativeMappingParserTest {
 
     @Test
     public void testEndCollectionSymbolRequirement() {
-        assertThrows(MappingIOException.class,
-                () -> mappingParser.parse(new File(ROOT2 + "missingCollectionEnding.obda")),
-                "java.io.IOException: ERROR reading missingCollectionEnding.obda at line: 48\n" +
-                        "MESSAGE: End collection symbol ]] is missing.\n");
+        var ex = assertThrows(MappingIOException.class,
+                () -> mappingParser.parse(new File(ROOT2 + "missingCollectionEnding.obda")));
+        assertEquals("java.io.IOException: ERROR reading missingCollectionEnding.obda at line: 48\n" +
+                        "MESSAGE: End collection symbol ]] is missing.", ex.getMessage());
     }
 
     @Test

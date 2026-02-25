@@ -28,8 +28,8 @@ public class ConstraintOracleTest extends AbstractConstraintTest {
 
     private static final String PROPERTIES_FILE = "/dbconstraints/dbconstraints-oracle.properties";
 
-    public ConstraintOracleTest(String method) {
-        super(method, PROPERTIES_FILE);
+    public ConstraintOracleTest() {
+        super(PROPERTIES_FILE);
     }
 
 }

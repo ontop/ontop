@@ -1,0 +1,52 @@
+{
+  "relations": [
+    {
+      "name": ["\"lenses\"", "\"employee\""],
+      "baseRelation": ["\"employees\""],
+      "uniqueConstraints": {
+        "added": [
+          {
+            "name": "employee-uc",
+            "determinants": ["\"employee\""],
+            "isPrimaryKey": false
+          }
+        ]
+      },
+      "type": "BasicLens"
+    },
+    {
+      "name": ["\"lenses\"", "\"department\""],
+      "baseRelation": ["\"departments\""],
+      "uniqueConstraints": {
+        "added": [
+          {
+            "name": "department-uc",
+            "determinants": ["\"department\""],
+            "isPrimaryKey": false
+          }
+        ]
+      },
+      "foreignKeys": { "added": [
+        {
+          "name": "departments-employees-fk",
+          "from": ["\"employee\""],
+          "to": {
+            "relation": ["\"employees\""],
+            "columns": ["\"employee\""]
+          }
+        }
+      ] },
+      "flattenedColumn": {
+        "name": "\"employees\"",
+        "datatype": "list"
+      },
+      "columns": {
+        "added": [],
+        "hidden": [],
+        "kept": ["\"department\""],
+        "new": "\"employee\""
+      },
+      "type": "FlattenLens"
+    }
+  ]
+}

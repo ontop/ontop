@@ -1026,6 +1026,23 @@ public abstract class AbstractBindTestWithFunctions extends AbstractDockerRDF4JT
     }
 
     @Test
+    public void testCaseInsensitiveREGEX() {
+        String query = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
+                + "PREFIX  ns:  <http://example.org/ns#>\n"
+                + "SELECT  (BOUND(?title) AS ?v) WHERE \n"
+                + "{  \n"
+                + "   ?x ns:price ?p .\n"
+                + "   ?x ns:discount ?discount .\n"
+                + "   OPTIONAL{\n"
+                + "     ?x dc:title ?title .\n"
+                + "     FILTER(REGEX(?title, \"semantic\", \"i\" )) \n"
+                + "   } } ORDER BY ?title";
+
+        executeAndCompareValues(query, ImmutableList.of("\"false\"^^xsd:boolean", "\"false\"^^xsd:boolean",
+                "\"false\"^^xsd:boolean", "\"true\"^^xsd:boolean"));
+    }
+
+    @Test
     public void testREPLACE() {
         String query = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\n"
                 + "SELECT  ?v WHERE \n"
@@ -1514,4 +1531,19 @@ public abstract class AbstractBindTestWithFunctions extends AbstractDockerRDF4JT
         return ImmutableSet.of("\"215.34\"^^xsd:decimal");
     }
 
+    @Test
+    public void testDurationArithmetic() {
+        String sparql = "PREFIX  ns:  <http://example.org/ns#>\n" +
+                "SELECT ?v WHERE {\n" +
+                "    ?x ns:pubYear ?year .\n" +
+                "    BIND(?year + \"-P2MT15M\"^^xsd:duration as ?v) \n" +
+                "} ORDER BY ?year";
+
+        executeAndCompareValues(sparql, getDurationArithmeticExpectedResults());
+    }
+
+    protected ImmutableSet<String> getDurationArithmeticExpectedResults() {
+        return ImmutableSet.of("\"1970-09-05T07:35:00\"^^xsd:dateTime", "\"2011-10-08T11:15:00\"^^xsd:dateTime",
+                "\"2014-04-05T16:32:52\"^^xsd:dateTime", "\"2015-07-21T09:08:06\"^^xsd:dateTime" );
+    }
 }

@@ -1,0 +1,14 @@
+[PrefixDeclaration]
+rdf:        http://www.w3.org/1999/02/22-rdf-syntax-ns#
+rdfs:       http://www.w3.org/2000/01/rdf-schema#
+owl:        http://www.w3.org/2002/07/owl#
+xsd:        http://www.w3.org/2001/XMLSchema#
+obda:       https://w3id.org/obda/vocabulary#
+
+[MappingDeclaration] @collection [[
+
+mappingId   MAPPING-ID85
+target      _:ontop-bnode-18{ingredientevents_subject_id}/{ingredientevents_hadm_id}/{ingredientevents_stay_id}/{ingredientevents_caregiver_id}/{ingredientevents_starttime}/{ingredientevents_endtime}/{ingredientevents_storetime}/{ingredientevents_itemid}/{ingredientevents_amount}/{ingredientevents_amountuom}/{ingredientevents_rate}/{ingredientevents_rateuom}/{ingredientevents_orderid}/{ingredientevents_linkorderid}/{ingredientevents_statusdescription}/{ingredientevents_originalamount}/{ingredientevents_originalrate} <http://eg.com/ingredientevents#ref-subject_id> <http://eg.com/patients/subject_id={patients_subject_id}> .
+source      SELECT "ingredientevents"."subject_id" AS "ingredientevents_subject_id", "ingredientevents"."hadm_id" AS "ingredientevents_hadm_id", "ingredientevents"."stay_id" AS "ingredientevents_stay_id", "ingredientevents"."caregiver_id" AS "ingredientevents_caregiver_id", "ingredientevents"."starttime" AS "ingredientevents_starttime", "ingredientevents"."endtime" AS "ingredientevents_endtime", "ingredientevents"."storetime" AS "ingredientevents_storetime", "ingredientevents"."itemid" AS "ingredientevents_itemid", "ingredientevents"."amount" AS "ingredientevents_amount", "ingredientevents"."amountuom" AS "ingredientevents_amountuom", "ingredientevents"."rate" AS "ingredientevents_rate", "ingredientevents"."rateuom" AS "ingredientevents_rateuom", "ingredientevents"."orderid" AS "ingredientevents_orderid", "ingredientevents"."linkorderid" AS "ingredientevents_linkorderid", "ingredientevents"."statusdescription" AS "ingredientevents_statusdescription", "ingredientevents"."originalamount" AS "ingredientevents_originalamount", "ingredientevents"."originalrate" AS "ingredientevents_originalrate", "patients"."subject_id" AS "patients_subject_id" FROM "ingredientevents", "patients" WHERE "ingredientevents"."subject_id" = "patients"."subject_id"
+
+]]

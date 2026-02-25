@@ -10,8 +10,8 @@ public class ConstraintDremioArrowFlightTest extends AbstractConstraintTest {
 
     private static final String PROPERTIES_FILE = "/dbconstraints/dbconstraints-dremio-arrowflight.properties";
 
-    public ConstraintDremioArrowFlightTest(String method) {
-        super(method, PROPERTIES_FILE);
+    public ConstraintDremioArrowFlightTest() {
+        super(PROPERTIES_FILE);
     }
 
 }

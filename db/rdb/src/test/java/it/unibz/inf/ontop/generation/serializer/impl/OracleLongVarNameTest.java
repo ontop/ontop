@@ -3,12 +3,12 @@ package it.unibz.inf.ontop.generation.serializer.impl;
 import it.unibz.inf.ontop.dbschema.QuotedID;
 import it.unibz.inf.ontop.dbschema.QuotedIDFactory;
 import it.unibz.inf.ontop.dbschema.impl.SQLStandardQuotedIDFactory;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.HashSet;
 import java.util.Set;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Test how the Oracle SQL dialect adapter behaves with long aliases.
@@ -35,7 +35,7 @@ public class OracleLongVarNameTest {
         assertTrue(veryLongVarName.getName().length() <= 30);
         //assertTrue(veryLongVarName.contains(defaultSuffix));
         assertTrue(veryLongVarName.getName().contains("veryVery"));
-        assertEquals(veryLongVarName.getName(), "veryVeryVeryVeryVeryVeryVer0");
+        assertEquals("veryVeryVeryVeryVeryVeryVer0", veryLongVarName.getName());
     }
 
     @Test
@@ -45,21 +45,22 @@ public class OracleLongVarNameTest {
         for(int i = 0; i < createdVarNb; i++) {
             assignedVars.add(oracleAdapter.createAttributeAlias(veryLongSignatureVarName + defaultSuffix));
         }
-        assertEquals(assignedVars.size(), createdVarNb);
+        assertEquals(createdVarNb, assignedVars.size());
     }
 
-    @Test(expected = RuntimeException.class)
+    @Test
     public void testOracleTooMuchSimilarVars() {
         int createdVarNb = 1001;
-        for(int i = 0; i < createdVarNb; i++) {
-            oracleAdapter.createAttributeAlias(veryLongSignatureVarName + defaultSuffix);
-        }
+        assertThrows(RuntimeException.class, () -> {
+            for (int i = 0; i < createdVarNb; i++) {
+                oracleAdapter.createAttributeAlias(veryLongSignatureVarName + defaultSuffix);
+            }
+        });
     }
 
     @Test
     public void testOracleMaxNonModifiedVarName() {
         QuotedID limitVarName = oracleAdapter.createAttributeAlias(limitSignatureVarName + defaultSuffix);
-        assertEquals(limitVarName.getName(), limitSignatureVarName + defaultSuffix);
+        assertEquals(limitSignatureVarName + defaultSuffix, limitVarName.getName());
     }
-
 }

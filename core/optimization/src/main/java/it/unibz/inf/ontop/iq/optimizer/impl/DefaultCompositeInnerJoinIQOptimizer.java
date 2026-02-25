@@ -1,15 +1,12 @@
 package it.unibz.inf.ontop.iq.optimizer.impl;
 
-import com.google.common.collect.ImmutableList;
-import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
-import it.unibz.inf.ontop.iq.IQ;
+import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.optimizer.*;
+import it.unibz.inf.ontop.iq.transform.impl.DefaultDelegatingIQTreeVariableGeneratorTransformer;
 
 import javax.inject.Inject;
 
-public class DefaultCompositeInnerJoinIQOptimizer implements InnerJoinIQOptimizer {
-
-    private final ImmutableList<IQOptimizer> optimizers;
+public class DefaultCompositeInnerJoinIQOptimizer extends DefaultDelegatingIQTreeVariableGeneratorTransformer implements InnerJoinIQOptimizer {
 
     @Inject
     private DefaultCompositeInnerJoinIQOptimizer(
@@ -18,21 +15,16 @@ public class DefaultCompositeInnerJoinIQOptimizer implements InnerJoinIQOptimize
             ArgumentTransferInnerJoinFDIQOptimizer fdIQOptimizer,
             RedundantJoinFKOptimizer fkOptimizer,
             BelowDistinctJoinWithClassUnionOptimizer belowDistinctClassUnionOptimizer) {
-        this.optimizers = ImmutableList.of(
-                selfJoinUCIQOptimizer,
-                fdIQOptimizer,
-                selfJoinSameTermIQOptimizer,
-                fkOptimizer,
-                belowDistinctClassUnionOptimizer);
-    }
 
-    @Override
-    public IQ optimize(IQ query) {
-        return optimizers.stream()
-                .reduce(query,
-                        (q, o) -> o.optimize(q),
-                        (q1, q2) -> {
-                            throw new MinorOntopInternalBugException("Merge is not supported");
-                        });
+        super(selfJoinUCIQOptimizer,
+                IQTree::normalizeForOptimization,
+                fdIQOptimizer,
+                IQTree::normalizeForOptimization,
+                selfJoinSameTermIQOptimizer,
+                IQTree::normalizeForOptimization,
+                fkOptimizer,
+                IQTree::normalizeForOptimization,
+                belowDistinctClassUnionOptimizer,
+                IQTree::normalizeForOptimization);
     }
 }

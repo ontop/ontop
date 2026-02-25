@@ -11,8 +11,8 @@ public class ConstraintAthenaTest extends AbstractConstraintTest {
 
     private static final String PROPERTIES_FILE = "/dbconstraints/dbconstraints-athena.properties";
 
-    public ConstraintAthenaTest(String method) {
-        super(method, PROPERTIES_FILE);
+    public ConstraintAthenaTest() {
+        super(PROPERTIES_FILE);
     }
 
 }

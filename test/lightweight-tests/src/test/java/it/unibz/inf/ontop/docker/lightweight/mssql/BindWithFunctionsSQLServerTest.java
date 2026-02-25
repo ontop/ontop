@@ -93,4 +93,5 @@ public class BindWithFunctionsSQLServerTest extends AbstractBindTestWithFunction
         String query = "PREFIX  dc:  <http://purl.org/dc/elements/1.1/>\nSELECT ?v WHERE { dc:switchCaseResult dc:value ?v } ";
         executeAndCompareValues(query, ImmutableSet.of("\"2\"^^xsd:integer", "\"1\"^^xsd:integer"));
     }
+
 }

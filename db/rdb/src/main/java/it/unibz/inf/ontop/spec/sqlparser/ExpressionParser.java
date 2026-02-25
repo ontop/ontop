@@ -3,6 +3,7 @@ package it.unibz.inf.ontop.spec.sqlparser;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
+import it.unibz.inf.ontop.exception.InvalidQueryException;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.*;
@@ -11,8 +12,9 @@ import it.unibz.inf.ontop.dbschema.QuotedID;
 import it.unibz.inf.ontop.dbschema.QuotedIDFactory;
 import it.unibz.inf.ontop.dbschema.RelationID;
 import it.unibz.inf.ontop.model.type.DBTypeFactory;
-import it.unibz.inf.ontop.model.type.TermTypeInference;
 import it.unibz.inf.ontop.spec.sqlparser.exception.InvalidSelectQueryRuntimeException;
+import it.unibz.inf.ontop.spec.sqlparser.exception.QueryParseException;
+import it.unibz.inf.ontop.spec.sqlparser.exception.UnsupportedSelectQueryException;
 import it.unibz.inf.ontop.spec.sqlparser.exception.UnsupportedSelectQueryRuntimeException;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import net.sf.jsqlparser.expression.*;
@@ -24,9 +26,7 @@ import net.sf.jsqlparser.expression.operators.relational.*;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.create.table.ColDataType;
-import net.sf.jsqlparser.statement.select.AllColumns;
-import net.sf.jsqlparser.statement.select.AllTableColumns;
-import net.sf.jsqlparser.statement.select.SubSelect;
+import net.sf.jsqlparser.statement.select.*;
 
 import java.util.*;
 import java.util.function.BiFunction;
@@ -34,11 +34,6 @@ import java.util.stream.IntStream;
 
 import static it.unibz.inf.ontop.model.term.functionsymbol.InequalityLabel.*;
 
-
-/**
- * Created by Roman Kontchakov on 10/11/2016.
- *
- */
 
 public class ExpressionParser {
 
@@ -59,11 +54,35 @@ public class ExpressionParser {
         return visitor.getTerm(expression);
     }
 
-    public ImmutableList<ImmutableExpression> parseBooleanExpression(Expression expression, RAExpressionAttributes attributes) {
+    public ImmutableExpression parseBooleanExpression(Expression expression, RAExpressionAttributes attributes) {
         TermVisitor visitor = new TermVisitor(attributes);
-        return visitor.getExpression(expression).flattenAND().collect(ImmutableCollectors.toList());
+        return visitor.getExpression(expression);
     }
 
+
+    public ImmutableTerm parseTerm(String expression, RAExpressionAttributes attributes) throws InvalidQueryException, UnsupportedSelectQueryException {
+        return parseTerm(parseJSqlExpression(expression), attributes);
+    }
+
+    public ImmutableExpression parseBooleanExpression(String expression, RAExpressionAttributes attributes) throws InvalidQueryException, UnsupportedSelectQueryException {
+        return parseBooleanExpression(parseJSqlExpression(expression), attributes);
+    }
+
+
+    private Expression parseJSqlExpression(String expression) throws InvalidQueryException, UnsupportedSelectQueryException {
+        try {
+            String sqlQuery = "SELECT \n" + expression + "\n FROM fakeTable";
+            Select statement = JSqlParserTools.parse(sqlQuery, !idfac.supportsSquareBracketQuotation());
+            SelectItem si = ((PlainSelect) statement.getSelectBody()).getSelectItems().get(0);
+            return ((SelectExpressionItem) si).getExpression();
+        }
+        catch (QueryParseException | InvalidSelectQueryRuntimeException e) {
+            throw new InvalidQueryException(e.getMessage());
+        }
+        catch (UnsupportedSelectQueryRuntimeException e) {
+            throw new UnsupportedSelectQueryException(e.getMessage(), expression);
+        }
+    }
 
 
 
@@ -278,8 +297,7 @@ public class ExpressionParser {
             else
                 throw new UnsupportedOperationException("Invalid HEX" + str);
 
-            result = termFactory.getDBConstant(value + "", dbTypeFactory.getDBLargeIntegerType());
-        }
+            result = termFactory.getDBConstant(String.valueOf(value), dbTypeFactory.getDBLargeIntegerType());        }
 
         @Override
         public void visit(StringValue expression) {
@@ -366,32 +384,32 @@ public class ExpressionParser {
 
         @Override
         public void visit(Addition expression) {
-            process(expression, getArithmeticOperation(expression));
+            processArithmeticOperation(expression);
         }
 
         @Override
         public void visit(Subtraction expression) {
-            process(expression, getArithmeticOperation(expression));
+            processArithmeticOperation(expression);
         }
 
         @Override
         public void visit(Multiplication expression) {
-            process(expression, getArithmeticOperation(expression));
+            processArithmeticOperation(expression);
         }
 
         @Override
         public void visit(Division expression) {
-            process(expression, getArithmeticOperation(expression));
+            processArithmeticOperation(expression);
         }
 
         @Override
         public void visit(IntegerDivision expression) {
-            process(expression, getArithmeticOperation(expression));
+            processArithmeticOperation(expression);
         }
 
         @Override
         public void visit(Modulo expression) {
-            process(expression, getArithmeticOperation(expression));
+            processArithmeticOperation(expression);
         }
 
         @Override
@@ -405,8 +423,9 @@ public class ExpressionParser {
             result = termFactory.getImmutableFunctionalTerm(function, leftTerm, rightTerm);
         }
 
-        private DBMathBinaryOperator getArithmeticOperation(BinaryExpression expression) {
-            return dbFunctionSymbolFactory.getUntypedDBMathBinaryOperator(expression.getStringExpression());
+        private void processArithmeticOperation(BinaryExpression expression) {
+            DBMathBinaryOperator operator = dbFunctionSymbolFactory.getUntypedDBMathBinaryOperator(expression.getStringExpression());
+            process(expression, operator);
         }
 
         // ------------------------------------------------------------
@@ -491,14 +510,14 @@ public class ExpressionParser {
                 //    - a PSEUDO-COLUMN like ROWID, ROWNUM or
                 //    - a FUNCTION without arguments like USER
 
-                if (column.equals(idfac.createAttributeID("true")))
+                if (relation == null && column.equals(idfac.createAttributeID("true")))
                     result = termFactory.getDBBooleanConstant(true);
-                else if (column.equals(idfac.createAttributeID("false")))
+                else if (relation == null && column.equals(idfac.createAttributeID("false")))
                     result = termFactory.getDBBooleanConstant(false);
                 else
                     throw new InvalidSelectQueryRuntimeException("Unable to find attribute "
                             + expression
-                            + " (available attributes are " + attributes.asMap().keySet() + ")", expression);
+                            + " (available attributes are " + attributes.getAttributes() + ")", expression);
             }
             else {
                 // if it is an attribute name (qualified or not)
@@ -634,52 +653,44 @@ public class ExpressionParser {
         // expression1 [NOT] RLIKE|REGEXP [BINARY] expression2
         public void visit(RegExpMySQLOperator expression) {
             // TODO: isUseRLike
-            DBConstant flags;
             switch (expression.getOperatorType()) {
                 case MATCH_CASESENSITIVE:
-                    flags = termFactory.getDBStringConstant("");
+                    process(expression, expression.isNot(), getDBRegexpMatchesFunction(""));
                     break;
                 case MATCH_CASEINSENSITIVE:
-                    flags = termFactory.getDBStringConstant("i");
+                    process(expression, expression.isNot(), getDBRegexpMatchesFunction("i"));
                     break;
                 default:
                     throw new UnsupportedOperationException();
             }
-            process(expression, expression.isNot(), (t1, t2) -> flags.getValue().isEmpty()
-                    ? termFactory.getDBRegexpMatches(ImmutableList.of(t1, t2))
-                    : termFactory.getDBRegexpMatches(ImmutableList.of(t1, t2, flags)));
         }
 
+        @Override
         // POSIX Regular Expressions
         // e.g., https://www.postgresql.org/docs/9.6/static/functions-matching.html#FUNCTIONS-POSIX-REGEXP
-
-        @Override
         public void visit(RegExpMatchOperator expression) { // expression [!]~[*] expression2
-            DBConstant flags;
-            boolean not;
             switch (expression.getOperatorType()) {
                 case MATCH_CASESENSITIVE:
-                    flags = termFactory.getDBStringConstant("");
-                    not = false;
+                    process(expression, false, getDBRegexpMatchesFunction(""));
                     break;
                 case MATCH_CASEINSENSITIVE:
-                    flags = termFactory.getDBStringConstant("i");
-                    not = false;
+                    process(expression, false, getDBRegexpMatchesFunction("i"));
                     break;
                 case NOT_MATCH_CASESENSITIVE:
-                    flags = termFactory.getDBStringConstant("");
-                    not = true;
+                    process(expression, true, getDBRegexpMatchesFunction(""));
                     break;
                 case NOT_MATCH_CASEINSENSITIVE:
-                    flags = termFactory.getDBStringConstant("i");
-                    not = true;
+                    process(expression, true, getDBRegexpMatchesFunction("i"));
                     break;
                 default:
                     throw new UnsupportedOperationException();
             }
-            process(expression, not, (t1, t2) -> flags.getValue().isEmpty()
-                    ? termFactory.getDBRegexpMatches(ImmutableList.of(t1, t2))
-                    : termFactory.getDBRegexpMatches(ImmutableList.of(t1, t2, flags)));
+        }
+
+        private BiFunction<ImmutableTerm, ImmutableTerm, ImmutableExpression> getDBRegexpMatchesFunction(String flags) {
+            return flags.isEmpty()
+                    ? (t1, t2) -> termFactory.getDBRegexpMatches(ImmutableList.of(t1, t2))
+                    : (t1, t2) -> termFactory.getDBRegexpMatches(ImmutableList.of(t1, t2, termFactory.getDBStringConstant(flags)));
         }
 
         @Override
@@ -1001,6 +1012,9 @@ public class ExpressionParser {
 
         @Override //  expression'[' index-expression ']' or expression'[' index-expression1 : index-expression2 ']'
         public void visit(ArrayExpression expression) {
+            if (expression.getIndexExpression() == null)
+                throw new UnsupportedSelectQueryRuntimeException("Array intervals are not supported", expression);
+
             ImmutableTerm arrayTerm = getTerm(expression.getObjExpression());
             ImmutableTerm indexTerm = getTerm(expression.getIndexExpression());
 

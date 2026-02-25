@@ -54,11 +54,6 @@ public class GeneralStructuralAndSemanticIQOptimizerImpl implements GeneralStruc
     }
 
     @Override
-    public IQ optimize(IQ query) {
-        return optimize(query, null);
-    }
-
-    @Override
     public IQ optimize(IQ query, @Nullable QueryContext queryContext) {
         //lift bindings and union when it is possible
         IQ liftedQuery = bindingLiftOptimizer.optimize(query);

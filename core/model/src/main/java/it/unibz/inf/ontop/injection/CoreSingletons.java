@@ -2,7 +2,10 @@ package it.unibz.inf.ontop.injection;
 
 import it.unibz.inf.ontop.constraints.HomomorphismFactory;
 import it.unibz.inf.ontop.dbschema.DatabaseInfoSupplier;
+import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.node.normalization.ConstructionSubstitutionNormalizer;
+import it.unibz.inf.ontop.iq.tools.UnionBasedQueryMerger;
+import it.unibz.inf.ontop.iq.transform.QueryRenamer;
 import it.unibz.inf.ontop.iq.type.NotYetTypedBinaryMathOperationTransformer;
 import it.unibz.inf.ontop.iq.type.NotYetTypedEqualityTransformer;
 import it.unibz.inf.ontop.iq.type.PartiallyTypedSimpleCastTransformer;
@@ -36,18 +39,15 @@ public interface CoreSingletons {
     HomomorphismFactory getHomomorphismFactory();
 
     IntermediateQueryFactory getIQFactory();
+    IQTreeTools getIQTreeTools();
 
     CoreUtilsFactory getCoreUtilsFactory();
-
-    /**
-     * TODO: refactor and remove
-     */
-    QueryTransformerFactory getQueryTransformerFactory();
 
     SingleTermTypeExtractor getUniqueTermTypeExtractor();
 
     OntopModelSettings getSettings();
 
+    QueryRenamer getQueryRenamer();
 
     ConstructionSubstitutionNormalizer getConstructionSubstitutionNormalizer();
 
@@ -57,5 +57,7 @@ public interface CoreSingletons {
     PartiallyTypedSimpleCastTransformer getPartiallyTypeSimpleCastTransformer();
 
     DatabaseInfoSupplier getDatabaseInfoSupplier();
+
+    UnionBasedQueryMerger getUnionBasedQueryMerger();
     // TODO: complete
 }

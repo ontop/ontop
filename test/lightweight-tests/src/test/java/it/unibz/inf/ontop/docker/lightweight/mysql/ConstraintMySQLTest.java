@@ -29,8 +29,8 @@ public class ConstraintMySQLTest extends AbstractConstraintTest {
 
     private static final String PROPERTIES_FILE = "/dbconstraints/dbconstraints-mysql.properties";
 
-    public ConstraintMySQLTest(String method) {
-        super(method, PROPERTIES_FILE);
+    public ConstraintMySQLTest() {
+        super(PROPERTIES_FILE);
     }
 
 }

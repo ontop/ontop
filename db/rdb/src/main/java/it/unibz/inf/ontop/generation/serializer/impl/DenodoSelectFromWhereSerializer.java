@@ -9,6 +9,7 @@ import it.unibz.inf.ontop.generation.algebra.SelectFromWhereWithModifiers;
 import it.unibz.inf.ontop.generation.serializer.SelectFromWhereSerializer;
 import it.unibz.inf.ontop.dbschema.DBParameters;
 import it.unibz.inf.ontop.dbschema.QualifiedAttributeID;
+import it.unibz.inf.ontop.injection.OntopSQLCoreSettings;
 import it.unibz.inf.ontop.model.term.DBConstant;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.term.Variable;
@@ -20,7 +21,7 @@ import java.util.stream.Collectors;
 public class DenodoSelectFromWhereSerializer extends DefaultSelectFromWhereSerializer implements SelectFromWhereSerializer {
 
     @Inject
-    private DenodoSelectFromWhereSerializer(TermFactory termFactory) {
+    private DenodoSelectFromWhereSerializer(TermFactory termFactory, OntopSQLCoreSettings settings) {
         super(new DefaultSQLTermSerializer(termFactory) {
             @Override
             protected String serializeDBConstant(DBConstant constant) {
@@ -39,7 +40,7 @@ public class DenodoSelectFromWhereSerializer extends DefaultSelectFromWhereSeria
 
                 return super.serializeDBConstant(constant);
             }
-        });
+        }, settings);
     }
 
     @Override
@@ -96,23 +97,15 @@ public class DenodoSelectFromWhereSerializer extends DefaultSelectFromWhereSeria
                      * ORDER BY ASC xxx NULLS FIRST
                      */
                     @Override
-                    protected String serializeOrderBy(ImmutableList<SQLOrderComparator> sortConditions,
-                                                      ImmutableMap<Variable, QualifiedAttributeID> fromColumnMap) {
-                        if (sortConditions.isEmpty())
-                            return "";
-
-                        String conditionString = sortConditions.stream()
-                                .map(c -> sqlTermSerializer.serialize(c.getTerm(), fromColumnMap) +
-                                        (c.isAscending() ? " ASC NULLS FIRST" : " DESC NULLS LAST"))
-                                .collect(Collectors.joining(", "));
-
-                        return String.format("ORDER BY %s\n", conditionString);
+                    protected String serializeOrderByComparator(SQLOrderComparator c, ImmutableMap<Variable, QualifiedAttributeID> columnIDs) {
+                        return serializeTerm(c.getTerm(), columnIDs) +
+                                (c.isAscending() ? " ASC NULLS FIRST" : " DESC NULLS LAST");
                     }
 
-                    /**
-                     * Adds a CONTEXT clause, so that the local time zone is set to uct
-                     * see https://community.denodo.com/docs/html/browse/6.0/vdp/vql/queries_select_statement/context_clause/context_clause
-                     */
+                        /**
+                         * Adds a CONTEXT clause, so that the local time zone is set to uct
+                         * see https://community.denodo.com/docs/html/browse/6.0/vdp/vql/queries_select_statement/context_clause/context_clause
+                         */
 //                    @Override
 //                    public QuerySerialization visit(SelectFromWhereWithModifiers selectFromWhere) {
 //                        QuerySerialization qs = super.visit(selectFromWhere);

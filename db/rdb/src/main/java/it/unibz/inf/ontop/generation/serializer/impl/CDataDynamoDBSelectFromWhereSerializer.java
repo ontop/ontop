@@ -7,6 +7,7 @@ import it.unibz.inf.ontop.dbschema.DBParameters;
 import it.unibz.inf.ontop.generation.algebra.SQLOneTupleDummyQueryExpression;
 import it.unibz.inf.ontop.generation.algebra.SelectFromWhereWithModifiers;
 import it.unibz.inf.ontop.generation.serializer.SelectFromWhereSerializer;
+import it.unibz.inf.ontop.injection.OntopSQLCoreSettings;
 import it.unibz.inf.ontop.model.term.DBConstant;
 import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.type.DBTermType;
@@ -15,7 +16,7 @@ import it.unibz.inf.ontop.model.type.DBTermType;
 public class CDataDynamoDBSelectFromWhereSerializer extends DefaultSelectFromWhereSerializer implements SelectFromWhereSerializer {
 
     @Inject
-    private CDataDynamoDBSelectFromWhereSerializer(TermFactory termFactory) {
+    private CDataDynamoDBSelectFromWhereSerializer(TermFactory termFactory, OntopSQLCoreSettings settings) {
         super(new DefaultSQLTermSerializer(termFactory) {
             @Override
             protected String serializeDBConstant(DBConstant constant) {
@@ -27,7 +28,7 @@ public class CDataDynamoDBSelectFromWhereSerializer extends DefaultSelectFromWhe
                 return super.serializeDBConstant(constant);
             }
 
-        });
+        }, settings);
     }
 
     @Override
@@ -39,7 +40,7 @@ public class CDataDynamoDBSelectFromWhereSerializer extends DefaultSelectFromWhe
                     public QuerySerialization visit(SQLOneTupleDummyQueryExpression sqlOneTupleDummyQueryExpression) {
                         String fromString = serializeDummyTable();
                         String sqlSubString = String.format("(SELECT 1 %s) tdummy", fromString);
-                        return new QuerySerializationImpl(sqlSubString, ImmutableMap.of());
+                        return new QuerySerializationImpl(sqlSubString, ImmutableMap.of(), ImmutableMap.of());
                     }
 
                     @Override

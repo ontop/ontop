@@ -57,6 +57,9 @@ public class DefaultSQLDBTypeFactory implements SQLDBTypeFactory {
     public static final String TIME_STR = "TIME";
     public static final String TIMESTAMP_STR = "TIMESTAMP";
     public static final String TIMESTAMP_WITH_TIME_ZONE_STR = "TIMESTAMP WITH TIME ZONE";
+    public static final String INTERVAL_STR = "INTERVAL";
+    public static final String INTERVAL_YEAR_MONTH_STR = "INTERVAL YEAR TO MONTH";
+    public static final String INTERVAL_DAY_TIME_STR = "INTERVAL DAY TO SECOND";
     public static final String BINARY_STR = "BINARY";
     public static final String BINARY_VAR_STR = "BINARY VARYING";
     public static final String VARBINARY_STR = "VARBINARY";
@@ -76,6 +79,9 @@ public class DefaultSQLDBTypeFactory implements SQLDBTypeFactory {
         DATETIMESTAMP,
         GEOMETRY,
         GEOGRAPHY,
+        INTERVAL,
+        INTERVAL_YEAR_MONTH,
+        INTERVAL_DAY_TIME,
         ARRAY,
         JSON
     }
@@ -160,7 +166,10 @@ public class DefaultSQLDBTypeFactory implements SQLDBTypeFactory {
                     new NonStringNonNumberNonBooleanNonDatetimeDBTermType(TIME_STR, rootTermType.getAncestry(), typeFactory.getDatatype(XSD.TIME)),
                     new DatetimeDBTermType(TIMESTAMP_STR, rootTermType.getAncestry(), typeFactory.getXsdDatetimeDatatype()),
                     // TODO: shall we map it to xsd.datetimeStamp ? (would not follow strictly R2RML but be more precise)
-                    new DatetimeDBTermType(TIMESTAMP_WITH_TIME_ZONE_STR, rootTermType.getAncestry(), typeFactory.getXsdDatetimeDatatype())
+                    new DatetimeDBTermType(TIMESTAMP_WITH_TIME_ZONE_STR, rootTermType.getAncestry(), typeFactory.getXsdDatetimeDatatype()),
+                    new IntervalDBTermType(INTERVAL_STR, rootTermType.getAncestry(), typeFactory.getXsdDurationDatatype()),
+                    new IntervalDBTermType(INTERVAL_YEAR_MONTH_STR, rootTermType.getAncestry(), typeFactory.getXsdDurationDatatype()),
+                    new IntervalDBTermType(INTERVAL_DAY_TIME_STR, rootTermType.getAncestry(), typeFactory.getXsdDurationDatatype())
                 )
                 .collect(Collectors.toMap(
                         DBTermType::getName,
@@ -184,6 +193,9 @@ public class DefaultSQLDBTypeFactory implements SQLDBTypeFactory {
         map.put(DefaultTypeCode.DATE, DATE_STR);
         map.put(DefaultTypeCode.TIME, TIME_STR);
         map.put(DefaultTypeCode.DATETIMESTAMP, TIMESTAMP_STR);
+        map.put(DefaultTypeCode.INTERVAL, INTERVAL_STR);
+        map.put(DefaultTypeCode.INTERVAL_YEAR_MONTH, INTERVAL_YEAR_MONTH_STR);
+        map.put(DefaultTypeCode.INTERVAL_DAY_TIME, INTERVAL_DAY_TIME_STR);
         return map;
     }
 
@@ -326,6 +338,22 @@ public class DefaultSQLDBTypeFactory implements SQLDBTypeFactory {
     public DBTermType getDBGeographyType() {
         return sqlTypeMap.get(defaultTypeCodeMap.get(DefaultTypeCode.GEOGRAPHY));
     }
+
+    @Override
+    public DBTermType getDBIntervalType() {
+        return sqlTypeMap.get(defaultTypeCodeMap.get(DefaultTypeCode.INTERVAL));
+    }
+
+    @Override
+    public DBTermType getDBIntervalYearMonthType() {
+        return sqlTypeMap.get(defaultTypeCodeMap.get(DefaultTypeCode.INTERVAL_YEAR_MONTH));
+    }
+
+    @Override
+    public DBTermType getDBIntervalDayTimeType() {
+        return sqlTypeMap.get(defaultTypeCodeMap.get(DefaultTypeCode.INTERVAL_DAY_TIME));
+    }
+
 
     @Override
     public boolean supportsDBGeometryType() {

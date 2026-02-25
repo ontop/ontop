@@ -1,5 +1,7 @@
 package it.unibz.inf.ontop.iq.optimizer;
 
+import it.unibz.inf.ontop.iq.transform.IQTreeVariableGeneratorTransformer;
+
 /**
  * Lifts certain functional terms that are blocked by a UNION:
  *   - non DBFunctionSymbols (e.g. IRI dictionary function symbols)
@@ -7,5 +9,5 @@ package it.unibz.inf.ontop.iq.optimizer;
  *
  * TODO: find a better name
  */
-public interface PostProcessableFunctionLifter extends IQOptimizer {
+public interface PostProcessableFunctionLifter extends IQTreeVariableGeneratorTransformer {
 }

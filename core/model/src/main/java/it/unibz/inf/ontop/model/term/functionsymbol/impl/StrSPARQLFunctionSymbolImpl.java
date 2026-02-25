@@ -8,33 +8,19 @@ import it.unibz.inf.ontop.model.term.TermFactory;
 import it.unibz.inf.ontop.model.type.ObjectRDFType;
 import it.unibz.inf.ontop.model.type.RDFDatatype;
 import it.unibz.inf.ontop.model.type.RDFTermType;
-import it.unibz.inf.ontop.model.type.TermTypeInference;
 import it.unibz.inf.ontop.model.vocabulary.SPARQL;
 
-import java.util.Optional;
 
+/**
+ * SPARQL STR. Does not tolerate blank nodes as arguments.
+ */
+public class StrSPARQLFunctionSymbolImpl extends AbstractStrSPARQLFunctionSymbolImpl {
 
-public class StrSPARQLFunctionSymbolImpl extends ReduciblePositiveAritySPARQLFunctionSymbolImpl {
-
-    private final RDFDatatype xsdStringType;
     private final ObjectRDFType bnodeType;
 
     protected StrSPARQLFunctionSymbolImpl(RDFTermType abstractRDFType, RDFDatatype xsdStringType, ObjectRDFType bnodeType) {
-        super("SP_STR", SPARQL.STR, ImmutableList.of(abstractRDFType));
-        this.xsdStringType = xsdStringType;
+        super("SP_STR", SPARQL.STR, abstractRDFType, xsdStringType);
         this.bnodeType = bnodeType;
-    }
-
-    @Override
-    protected ImmutableTerm computeLexicalTerm(ImmutableList<ImmutableTerm> subLexicalTerms,
-                                               ImmutableList<ImmutableTerm> typeTerms, TermFactory termFactory, ImmutableTerm returnedTypeTerm) {
-        return subLexicalTerms.get(0);
-    }
-
-    @Override
-    protected ImmutableTerm computeTypeTerm(ImmutableList<? extends ImmutableTerm> subLexicalTerms, ImmutableList<ImmutableTerm> typeTerms, TermFactory termFactory,
-                                            VariableNullability variableNullability) {
-        return termFactory.getRDFTermTypeConstant(xsdStringType);
     }
 
     /**
@@ -47,23 +33,5 @@ public class StrSPARQLFunctionSymbolImpl extends ReduciblePositiveAritySPARQLFun
 
         return termFactory.getDBNot(termFactory.getIsAExpression(typeTerm, bnodeType))
                 .evaluate(variableNullability);
-    }
-
-    @Override
-    public boolean isAlwaysInjectiveInTheAbsenceOfNonInjectiveFunctionalTerms() {
-        return false;
-    }
-
-    @Override
-    public Optional<TermTypeInference> inferType(ImmutableList<? extends ImmutableTerm> terms) {
-        return Optional.of(TermTypeInference.declareTermType(xsdStringType));
-    }
-
-    /**
-     * Could be allowed in the future
-     */
-    @Override
-    public boolean canBePostProcessed(ImmutableList<? extends ImmutableTerm> arguments) {
-        return false;
     }
 }

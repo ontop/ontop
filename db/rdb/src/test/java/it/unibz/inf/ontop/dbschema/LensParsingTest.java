@@ -5,11 +5,12 @@ import com.google.inject.Injector;
 import it.unibz.inf.ontop.exception.MetadataExtractionException;
 import it.unibz.inf.ontop.injection.OntopSQLCoreConfiguration;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.io.FileReader;
 import java.io.Reader;
-import java.util.stream.Collectors;
+
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class LensParsingTest {
 
@@ -29,19 +30,19 @@ public class LensParsingTest {
      /**
      * Hidden attribute present in newly added FD
      */
-    @Test(expected = MetadataExtractionException.class)
+    @Test
     public void testValidProfBasicLenses_MissingFDAttributes() throws Exception {
-        ImmutableSet<Lens> lenses = loadLensesH2("src/test/resources/prof/prof-basic-views-with-constraints-hiddenFD.json",
-                "src/test/resources/prof/prof_with_constraints.db-extract.json");
+        assertThrows(MetadataExtractionException.class, () -> loadLensesH2("src/test/resources/prof/prof-basic-views-with-constraints-hiddenFD.json",
+                "src/test/resources/prof/prof_with_constraints.db-extract.json"));
     }
 
     /**
      * Hidden attribute present in newly added UC
      */
-    @Test(expected = MetadataExtractionException.class)
+    @Test
     public void testValidProfBasicLenses_MissingUCAttributes() throws Exception {
-        ImmutableSet<Lens> lenses = loadLensesH2("src/test/resources/prof/prof-basic-views-with-constraints-hiddenUC.json",
-                "src/test/resources/prof/prof_with_constraints.db-extract.json");
+        assertThrows(MetadataExtractionException.class, () -> loadLensesH2("src/test/resources/prof/prof-basic-views-with-constraints-hiddenUC.json",
+                "src/test/resources/prof/prof_with_constraints.db-extract.json"));
     }
 
     public static ImmutableSet<Lens> loadLensesH2(String viewFilePath,

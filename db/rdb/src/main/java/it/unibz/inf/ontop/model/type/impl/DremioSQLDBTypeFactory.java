@@ -30,9 +30,15 @@ public class DremioSQLDBTypeFactory extends DefaultSQLDBTypeFactory {
                 typeFactory.getXsdDecimalDatatype(), DECIMAL);
         DBTermType dateType = new DateDBTermType(DATE_STR, rootAncestry,
                 typeFactory.getDatatype(XSD.DATE));
+        DBTermType defaultStringType = new StringDBTermType(VARCHAR_STR, "VARCHAR", rootAncestry,
+                typeFactory.getXsdStringDatatype());
+
         Map<String, DBTermType> map = createDefaultSQLTypeMap(rootTermType, typeFactory);
         map.put(DECIMAL_STR, decimalType);
         map.put(DATE_STR, dateType);
+        map.put(VARCHAR_STR, defaultStringType);
+        map.put(CHAR_VAR_STR, defaultStringType);
+
         return map;
     }
 

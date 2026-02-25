@@ -1,0 +1,10 @@
+@prefix : <http://example.org/ontology#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+:T a owl:Class .
+:R a owl:Class .
+
+:p a owl:ObjectProperty ;
+    rdfs:domain :R ;
+    rdfs:range :T .

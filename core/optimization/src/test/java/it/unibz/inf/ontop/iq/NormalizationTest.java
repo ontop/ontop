@@ -1619,6 +1619,25 @@ public class NormalizationTest {
     }
 
     @Test
+    public void testLJNonRequiredVariables() {
+        DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_AR2_PREDICATE, A, B);
+
+        ExtensionalDataNode extensionalDataNode1 = createExtensionalDataNode(TABLE1_AR3, ImmutableList.of(A, B, C));
+        ExtensionalDataNode extensionalDataNode2 = createExtensionalDataNode(TABLE2_AR2, ImmutableList.of(B, A));
+
+        LeftJoinNode leftJoinNode = IQ_FACTORY.createLeftJoinNode(createExpression(C));
+
+        IQTree leftJoin = IQ_FACTORY.createBinaryNonCommutativeIQTree(leftJoinNode,
+                extensionalDataNode1, extensionalDataNode2);
+
+        IQTree tree = IQ_FACTORY.createUnaryIQTree(IQ_FACTORY.createConstructionNode(ImmutableSet.of(A, B)), leftJoin);
+
+        IQ initialIQ = IQ_FACTORY.createIQ(projectionAtom, tree);
+
+        normalizeAndCompare(initialIQ, initialIQ);
+    }
+
+    @Test
     public void testLJInnerJoin1() {
         DistinctVariableOnlyDataAtom projectionAtom = ATOM_FACTORY.getDistinctVariableOnlyDataAtom(ANS1_AR4_PREDICATE, A, B, C, D);
 

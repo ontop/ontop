@@ -35,6 +35,8 @@ public interface IntermediateQueryFactory {
     ConstructionNode createConstructionNode(ImmutableSet<Variable> projectedVariables,
                                             Substitution<? extends ImmutableTerm> substitution);
 
+    ConstructionNode createConstructionNodeForNativeQuery(Substitution<? extends ImmutableTerm> substitution);
+
     UnionNode createUnionNode(ImmutableSet<Variable> projectedVariables);
 
     InnerJoinNode createInnerJoinNode();
@@ -104,12 +106,6 @@ public interface IntermediateQueryFactory {
     NaryIQTree createNaryIQTree(NaryOperatorNode rootNode, ImmutableList<IQTree> children, IQTreeCache treeCache);
 
     IQ createIQ(DistinctVariableOnlyDataAtom projectionAtom, IQTree tree);
-
-    /**
-     * Temporary. IQTreeCache are normally not created from scratch but derived from existing IQTreeCache-s
-     */
-    @Deprecated
-    IQTreeCache createIQTreeCache();
 
     /**
      * Temporary. IQTreeCache are normally not created from scratch but derived from existing IQTreeCache-s

@@ -4,7 +4,7 @@ import com.google.common.collect.*;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
-import it.unibz.inf.ontop.iq.UnaryIQTree;
+import it.unibz.inf.ontop.iq.impl.NaryIQTreeTools;
 import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.DistinctNode;
 import it.unibz.inf.ontop.iq.node.UnionNode;
@@ -13,7 +13,7 @@ import it.unibz.inf.ontop.spec.mapping.transformer.MappingDistinctTransformer;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
-import java.util.Optional;
+import static it.unibz.inf.ontop.iq.impl.UnaryIQTreeTools.UnaryIQTreeDecomposition;
 
 public class MappingDistinctTransformerImpl implements MappingDistinctTransformer {
 
@@ -24,7 +24,7 @@ public class MappingDistinctTransformerImpl implements MappingDistinctTransforme
         this.iqFactory = iqFactory;
     }
 
-    public ImmutableList<MappingAssertion> addDistinct(ImmutableList<MappingAssertion> mapping){
+    public ImmutableList<MappingAssertion> addDistinct(ImmutableList<MappingAssertion> mapping) {
         return mapping.stream()
                 .map(this::updateQuery)
                 .collect(ImmutableCollectors.toList());
@@ -44,21 +44,19 @@ public class MappingDistinctTransformerImpl implements MappingDistinctTransforme
                 assertion.getQuery().getTree())
                 .normalizeForOptimization(variableGenerator);
 
-        Optional<ConstructionNode> topConstructionNode = Optional.of(distinctTree.getRootNode())
-                .filter(n -> n instanceof ConstructionNode)
-                .map(n -> (ConstructionNode) n);
+        var topConstruction = UnaryIQTreeDecomposition.of(distinctTree, ConstructionNode.class);
+        var distinct = UnaryIQTreeDecomposition.of(topConstruction, DistinctNode.class);
 
-        Optional<IQTree> distinctUnionTree = topConstructionNode
-                .map(n -> ((UnaryIQTree) distinctTree).getChild())
-                .filter(t -> t.getRootNode() instanceof DistinctNode)
-                .map(t -> ((UnaryIQTree) t).getChild())
-                .filter(t -> t.getRootNode() instanceof UnionNode)
-                .map(t -> ((UnionNode) t.getRootNode()).makeDistinct(t.getChildren()));
-
-        IQTree newTree = distinctUnionTree
-                .map(t -> iqFactory.createUnaryIQTree(topConstructionNode.get(), t))
-                .map(t -> t.normalizeForOptimization(variableGenerator))
-                .orElse(distinctTree);
+        var union = NaryIQTreeTools.UnionDecomposition.of(distinct);
+        IQTree newTree;
+        if (union.isPresent()) {
+            IQTree t = union.getNode().makeDistinct(union.getChildren());
+            newTree = iqFactory.createUnaryIQTree(topConstruction.getNode(), t)
+                                .normalizeForOptimization(variableGenerator);
+        }
+        else {
+            newTree = distinctTree;
+        }
 
         return assertion.copyOf(newTree, iqFactory);
     }
