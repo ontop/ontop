@@ -463,7 +463,7 @@ public class MappingEntryClusterTest {
         JoinMappingEntryCluster assertion1 = new JoinMappingEntryCluster(iq1.getTree(),
                 new RDFFactTemplatesImpl(ImmutableList.of(iq1.getProjectionAtom().getArguments())),
                 iq1.getVariableGenerator(),
-                IQ_FACTORY, SUBSTITUTION_FACTORY, TERM_FACTORY);
+                IQ_FACTORY, SUBSTITUTION_FACTORY, TERM_FACTORY, QUERY_RENAMER);
 
 
         ConstructionNode constr2 = IQ_FACTORY.createConstructionNode(ImmutableSet.of(S1, P1, O1),
@@ -476,7 +476,7 @@ public class MappingEntryClusterTest {
         JoinMappingEntryCluster assertion2 = new JoinMappingEntryCluster(iq2.getTree(),
                 new RDFFactTemplatesImpl(ImmutableList.of(iq2.getProjectionAtom().getArguments())),
                 iq2.getVariableGenerator(),
-                IQ_FACTORY, SUBSTITUTION_FACTORY, TERM_FACTORY);
+                IQ_FACTORY, SUBSTITUTION_FACTORY, TERM_FACTORY, QUERY_RENAMER);
 
         Optional<MappingEntryCluster> mergedAssertion = assertion1.merge(assertion2);
         assert mergedAssertion.isPresent();
@@ -498,7 +498,7 @@ public class MappingEntryClusterTest {
         JoinMappingEntryCluster assertion1 = new JoinMappingEntryCluster(iq1.getTree(),
                 new RDFFactTemplatesImpl(ImmutableList.of(iq1.getProjectionAtom().getArguments())),
                 iq1.getVariableGenerator(),
-                IQ_FACTORY, SUBSTITUTION_FACTORY, TERM_FACTORY);
+                IQ_FACTORY, SUBSTITUTION_FACTORY, TERM_FACTORY, QUERY_RENAMER);
 
         ExtensionalDataNode ext3 = IQ_FACTORY.createExtensionalDataNode(T2, ImmutableMap.of(0, ID2, 1, NAME2));
         ExtensionalDataNode ext4 = IQ_FACTORY.createExtensionalDataNode(T1, ImmutableMap.of(0, ID1, 1, NAME1, 3, ID2));
@@ -513,7 +513,7 @@ public class MappingEntryClusterTest {
         JoinMappingEntryCluster assertion2 = new JoinMappingEntryCluster(iq2.getTree(),
                 new RDFFactTemplatesImpl(ImmutableList.of(iq2.getProjectionAtom().getArguments())),
                 iq2.getVariableGenerator(),
-                IQ_FACTORY, SUBSTITUTION_FACTORY, TERM_FACTORY);
+                IQ_FACTORY, SUBSTITUTION_FACTORY, TERM_FACTORY, QUERY_RENAMER);
 
         Optional<MappingEntryCluster> mergedAssertion = assertion1.merge(assertion2);
         assert mergedAssertion.isEmpty();
@@ -536,7 +536,7 @@ public class MappingEntryClusterTest {
         JoinMappingEntryCluster assertion1 = new JoinMappingEntryCluster(iq1.getTree(),
                 new RDFFactTemplatesImpl(ImmutableList.of(iq1.getProjectionAtom().getArguments())),
                 iq1.getVariableGenerator(),
-                IQ_FACTORY, SUBSTITUTION_FACTORY, TERM_FACTORY);
+                IQ_FACTORY, SUBSTITUTION_FACTORY, TERM_FACTORY, QUERY_RENAMER);
 
         ConstructionNode constr2 = IQ_FACTORY.createConstructionNode(ImmutableSet.of(S1, P1, O1),
                 SUBSTITUTION_FACTORY.getSubstitution(S1, generatePersonURI(PERSON_URI_TEMPLATE, ID1),
@@ -549,7 +549,7 @@ public class MappingEntryClusterTest {
         JoinMappingEntryCluster assertion2 = new JoinMappingEntryCluster(iq2.getTree(),
                 new RDFFactTemplatesImpl(ImmutableList.of(iq2.getProjectionAtom().getArguments())),
                 iq2.getVariableGenerator(),
-                IQ_FACTORY, SUBSTITUTION_FACTORY, TERM_FACTORY);
+                IQ_FACTORY, SUBSTITUTION_FACTORY, TERM_FACTORY, QUERY_RENAMER);
 
         Optional<MappingEntryCluster> mergedAssertion = assertion1.merge(assertion2);
         assert mergedAssertion.isPresent();
@@ -572,7 +572,7 @@ public class MappingEntryClusterTest {
         JoinMappingEntryCluster assertion1 = new JoinMappingEntryCluster(iq1.getTree(),
                 new RDFFactTemplatesImpl(ImmutableList.of(iq1.getProjectionAtom().getArguments())),
                 iq1.getVariableGenerator(),
-                IQ_FACTORY, SUBSTITUTION_FACTORY, TERM_FACTORY);
+                IQ_FACTORY, SUBSTITUTION_FACTORY, TERM_FACTORY, QUERY_RENAMER);
 
         ExtensionalDataNode ext4 = IQ_FACTORY.createExtensionalDataNode(T1, ImmutableMap.of(0, ID1, 1, NAME1));
         ExtensionalDataNode ext5 = IQ_FACTORY.createExtensionalDataNode(T2, ImmutableMap.of(0, ID2, 1, NAME2));
@@ -588,7 +588,7 @@ public class MappingEntryClusterTest {
         JoinMappingEntryCluster assertion2 = new JoinMappingEntryCluster(iq2.getTree(),
                 new RDFFactTemplatesImpl(ImmutableList.of(iq2.getProjectionAtom().getArguments())),
                 iq2.getVariableGenerator(),
-                IQ_FACTORY, SUBSTITUTION_FACTORY, TERM_FACTORY);
+                IQ_FACTORY, SUBSTITUTION_FACTORY, TERM_FACTORY, QUERY_RENAMER);
 
         Optional<MappingEntryCluster> mergedAssertion = assertion1.merge(assertion2);
         assert mergedAssertion.isEmpty();
@@ -612,8 +612,7 @@ public class MappingEntryClusterTest {
         JoinMappingEntryCluster assertion1 = new JoinMappingEntryCluster(iq1.getTree(),
                 new RDFFactTemplatesImpl(ImmutableList.of(iq1.getProjectionAtom().getArguments())),
                 iq1.getVariableGenerator(),
-                IQ_FACTORY, SUBSTITUTION_FACTORY, TERM_FACTORY);
-
+                IQ_FACTORY, SUBSTITUTION_FACTORY, TERM_FACTORY, QUERY_RENAMER);
 
         ConstructionNode constr2 = IQ_FACTORY.createConstructionNode(ImmutableSet.of(S1, P1, O1),
                 SUBSTITUTION_FACTORY.getSubstitution(S1, generatePersonURI(PERSON_URI_TEMPLATE, ID1),
@@ -625,7 +624,7 @@ public class MappingEntryClusterTest {
         JoinMappingEntryCluster assertion2 = new JoinMappingEntryCluster(iq2.getTree(),
                 new RDFFactTemplatesImpl(ImmutableList.of(iq2.getProjectionAtom().getArguments())),
                 iq2.getVariableGenerator(),
-                IQ_FACTORY, SUBSTITUTION_FACTORY, TERM_FACTORY);
+                IQ_FACTORY, SUBSTITUTION_FACTORY, TERM_FACTORY, QUERY_RENAMER);
 
         Optional<MappingEntryCluster> mergedAssertion = assertion1.merge(assertion2);
         assert mergedAssertion.isEmpty();
@@ -648,7 +647,7 @@ public class MappingEntryClusterTest {
         JoinMappingEntryCluster assertion1 = new JoinMappingEntryCluster(iq1.getTree(),
                 new RDFFactTemplatesImpl(ImmutableList.of(iq1.getProjectionAtom().getArguments())),
                 iq1.getVariableGenerator(),
-                IQ_FACTORY, SUBSTITUTION_FACTORY, TERM_FACTORY);
+                IQ_FACTORY, SUBSTITUTION_FACTORY, TERM_FACTORY, QUERY_RENAMER);
 
 
         ConstructionNode constr2 = IQ_FACTORY.createConstructionNode(ImmutableSet.of(S1, P1, O1),
@@ -661,7 +660,7 @@ public class MappingEntryClusterTest {
         JoinMappingEntryCluster assertion2 = new JoinMappingEntryCluster(iq2.getTree(),
                 new RDFFactTemplatesImpl(ImmutableList.of(iq2.getProjectionAtom().getArguments())),
                 iq2.getVariableGenerator(),
-                IQ_FACTORY, SUBSTITUTION_FACTORY, TERM_FACTORY);
+                IQ_FACTORY, SUBSTITUTION_FACTORY, TERM_FACTORY, QUERY_RENAMER);
 
         Optional<MappingEntryCluster> mergedAssertion = assertion1.merge(assertion2);
         assert mergedAssertion.isEmpty();
@@ -765,7 +764,7 @@ public class MappingEntryClusterTest {
         JoinMappingEntryCluster assertion1 = new JoinMappingEntryCluster(iq1.getTree(),
                 new RDFFactTemplatesImpl(ImmutableList.of(iq1.getProjectionAtom().getArguments())),
                 iq1.getVariableGenerator(),
-                IQ_FACTORY, SUBSTITUTION_FACTORY, TERM_FACTORY);
+                IQ_FACTORY, SUBSTITUTION_FACTORY, TERM_FACTORY, QUERY_RENAMER);
 
 
         ConstructionNode constr2 = IQ_FACTORY.createConstructionNode(ImmutableSet.of(S1, P1, O1),
@@ -781,7 +780,7 @@ public class MappingEntryClusterTest {
         JoinMappingEntryCluster assertion2 = new JoinMappingEntryCluster(iq2.getTree(),
                 new RDFFactTemplatesImpl(ImmutableList.of(iq2.getProjectionAtom().getArguments())),
                 iq2.getVariableGenerator(),
-                IQ_FACTORY, SUBSTITUTION_FACTORY, TERM_FACTORY);
+                IQ_FACTORY, SUBSTITUTION_FACTORY, TERM_FACTORY, QUERY_RENAMER);
 
         Optional<MappingEntryCluster> mergedAssertion = assertion1.merge(assertion2);
         assert mergedAssertion.isEmpty();

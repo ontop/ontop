@@ -159,10 +159,10 @@ public class FilterMappingEntryCluster extends AbstractMappingEntryCluster imple
     private boolean haveSameFilterCondition(Substitution<ImmutableTerm> unificationSubstitution,
                                             ImmutableExpression filterCondition,
                                             FilterMappingEntryCluster otherFilterRenamed) {
-                var renamingSubstitution = unificationSubstitution.stream()
-                .filter(e -> e.getValue() instanceof Variable)
-                .map(e -> Map.entry(e.getKey(), (Variable) e.getValue()))
-                .collect(substitutionFactory.toSubstitution());
+        Substitution<Variable> renamingSubstitution = unificationSubstitution.stream()
+        .filter(e -> e.getValue() instanceof Variable)
+        .map(e -> Map.entry(e.getKey(), (Variable) e.getValue()))
+        .collect(substitutionFactory.toSubstitution());
 
         IQTree renamedOtherFilter = queryRenamer.applyInDepthRenaming(renamingSubstitution.injective(), otherFilterRenamed.tree);
         var tmpCluster = new FilterMappingEntryCluster(renamedOtherFilter,
