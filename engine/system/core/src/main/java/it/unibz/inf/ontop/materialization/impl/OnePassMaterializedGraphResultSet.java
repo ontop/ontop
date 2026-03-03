@@ -43,7 +43,8 @@ public class OnePassMaterializedGraphResultSet implements MaterializedGraphResul
     private final ImmutableMap<IRI, VocabularyEntry> vocabulary;
     private final Iterator<MappingEntryCluster> mappingClustersIterator;
     private final boolean canBeIncomplete;
-    private int counter;
+    private int tripleCounter;
+    private int queryCounter;
 
     @Nullable
     private OntopConnection ontopConnection;
@@ -83,7 +84,8 @@ public class OnePassMaterializedGraphResultSet implements MaterializedGraphResul
         this.queryContext = queryContextFactory.create(ImmutableMap.of());
 
         this.possiblyIncompleteClassesAndProperties = new ArrayList<>();
-        counter = 0;
+        tripleCounter = 0;
+        queryCounter = 0;
 
         // Lately initialized
         ontopConnection = null;
@@ -155,7 +157,7 @@ public class OnePassMaterializedGraphResultSet implements MaterializedGraphResul
 
     @Override
     public RDFFact next() throws OntopQueryAnsweringException {
-        counter++;
+        tripleCounter++;
         OntopBindingSet resultTuple;
         try {
             if (tmpRDFFactsIterator != null && tmpRDFFactsIterator.hasNext()) {
@@ -217,7 +219,12 @@ public class OnePassMaterializedGraphResultSet implements MaterializedGraphResul
 
     @Override
     public long getTripleCountSoFar() {
-        return counter;
+        return tripleCounter;
+    }
+
+    @Override
+    public long getSQLQueryCountSoFar() {
+        return queryCounter;
     }
 
     @Override
@@ -236,7 +243,9 @@ public class OnePassMaterializedGraphResultSet implements MaterializedGraphResul
         IQ optimizedQuery = generalOptimizer.optimize(tree, queryContext);
         IQ plannedQuery = queryPlanner.optimize(optimizedQuery);
         IQ executableQuery = nativeQueryGenerator.generateSourceQuery(plannedQuery, true, true);
+
         queryLogger.declareReformulationFinishedAndSerialize(executableQuery, false);
+        queryCounter ++;
 
         return executableQuery;
     }

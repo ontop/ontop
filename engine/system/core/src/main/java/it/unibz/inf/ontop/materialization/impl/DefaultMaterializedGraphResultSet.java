@@ -29,7 +29,6 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 class DefaultMaterializedGraphResultSet implements MaterializedGraphResultSet {
 
@@ -41,7 +40,8 @@ class DefaultMaterializedGraphResultSet implements MaterializedGraphResultSet {
     private final OntopQueryEngine queryEngine;
     private final UnmodifiableIterator<VocabularyEntry> vocabularyIterator;
 
-    private int counter;
+    private int tripleCounter;
+    private int queryCounter;
     @Nullable
     private OntopConnection ontopConnection;
     @Nullable
@@ -75,7 +75,8 @@ class DefaultMaterializedGraphResultSet implements MaterializedGraphResultSet {
         this.queryContext = queryContextFactory.create(ImmutableMap.of());
         this.possiblyIncompleteClassesAndProperties = new ArrayList<>();
 
-        counter = 0;
+        tripleCounter = 0;
+        queryCounter = 0;
 
         rdfTypeIRI = termFactory.getConstantIRI(RDF.TYPE.getIRIString());
 
@@ -133,6 +134,7 @@ class DefaultMaterializedGraphResultSet implements MaterializedGraphResultSet {
 
                 tmpStatement = ontopConnection.createStatement();
                 tmpContextResultSet = tmpStatement.execute(query, queryContext);
+                queryCounter ++;
 
                 if (tmpContextResultSet.hasNext()) {
                     lastSeenPredicate = predicate;
@@ -173,7 +175,7 @@ class DefaultMaterializedGraphResultSet implements MaterializedGraphResultSet {
 
     @Override
     public RDFFact next() throws OntopQueryAnsweringException {
-        counter++;
+        tripleCounter++;
 
         OntopBindingSet resultTuple;
         try {
@@ -208,8 +210,14 @@ class DefaultMaterializedGraphResultSet implements MaterializedGraphResultSet {
         }
     }
 
+    @Override
     public long getTripleCountSoFar() {
-        return counter;
+        return tripleCounter;
+    }
+
+    @Override
+    public long getSQLQueryCountSoFar() {
+        return queryCounter;
     }
 
     public ImmutableList<IRI> getPossiblyIncompleteRDFPropertiesAndClassesSoFar() {
