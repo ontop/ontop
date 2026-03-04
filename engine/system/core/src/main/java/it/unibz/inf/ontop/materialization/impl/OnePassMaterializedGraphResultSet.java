@@ -9,6 +9,7 @@ import it.unibz.inf.ontop.evaluator.QueryContext;
 import it.unibz.inf.ontop.exception.*;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQ;
+import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.optimizer.GeneralStructuralAndSemanticIQOptimizer;
 import it.unibz.inf.ontop.iq.planner.QueryPlanner;
 import it.unibz.inf.ontop.materialization.MappingEntryCluster;
@@ -18,6 +19,8 @@ import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.query.resultset.OntopBindingSet;
 import it.unibz.inf.ontop.spec.ontology.RDFFact;
+import it.unibz.inf.ontop.substitution.Substitution;
+import it.unibz.inf.ontop.substitution.impl.SubstitutionImpl;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.apache.commons.rdf.api.IRI;
 import org.slf4j.Logger;
@@ -33,7 +36,6 @@ public class OnePassMaterializedGraphResultSet extends AbstractMaterializedGraph
     private final GeneralStructuralAndSemanticIQOptimizer generalOptimizer;
     private final QueryPlanner queryPlanner;
     private final QueryLogger.Factory queryLoggerFactory;
-
     private final Iterator<MappingEntryCluster> mappingClustersIterator;
 
     @Nullable
@@ -61,7 +63,6 @@ public class OnePassMaterializedGraphResultSet extends AbstractMaterializedGraph
         this.generalOptimizer = generalOptimizer;
         this.queryPlanner = queryPlanner;
         this.queryLoggerFactory = queryLogger;
-
         this.mappingClustersIterator = mappingEntryClusters.stream().iterator();
 
         // Lately initialized
@@ -100,7 +101,10 @@ public class OnePassMaterializedGraphResultSet extends AbstractMaterializedGraph
                 }
             } catch (OntopQueryAnsweringException | OntopConnectionException e) {
                 if (canBeIncomplete) {
-                    LOGGER.warn("Possibly incomplete class/property {} (materialization problem).\nDetails: {}", mappingClusterEntry.getIQTree(), e);
+                    ImmutableSet<IRI> incompleteClassesAndProperties = getIncompleteClassesAndProperties(mappingClusterEntry);
+                    this.possiblyIncompleteClassesAndProperties.addAll(incompleteClassesAndProperties);
+                    LOGGER.warn("Possibly incomplete class/property {} (materialization problem).\nDetails: {}",
+                            incompleteClassesAndProperties, e);
                 } else {
                     LOGGER.error("Problem materializing {}", mappingClusterEntry.getIQTree());
                     throw e;
@@ -126,9 +130,7 @@ public class OnePassMaterializedGraphResultSet extends AbstractMaterializedGraph
                     MappingEntryCluster mappingClusterEntry = mappingClustersIterator.next();
                     currentRDFFactTemplates = mappingClusterEntry.getRDFFactTemplates();
 
-                    // Close previous statement before creating a new one to avoid resource leak
                     closeResource(tmpStatement);
-
                     try {
                         tmpStatement = ontopConnection.createStatement();
                         QueryLogger queryLogger = queryLoggerFactory.create(queryContext);
@@ -136,9 +138,12 @@ public class OnePassMaterializedGraphResultSet extends AbstractMaterializedGraph
                         tmpContextResultSet = tmpStatement.executeSelectQuery(nativeQuery, queryLogger);
                     } catch (OntopConnectionException e) {
                         if (canBeIncomplete) {
-                            getLogger().warn("Possibly incomplete class/property {} (materialization problem).\nDetails: {}", mappingClusterEntry.getIQTree(), e);
+                            ImmutableSet<IRI> incompleteClassesAndProperties = getIncompleteClassesAndProperties(mappingClusterEntry);
+                            this.possiblyIncompleteClassesAndProperties.addAll(incompleteClassesAndProperties);
+                            LOGGER.warn("Possibly incomplete class/property {} (materialization problem).\nDetails: {}",
+                                    incompleteClassesAndProperties, e);
                         } else {
-                            getLogger().error("Problem materializing {}", mappingClusterEntry.getIQTree());
+                            LOGGER.error("Problem materializing {}", mappingClusterEntry.getIQTree());
                             throw e;
                         }
                     }
@@ -149,7 +154,7 @@ public class OnePassMaterializedGraphResultSet extends AbstractMaterializedGraph
             }
             return tmpRDFFactsIterator.next();
         } catch (OntopConnectionException e) {
-            getLogger().error("Connection error while retrieving next RDF fact", e);
+            LOGGER.error("Connection error while retrieving next RDF fact", e);
             closeResource(tmpContextResultSet);
             closeResource(tmpStatement);
             throw new OntopQueryEvaluationException("Failed to retrieve next RDF fact", e);
@@ -205,5 +210,22 @@ public class OnePassMaterializedGraphResultSet extends AbstractMaterializedGraph
                     }
                 })
                 .collect(ImmutableCollectors.toList());
+    }
+
+    private ImmutableSet<IRI> getIncompleteClassesAndProperties(MappingEntryCluster mappingCluster) {
+        ImmutableSet<Variable> predicatesVars = mappingCluster.getRDFFactTemplates().getTriplesOrQuadsVariables().stream()
+                .map(variables -> variables.get(1))
+                .collect(ImmutableCollectors.toSet());
+
+        if (mappingCluster.getIQTree().getRootNode() instanceof ConstructionNode) {
+            Substitution<ImmutableTerm> substitution = ((ConstructionNode) mappingCluster.getIQTree().getRootNode()).getSubstitution();
+            return predicatesVars.stream()
+                    .map(substitution::applyToTerm)
+                    .filter(t -> t instanceof IRIConstant)
+                    .map(t -> ((IRIConstant) t).getIRI())
+                    .collect(ImmutableCollectors.toSet());
+        } else {
+            return ImmutableSet.of();
+        }
     }
 }

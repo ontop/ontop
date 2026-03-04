@@ -24,12 +24,11 @@ class DefaultMaterializedGraphResultSet extends AbstractMaterializedGraphResultS
     private final TermFactory termFactory;
     private final KGQueryFactory kgQueryFactory;
 
-    private final Logger LOGGER = LoggerFactory.getLogger(DefaultMaterializedGraphResultSet.class);
     private VocabularyEntry lastSeenPredicate;
     private IRIConstant lastSeenPredicateIRI;
-
     private final IRIConstant rdfTypeIRI;
 
+    private final Logger LOGGER = LoggerFactory.getLogger(DefaultMaterializedGraphResultSet.class);
 
     DefaultMaterializedGraphResultSet(ImmutableMap<IRI, VocabularyEntry> vocabulary, MaterializationParams params,
                                       OntopQueryEngine queryEngine,
@@ -42,7 +41,6 @@ class DefaultMaterializedGraphResultSet extends AbstractMaterializedGraphResultS
 
         tripleCounter = 0;
         queryCounter = 0;
-
         rdfTypeIRI = termFactory.getConstantIRI(RDF.TYPE.getIRIString());
 
         // Lately initiated
@@ -127,7 +125,7 @@ class DefaultMaterializedGraphResultSet extends AbstractMaterializedGraphResultS
             resultTuple = tmpContextResultSet.next();
             return toAssertion(resultTuple);
         } catch (OntopConnectionException e) {
-            getLogger().error("Connection error while retrieving next RDF fact", e);
+            LOGGER.error("Connection error while retrieving next RDF fact", e);
             closeResource(tmpContextResultSet);
             closeResource(tmpStatement);
             throw new OntopQueryEvaluationException("Failed to retrieve next RDF fact", e);
