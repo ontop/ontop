@@ -2,8 +2,6 @@ package it.unibz.inf.ontop.materialization.impl;
 
 import com.google.common.collect.*;
 import it.unibz.inf.ontop.answering.OntopQueryEngine;
-import it.unibz.inf.ontop.answering.connection.OntopConnection;
-import it.unibz.inf.ontop.answering.connection.OntopStatement;
 import it.unibz.inf.ontop.answering.logging.QueryLogger;
 import it.unibz.inf.ontop.answering.reformulation.generation.NativeQueryGenerator;
 import it.unibz.inf.ontop.answering.resultset.MaterializedGraphResultSet;
@@ -19,8 +17,6 @@ import it.unibz.inf.ontop.materialization.RDFFactTemplates;
 import it.unibz.inf.ontop.model.atom.AtomFactory;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.query.resultset.OntopBindingSet;
-import it.unibz.inf.ontop.query.resultset.OntopCloseableIterator;
-import it.unibz.inf.ontop.query.resultset.TupleResultSet;
 import it.unibz.inf.ontop.spec.ontology.RDFFact;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.apache.commons.rdf.api.IRI;
@@ -30,35 +26,22 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.Nullable;
 import java.util.*;
 
-public class OnePassMaterializedGraphResultSet implements MaterializedGraphResultSet {
+public class OnePassMaterializedGraphResultSet extends AbstractMaterializedGraphResultSet implements MaterializedGraphResultSet {
     private final NativeQueryGenerator nativeQueryGenerator;
     private final AtomFactory atomFactory;
     private final IntermediateQueryFactory iqFactory;
-    private final OntopQueryEngine queryEngine;
     private final GeneralStructuralAndSemanticIQOptimizer generalOptimizer;
     private final QueryPlanner queryPlanner;
     private final QueryLogger.Factory queryLoggerFactory;
-    private final QueryContext queryContext;
 
-    private final ImmutableMap<IRI, VocabularyEntry> vocabulary;
     private final Iterator<MappingEntryCluster> mappingClustersIterator;
-    private final boolean canBeIncomplete;
-    private int tripleCounter;
-    private int queryCounter;
 
-    @Nullable
-    private OntopConnection ontopConnection;
-    @Nullable
-    private OntopStatement tmpStatement;
-    @Nullable
-    private TupleResultSet tmpContextResultSet;
     @Nullable
     private RDFFactTemplates currentRDFFactTemplates;
     @Nullable
     private Iterator<RDFFact> tmpRDFFactsIterator;
 
-    private final Logger LOGGER = LoggerFactory.getLogger(DefaultMaterializedGraphResultSet.class);
-    private final List<IRI> possiblyIncompleteClassesAndProperties;
+    private static final Logger LOGGER = LoggerFactory.getLogger(OnePassMaterializedGraphResultSet.class);
 
     OnePassMaterializedGraphResultSet(ImmutableMap<IRI, VocabularyEntry> vocabulary,
                                       ImmutableList<MappingEntryCluster> mappingEntryClusters,
@@ -71,39 +54,25 @@ public class OnePassMaterializedGraphResultSet implements MaterializedGraphResul
                                       QueryPlanner queryPlanner,
                                       QueryLogger.Factory queryLogger,
                                       QueryContext.Factory queryContextFactory) {
-        this.vocabulary = vocabulary;
-        this.mappingClustersIterator = mappingEntryClusters.stream().iterator();
-        this.queryEngine = queryEngine;
-        this.canBeIncomplete = params.canMaterializationBeIncomplete();
+        super(vocabulary, params, queryEngine, queryContextFactory);
         this.nativeQueryGenerator = nativeQueryGenerator;
         this.atomFactory = atomFactory;
         this.iqFactory = iqFactory;
         this.generalOptimizer = generalOptimizer;
         this.queryPlanner = queryPlanner;
         this.queryLoggerFactory = queryLogger;
-        this.queryContext = queryContextFactory.create(ImmutableMap.of());
 
-        this.possiblyIncompleteClassesAndProperties = new ArrayList<>();
-        tripleCounter = 0;
-        queryCounter = 0;
+        this.mappingClustersIterator = mappingEntryClusters.stream().iterator();
 
         // Lately initialized
-        ontopConnection = null;
-        tmpStatement = null;
-        tmpContextResultSet = null;
-        currentRDFFactTemplates = null;
         tmpRDFFactsIterator = null;
     }
 
     @Override
-    public ImmutableSet<IRI> getSelectedVocabulary() {
-        return vocabulary.keySet();
-    }
-
-    @Override
     public boolean hasNext() throws OntopQueryAnsweringException, OntopConnectionException {
-        if (ontopConnection == null)
+        if (ontopConnection == null) {
             ontopConnection = queryEngine.getConnection();
+        }
 
         if (tmpRDFFactsIterator != null && tmpRDFFactsIterator.hasNext()) {
             return true;
@@ -114,20 +83,8 @@ public class OnePassMaterializedGraphResultSet implements MaterializedGraphResul
         }
 
         while (mappingClustersIterator.hasNext()) {
-            if (tmpContextResultSet != null) {
-                try {
-                    tmpContextResultSet.close();
-                } catch (OntopConnectionException e) {
-                    LOGGER.warn("Non-critical exception while closing the graph result set: " + e);
-                }
-            }
-            if (tmpStatement != null) {
-                try {
-                    tmpStatement.close();
-                } catch (OntopConnectionException e) {
-                    LOGGER.warn("Non-critical exception while closing the statement: " + e);
-                }
-            }
+            closeResource(tmpContextResultSet);
+            closeResource(tmpStatement);
 
             MappingEntryCluster mappingClusterEntry = mappingClustersIterator.next();
             currentRDFFactTemplates = mappingClusterEntry.getRDFFactTemplates();
@@ -143,10 +100,9 @@ public class OnePassMaterializedGraphResultSet implements MaterializedGraphResul
                 }
             } catch (OntopQueryAnsweringException | OntopConnectionException e) {
                 if (canBeIncomplete) {
-                    LOGGER.warn("Possibly incomplete class/property " + mappingClusterEntry.getIQTree() + " (materialization problem).\n"
-                            + "Details: " + e);
+                    LOGGER.warn("Possibly incomplete class/property {} (materialization problem).\nDetails: {}", mappingClusterEntry.getIQTree(), e);
                 } else {
-                    LOGGER.error("Problem materializing " + mappingClusterEntry.getIQTree());
+                    LOGGER.error("Problem materializing {}", mappingClusterEntry.getIQTree());
                     throw e;
                 }
             }
@@ -170,6 +126,9 @@ public class OnePassMaterializedGraphResultSet implements MaterializedGraphResul
                     MappingEntryCluster mappingClusterEntry = mappingClustersIterator.next();
                     currentRDFFactTemplates = mappingClusterEntry.getRDFFactTemplates();
 
+                    // Close previous statement before creating a new one to avoid resource leak
+                    closeResource(tmpStatement);
+
                     try {
                         tmpStatement = ontopConnection.createStatement();
                         QueryLogger queryLogger = queryLoggerFactory.create(queryContext);
@@ -177,10 +136,9 @@ public class OnePassMaterializedGraphResultSet implements MaterializedGraphResul
                         tmpContextResultSet = tmpStatement.executeSelectQuery(nativeQuery, queryLogger);
                     } catch (OntopConnectionException e) {
                         if (canBeIncomplete) {
-                            LOGGER.warn("Possibly incomplete class/property " + mappingClusterEntry.getIQTree() + " (materialization problem).\n"
-                                    + "Details: " + e);
+                            getLogger().warn("Possibly incomplete class/property {} (materialization problem).\nDetails: {}", mappingClusterEntry.getIQTree(), e);
                         } else {
-                            LOGGER.error("Problem materializing " + mappingClusterEntry.getIQTree());
+                            getLogger().error("Problem materializing {}", mappingClusterEntry.getIQTree());
                             throw e;
                         }
                     }
@@ -191,45 +149,16 @@ public class OnePassMaterializedGraphResultSet implements MaterializedGraphResul
             }
             return tmpRDFFactsIterator.next();
         } catch (OntopConnectionException e) {
-            try {
-                tmpContextResultSet.close();
-            } catch (OntopConnectionException ex) {
-                ex.printStackTrace();
-            }
-            e.printStackTrace();
-        }
-
-        return null;
-    }
-
-    @Override
-    public OntopCloseableIterator<RDFFact, OntopConnectionException> iterator() {
-        throw new UnsupportedOperationException("iterator");
-    }
-
-    @Override
-    public void close() throws OntopConnectionException {
-        if (tmpStatement != null) {
-            tmpStatement.close();
-        }
-        if (ontopConnection != null) {
-            ontopConnection.close();
+            getLogger().error("Connection error while retrieving next RDF fact", e);
+            closeResource(tmpContextResultSet);
+            closeResource(tmpStatement);
+            throw new OntopQueryEvaluationException("Failed to retrieve next RDF fact", e);
         }
     }
 
     @Override
-    public long getTripleCountSoFar() {
-        return tripleCounter;
-    }
-
-    @Override
-    public long getSQLQueryCountSoFar() {
-        return queryCounter;
-    }
-
-    @Override
-    public ImmutableList<IRI> getPossiblyIncompleteRDFPropertiesAndClassesSoFar() {
-        return ImmutableList.copyOf(possiblyIncompleteClassesAndProperties);
+    Logger getLogger() {
+        return LOGGER;
     }
 
     private IQ translateIntoNativeQuery(MappingEntryCluster mappingClusterEntry, QueryLogger queryLogger, QueryContext queryContext) {
@@ -250,7 +179,7 @@ public class OnePassMaterializedGraphResultSet implements MaterializedGraphResul
         return executableQuery;
     }
 
-    private Iterator<RDFFact> toRdfFacts(OntopBindingSet tuple, RDFFactTemplates templates) throws OntopResultConversionException {
+    private Iterator<RDFFact> toRdfFacts(OntopBindingSet tuple, RDFFactTemplates templates) {
         return templates.getTriplesOrQuadsVariables().stream()
                 .filter(variables -> convertToRDFConstants(tuple, variables.subList(0, 3)).stream().allMatch(Optional::isPresent))
                 .map(variables -> {
