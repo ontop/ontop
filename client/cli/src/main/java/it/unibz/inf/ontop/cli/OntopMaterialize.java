@@ -88,7 +88,7 @@ public class OntopMaterialize extends OntopMappingOntologyRelatedCommand {
     private boolean noStream = false;
 
     @Option(type = OptionType.COMMAND, name = {"--legacy"}, title = "use the legacy materializer",
-            description = "Uses the legacy materializer (was the main materializer until 5.4.0)")
+            description = "Uses the legacy materializer (was the main materializer until 5.6.0)")
     private boolean useLegacyMaterializer = false;
 
     @Option(type = OptionType.COMMAND, name = {"--allow-duplicates"}, title = "allow duplicates in the materialized RDF graph",

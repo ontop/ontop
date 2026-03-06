@@ -1,7 +1,7 @@
 package it.unibz.inf.ontop.materialization.impl;
 
 import com.google.common.collect.*;
-import it.unibz.inf.ontop.dbschema.Attribute;
+import it.unibz.inf.ontop.dbschema.QuotedID;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.IQTree;
@@ -19,8 +19,6 @@ import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
 public class DictionaryPatternMappingEntryCluster extends AbstractMappingEntryCluster implements MappingEntryCluster {
     private final ExtensionalDataNode dataNode;
@@ -79,22 +77,23 @@ public class DictionaryPatternMappingEntryCluster extends AbstractMappingEntryCl
     private IQTree makeEqualityConditionExplicit(IQTree tree, ExtensionalDataNode dataNode) {
         ImmutableMap<Integer, ? extends VariableOrGroundTerm> originalArgumentMap = dataNode.getArgumentMap();
 
-        ImmutableMap<Integer, Attribute> constantAttributes = originalArgumentMap.entrySet().stream()
+        ImmutableMap<Integer, QuotedID> constantAttributes = originalArgumentMap.entrySet().stream()
                 .filter(e -> e.getValue() instanceof DBConstant)
                 .map(Map.Entry::getKey)
                 .collect(ImmutableCollectors.toMap(
                         k -> k,
-                        k -> dataNode.getRelationDefinition().getAttribute(k + 1)));
+                        k -> dataNode.getRelationDefinition().getAttribute(k + 1).getID()));
 
         ImmutableMap<Integer, Variable> constantTermsVariables = constantAttributes.entrySet().stream()
                 .collect(ImmutableCollectors.toMap(
                         Map.Entry::getKey,
-                        e -> variableGenerator.generateNewVariable(e.getValue().getID().getName())));
+                        e -> variableGenerator.generateNewVariable(e.getValue().getName())));
 
-        ImmutableList<DBConstant> constantValues = constantAttributes.keySet().stream()
-                .map(originalArgumentMap::get)
-                .map(v -> (DBConstant) v)
-                .collect(ImmutableCollectors.toList());
+        ImmutableMap<Integer, DBConstant> constantValues = constantAttributes.entrySet().stream()
+                .collect(ImmutableCollectors.toMap(
+                        Map.Entry::getKey,
+                        e -> (DBConstant) originalArgumentMap.get(e.getKey())
+                ));
 
         ImmutableMap<Integer, ? extends VariableOrGroundTerm> newArgumentMap = originalArgumentMap.entrySet().stream()
                 .collect(ImmutableCollectors.toMap(
@@ -105,7 +104,7 @@ public class DictionaryPatternMappingEntryCluster extends AbstractMappingEntryCl
 
         ConstructionNode topNode = (ConstructionNode) tree.getRootNode();
         Substitution<ImmutableTerm> newTopSubstitution = setPossiblyNullRDFTerms(
-                topNode.getSubstitution(), constantTermsVariables.values().asList(), constantValues);
+                topNode.getSubstitution(), constantTermsVariables, constantValues);
         ConstructionNode newTopNode = iqFactory.createConstructionNode(topNode.getVariables(), newTopSubstitution);
 
         ExtensionalDataNode variablesOnlyDataNode = iqFactory.createExtensionalDataNode(
@@ -115,19 +114,17 @@ public class DictionaryPatternMappingEntryCluster extends AbstractMappingEntryCl
     }
 
     private Substitution<ImmutableTerm> setPossiblyNullRDFTerms(Substitution<ImmutableTerm> rdfTermConstructionSubstitution,
-                                                                ImmutableList<Variable> constantVariables,
-                                                                ImmutableList<DBConstant> constantValues) {
-        ImmutableExpression equalityCondition;
-        if (constantVariables.size() == 1) {
-             equalityCondition = termFactory.getStrictEquality(constantVariables.get(0), constantValues.get(0));
-        } else {
-             equalityCondition = termFactory.getConjunction(
-                    IntStream.range(0, constantValues.size())
-                            .boxed()
-                            .map(i -> termFactory.getStrictEquality(constantVariables.get(i),
-                                    constantValues.get(i)))
-                            .collect(ImmutableCollectors.toList()));
+                                                                ImmutableMap<Integer, Variable> constantVariables,
+                                                                ImmutableMap<Integer, DBConstant> constantValues) {
+        if (!constantVariables.keySet().equals(constantValues.keySet())) {
+            throw new MinorOntopInternalBugException("The constant variables and values should have the same keys");
         }
+
+        ImmutableExpression equalityCondition = termFactory.getConjunction(
+                constantValues.entrySet().stream()
+                        .map(e -> termFactory.getStrictEquality(constantVariables.get(e.getKey()),
+                                e.getValue()))
+                        .collect(ImmutableCollectors.toList()));
 
         return rdfTermConstructionSubstitution.stream()
                 .map(e -> Map.entry(
@@ -138,9 +135,7 @@ public class DictionaryPatternMappingEntryCluster extends AbstractMappingEntryCl
     }
 
     private MappingEntryCluster mergeWithDictionaryCluster(DictionaryPatternMappingEntryCluster otherDictionaryCluster) {
-        ExtensionalDataNode mergedDataNode = mergeDataNodes(dataNode, otherDictionaryCluster.dataNode);
-
-        IQTree newTree = createMergedIQTree(otherDictionaryCluster, mergedDataNode);
+        IQTree newTree = createMergedUnaryIQTree(otherDictionaryCluster);
 
         RDFFactTemplates mergedRDFTemplates = rdfTemplates.merge(otherDictionaryCluster.getRDFFactTemplates());
 
@@ -155,18 +150,18 @@ public class DictionaryPatternMappingEntryCluster extends AbstractMappingEntryCl
     }
 
     private MappingEntryCluster mergeWithSimpleCluster(SimpleMappingEntryCluster otherSimpleCluster) {
-        ExtensionalDataNode mergedDataNode = mergeDataNodes(dataNode, otherSimpleCluster.getDataNodes().get(0));
-
-        IQTree mappingTree = createMergedIQTree(otherSimpleCluster, mergedDataNode);
+        IQTree mappingTree = createMergedUnaryIQTree(otherSimpleCluster);
 
         RDFFactTemplates mergedRDFTemplates = rdfTemplates.merge(otherSimpleCluster.getRDFFactTemplates());
 
         return compressCluster(mappingTree, mergedRDFTemplates);
     }
 
-    private IQTree createMergedIQTree(MappingEntryCluster otherCluster, ExtensionalDataNode mergedDataNode){
+    private IQTree createMergedUnaryIQTree(MappingEntryCluster otherCluster){
+        ExtensionalDataNode mergedDataNode = mergeDataNodes(dataNode, otherCluster.getDataNodes().get(0));
 
         ConstructionNode optionalRenamingNode = unify(dataNode, otherCluster.getDataNodes().get(0));
+
         IQTree childTree = iqFactory.createUnaryIQTree(optionalRenamingNode, mergedDataNode);
 
         ConstructionNode topConstructionNode = createMergedTopConstructionNode(
@@ -180,7 +175,7 @@ public class DictionaryPatternMappingEntryCluster extends AbstractMappingEntryCl
 
     private Substitution<ImmutableTerm> compressIfElseNullTerms(Substitution<ImmutableTerm> rdfTermsConstructionSubstitution,
                                                                 ImmutableSet<Variable> projectedVariables) {
-        var rdfFunctionalTerms = rdfTermsConstructionSubstitution.stream()
+        ImmutableMap<Variable, NonGroundFunctionalTerm> rdfFunctionalTerms = rdfTermsConstructionSubstitution.stream()
                 .filter(e -> projectedVariables.contains(e.getKey())
                         && e.getValue() instanceof NonGroundFunctionalTerm
                         && ((NonGroundFunctionalTerm) e.getValue()).getFunctionSymbol() instanceof RDFTermFunctionSymbol)
@@ -189,7 +184,7 @@ public class DictionaryPatternMappingEntryCluster extends AbstractMappingEntryCl
                         e -> ((NonGroundFunctionalTerm) e.getValue())
                 ));
 
-        var rdfIfElseNullTerms = rdfFunctionalTerms.entrySet().stream()
+        ImmutableMap<Variable, ImmutableList<? extends ImmutableTerm>> rdfIfElseNullTerms = rdfFunctionalTerms.entrySet().stream()
                 .filter(e -> e.getValue().getTerm(0) instanceof ImmutableFunctionalTerm
                         && ( (ImmutableFunctionalTerm)e.getValue().getTerm(0)).getFunctionSymbol() instanceof DBIfElseNullFunctionSymbol)
                 .collect(ImmutableCollectors.toMap(
@@ -197,59 +192,53 @@ public class DictionaryPatternMappingEntryCluster extends AbstractMappingEntryCl
                         e -> e.getValue().getTerms()
                 ));
 
-        var thenLexicalTerms = rdfIfElseNullTerms.entrySet().stream()
+        Substitution<ImmutableTerm> ifElseNullDisjunctionSubstitution = createIfElseNullDisjunctionSubstitution(rdfIfElseNullTerms);
+
+        Substitution<ImmutableTerm> notIfElseNullTerms = rdfTermsConstructionSubstitution.stream()
+                .filter(e -> !rdfIfElseNullTerms.containsKey(e.getKey()))
+                .collect(substitutionFactory.toSubstitution());
+
+        return notIfElseNullTerms.compose(ifElseNullDisjunctionSubstitution);
+    }
+
+    private Substitution<ImmutableTerm> createIfElseNullDisjunctionSubstitution(ImmutableMap<Variable, ImmutableList<? extends ImmutableTerm>> rdfIfElseNullTerms) {
+        ImmutableMap<Variable, ImmutableTerm> thenLexicalTerms = rdfIfElseNullTerms.entrySet().stream()
                 .collect(ImmutableCollectors.toMap(
                         Map.Entry::getKey,
                         e -> ((ImmutableFunctionalTerm)e.getValue()
                                 .get(0)).getTerm(1)
                 ));
 
-        var thenTermsDatatypes = rdfIfElseNullTerms.entrySet().stream()
+        ImmutableMap<Variable, ImmutableTerm> thenLexicalTermsDatatypes = rdfIfElseNullTerms.entrySet().stream()
                 .collect(ImmutableCollectors.toMap(
                         Map.Entry::getKey,
                         e -> ((ImmutableFunctionalTerm)e.getValue()
                                 .get(1)).getTerm(1)
                 ));
 
-        var equalityConditionsMap = rdfIfElseNullTerms.entrySet().stream()
+        ImmutableMap<Variable, ImmutableExpression> ifConditionsMap = rdfIfElseNullTerms.entrySet().stream()
                 .collect(ImmutableCollectors.toMap(
                         Map.Entry::getKey,
                         e -> (ImmutableExpression) ((ImmutableFunctionalTerm)e.getValue()
                                 .get(0)).getTerm(0)));
 
-        Substitution<ImmutableTerm> ifElseNullDisjunctionSubstitution = createIfElseNullDisjunctionSubstitution(
-                thenLexicalTerms, thenTermsDatatypes, equalityConditionsMap);
-
-        Substitution<ImmutableTerm> notIfElseNullTerms = rdfTermsConstructionSubstitution.stream()
-                .filter(e -> !thenLexicalTerms.containsKey(e.getKey()))
-                .collect(substitutionFactory.toSubstitution());
-
-        return notIfElseNullTerms.compose(ifElseNullDisjunctionSubstitution);
-    }
-
-    private Substitution<ImmutableTerm> createIfElseNullDisjunctionSubstitution(ImmutableMap<Variable, ImmutableTerm> thenLexicalTerms,
-                                                                                ImmutableMap<Variable, ImmutableTerm> thenTermsDatatypes,
-                                                                                ImmutableMap<Variable, ImmutableExpression> equalityConditionsMap) {
-        var thenTerms2sparqlVars = thenLexicalTerms.entrySet().stream()
+        ImmutableSet<ImmutableSet<Variable>> projectedVarsPerLexicalTerm = thenLexicalTerms.entrySet().stream()
                 .collect(ImmutableCollectors.toMultimap(
                         Map.Entry::getValue,
                         Map.Entry::getKey
-                )).asMap().entrySet().stream()
-                .collect(ImmutableCollectors.toMap(
-                        Map.Entry::getKey,
-                        e -> ImmutableSet.copyOf(e.getValue())
-                ));
+                )).asMap().values().stream()
+                .map(ImmutableSet::copyOf)
+                .collect(ImmutableCollectors.toSet());
 
-        return thenTerms2sparqlVars.values().stream()
+        return projectedVarsPerLexicalTerm.stream()
                 .map(variables -> {
-                    Stream<ImmutableExpression> equalityConditionsStream = variables.stream()
-                            .map(equalityConditionsMap::get);
-                    ImmutableExpression disjunctionEqualityConditions = termFactory.getDisjunction(equalityConditionsStream)
-                            .orElseThrow(() -> new MinorOntopInternalBugException("The disjunction of equality conditions should not be empty"));
+                    ImmutableExpression disjunctionEqualityConditions = termFactory.getDisjunction(variables.stream()
+                                    .map(ifConditionsMap::get))
+                            .orElseThrow(() -> new MinorOntopInternalBugException("The disjunction of conditions should not be empty"));
                     return variables.stream()
                             .map(v -> {
                                         ImmutableTerm thenTerm = thenLexicalTerms.get(v);
-                                        ImmutableTerm datatype = thenTermsDatatypes.get(v);
+                                        ImmutableTerm datatype = thenLexicalTermsDatatypes.get(v);
                                         ImmutableTerm rdfTerm = termFactory.getRDFFunctionalTerm(
                                                 termFactory.getIfElseNull(disjunctionEqualityConditions, thenTerm),
                                                 termFactory.getIfElseNull(disjunctionEqualityConditions, datatype));
