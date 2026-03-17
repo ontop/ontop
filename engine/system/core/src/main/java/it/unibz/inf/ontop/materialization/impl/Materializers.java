@@ -10,7 +10,7 @@ public class Materializers {
     public static OntopRDFMaterializer create(OntopSystemConfiguration configuration,
                                               MaterializationParams materializationParams) throws OBDASpecificationException {
         return materializationParams.useLegacyMaterializer()
-                ? new DefaultOntopRDFMaterializer(configuration, materializationParams)
+                ? new LegacyOntopRDFMaterializer(configuration, materializationParams)
                 : new OnePassRDFMaterializer(configuration, materializationParams);
     }
 }

@@ -19,7 +19,7 @@ import org.apache.commons.rdf.api.IRI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-class DefaultMaterializedGraphResultSet extends AbstractMaterializedGraphResultSet implements MaterializedGraphResultSet {
+class LegacyMaterializedGraphResultSet extends AbstractMaterializedGraphResultSet implements MaterializedGraphResultSet {
 
     private final TermFactory termFactory;
     private final KGQueryFactory kgQueryFactory;
@@ -28,13 +28,13 @@ class DefaultMaterializedGraphResultSet extends AbstractMaterializedGraphResultS
     private IRIConstant lastSeenPredicateIRI;
     private final IRIConstant rdfTypeIRI;
 
-    private final Logger LOGGER = LoggerFactory.getLogger(DefaultMaterializedGraphResultSet.class);
+    private final Logger LOGGER = LoggerFactory.getLogger(LegacyMaterializedGraphResultSet.class);
 
-    DefaultMaterializedGraphResultSet(ImmutableMap<IRI, VocabularyEntry> vocabulary, MaterializationParams params,
-                                      OntopQueryEngine queryEngine,
-                                      KGQueryFactory kgQueryFactory,
-                                      TermFactory termFactory,
-                                      QueryContext.Factory queryContextFactory) {
+    LegacyMaterializedGraphResultSet(ImmutableMap<IRI, VocabularyEntry> vocabulary, MaterializationParams params,
+                                     OntopQueryEngine queryEngine,
+                                     KGQueryFactory kgQueryFactory,
+                                     TermFactory termFactory,
+                                     QueryContext.Factory queryContextFactory) {
         super(vocabulary, params, queryEngine, queryContextFactory);
         this.termFactory = termFactory;
         this.kgQueryFactory = kgQueryFactory;

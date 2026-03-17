@@ -31,7 +31,7 @@ import java.util.stream.Stream;
  *
  * @author Mariano Rodriguez Muro (initial version was called QuestMaterializer)
  */
-public class DefaultOntopRDFMaterializer implements OntopRDFMaterializer {
+public class LegacyOntopRDFMaterializer implements OntopRDFMaterializer {
 
     private final MaterializationParams params;
     private final KGQueryFactory kgQueryFactory;
@@ -41,7 +41,7 @@ public class DefaultOntopRDFMaterializer implements OntopRDFMaterializer {
     private final TermFactory termFactory;
     private final QueryContext.Factory queryContextFactory;
 
-    protected DefaultOntopRDFMaterializer(OntopSystemConfiguration configuration, MaterializationParams materializationParams) throws OBDASpecificationException {
+    protected LegacyOntopRDFMaterializer(OntopSystemConfiguration configuration, MaterializationParams materializationParams) throws OBDASpecificationException {
         Injector injector = configuration.getInjector();
         OntopSystemFactory engineFactory = injector.getInstance(OntopSystemFactory.class);
 
@@ -57,12 +57,12 @@ public class DefaultOntopRDFMaterializer implements OntopRDFMaterializer {
 
     @Override
     public MaterializedGraphResultSet materialize() {
-        return new DefaultMaterializedGraphResultSet(vocabulary, params, queryEngine, kgQueryFactory, termFactory, queryContextFactory);
+        return new LegacyMaterializedGraphResultSet(vocabulary, params, queryEngine, kgQueryFactory, termFactory, queryContextFactory);
     }
 
     @Override
     public MaterializedGraphResultSet materialize(@Nonnull ImmutableSet<IRI> selectedVocabulary) {
-        return new DefaultMaterializedGraphResultSet(filterVocabularyEntries(selectedVocabulary), params, queryEngine, kgQueryFactory, termFactory, queryContextFactory);
+        return new LegacyMaterializedGraphResultSet(filterVocabularyEntries(selectedVocabulary), params, queryEngine, kgQueryFactory, termFactory, queryContextFactory);
     }
 
     private ImmutableMap<IRI, VocabularyEntry> filterVocabularyEntries(ImmutableSet<IRI> selectedVocabulary) {
