@@ -101,10 +101,6 @@ public class RDB2RDFTest {
 			"tc0016b",
 			// Timezone was not expected to be added. Same for milliseconds (not so relevant test)
 			"tc0016c",
-			// H2 does not store the implicit trailing spaces in CHAR(15) and does not output them.
-			//"dg0018",
-			// H2 does not store the implicit trailing spaces in CHAR(15) and does not output them.
-			//"tc0018a",
 			// Should create an IRI based on a column and the base IRI. TODO: support the base IRI in R2RML
 			"tc0019a"
 	);
