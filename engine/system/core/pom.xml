@@ -84,6 +84,11 @@
             <groupId>org.eclipse.rdf4j</groupId>
             <artifactId>rdf4j-queryalgebra-model</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-rdf-rdf4j</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
 </project>

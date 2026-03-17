@@ -168,7 +168,10 @@ public class OntopMaterializerTest {
 		ImmutableSet<IRI> vocabulary = Stream.of(fnIRI, lnIRI, ageIRI, hasschoolIRI, schoolIRI)
 				.collect(ImmutableCollectors.toSet());
 
-		OntopRDFMaterializer materializer = OntopRDFMaterializer.defaultMaterializer(configuration);
+		OntopRDFMaterializer materializer = OntopRDFMaterializer.defaultMaterializer(configuration,
+				MaterializationParams.defaultBuilder()
+						.useLegacyMaterializer(true)
+						.build());
 
 		try (MaterializedGraphResultSet materializationResultSet = materializer.materialize(vocabulary)) {
 
@@ -206,7 +209,10 @@ public class OntopMaterializerTest {
 		ImmutableSet<IRI> vocabulary = Stream.of(fnIRI, lnIRI, ageIRI, hasschoolIRI, schoolIRI)
 				.collect(ImmutableCollectors.toSet());
 
-		OntopRDFMaterializer materializer = OntopRDFMaterializer.defaultMaterializer(configuration);
+		OntopRDFMaterializer materializer = OntopRDFMaterializer.defaultMaterializer(configuration,
+				MaterializationParams.defaultBuilder()
+						.useLegacyMaterializer(true)
+						.build());
 
 		try (MaterializedGraphResultSet materializationResultSet = materializer.materialize(vocabulary)) {
 

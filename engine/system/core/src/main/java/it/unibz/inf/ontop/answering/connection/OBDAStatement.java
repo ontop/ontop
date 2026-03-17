@@ -1,6 +1,7 @@
 package it.unibz.inf.ontop.answering.connection;
 
 import com.google.common.collect.ImmutableMultimap;
+import it.unibz.inf.ontop.evaluator.QueryContext;
 import it.unibz.inf.ontop.query.KGQuery;
 import it.unibz.inf.ontop.query.resultset.OBDAResultSet;
 import it.unibz.inf.ontop.exception.*;
@@ -23,6 +24,9 @@ public interface OBDAStatement extends AutoCloseable {
     void close() throws OntopConnectionException;
 
 	<R extends OBDAResultSet> R execute(KGQuery<R> inputQuery) throws OntopReformulationException, OntopQueryEvaluationException,
+			OntopConnectionException, OntopResultConversionException;
+
+	<R extends OBDAResultSet> R execute(KGQuery<R> inputQuery, QueryContext queryContext) throws OntopReformulationException, OntopQueryEvaluationException,
 	OntopConnectionException, OntopResultConversionException;
 
 	<R extends OBDAResultSet> R execute(KGQuery<R> inputQuery, ImmutableMultimap<String, String> httpHeaders)

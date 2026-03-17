@@ -1,0 +1,38 @@
+[PrefixDeclaration]
+:		http://example.org/company#
+ex:		http://example.org/company#
+owl:		http://www.w3.org/2002/07/owl#
+rdf:		http://www.w3.org/1999/02/22-rdf-syntax-ns#
+xml:		http://www.w3.org/XML/1998/namespace
+xsd:		http://www.w3.org/2001/XMLSchema#
+obda:		https://w3id.org/obda/vocabulary#
+rdfs:		http://www.w3.org/2000/01/rdf-schema#
+
+[MappingDeclaration] @collection [[
+
+mappingId	MAPID-employees-graph-emptype
+target		GRAPH :graph/employees-type/{emp_type} { :employee/{emp_id} a :Employee ; :firstName {first_name} . }
+source		SELECT emp_id, first_name, emp_type
+			FROM employees
+
+mappingId	MAPID-employees-graph1
+target		GRAPH :graph/employees/1 { :employee/{emp_id} a :Employee . }
+source		SELECT emp_id
+			FROM employees
+
+mappingId	MAPID-employees-graph2
+target		GRAPH :graph/employees/2 { :employee/{emp_id} a :Employee  . }
+source		SELECT emp_id
+			FROM employees
+
+mappingId	MAPID-employees
+target		:employee/{emp_id} a :Employee ; :email {email}^^xsd:string  .
+source		SELECT emp_id, email
+			FROM employees
+
+mappingId	MAPID-departments-graph1
+target		GRAPH :graph/employees/1 { :department/{dept_id} a :Department ; :departmentName {dept_name} ; :budget {budget}^^xsd:decimal . }
+source		SELECT dept_id, dept_name, budget
+			FROM departments
+
+]]

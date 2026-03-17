@@ -1,0 +1,42 @@
+[PrefixDeclaration]
+:		http://example.org/company#
+ex:		http://example.org/company#
+owl:		http://www.w3.org/2002/07/owl#
+rdf:		http://www.w3.org/1999/02/22-rdf-syntax-ns#
+xml:		http://www.w3.org/XML/1998/namespace
+xsd:		http://www.w3.org/2001/XMLSchema#
+obda:		https://w3id.org/obda/vocabulary#
+rdfs:		http://www.w3.org/2000/01/rdf-schema#
+
+[MappingDeclaration] @collection [[
+
+mappingId	MAPID-explicit-null-check
+target		:employee/{emp_id} :wasHiredOn {hire_date}^^xsd:date .
+source		SELECT emp_id, hire_date
+			FROM employees
+			WHERE hire_date IS NOT NULL
+
+mappingId	MAPID-implicit-null-check
+target		:employee/{emp_id} :email {email}^^xsd:string .
+source		SELECT emp_id, email
+			FROM employees
+
+mappingId	MAPID-filter-on-salary
+target		:employee/{emp_id} :hasHighSalary "true"^^xsd:boolean .
+source		SELECT emp_id
+			FROM employees
+			WHERE salary > 50000
+
+mappingId	MAPID-current-role
+target		:employee/{assignment_id}/{emp_id} :hasCurrentRole {role}^^xsd:string .
+source		SELECT ed.emp_id, ed.dept_id, ed.role, ed.assignment_id
+			FROM employee_dept ed
+			WHERE ed.end_date IS NULL AND ed.role IS NOT NULL
+
+mappingId	MAPID-current-role-2
+target		:employee/{assignment_id}/{emp_id} :worksInRole {role}^^xsd:string .
+source		SELECT ed.emp_id, ed.dept_id, ed.role, ed.assignment_id
+			FROM employee_dept ed
+			WHERE ed.end_date IS NULL AND ed.role IS NOT NULL
+
+]]

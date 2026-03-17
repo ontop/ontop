@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Injector;
 import it.unibz.inf.ontop.answering.OntopQueryEngine;
+import it.unibz.inf.ontop.evaluator.QueryContext;
 import it.unibz.inf.ontop.query.KGQueryFactory;
 import it.unibz.inf.ontop.answering.resultset.MaterializedGraphResultSet;
 import it.unibz.inf.ontop.exception.*;
@@ -19,7 +20,6 @@ import it.unibz.inf.ontop.spec.OBDASpecification;
 import it.unibz.inf.ontop.spec.mapping.Mapping;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.apache.commons.rdf.api.IRI;
-import org.apache.commons.rdf.api.RDF;
 
 import javax.annotation.Nonnull;
 import java.util.*;
@@ -39,9 +39,9 @@ public class DefaultOntopRDFMaterializer implements OntopRDFMaterializer {
 
     private final ImmutableMap<IRI, VocabularyEntry> vocabulary;
     private final TermFactory termFactory;
-    private final RDF rdfFactory;
+    private final QueryContext.Factory queryContextFactory;
 
-    public DefaultOntopRDFMaterializer(OntopSystemConfiguration configuration, MaterializationParams materializationParams) throws OBDASpecificationException {
+    protected DefaultOntopRDFMaterializer(OntopSystemConfiguration configuration, MaterializationParams materializationParams) throws OBDASpecificationException {
         Injector injector = configuration.getInjector();
         OntopSystemFactory engineFactory = injector.getInstance(OntopSystemFactory.class);
 
@@ -49,7 +49,7 @@ public class DefaultOntopRDFMaterializer implements OntopRDFMaterializer {
         this.queryEngine = engineFactory.create(specification);
         this.kgQueryFactory = injector.getInstance(KGQueryFactory.class);
         this.termFactory = injector.getInstance(TermFactory.class);
-        this.rdfFactory = injector.getInstance(RDF.class);
+        this.queryContextFactory = injector.getInstance(QueryContext.Factory.class);
         this.vocabulary = extractVocabulary(specification.getSaturatedMapping());
 
         this.params = materializationParams;
@@ -57,12 +57,12 @@ public class DefaultOntopRDFMaterializer implements OntopRDFMaterializer {
 
     @Override
     public MaterializedGraphResultSet materialize() {
-        return new DefaultMaterializedGraphResultSet(vocabulary, params, queryEngine, kgQueryFactory, termFactory, rdfFactory);
+        return new DefaultMaterializedGraphResultSet(vocabulary, params, queryEngine, kgQueryFactory, termFactory, queryContextFactory);
     }
 
     @Override
     public MaterializedGraphResultSet materialize(@Nonnull ImmutableSet<IRI> selectedVocabulary) {
-        return new DefaultMaterializedGraphResultSet(filterVocabularyEntries(selectedVocabulary), params, queryEngine, kgQueryFactory, termFactory, rdfFactory);
+        return new DefaultMaterializedGraphResultSet(filterVocabularyEntries(selectedVocabulary), params, queryEngine, kgQueryFactory, termFactory, queryContextFactory);
     }
 
     private ImmutableMap<IRI, VocabularyEntry> filterVocabularyEntries(ImmutableSet<IRI> selectedVocabulary) {
