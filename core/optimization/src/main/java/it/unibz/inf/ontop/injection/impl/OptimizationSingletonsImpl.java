@@ -15,26 +15,18 @@ import it.unibz.inf.ontop.iq.visitor.RequiredExtensionalDataNodeExtractor;
 public class OptimizationSingletonsImpl implements OptimizationSingletons {
 
     private final CoreSingletons coreSingletons;
-    private final RequiredExtensionalDataNodeExtractor requiredExtensionalDataNodeExtractor;
     private final OntopOptimizationSettings settings;
     private final GeneralStructuralAndSemanticIQOptimizer generalStructuralAndSemanticIQOptimizer;
-    private final JoinLikeOptimizer joinLikeOptimizer;
     private final QueryPlanner queryPlanner;
-    private final DefinitionPushDownTransformer definitionPushDownTransformer;
 
     @Inject
     protected OptimizationSingletonsImpl(CoreSingletons coreSingletons,
-                                         RequiredExtensionalDataNodeExtractor requiredExtensionalDataNodeExtractor,
                                          GeneralStructuralAndSemanticIQOptimizer generalStructuralAndSemanticIQOptimizer,
-                                         JoinLikeOptimizer joinLikeOptimizer, QueryPlanner queryPlanner,
-                                         OntopOptimizationSettings settings, DefinitionPushDownTransformer definitionPushDownTransformer) {
+                                         QueryPlanner queryPlanner, OntopOptimizationSettings settings) {
         this.coreSingletons = coreSingletons;
-        this.requiredExtensionalDataNodeExtractor = requiredExtensionalDataNodeExtractor;
         this.settings = settings;
         this.generalStructuralAndSemanticIQOptimizer = generalStructuralAndSemanticIQOptimizer;
-        this.joinLikeOptimizer = joinLikeOptimizer;
         this.queryPlanner = queryPlanner;
-        this.definitionPushDownTransformer = definitionPushDownTransformer;
     }
 
     @Override
@@ -43,28 +35,13 @@ public class OptimizationSingletonsImpl implements OptimizationSingletons {
     }
 
     @Override
-    public DefinitionPushDownTransformer getDefinitionPushDownTransformer() {
-        return definitionPushDownTransformer;
-    }
-
-    @Override
     public OntopOptimizationSettings getSettings() {
         return settings;
     }
 
     @Override
-    public RequiredExtensionalDataNodeExtractor getRequiredExtensionalDataNodeExtractor() {
-        return requiredExtensionalDataNodeExtractor;
-    }
-
-    @Override
     public GeneralStructuralAndSemanticIQOptimizer getGeneralStructuralAndSemanticIQOptimizer() {
         return generalStructuralAndSemanticIQOptimizer;
-    }
-
-    @Override
-    public JoinLikeOptimizer getJoinLikeOptimizer() {
-        return joinLikeOptimizer;
     }
 
     @Override
