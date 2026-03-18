@@ -2,7 +2,7 @@ package it.unibz.inf.ontop.iq.transformer.impl;
 
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
-import it.unibz.inf.ontop.injection.OptimizationSingletons;
+import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.request.DefinitionPushDownRequest;
 import it.unibz.inf.ontop.iq.transformer.DefinitionPushDownTransformer;
@@ -26,9 +26,9 @@ public abstract class RDFTypeDependentSimplifyingTransformer extends DefaultRecu
 
     private final DefinitionPushDownTransformer definitionPushDownTransformer;
 
-    protected RDFTypeDependentSimplifyingTransformer(OptimizationSingletons optimizationSingletons, VariableGenerator variableGenerator) {
-        super(optimizationSingletons.getCoreSingletons().getIQFactory(), variableGenerator);
-        this.definitionPushDownTransformer = optimizationSingletons.getDefinitionPushDownTransformer();
+    protected RDFTypeDependentSimplifyingTransformer(CoreSingletons coreSingletons, DefinitionPushDownTransformer definitionPushDownTransformer, VariableGenerator variableGenerator) {
+        super(coreSingletons.getIQFactory(), variableGenerator);
+        this.definitionPushDownTransformer = definitionPushDownTransformer;
     }
 
     protected ImmutableTerm unwrapIfElseNull(ImmutableTerm term) {
