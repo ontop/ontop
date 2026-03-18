@@ -17,17 +17,11 @@ public interface OptimizationSingletons {
 
     CoreSingletons getCoreSingletons();
 
-    DefinitionPushDownTransformer getDefinitionPushDownTransformer();
-
-    RequiredExtensionalDataNodeExtractor getRequiredExtensionalDataNodeExtractor();
-
-    GeneralStructuralAndSemanticIQOptimizer getGeneralStructuralAndSemanticIQOptimizer();
-
-    JoinLikeOptimizer getJoinLikeOptimizer();
-
-    QueryPlanner getQueryPlanner();
-
     OntopOptimizationSettings getSettings();
 
-    // TODO: complete
+    // used by downstream applications outside Ontop
+    GeneralStructuralAndSemanticIQOptimizer getGeneralStructuralAndSemanticIQOptimizer();
+
+    // used by downstream applications outside Ontop
+    QueryPlanner getQueryPlanner();
 }

@@ -4,7 +4,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.injection.CoreSingletons;
-import it.unibz.inf.ontop.injection.OptimizationSingletons;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
@@ -13,6 +12,7 @@ import it.unibz.inf.ontop.iq.node.ConstructionNode;
 import it.unibz.inf.ontop.iq.node.QueryNode;
 import it.unibz.inf.ontop.iq.optimizer.AggregationSimplifier;
 import it.unibz.inf.ontop.iq.transform.IQTreeVariableGeneratorTransformer;
+import it.unibz.inf.ontop.iq.transformer.DefinitionPushDownTransformer;
 import it.unibz.inf.ontop.iq.transformer.impl.RDFTypeDependentSimplifyingTransformer;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.FunctionSymbol;
@@ -29,20 +29,21 @@ import java.util.Optional;
 
 public class AggregationSimplifierImpl extends AbstractIQOptimizer implements AggregationSimplifier {
 
-    private final OptimizationSingletons optimizationSingletons;
+    private final CoreSingletons coreSingletons;
     private final TermFactory termFactory;
     private final IQTreeTools iqTreeTools;
+    private final DefinitionPushDownTransformer definitionPushDownTransformer;
 
     private final IQTreeVariableGeneratorTransformer transformer;
 
     @Inject
-    private AggregationSimplifierImpl(OptimizationSingletons optimizationSingletons) {
+    private AggregationSimplifierImpl(CoreSingletons coreSingletons, DefinitionPushDownTransformer definitionPushDownTransformer) {
         // no equality check
-        super(optimizationSingletons.getCoreSingletons().getIQFactory());
-        this.optimizationSingletons = optimizationSingletons;
-        CoreSingletons coreSingletons = optimizationSingletons.getCoreSingletons();
+        super(coreSingletons.getIQFactory());
+        this.coreSingletons = coreSingletons;
         this.termFactory = coreSingletons.getTermFactory();
         this.iqTreeTools = coreSingletons.getIQTreeTools();
+        this.definitionPushDownTransformer = definitionPushDownTransformer;
 
         this.transformer = IQTreeVariableGeneratorTransformer.of(
                 IQTreeVariableGeneratorTransformer.of(AggregationSimplifyingTransformer::new),
@@ -60,7 +61,7 @@ public class AggregationSimplifierImpl extends AbstractIQOptimizer implements Ag
     private class AggregationSimplifyingTransformer extends RDFTypeDependentSimplifyingTransformer {
 
         AggregationSimplifyingTransformer(VariableGenerator variableGenerator) {
-            super(optimizationSingletons, variableGenerator);
+            super(coreSingletons, definitionPushDownTransformer,  variableGenerator);
         }
 
         @Override

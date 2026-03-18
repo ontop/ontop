@@ -4,7 +4,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.injection.CoreSingletons;
-import it.unibz.inf.ontop.injection.OptimizationSingletons;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.UnaryIQTree;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
@@ -12,6 +11,7 @@ import it.unibz.inf.ontop.iq.node.OrderByNode;
 import it.unibz.inf.ontop.iq.optimizer.OrderBySimplifier;
 import it.unibz.inf.ontop.iq.request.DefinitionPushDownRequest;
 import it.unibz.inf.ontop.iq.transform.IQTreeVariableGeneratorTransformer;
+import it.unibz.inf.ontop.iq.transformer.DefinitionPushDownTransformer;
 import it.unibz.inf.ontop.iq.transformer.impl.RDFTypeDependentSimplifyingTransformer;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.term.functionsymbol.RDFTermFunctionSymbol;
@@ -26,7 +26,8 @@ import java.util.stream.Stream;
 
 public class OrderBySimplifierImpl extends AbstractIQOptimizer implements OrderBySimplifier {
 
-    private final OptimizationSingletons optimizationSingletons;
+    private final CoreSingletons coreSingletons;
+    private final DefinitionPushDownTransformer definitionPushDownTransformer;
     private final IQTreeTools iqTreeTools;
     private final TermFactory termFactory;
     private final TypeFactory typeFactory;
@@ -35,11 +36,11 @@ public class OrderBySimplifierImpl extends AbstractIQOptimizer implements OrderB
     private final IQTreeVariableGeneratorTransformer transformer;
 
     @Inject
-    protected OrderBySimplifierImpl(OptimizationSingletons optimizationSingletons) {
+    protected OrderBySimplifierImpl(CoreSingletons coreSingletons, DefinitionPushDownTransformer definitionPushDownTransformer) {
         // no equality check
-        super(optimizationSingletons.getCoreSingletons().getIQFactory());
-        this.optimizationSingletons = optimizationSingletons;
-        CoreSingletons coreSingletons = optimizationSingletons.getCoreSingletons();
+        super(coreSingletons.getIQFactory());
+        this.coreSingletons = coreSingletons;
+        this.definitionPushDownTransformer = definitionPushDownTransformer;
         this.termFactory = coreSingletons.getTermFactory();
         this.typeFactory = coreSingletons.getTypeFactory();
         this.iqTreeTools = coreSingletons.getIQTreeTools();
@@ -57,7 +58,7 @@ public class OrderBySimplifierImpl extends AbstractIQOptimizer implements OrderB
     private class OrderBySimplifyingTransformer extends RDFTypeDependentSimplifyingTransformer {
 
         OrderBySimplifyingTransformer(VariableGenerator variableGenerator) {
-            super(optimizationSingletons, variableGenerator);
+            super(coreSingletons, definitionPushDownTransformer, variableGenerator);
         }
 
         @Override
