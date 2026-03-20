@@ -39,9 +39,14 @@ public abstract class AbstractDBIsNullOrNotFunctionSymbol extends DBBooleanFunct
         return false;
     }
 
+    /**
+     * Prevents post-processing when the argument is a functional term of which we cannot infer the type
+     */
     @Override
     public boolean canBePostProcessed(ImmutableList<? extends ImmutableTerm> arguments) {
-        return true;
+        var argument = arguments.get(0);
+        return (argument instanceof NonFunctionalTerm)
+                || argument.inferType().isPresent();
     }
 
     @Override
