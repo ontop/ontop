@@ -1,0 +1,16 @@
+[PrefixDeclaration]
+:           http://example.org/
+geo:        http://example.org/geo#
+rdfs:       http://www.w3.org/2000/01/rdf-schema#
+xsd:        http://www.w3.org/2001/XMLSchema#
+owl:        http://www.w3.org/2002/07/owl#
+
+[MappingDeclaration] @collection [[
+mappingId   info-type-label
+target      :Info_{id} a :Dummy ; rdfs:label {name} .
+source      SELECT id, name FROM info
+
+mappingId   info-geojson
+target      :Info_{id} geo:asGeoJSON "{geojson}"^^xsd:string .
+source      SELECT id, ST_AsGeoJSON(geom) AS geojson FROM info WHERE geom IS NOT NULL
+]]

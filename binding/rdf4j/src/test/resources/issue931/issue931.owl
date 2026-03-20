@@ -1,0 +1,12 @@
+@prefix : <http://example.org/> .
+@prefix geo: <http://example.org/geo#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+: a owl:Ontology .
+
+:Dummy a owl:Class .
+
+geo:asGeoJSON a owl:DatatypeProperty ;
+    rdfs:range xsd:string .
