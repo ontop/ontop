@@ -41,7 +41,9 @@ public class ReformulateController {
         ImmutableMultimap<String, String> inputHeaders = SparqlQueryExecutor.extractHttpHeaders(request);
 
         try (OntopRepositoryConnection connection = repository.getConnection()) {
-            String reformulation = connection.reformulate(query, inputHeaders, forNativeConsumption);
+            String reformulation = forNativeConsumption
+                    ? connection.reformulateIntoNativeQuery(query, inputHeaders, true)
+                    : connection.reformulate(query, inputHeaders);
 
             HttpHeaders returnedHeaders = new HttpHeaders();
             returnedHeaders.set(CONTENT_TYPE, "text/plain; charset=UTF-8");

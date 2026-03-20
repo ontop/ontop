@@ -609,11 +609,11 @@ public class OntopRepositoryConnectionImpl implements OntopRepositoryConnection 
     }
 
     @Override
-    public String reformulate(String sparql, ImmutableMultimap<String, String> httpHeaders, boolean forNativeConsumption)
+    public String reformulate(String sparql, ImmutableMultimap<String, String> httpHeaders)
             throws RepositoryException {
         try {
             SPARQLQuery<?> sparqlQuery = ontopConnection.getInputQueryFactory().createSPARQLQuery(sparql);
-            return ontopConnection.createStatement().getExecutableQuery(sparqlQuery, httpHeaders, forNativeConsumption).toString();
+            return ontopConnection.createStatement().getExecutableQuery(sparqlQuery, httpHeaders, false).toString();
         } catch (OntopKGQueryException | OntopReformulationException | OntopConnectionException e) {
             throw new RepositoryException(e);
         }
