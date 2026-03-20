@@ -11,12 +11,12 @@ import it.unibz.inf.ontop.iq.IQ;
 public class DummyQueryCache implements QueryCache {
 
     @Override
-    public IQ get(KGQuery<?> inputQuery, QueryContext queryContext) {
+    public IQ get(KGQuery<?> inputQuery, QueryContext queryContext, boolean forNativeConsumption) {
         return null;
     }
 
     @Override
-    public void put(KGQuery<?> inputQuery, QueryContext queryContext, IQ executableQuery) {
+    public void put(KGQuery<?> inputQuery, QueryContext queryContext, boolean forNativeConsumption, IQ executableQuery) {
     }
 
     @Override
