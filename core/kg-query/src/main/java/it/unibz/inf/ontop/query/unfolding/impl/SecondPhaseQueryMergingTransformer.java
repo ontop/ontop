@@ -25,6 +25,7 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.*;
+import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -78,20 +79,22 @@ public class SecondPhaseQueryMergingTransformer extends AbstractMultiPhaseQueryM
 
     private ImmutableMap<Variable, ImmutableSet<RDFSelector>> convertIntoConstraints(
             ImmutableSet<? extends Substitution<? extends ImmutableTerm>> variableDefinitions) {
-        Set<Map<Variable, RDFSelector>> selectorMapFromSubstitutions =
+        ImmutableSet<Map<Variable, RDFSelector>> selectorMapFromSubstitutions =
                 variableDefinitions.stream()
                         .map(this::extractSelectorsFromSubstitution)
-                        .collect(Collectors.toSet());
+                        .collect(ImmutableCollectors.toSet());
 
         // Groups the selectors per variable
         ImmutableMap<Variable, Collection<RDFSelector>> groupedSelectors = selectorMapFromSubstitutions.stream()
-                .flatMap(m -> m.entrySet().stream())
+                .map(Map::entrySet)
+                .flatMap(Collection::stream)
                 .collect(ImmutableCollectors.toMultimap())
                 .asMap();
 
-        var alwaysConstrainedVariables = selectorMapFromSubstitutions.stream()
+        ImmutableSet<Variable> alwaysConstrainedVariables = selectorMapFromSubstitutions.stream()
                 .map(Map::keySet)
-                .reduce(Sets::intersection)
+                .reduce((s1, s2) -> Sets.intersection(s1, s2).immutableCopy())
+                .map(ImmutableSet::copyOf)
                 .orElseGet(ImmutableSet::of);
 
         return groupedSelectors.entrySet().stream()

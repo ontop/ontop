@@ -73,7 +73,8 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
     public ImmutableSet<Substitution<NonVariableTerm>> getPossibleVariableDefinitions(ImmutableList<IQTree> children) {
         return children.stream()
                 .map(IQTree::getPossibleVariableDefinitions)
-                .reduce(ImmutableSet.of(), this::combineVarDefs);
+                .reduce(ImmutableSet.of(substitutionFactory.getSubstitution()),
+                        this::combineVarDefs);
     }
 
     private ImmutableSet<Substitution<NonVariableTerm>> combineVarDefs(
@@ -87,16 +88,17 @@ public class InnerJoinNodeImpl extends JoinLikeNodeImpl implements InnerJoinNode
          // If not normalized, the definitions may be incompatible, but that's fine
          // since they will not produce any result.
 
-        return s1.isEmpty()
-                ? s2
-                : s2.isEmpty()
-                    ? s1
-                    : s1.stream()
-                        .flatMap(d1 -> s2.stream()
-                            .map(d2 -> substitutionFactory.onNonVariableTerms().compose(d2, d1)))
-                        .collect(ImmutableCollectors.toSet());
+        return s1.stream()
+                .flatMap(d1 -> s2.stream()
+                        .filter(d2 -> isCompatible(d1, d2))
+                        .map(d2 -> substitutionFactory.onNonVariableTerms().compose(d2, d1)))
+                .collect(ImmutableCollectors.toSet());
     }
 
+    private boolean isCompatible(Substitution<NonVariableTerm> s1, Substitution<NonVariableTerm> s2) {
+        return Sets.intersection(s1.restrictRangeTo(GroundTerm.class).getDomain(),  s2.restrictRangeTo(GroundTerm.class).getDomain()).stream()
+                .allMatch(v -> s1.get(v).equals(s2.get(v)));
+    }
 
     @Override
     public int hashCode() {

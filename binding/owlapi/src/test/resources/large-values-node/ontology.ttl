@@ -1,0 +1,5015 @@
+PREFIX org: <http://www.w3.org/ns/org#>
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+
+<https://undrr-hip.org/BI0001>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/BI> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC01> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/BI0002>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/BI> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC02> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/BI0003>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/BI> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC02> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/BI0004>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/BI> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC03> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/BI0005>
+    rdfs:subClassOf <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/BI0006>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/BI> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC04> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/BI0007>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/BI> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC04> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/BI0008>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/BI> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC05> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/BI0009>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/BI> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC06> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/BI0010>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/BI> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC07> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/BI0011>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/BI> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC07> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/BI0012>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/BI> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC08> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/BI0013>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/BI> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC08> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/BI0014>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/BI> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC08> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/BI0015>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/BI> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC09> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/BI0016>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/BI> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC09> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/BI0017>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/BI> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC09> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/BI0018>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/BI> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC09> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/BI0019>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/BI> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC09> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/BI0020>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/BI> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC09> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/BI0021>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/BI> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC09> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/BI0022>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/BI> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC09> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/BI0023>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/BI> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC09> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/BI0024>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/BI> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC09> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/BI0025>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/BI> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC09> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/BI0026>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/BI> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC09> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/BI0027>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/BI> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC09> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/BI0028>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/BI> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC09> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/BI0029>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/BI> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC09> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/BI0030>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/BI> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC09> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/BI0031>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/BI> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC09> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/BI0032>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/BI> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC09> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/BI0033>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/BI> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC09> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/BI0034>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/BI> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC09> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/BI0035>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/BI> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC09> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/BI0036>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/BI> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC09> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/BI0037>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/BI> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC09> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/BI0038>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/BI> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC09> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/BI0039>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/BI> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC09> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/BI0040>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/BI> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC09> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/BI0041>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/BI> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC09> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/BI0042>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/BI> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC09> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/BI0043>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/BI> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC09> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/BI0044>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/BI> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC09> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/BI0045>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/BI> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC09> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/BI0046>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/BI> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC09> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/BI0047>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/BI> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC09> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/BI0048>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/BI> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC09> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/BI0049>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/BI> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC09> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/BI0050>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/BI> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC09> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/BI0051>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/BI> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC09> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/BI0052>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/BI> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC09> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/BI0053>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/BI> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC09> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/BI0054>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/BI> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC09> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/BI0055>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/BI> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC09> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/BI0056>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/BI> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC09> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/BI0057>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/BI> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC09> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/BI0058>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/BI> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC09> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/BI0059>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/BI> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC09> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/BI0060>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/BI> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC09> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/BI0061>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/BI> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC09> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/BI0062>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/BI> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC09> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/BI0063>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/BI> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC09> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/BI0064>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/BI> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC09> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/BI0065>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/BI> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC09> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/BI0066>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/BI> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC09> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/BI0067>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/BI> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC09> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/BI0068>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/BI> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC09> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/BI0069>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/BI> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC09> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/BI0070>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/BI> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC10> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/BI0071>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/BI> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC09> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/BI0072>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/BI> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC09> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/BI0073>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/BI> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC10> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/BI0074>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/BI> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC09> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/BI0075>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/BI> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC09> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/BI0076>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/BI> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC09> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/BI0077>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/BI> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC09> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/BI0078>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/BI> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC09> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/BI0079>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/BI> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC09> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/BI0080>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/BI> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC09> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/BI0081>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/BI> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC09> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/BI0082>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/BI> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC09> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/BI0083>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/BI> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC09> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/BI0084>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC09> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/BI> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/BI0085>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/BI> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC10> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/BI00869>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/BI> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC09> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/BI0087>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/BI> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC11> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/BI0088>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/BI> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC11> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/CH0001>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/CH> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC12> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/CH0002>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/CH> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC12> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/CH0003>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/CH> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC13> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/CH0004>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/CH> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC13> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/CH0005>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/CH> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC13> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/CH0006>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/CH> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC13> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/CH0007>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/CH> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC07> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/CH0009>
+    rdfs:subClassOf <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/CH0010>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/CH> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC15> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/CH0011>
+    rdfs:subClassOf <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/CH0013>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/CH> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC15> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/CH0014>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/CH> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC15> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/CH0015>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/CH> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC12> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/CH0016>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/CH> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC12> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/CH0017>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/CH> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC16> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/CH0018>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/CH> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC16> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/CH0019>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/CH> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC05> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/CH0020>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/CH> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC17> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/CH0021>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/CH> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC17> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/CH0022>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/CH> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC17> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/CH0023>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/CH> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC17> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/CH0024>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/CH> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC17> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/CH0025>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/CH> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC01> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/CHO012>
+    rdfs:subClassOf <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/Definition>
+    rdfs:subClassOf <https://undrr-hip.org/MetadataElement> ;
+.
+
+<https://undrr-hip.org/EN0001>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/EN> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC18> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/EN0002>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/EN> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC18> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/EN0003>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/EN> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC18> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/EN0004>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/EN> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC18> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/EN0005>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/EN> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC18> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/EN0006>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/EN> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC18> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/EN0007>
+    rdfs:subClassOf <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/EN0008>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/EN> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC18> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/EN0009>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/EN> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC19> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/EN0010>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/EN> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC18> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/EN0011>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/EN> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC18> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/EN0012>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/EN> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC19> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/EN0013>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC19> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/EN> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/EN0014>
+    rdfs:subClassOf <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/EN0015>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/EN> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC18> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/EN0016>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC18> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/EN> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/EN0017>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/EN> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC18> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/EN0018>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/EN> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC18> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/EN0019>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/EN> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC18> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/EN0020>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/EN> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC18> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/EN0021>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/EN> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC18> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/EN0022>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/EN> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC18> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/EN0023>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/EN> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC18> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/EN0024>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/EN> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC18> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/EN01707>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/EN> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC18> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/EN01711>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/EN> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC18> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/ET0001>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/ET> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC20> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/ET0002>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/ET> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/MH> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC20> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC25> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/ET0003>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/ET> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC20> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/ET0004>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/ET> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC20> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/ET0005>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/ET> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC20> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/ET0006>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/ET> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC20> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/ET0007>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/ET> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC20> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/ET0008>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/ET> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC20> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/ET0009>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/ET> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC20> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/GH0001>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/GH> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC21> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/GH0002>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/GH> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC21> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/GH0003>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/GH> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC21> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/GH0004>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/GH> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC21> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/GH0005>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/GH> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC21> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/GH0006>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/GH> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC21> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/GH0007>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/GH> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC21> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/GH0008>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/GH> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC21> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/GH0009>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/GH> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC22> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/GH0010>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/GH> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC22> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/GH0011>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/GH> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC22> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/GH0012>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/GH> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC22> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/GH0013>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/GH> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC22> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/GH0014>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/GH> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC22> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/GH0015>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/GH> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC22> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/GH0016>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/GH> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC22> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/GH0017>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/GH> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC22> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/GH0018>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/GH> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC22> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/GH0019>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/GH> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC22> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/GH0020>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/GH> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC21> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/GH0021>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/GH> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC23> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/GH0022>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/GH> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC23> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/GH0023>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/GH> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC23> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/GH0024>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/GH> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC23> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/GH0025>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/GH> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC23> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/GH0026>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/GH> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC23> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/GH0027>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/GH> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC23> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/GH0028>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/GH> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC23> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/GH0029>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/GH> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC23> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/GH0030>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/GH> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC23> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/GH0031>
+    rdfs:subClassOf <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/GH0032>
+    rdfs:subClassOf <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/GH0033>
+    rdfs:subClassOf <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/GH0034>
+    rdfs:subClassOf <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/GH0035>
+    rdfs:subClassOf <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/GHC041>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/GH> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC23> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/GHC042>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/GH> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC23> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/GHC043>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/GH> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC23> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/GHC044>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/GH> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC23> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/GHC045>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/GH> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC23> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/MH0001>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/MH> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC24> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/MH0002>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/MH> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC24> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/MH0003>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/MH> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC24> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/MH0004>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/MH> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC25> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/MH0005>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/MH> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC25> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/MH0006>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/MH> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC25> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/MH0007>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/MH> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC25> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/MH0008>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/MH> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC25> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/MH0009>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/MH> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC25> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/MH0010>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/MH> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC25> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/MH0011>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/MH> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC25> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/MH0012>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/MH> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC25> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/MH0013>
+    rdfs:subClassOf <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/MH0014>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/MH> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC26> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/MH0015>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/MH> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC26> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/MH0016>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/MH> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC26> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/MH0017>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/MH> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC26> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/MH0018>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/MH> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC26> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/MH0019>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/MH> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC26> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/MH0020>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/MH> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC26> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/MH0021>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/MH> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC27> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/MH0022>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/MH> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC27> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/MH0023>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/MH> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC27> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/MH0024>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/MH> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC27> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/MH0025>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/MH> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC27> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/MH0026>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/MH> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC27> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/MH0027>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/MH> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC27> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/MH0028>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/MH> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC27> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/MH0029>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/MH> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC27> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/MH0030>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/MH> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC28> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/MH0031>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/MH> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC28> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/MH0032>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/MH> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC28> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/MH0033>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/MH> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC29> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/MH0034>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/MH> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/CH8> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/MH0035>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/MH> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC29> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/MH0036>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/MH> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC29> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/MH0037>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/MH> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC29> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/MH0038>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/MH> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC29> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/MH0039>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/MH> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC29> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/MH0040>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/MH> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/CH8> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/MH0041>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/MH> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/CH8> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/MH0042>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/MH> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/CH8> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/MH0043>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/MH> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/CH8> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/MH0044>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/MH> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/CH8> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/MH0045>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/MH> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/CH8> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/MH0046>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/MH> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/CH8> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/MH0047>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/MH> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/CH8> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/MH0048>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/MH> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/CH8> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/MH0049>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/MH> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/CH8> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/MH0050>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC31> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/MH> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/MH0051>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/MH> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC31> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/MH0052>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/MH> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC31> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/MH0053>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/MH> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC32> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/MH0054>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/MH> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC32> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/MH0055>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/MH> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC32> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/MH0056>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/MH> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC32> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/MH0057>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/MH> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC32> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/MH0058>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/MH> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC32> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/MH0059>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/MH> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC32> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/MH0060>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/MH> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC32> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/Organization>
+    rdfs:subClassOf org:Organization ;
+.
+
+<https://undrr-hip.org/SO0001>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/SO> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC33> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/SO0002>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/SO> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC33> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/SO0003>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/SO> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC33> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/SO0004>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/SO> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC34> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/SO0005>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/SO> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC34> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/SO0006>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/SO> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC35> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/SO0007>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/SO> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC35> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/SO0008>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/SO> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC36> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/ScientificDescription>
+    rdfs:subClassOf <https://undrr-hip.org/MetadataElement> ;
+.
+
+<https://undrr-hip.org/TL0001>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/TL> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC37> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/TL0002>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/TL> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC37> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/TL0003>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/TL> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC05> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/TL0004>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/BI> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC05> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/TL0005>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/TL> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC38> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/TL0006>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/TL> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC38> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/TL0007>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/TL> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC38> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/TL0008>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/TL> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC38> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/TL0009>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/TL> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC38> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/TL0010>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/TL> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC38> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/TL0011>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/TL> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC38> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/TL0012>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/TL> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC39> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/TL0013>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/TL> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC39> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/TL0014>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/TL> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC39> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/TL0015>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/TL> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC39> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/TL0016>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/TL> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC39> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/TL0017>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/TL> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC40> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/TL0018>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/TL> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC40> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/TL0019>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC40> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/TL> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/TL0020>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/TL> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC40> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/TL0021>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/TL> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC40> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/TL0022>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/TL> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC40> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/TL0023>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/TL> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC40> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/TL0024>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/TL> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC40> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/TL0025>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC40> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/TL> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/TL0026>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/TL> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC40> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/TL0027>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/TL> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC41> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/TL0028>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/TL> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC41> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/TL0029>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/TL> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC41> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/TL0030>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/TL> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC41> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/TL0031>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/TL> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC41> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/TL0032>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC41> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/TL> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/TL0033>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/TL> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC41> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/TL0034>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/TL> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC41> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/TL0035>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/TL> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC42> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/TL0036>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/TL> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC42> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/TL0037>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/TL> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC42> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/TL0038>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/TL> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC42> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/TL0039>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/TL> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC42> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/TL0041>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/TL> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC42> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/TL0042>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/TL> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC42> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/TL0043>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/TL> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC42> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/TL0044>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/TL> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC42> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/TL0045>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/TL> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC42> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/TL0046>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/TL> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC25> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/TL0047>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/TL> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC25> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/TL0048>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/TL> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC43> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/TL0049>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/TL> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC43> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/TL0050>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/TL> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC43> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/TL0051>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/TL> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC43> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/TL0052>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/TL> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC43> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/TL0053>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/BI> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/isMemberOf> ;
+            owl:someValuesFrom <https://undrr-hip.org/HC05> ;
+        ] ,
+        <https://undrr-hip.org/SpecificHazard> ;
+.
+
+<https://undrr-hip.org/HC03>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/BI> ;
+        ] ,
+        <https://undrr-hip.org/HazardCluster> ;
+.
+
+<https://undrr-hip.org/HC06>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/BI> ;
+        ] ,
+        <https://undrr-hip.org/HazardCluster> ;
+.
+
+<https://undrr-hip.org/HC36>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/SO> ;
+        ] ,
+        <https://undrr-hip.org/HazardCluster> ;
+.
+
+<https://undrr-hip.org/HC01>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/BI> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/CH> ;
+        ] ,
+        <https://undrr-hip.org/HazardCluster> ;
+.
+
+<https://undrr-hip.org/HC02>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/BI> ;
+        ] ,
+        <https://undrr-hip.org/HazardCluster> ;
+.
+
+<https://undrr-hip.org/HC04>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/BI> ;
+        ] ,
+        <https://undrr-hip.org/HazardCluster> ;
+.
+
+<https://undrr-hip.org/HC11>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/BI> ;
+        ] ,
+        <https://undrr-hip.org/HazardCluster> ;
+.
+
+<https://undrr-hip.org/HC16>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/CH> ;
+        ] ,
+        <https://undrr-hip.org/HazardCluster> ;
+.
+
+<https://undrr-hip.org/HC34>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/SO> ;
+        ] ,
+        <https://undrr-hip.org/HazardCluster> ;
+.
+
+<https://undrr-hip.org/HC35>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/SO> ;
+        ] ,
+        <https://undrr-hip.org/HazardCluster> ;
+.
+
+<https://undrr-hip.org/HC37>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/TL> ;
+        ] ,
+        <https://undrr-hip.org/HazardCluster> ;
+.
+
+<https://undrr-hip.org/HazardInformationProfiles>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:allValuesFrom <http://www.semanticweb.org/crima/crima-ecv#EssentialClimaticVariables> ;
+            owl:onProperty skos:inScheme ;
+        ] ,
+        skos:ConceptScheme ;
+.
+
+<https://undrr-hip.org/HC07>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/BI> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/CH> ;
+        ] ,
+        <https://undrr-hip.org/HazardCluster> ;
+.
+
+<https://undrr-hip.org/HC08>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/BI> ;
+        ] ,
+        <https://undrr-hip.org/HazardCluster> ;
+.
+
+<https://undrr-hip.org/HC10>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/BI> ;
+        ] ,
+        <https://undrr-hip.org/HazardCluster> ;
+.
+
+<https://undrr-hip.org/HC15>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/CH> ;
+        ] ,
+        <https://undrr-hip.org/HazardCluster> ;
+.
+
+<https://undrr-hip.org/HC19>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/EN> ;
+        ] ,
+        <https://undrr-hip.org/HazardCluster> ;
+.
+
+<https://undrr-hip.org/HC24>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/MH> ;
+        ] ,
+        <https://undrr-hip.org/HazardCluster> ;
+.
+
+<https://undrr-hip.org/HC28>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/MH> ;
+        ] ,
+        <https://undrr-hip.org/HazardCluster> ;
+.
+
+<https://undrr-hip.org/HC31>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/MH> ;
+        ] ,
+        <https://undrr-hip.org/HazardCluster> ;
+.
+
+<https://undrr-hip.org/HC33>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/SO> ;
+        ] ,
+        <https://undrr-hip.org/HazardCluster> ;
+.
+
+<https://undrr-hip.org/HC12>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/CH> ;
+        ] ,
+        <https://undrr-hip.org/HazardCluster> ;
+.
+
+<https://undrr-hip.org/HC13>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/CH> ;
+        ] ,
+        <https://undrr-hip.org/HazardCluster> ;
+.
+
+<https://undrr-hip.org/HC05>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/BI> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/CH> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/TL> ;
+        ] ,
+        <https://undrr-hip.org/HazardCluster> ;
+.
+
+<https://undrr-hip.org/HC17>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/CH> ;
+        ] ,
+        <https://undrr-hip.org/HazardCluster> ;
+.
+
+<https://undrr-hip.org/HC39>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/TL> ;
+        ] ,
+        <https://undrr-hip.org/HazardCluster> ;
+.
+
+<https://undrr-hip.org/HC43>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/TL> ;
+        ] ,
+        <https://undrr-hip.org/HazardCluster> ;
+.
+
+<https://undrr-hip.org/HC29>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/MH> ;
+        ] ,
+        <https://undrr-hip.org/HazardCluster> ;
+.
+
+<https://undrr-hip.org/HC26>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/MH> ;
+        ] ,
+        <https://undrr-hip.org/HazardCluster> ;
+.
+
+<https://undrr-hip.org/HC38>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/TL> ;
+        ] ,
+        <https://undrr-hip.org/HazardCluster> ;
+.
+
+<https://undrr-hip.org/HC32>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/MH> ;
+        ] ,
+        <https://undrr-hip.org/HazardCluster> ;
+.
+
+<https://undrr-hip.org/HC41>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/TL> ;
+        ] ,
+        <https://undrr-hip.org/HazardCluster> ;
+.
+
+<https://undrr-hip.org/HazardType>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:allValuesFrom <https://undrr-hip.org/HazardInformationProfiles> ;
+            owl:onProperty skos:inScheme ;
+        ] ,
+        skos:Concept ;
+.
+
+<https://undrr-hip.org/HC20>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/ET> ;
+        ] ,
+        <https://undrr-hip.org/HazardCluster> ;
+.
+
+<https://undrr-hip.org/HC21>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/GH> ;
+        ] ,
+        <https://undrr-hip.org/HazardCluster> ;
+.
+
+<https://undrr-hip.org/HC27>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/MH> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/TL> ;
+        ] ,
+        <https://undrr-hip.org/HazardCluster> ;
+.
+
+<https://undrr-hip.org/ET>
+    rdfs:subClassOf <https://undrr-hip.org/HazardType> ;
+.
+
+<https://undrr-hip.org/HC40>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/TL> ;
+        ] ,
+        <https://undrr-hip.org/HazardCluster> ;
+.
+
+<https://undrr-hip.org/HC42>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/TL> ;
+        ] ,
+        <https://undrr-hip.org/HazardCluster> ;
+.
+
+<https://undrr-hip.org/CH8>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/MH> ;
+        ] ,
+        <https://undrr-hip.org/HazardCluster> ;
+.
+
+<https://undrr-hip.org/HC22>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/GH> ;
+        ] ,
+        <https://undrr-hip.org/HazardCluster> ;
+.
+
+<https://undrr-hip.org/HC25>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/MH> ;
+        ] ,
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/TL> ;
+        ] ,
+        <https://undrr-hip.org/HazardCluster> ;
+.
+
+<https://undrr-hip.org/SO>
+    rdfs:subClassOf <https://undrr-hip.org/HazardType> ;
+.
+
+<https://undrr-hip.org/HC23>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/GH> ;
+        ] ,
+        <https://undrr-hip.org/HazardCluster> ;
+.
+
+<https://undrr-hip.org/HC18>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/EN> ;
+        ] ,
+        <https://undrr-hip.org/HazardCluster> ;
+.
+
+<https://undrr-hip.org/EN>
+    rdfs:subClassOf <https://undrr-hip.org/HazardType> ;
+.
+
+<https://undrr-hip.org/CH>
+    rdfs:subClassOf <https://undrr-hip.org/HazardType> ;
+.
+
+<https://undrr-hip.org/GH>
+    rdfs:subClassOf <https://undrr-hip.org/HazardType> ;
+.
+
+<https://undrr-hip.org/HazardCluster>
+    rdfs:subClassOf skos:Collection ;
+.
+
+<https://undrr-hip.org/TL>
+    rdfs:subClassOf <https://undrr-hip.org/HazardType> ;
+.
+
+<https://undrr-hip.org/HC09>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:onProperty <https://undrr-hip.org/broader> ;
+            owl:someValuesFrom <https://undrr-hip.org/BI> ;
+        ] ,
+        <https://undrr-hip.org/HazardCluster> ;
+.
+
+<https://undrr-hip.org/MH>
+    rdfs:subClassOf <https://undrr-hip.org/HazardType> ;
+.
+
+<https://undrr-hip.org/BI>
+    rdfs:subClassOf <https://undrr-hip.org/HazardType> ;
+.
+
+<https://undrr-hip.org/SpecificHazard>
+    rdfs:subClassOf
+        [
+            a owl:Restriction ;
+            owl:allValuesFrom <https://undrr-hip.org/HazardInformationProfiles> ;
+            owl:onProperty skos:inScheme ;
+        ] ,
+        skos:Concept ;
+.

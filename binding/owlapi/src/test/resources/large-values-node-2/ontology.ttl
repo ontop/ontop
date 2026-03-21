@@ -1,0 +1,1793 @@
+PREFIX hip: <https://undrr-hip.org/>
+PREFIX owl: <http://www.w3.org/2002/07/owl#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+PREFIX skos: <http://www.w3.org/2004/02/skos/core#>
+
+hip:Definition
+    a
+        rdfs:Class ,
+        owl:Class ;
+    rdfs:label "Definition" ;
+    rdfs:subClassOf
+        hip:Definition ,
+        hip:MetadataElement ;
+.
+
+hip:MetadataElement
+    a
+        rdfs:Class ,
+        owl:Class ;
+    rdfs:label "Metadata Element" ;
+    rdfs:subClassOf hip:MetadataElement ;
+.
+
+hip:BI0008
+    hip:definedAs hip:definition.BI0008 ;
+.
+
+hip:BI0010
+    hip:definedAs hip:definition.BI0010 ;
+.
+
+hip:BI0012
+    hip:definedAs hip:definition.BI0012 ;
+.
+
+hip:BI0015
+    hip:definedAs hip:definition.BI0015 ;
+.
+
+hip:BI0016
+    hip:definedAs hip:definition.BI0016 ;
+.
+
+hip:BI0017
+    hip:definedAs hip:definition.BI0017 ;
+.
+
+hip:BI0025
+    hip:definedAs hip:definition.BI0025 ;
+.
+
+hip:BI0026
+    hip:definedAs hip:definition.BI0026 ;
+.
+
+hip:BI0028
+    hip:definedAs hip:definition.BI0028 ;
+.
+
+hip:BI0033
+    hip:definedAs hip:definition.BI0033 ;
+.
+
+hip:BI0034
+    hip:definedAs hip:definition.BI0034 ;
+.
+
+hip:BI0035
+    hip:definedAs hip:definition.BI0035 ;
+.
+
+hip:BI0042
+    hip:definedAs hip:definition.BI0042 ;
+.
+
+hip:BI0045
+    hip:definedAs hip:definition.BI0045 ;
+.
+
+hip:BI0049
+    hip:definedAs hip:definition.BI0049 ;
+.
+
+hip:BI0051
+    hip:definedAs hip:definition.BI0051 ;
+.
+
+hip:BI0059
+    hip:definedAs hip:definition.BI0059 ;
+.
+
+hip:BI0061
+    hip:definedAs hip:definition.BI0061 ;
+.
+
+hip:BI0070
+    hip:definedAs hip:definition.BI0070 ;
+.
+
+hip:BI0072
+    hip:definedAs hip:definition.BI0072 ;
+.
+
+hip:BI0073
+    hip:definedAs hip:definition.BI0073 ;
+.
+
+hip:BI0074
+    hip:definedAs hip:definition.BI0074 ;
+.
+
+hip:BI0075
+    hip:definedAs hip:definition.BI0075 ;
+.
+
+hip:CH0001
+    hip:definedAs hip:definition.CH0001 ;
+.
+
+hip:CH0002
+    hip:definedAs hip:definition.CH0002 ;
+.
+
+hip:CH0003
+    hip:definedAs hip:definition.CH0003 ;
+.
+
+hip:CH0013
+    hip:definedAs hip:definition.CH0013 ;
+.
+
+hip:CH0016
+    hip:definedAs hip:definition.CH0016 ;
+.
+
+hip:CH0018
+    hip:definedAs hip:definition.CH0018 ;
+.
+
+hip:CH0019
+    hip:definedAs hip:definition.CH0019 ;
+.
+
+hip:CH0020
+    hip:definedAs hip:definition.CH0020 ;
+.
+
+hip:CH0021
+    hip:definedAs hip:definition.CH0021 ;
+.
+
+hip:EN0002
+    hip:definedAs hip:definition.EN0002 ;
+.
+
+hip:EN0003
+    hip:definedAs hip:definition.EN0003 ;
+.
+
+hip:EN0008
+    hip:definedAs hip:definition.EN0008 ;
+.
+
+hip:EN0009
+    hip:definedAs hip:definition.EN0009 ;
+.
+
+hip:EN0014
+    hip:definedAs hip:definition.EN0014 ;
+.
+
+hip:EN0017
+    hip:definedAs hip:definition.EN0017 ;
+.
+
+hip:EN0018
+    hip:definedAs hip:definition.EN0018 ;
+.
+
+hip:EN0020
+    hip:definedAs hip:definition.EN0020 ;
+.
+
+hip:ET0001
+    hip:definedAs hip:definition.ET0001 ;
+.
+
+hip:GH0010
+    hip:definedAs hip:definition.GH0010 ;
+.
+
+hip:GH0011
+    hip:definedAs hip:definition.GH0011 ;
+.
+
+hip:GH0013
+    hip:definedAs hip:definition.GH0013 ;
+.
+
+hip:GH0030
+    hip:definedAs hip:definition.GH0030 ;
+.
+
+hip:MH0001
+    hip:definedAs hip:definition.MH0001 ;
+.
+
+hip:MH0004
+    hip:definedAs hip:definition.MH0004 ;
+.
+
+hip:MH0005
+    hip:definedAs hip:definition.MH0005 ;
+.
+
+hip:MH0006
+    hip:definedAs hip:definition.MH0006 ;
+.
+
+hip:MH0014
+    hip:definedAs hip:definition.MH0014 ;
+.
+
+hip:MH0015
+    hip:definedAs hip:definition.MH0015 ;
+.
+
+hip:MH0016
+    hip:definedAs hip:definition.MH0016 ;
+.
+
+hip:MH0030
+    hip:definedAs hip:definition.MH0030 ;
+.
+
+hip:MH0033
+    hip:definedAs hip:definition.MH0033 ;
+.
+
+hip:MH0034
+    hip:definedAs hip:definition.MH0034 ;
+.
+
+hip:MH0035
+    hip:definedAs hip:definition.MH0035 ;
+.
+
+hip:MH0040
+    hip:definedAs hip:definition.MH0040 ;
+.
+
+hip:MH0041
+    hip:definedAs hip:definition.MH0041 ;
+.
+
+hip:MH0043
+    hip:definedAs hip:definition.MH0043 ;
+.
+
+hip:MH0044
+    hip:definedAs hip:definition.MH0044 ;
+.
+
+hip:MH0045
+    hip:definedAs hip:definition.MH0045 ;
+.
+
+hip:MH0046
+    hip:definedAs hip:definition.MH0046 ;
+.
+
+hip:MH0050
+    hip:definedAs hip:definition.MH0050 ;
+.
+
+hip:MH0053
+    hip:definedAs hip:definition.MH0053 ;
+.
+
+hip:MH0054
+    hip:definedAs hip:definition.MH0054 ;
+.
+
+hip:SO0003
+    hip:definedAs hip:definition.SO0003 ;
+.
+
+hip:TL0005
+    hip:definedAs hip:definition.TL0005 ;
+.
+
+hip:TL0006
+    hip:definedAs hip:definition.TL0006 ;
+.
+
+hip:TL0008
+    hip:definedAs hip:definition.TL0008 ;
+.
+
+hip:TL0009
+    hip:definedAs hip:definition.TL0009 ;
+.
+
+hip:TL0011
+    hip:definedAs hip:definition.TL0011 ;
+.
+
+hip:TL0020
+    hip:definedAs hip:definition.TL0020 ;
+.
+
+hip:TL0021
+    hip:definedAs hip:definition.TL0021 ;
+.
+
+hip:TL0022
+    hip:definedAs hip:definition.TL0022 ;
+.
+
+hip:TL0026
+    hip:definedAs hip:definition.TL0026 ;
+.
+
+hip:TL0035
+    hip:definedAs hip:definition.TL0035 ;
+.
+
+hip:TL0046
+    hip:definedAs hip:definition.TL0046 ;
+.
+
+hip:TL0048
+    hip:definedAs hip:definition.TL0048 ;
+.
+
+hip:definition.BI0001
+    a hip:Definition ;
+    skos:definition "Harmful algal blooms result from noxious and/or toxic algae that cause direct and indirect negative impacts on aquatic ecosystems, coastal resources, and human health" ;
+.
+
+hip:definition.BI0002
+    a hip:Definition ;
+    skos:definition "An insect pest infestation is a recently detected insect pest population, including an incursion, or a sudden significant increase of an established insect, disease agents or weed population in an area leading to damage to plants in production fields, forests or natural habitats and causing substantial damage to productivity, biodiversity or natural resources" ;
+.
+
+hip:definition.BI0003
+    a hip:Definition ;
+    skos:definition "Widespread and heavy infestations of crops and natural vegetation by locusts causing significant threats to food security, livelihoods and natural habitats in multiple regions" ;
+.
+
+hip:definition.BI0004
+    a hip:Definition ;
+    skos:definition "An invasive weed is an alien species that by its establishment or spread has become injurious to plants, or that by risk analysis is shown to be potentially injurious to plants" ;
+.
+
+hip:definition.BI0005
+    a hip:Definition ;
+    skos:definition "‘Invasive species’, also known as ‘alien invasive species’, are species whose introduction, establishment and spread into new areas threaten ecosystems, habitats or other species and cause social, economic or environmental harm, or harm to human health" ;
+.
+
+hip:definition.BI0006
+    a hip:Definition ;
+    skos:definition "A snake envenomation is a potentially life-threatening disease caused by toxins in the bite of a venomous snake. Envenoming can also be caused by having venom sprayed into the eyes by certain species of snake that have the ability to spit venom as a defence measure" ;
+.
+
+hip:definition.BI0007
+    a hip:Definition ;
+    skos:definition "Human-wildlife conflict is defined as struggles that emerge when the presence or behaviour of wildlife poses an actual or perceived, direct and recurring threat to human interests or needs, leading to disagreements between groups of people and negative impacts on people and/or wildlife" ;
+.
+
+hip:definition.BI0009
+    a hip:Definition ;
+    skos:definition "The term ‘suicide cluster’ describes a situation in which more suicides than expected occur in terms of time, place, or both. It is difficult to precisely define a cluster. A suicide cluster usually includes three or more deaths; however, two suicides occurring in a specific community or setting (for example a school) in a short time period should also be taken very seriously in terms of possible links and impacts (even if the deaths are apparently unconnected), particularly in the case of young people" ;
+.
+
+hip:definition.BI0011
+    a hip:Definition ;
+    skos:definition """Foodborne microbial hazards include (but are not limited to) pathogenic bacteria, viruses, algae, protozoa, fungi, parasites, prions, toxins and other harmful metabolites of microbial origin (FAO and WHO, 2007).
+
+A human enteric virus is a virus that replicates in the gastro-intestinal tract or in the liver and is excreted in faeces and/or vomitus from humans. It is transmitted mainly by the faecal-oral route and is infectious to humans (FAO and WHO, 2012).
+
+A foodborne parasite is any parasite that can be transmitted to humans by ingesting food (FAO and WHO, 2016).""" ;
+.
+
+hip:definition.BI0013
+    a hip:Definition ;
+    skos:definition "Fungal plant disease is the occurrence of plant diseases caused by fungal agents over large areas with significant impact on crop productivity or natural habitats" ;
+.
+
+hip:definition.BI0019
+    a hip:Definition ;
+    skos:definition "Foodborne diseases are transmitted by consumption of contaminated biological food and drink (WHO, 2012). These diseases are caused by eating food contaminated with bacteria, viruses, parasites or chemical substances" ;
+.
+
+hip:definition.BI0020
+    a hip:Definition ;
+    skos:definition "Sexually transmitted diseases are infections transmitted from an infected person to an uninfected person through sexual contact" ;
+.
+
+hip:definition.BI0021
+    a hip:Definition ;
+    skos:definition "Neglected tropical diseases (NTDs) are a diverse group of communicable diseases caused by bacteria, viruses or parasites that prevail in tropical and subtropical conditions (WHO, no date). Twenty diseases and disease groups are addressed in the global roadmap for NTDs 2021–2030" ;
+.
+
+hip:definition.BI0029
+    a hip:Definition ;
+    skos:definition "Prion diseases are a family of rare progressive neurodegenerative disorders that affect both humans and animals" ;
+.
+
+hip:definition.BI0030
+    a hip:Definition ;
+    skos:definition "Hepatitis B is a vaccine-preventable disease, that is endemic and epidemic worldwide, and caused by the Hepatitis B virus (HBV). HBV can cause both acute and chronic liver disease. Chronic infection puts people at high risk of death from cirrhosis and liver cancer" ;
+.
+
+hip:definition.BI0031
+    a hip:Definition ;
+    skos:definition "Hepatitis C is a blood-borne liver disease caused by the hepatitis C virus: the virus can cause both acute and chronic hepatitis, ranging in severity from a mild illness lasting a few weeks to a serious, lifelong illness including liver cirrhosis and liver cancer. Hepatitis C is endemic and epidemic worldwide" ;
+.
+
+hip:definition.BI0032
+    a hip:Definition ;
+    skos:definition "The human immunodeficiency virus (HIV) is a viral sexually transmitted and blood-borne infection which targets the immune system, weakening people’s defences against opportunistic infections and some types of cancer. The most advanced stage of HIV infection is acquired immunodeficiency syndrome (AIDS), which can take from 2 to 15 years to develop if not treated, depending on the individual. AIDS is defined by the development of certain cancers, infections or other severe clinical manifestations" ;
+.
+
+hip:definition.BI0036
+    a hip:Definition ;
+    skos:definition "Paratyphoid fever is a systemic disease caused by the bacterium Salmonella Paratyphi usually through ingestion of contaminated food or water" ;
+.
+
+hip:definition.BI0038
+    a hip:Definition ;
+    skos:definition "Hepatitis A is an acute vaccine-preventable viral liver disease caused by the hepatitis A virus. The infection can cause mild to severe illness and is epidemic prone" ;
+.
+
+hip:definition.BI0039
+    a hip:Definition ;
+    skos:definition "Escherichia coli (E. coli) is a bacterium commonly found in the gut. Some strains can cause serious food poisoning, leading to diarrhoea and sometimes to life-threatening complications including haemolytic uraemic syndrome" ;
+.
+
+hip:definition.BI0040
+    a hip:Definition ;
+    skos:definition "Listeriosis is a foodborne infection caused by the bacterium Listeria monocytogenes which can be invasive (the more serious form of the disease) or non-invasive (the milder form of the disease). Listeriosis outbreaks occur in all countries and can be a significant public health concern" ;
+.
+
+hip:definition.BI0041
+    a hip:Definition ;
+    skos:definition "Shigellosis is an acute invasive enteric infection caused by bacteria belonging to genus Shigella" ;
+.
+
+hip:definition.BI0043
+    a hip:Definition ;
+    skos:definition "An influenza pandemic is the worldwide spread of a new influenza virus to which there is little or no pre-existing immunity in the human population" ;
+.
+
+hip:definition.BI0044
+    a hip:Definition ;
+    skos:definition "Seasonal influenza is an acute respiratory infection caused by influenza viruses which circulate in all parts of the world" ;
+.
+
+hip:definition.BI0046
+    a hip:Definition ;
+    skos:definition "Leptospirosis is an infectious disease caused by pathogenic Spirochaetes of the genus Leptospira. These bacteria called leptospires affect both humans and animals. Humans become infected through direct contact with the urine of infected animals or with a urinecontaminated environment. It is a zoonosis. Human-to-human transmission occurs only very rarely" ;
+.
+
+hip:definition.BI0047
+    a hip:Definition ;
+    skos:definition "Plague is an acute febrile infectious disease caused by the zoonotic bacteria Yersinia pestis" ;
+.
+
+hip:definition.BI0048
+    a hip:Definition ;
+    skos:definition "Leprosy is a curable infectious disease, endemic in many countries, caused by the bacterium Mycobacterium leprae (M. leprae). It mainly affects the skin, peripheral nerves, mucosa of the upper respiratory tract and eyes. Untreated, it can lead to permanent disability" ;
+.
+
+hip:definition.BI0052
+    a hip:Definition ;
+    skos:definition "Measles is a highly contagious, serious disease caused by a virus from the paramyxovirus family. Transmission occurs through direct contact, droplet spread, and airborne spread. The virus initially infects the respiratory tract, then spreads throughout the body" ;
+.
+
+hip:definition.BI0053
+    a hip:Definition ;
+    skos:definition "Meningococcal meningitis is a bacterial form of meningitis, a serious infection of the thin lining that surrounds the brain and spinal cord, that is caused by the bacterium Neisseria meningitidis. Meningococcal meningitis has the potential to cause large-scale epidemics and is observed worldwide" ;
+.
+
+hip:definition.BI0054
+    a hip:Definition ;
+    skos:definition "Pertussis is a highly contagious disease of the respiratory tract caused by the bacterium Bordetella pertussis" ;
+.
+
+hip:definition.BI0055
+    a hip:Definition ;
+    skos:definition "Polio (human) is a highly infectious viral disease which mainly affects young children" ;
+.
+
+hip:definition.BI0056
+    a hip:Definition ;
+    skos:definition "Smallpox is an acute contagious disease caused by the variola virus" ;
+.
+
+hip:definition.BI0060
+    a hip:Definition ;
+    skos:definition "Malaria is a life-threatening disease caused by parasites that are transmitted to people through the bites of infected female Anopheles mosquitoes. It is preventable and curable. In 2018, there were an estimated 228 million cases of malaria worldwide and the estimated number of malaria deaths stood at 405,000" ;
+.
+
+hip:definition.BI0062
+    a hip:Definition ;
+    skos:definition "Ebola virus disease (EVD) is a rare but severe zoonotic viral infectious disease caused by the Ebola virus. It can lead to haemorrhagic fever and is often fatal in humans. EVD can trigger epidemics with high casefatality rates" ;
+.
+
+hip:definition.BI0063
+    a hip:Definition ;
+    skos:definition "Lassa fever is a zoonotic disease associated with acute and potentially fatal haemorrhagic illness caused by Lassa virus. It is associated with epidemics particularly where it is endemic in Benin, Ghana, Guinea, Liberia, Mali, Sierra Leone, and Nigeria" ;
+.
+
+hip:definition.BI0065
+    a hip:Definition ;
+    skos:definition "Middle East respiratory syndrome (MERS) is a viral respiratory disease caused by MERS-Corona Virus (MERS-CoV)" ;
+.
+
+hip:definition.BI0066
+    a hip:Definition ;
+    skos:definition "Monkeypox is a viral zoonotic disease that has symptoms similar to those of smallpox" ;
+.
+
+hip:definition.BI0067
+    a hip:Definition ;
+    skos:definition "Rabies is a vaccine preventable zoonotic disease causing acute encephalitis which can progress towards coma and death typically within 7 to 10 days of the first signs if no intensive care is instituted. It is a disease of public health concern" ;
+.
+
+hip:definition.BI0068
+    a hip:Definition ;
+    skos:definition "Severe acute respiratory syndrome (SARS) is a viral respiratory illness caused by a coronavirus called SARS-associated coronavirus (SARSCoV)" ;
+.
+
+hip:definition.BI0069
+    a hip:Definition ;
+    skos:definition "Rotaviruses are the most common cause of severe diarrhoeal disease in young children throughout the world. According to WHO estimates in 2013 about 215,000 children aged under 5 years die each year from vaccine-preventable rotavirus infections; the vast majority of these children live in low-income countries" ;
+.
+
+hip:definition.BI0076
+    a hip:Definition ;
+    skos:definition "Foot-and-mouth disease is caused by a virus of the family Picornaviridae, genus Aphthovirus. It is a highly contagious and economically important disease of cloven-hoofed domestic animals (cattle, buffaloes, pigs, sheep, goats) and wild animals" ;
+.
+
+hip:definition.BI0077
+    a hip:Definition ;
+    skos:definition "Lumpy skin disease is a vector-borne pox disease of domestic cattle and Asian water buffalo and is characterised by the appearance of skin nodules on all body surface including the udder" ;
+.
+
+hip:definition.BI0078
+    a hip:Definition ;
+    skos:definition "New World screwworms are a type of blow fly larvae (maggots) that can infest livestock and other warm blooded animals, including people. They most often enter an animal through an open wound and feed on the animal’s living flesh. If not treated, infestations can be fatal" ;
+.
+
+hip:definition.BI0079
+    a hip:Definition ;
+    skos:definition "Newcastle disease is an infectious disease of birds caused by Newcastle disease virus, of the Paramyxovirdae family. The disease is seen mainly in chickens, but many bird species and even reptiles and mammals are susceptible to infection" ;
+.
+
+hip:definition.BI0080
+    a hip:Definition ;
+    skos:definition "Peste des petits ruminants is a highly contagious and devastating disease of goats and sheep. The causative agent, Peste des petits ruminants virus is a member of the genus Morbillivirus, Family Paramyxoviridae and Order Mononegavirales" ;
+.
+
+hip:definition.BI0081
+    a hip:Definition ;
+    skos:definition "Q fever is a widespread zoonosis caused by the bacterium Coxiella burnetii. The respiratory tract is the most common route of infection, which occurs by inhalation of contaminated dust and spray shed from infected animals. Livestock, more specifically dairy goats and cows are considered as the major ‘source’ for human infections; dairy products from infected goats or cows are also an important source of infection" ;
+.
+
+hip:definition.BI0082
+    a hip:Definition ;
+    skos:definition "Rift Valley fever (RVF) is an acute haemorrhagic viral disease, affecting small and large ruminants and camels. RVF virus is a member of the Phlebovirus genus. The disease causes high mortality especially in new borne and mass abortions in pregnant animals. Humans become infected from contact with tissues/blood of infected animals including abortive material and through mosquito bites. Disease in humans presents as influenza like illness, haemorrhagic fever, encephalitis and occasionally death" ;
+.
+
+hip:definition.BI0085
+    a hip:Definition ;
+    skos:definition "Rinderpest was a disease caused by paramyxovirus in the genus Morbillivirus. It was most commonly observed in domestic cattle and buffaloes. The last confirmed outbreak of rinderpest was in 2001 and the disease was declared to have been eradicated globally in 2011 by the Food and Agriculture Organization of the United Nations (FAO) and the World Organisation for Animal Health (OIE). Rinderpest was a highly contagious viral disease of animals that, throughout history, has resulted in the mortality of hundreds of millions of livestock and has caused significant disruption and damage to agricultural supply chains throughout the world. Rinderpest is the first animal disease eradicated worldwide. The last confirmed outbreak of rinderpest was in 2001. Rinderpest was declared as eradicated by 2011. The Rinderpest Secretariat (FAO and OIE joint activity) is engaged in safeguarding the global freedom, similar to what has been done for smallpox by the World Health Organization" ;
+.
+
+hip:definition.BI0087
+    a hip:Definition ;
+    skos:definition "Shrimp acute hepatopancreatic necrosis disease (AHPND) is caused by virulent strains of Vibrio parahaemolyticus and related Vibrio species. AHPND-associated mortalities occur early in the production cycle, usually within 30 to 35 days of stocking, and because of this AHPND was initially referred to as early mortality syndrome" ;
+.
+
+hip:definition.BI0088
+    a hip:Definition ;
+    skos:definition "There are a number of causal agents recognised for oyster diseases. Examples of major oyster diseases and their causal protozoan agents are: bonamiosis (Bonamia exitiosa, B. ostreae); marteiliosis (Marteilia refringens); perkinsosis (Perkinsus marinus, P. olseni). These oyster diseases are notifiable OIE-listed diseases and occur worldwide" ;
+.
+
+hip:definition.CH0005
+    a hip:Definition ;
+    skos:definition "Lead is a naturally occurring highly toxic heavy metal. Its widespread use has caused extensive environmental contamination and health problems in many parts of the world. It is a cumulative toxicant that affects multiple body systems, including the neurological, haematological, gastrointestinal, cardiovascular and renal systems. Children are particularly vulnerable to the neurotoxic effects of lead, and even relatively low levels of exposure can cause serious and, in some cases, irreversible neurological damage (WHO, 2010)." ;
+.
+
+hip:definition.CH0006
+    a hip:Definition ;
+    skos:definition "Mercury is a naturally occurring element that is found in air, water and soil. Exposure to mercury – even small amounts – may cause serious health problems and is a threat to the development of the foetus in utero and for children early in life (WHO, 2017)." ;
+.
+
+hip:definition.CH0007
+    a hip:Definition ;
+    skos:definition "A contaminant in food and feed is defined as any substance not intentionally added to food or feed for food-producing animals, which is present in such food or feed as a result of the production (including operations carried out in crop husbandry, animal husbandry and veterinary medicine), manufacture, processing, preparation, treatment, packing, packaging, transport or storage, or as a result of environmental contamination. Note: The term includes toxins, such as moulds, but does not include insect fragments, rodent hairs and other extraneous matter (FAO and WHO, 2019)." ;
+.
+
+hip:definition.CH0008
+    a hip:Definition ;
+    skos:definition """Pesticide means any substance, or mixture of substances of chemical or biological ingredients intended for repelling, destroying or controlling any pest, or regulating plant growth. Pesticides are inherently toxic, and among them, a small number of Highly Hazardous Pesticides, cause disproportionate harm to the environment and human health. The Food and Agriculture Organization (FAO) and the World Health Organization (WHO) Guidelines on Highly Hazardous pesticides (UNEP, 2021) adopted the following definition:
+
+“Highly Hazardous Pesticides means pesticides that are acknowledged to present particularly high levels of acute or chronic hazards to health or environment according to internationally accepted classification systems such as WHO or Global Harmonized System (GHS) or their listing in relevant binding international agreements or conventions. In addition, pesticides that appear to cause severe or irreversible harm to health or the environment under conditions of use in a country may be considered to be and treated as highly hazardous.”""" ;
+.
+
+hip:definition.CH0009
+    a hip:Definition ;
+    skos:definition "Pesticide residue means any specified substance in food, agricultural commodities, or animal feed resulting from the use of a pesticide. The term includes any derivatives of a pesticide, such as conversion products, metabolites, reaction products, and impurities considered to be of toxicological significance (FAO and WHO, no date, 2019)." ;
+.
+
+hip:definition.CH0010
+    a hip:Definition ;
+    skos:definition "Hazardous pesticide contamination in soils often results from improper storage of (obsolete) agrochemicals, as a result of which pesticides are spilled in the surroundings of the storage site, where they seep into the soil or are dispersed by wind. In some cases, pesticide spillage has been ongoing for many years. Such spillage may cause serious soil or groundwater contamination. In addition, highly toxic and persistent compounds have been used in agriculture for decades to control pests and diseases, which are proven to cause harm to non-target species. Although international agreements are put in place to regulate the production and use of those highly toxic and persistent compounds they will still remain in soils for several more decades. Moreover, in some countries, the international agreements are not yet being implemented or fully implemented, and therefore toxic pesticides are still being used. When soil and groundwater are contaminated, crops, livestock and drinking water may become affected and, when they are consumed by people, health risks may occur (FAO, 2000)." ;
+.
+
+hip:definition.CH0011
+    a hip:Definition ;
+    skos:definition "Insecticides are chemicals used to control insects by killing them (CDC, 2019)." ;
+.
+
+hip:definition.CH0014
+    a hip:Definition ;
+    skos:definition "Microplastics are small plastic pieces less than five millimetres in length which can be harmful to the environment especially marine life. They originate from a variety of sources, including larger plastic debris that degrades into progressively smaller pieces (adapted from UNEP, 2016 and NOAA, no date)." ;
+.
+
+hip:definition.CH0015
+    a hip:Definition ;
+    skos:definition "Phosphine (PH₃) is a colourless, flammable, and explosive gas at room temperature. The major uses of phosphine are as a rodenticide and fumigant for agricultural products and in the manufacture of semiconductors for the electronics industry. Exposure to low doses causes non-specific symptoms, such as nausea, vomiting, stomach pain, diarrhoea, thirst, muscle pain, difficulty breathing and fluid in the lungs. Exposure to higher doses may cause more severe effects, even death (adapted from PHE, 2017 and CDC, 2019)." ;
+.
+
+hip:definition.CH0017
+    a hip:Definition ;
+    skos:definition "Oil pollution includes the accidental or deliberate, operational spills of oil from ships, especially tankers, offshore platforms and pipelines (Global Marine Oil Pollution Information Gateway, no date)." ;
+.
+
+hip:definition.CH0022
+    a hip:Definition ;
+    skos:definition "Fluoride is a naturally occurring mineral to which the public are often exposed via drinking-water. Depending on dose intake fluoride may have both beneficial effects (reducing the incidence of dental caries) or negative effects (causing tooth enamel and skeletal fluorosis following prolonged high exposure) (adapted from NCBI, 2020 and WHO, no date)." ;
+.
+
+hip:definition.CH0023
+    a hip:Definition ;
+    skos:definition "Methanol is a colourless fairly volatile liquid with a faintly sweet pungent odour similar to ethyl alcohol. Outbreaks of methanol poisoning arise from the consumption of adulterated counterfeit or informally produced spirit drinks (adapted from NCBI, 2020 and WHO, 2014)." ;
+.
+
+hip:definition.CH0024
+    a hip:Definition ;
+    skos:definition "Substandard and falsified medical products are defined as those that may cause harm to patients and fail to treat the diseases for which they were intended (WHO, 2018)." ;
+.
+
+hip:definition.CH0025
+    a hip:Definition ;
+    skos:definition "Marine toxins (biotoxins) are naturally occurring chemicals, mostly caused by certain types of toxic algae, but also by bacteria. These toxins can accumulate in fish and shellfish and present a human health hazard (WHO, no date). When people consume such contaminated aquatic products, depending on the toxins, they can evoke a variety of gastrointestinal and neurological illnesses (paralytic shellfish poisoning, amnesic shellfish poisoning, diarrhoeic shellfish poisoning, neurotoxic shellfish poisoning, azaspiracid shellfish poisoning and ciguatera poisoning)." ;
+.
+
+hip:definition.CHO012
+    a hip:Definition ;
+    skos:definition "Fungicides are chemicals that kill or slow the growth of fungi and their spores. They can be used on plants or other surfaces where mould or mildew grow (CDC, 2019)." ;
+.
+
+hip:definition.EN0001
+    a hip:Definition ;
+    skos:definition "Household air pollution is one of the leading causes of disease and premature death and is associated with inefficient cooking practices using polluting stoves paired with solid fuels and kerosene (WHO, 2018)." ;
+.
+
+hip:definition.EN0004
+    a hip:Definition ;
+    skos:definition """Land degradation means reduction or loss, in arid, semi-arid and dry subhumid areas, of the biological or economic productivity and complexity of rainfed cropland, irrigated cropland or range, pasture, forest and woodlands resulting from land uses or from a process or combination of processes, including processes arising from human activities and habitation patterns such as: soil erosion caused by wind and/or water; deterioration of the physical, chemical and biological or economic properties of soil; and long-term loss of natural vegetation (UNCCD, 1993).
+
+Alternative Definition: Land degradation is the reduction in the capability of the land to produce benefits from a particular land use under a specified form of land management (FAO, 1999).
+
+Alternative Definition: Land degradation is a negative trend in land condition, caused by direct or indirect human-induced processes including anthropogenic climate change, expressed as long-term reduction or loss of at least one of the following: biological productivity, ecological integrity or value to humans. [Note: This definition applies to forest and non-forest land. Changes in land condition resulting solely from natural processes (such as volcanic eruptions) are not considered to be land degradation. Reduction of biological productivity or ecological integrity or value to humans can constitute degradation, but any one of these changes need not necessarily be considered degradation.] (Olsson et al., 2019).""" ;
+.
+
+hip:definition.EN0005
+    a hip:Definition ;
+    skos:definition "Soil degradation is defined as a change in soil health status resulting in a diminished capacity of the ecosystem to provide goods and services for its beneficiaries (FAO, 2020)." ;
+.
+
+hip:definition.EN0006
+    a hip:Definition ;
+    skos:definition "Nonpoint sources of pollution refer to pollution sources that are diffused and without a single point of origin or not introduced into a receiving freshwater or maritime environment from a specific outlet. The pollutants are generally carried off the land by storm-water run-off. The commonly used categories for nonpoint sources are agriculture, forestry, urban areas, mining, construction, dams and channels, land disposal and saltwater intrusion (UN data, no date)." ;
+.
+
+hip:definition.EN0007
+    a hip:Definition ;
+    skos:definition """Saline soils are those which have an electrical conductivity of the saturation soil extract of more than 4 dS/m at 25°C (Richards, 1954). This value is generally used worldwide although the terminology committee of the Soil Science Society of America has lowered the boundary between saline and non-saline soils to 2 dS/m in the saturation extract (FAO, 1988).
+
+Note: dS/m = decisiemens per metre this is equivalent to the measurement of electrical conductivity of the salinity which can also be described as millimho per centimetre, hence 1 dS/m = 1 mmho/cm. Once the dS/m is known this can be converted to either mg/L or parts per million (ppm) (University of California, 2020).""" ;
+.
+
+hip:definition.EN0010
+    a hip:Definition ;
+    skos:definition "Forest declines and diebacks are episodic events characterised by premature, progressive loss of tree and stand vigour and health over a given period without obvious evidence of a single clearly identifiable causal factor such as physical disturbance or attack by primary disease or insect (Ciesla and Donaubauer, 1994)." ;
+.
+
+hip:definition.EN0011
+    a hip:Definition ;
+    skos:definition "Forest disturbance is the damage caused by any factor (biotic or abiotic) that adversely affects the vigour and productivity of the forest and which is not a direct result of human activities. It includes disturbance by insect pests, diseases, severe weather events and fires (FAO, 2018, 2020)." ;
+.
+
+hip:definition.EN0012
+    a hip:Definition ;
+    skos:definition "Forest invasive species are any species that are non-native to a particular forest ecosystem and whose introduction and spread causes, or are likely to cause, socio-cultural, economic or environmental harm or harm to human health (adapted from FAO, 2015)." ;
+.
+
+hip:definition.EN0013
+    a hip:Definition ;
+    skos:definition "Wildfires are any unplanned or uncontrolled fire affecting natural, cultural, industrial and residential landscapes (adapted from FAO, 2010)." ;
+.
+
+hip:definition.EN0015
+    a hip:Definition ;
+    skos:definition "Mangroves and the destruction of mangrove habitat is caused by both human and natural causes. Human activities in the form of farming, aquaculture, urban development and natural stressors such as erosion and extreme weather have driven mangrove habitat loss. The hazard of loss of mangroves and their ecosystem services has devastating socioeconomic and environmental consequences for coastal communities, especially in those areas with low mangrove diversity and low mangrove area (adapted from Ellison et al., 1996; Polidoro et al., 2010; and Goldberg, 2020)." ;
+.
+
+hip:definition.EN0016
+    a hip:Definition ;
+    skos:definition "Wetland loss/degradation is a negative trend in wetland condition, caused by physical or direct/indirect human-induced processes expressed as long-term reduction or loss of at least one of the following: biological productivity, ecological role or value to humans (Craig et al., 1979; Olsson et al., 2019). Where wetlands are defined as areas of marsh, fen, peatland or water, whether natural or artificial, permanent or temporary, with water that is static or flowing, fresh, brackish or salt, including areas of marine water the depth of which at low tide does not exceed six metres (Ramsar Convention 1971: Article 1.1). Wetlands may incorporate riparian and coastal zones adjacent to the wetlands, and islands or bodies of marine water deeper than six metres at low tide lying within the wetlands (Ramsar Convention 1971: Article 2.1)." ;
+.
+
+hip:definition.EN0019
+    a hip:Definition ;
+    skos:definition "Soil erosion is defined as the accelerated removal of topsoil from the land surface through water, wind and tillage (FAO, 2020)." ;
+.
+
+hip:definition.EN0021
+    a hip:Definition ;
+    skos:definition "Permafrost is defined as the ground that remains frozen under 0°C for a minimum of two consecutive years. Permafrost loss, also known as permafrost thaw is the progressive loss of ground ice in permafrost, usually due to input of heat. Thaw can occur over decades to centuries over the entire depth of permafrost ground, with impacts occurring while thaw progresses. During thaw, temperature fluctuations are subdued because energy is transferred by phase change between ice and water. After the transition from permafrost to non-permafrost, ground can be described as thawed (IPCC, 2019)." ;
+.
+
+hip:definition.EN0022
+    a hip:Definition ;
+    skos:definition "Sand mining (extraction) is defined as the removal of primary (virgin) natural sand and sand resources (mineral sands and aggregates) from the natural environment (terrestrial, riverine, coastal, or marine) for extracting valuable minerals, metals, crushed stone, sand and gravel for subsequent processing (UNEP, 2019)." ;
+.
+
+hip:definition.EN0023
+    a hip:Definition ;
+    skos:definition "Sea-level change (sea-level rise / sea-level fall) is a change to the height of sea level, both globally and locally (relative sea-level change) at seasonal, annual, or longer time scales due to: a change in ocean volume as a result of a change in the mass of water in the ocean (e.g., due to melt of glaciers and ice sheets); to changes in ocean volume as a result of changes in ocean water density (e.g., expansion under warmer conditions), and to changes in the shape of the ocean basins and changes in the Earth’s gravitational and rotational fields, and local subsidence or uplift of the land (IPCC, 2019)." ;
+.
+
+hip:definition.EN0024
+    a hip:Definition ;
+    skos:definition "Eutrophication is the overabundance of nutrients in a body of water that results in harmful algal blooms, fish kills, and in some cases ecosystem collapse. It is a process driven by enrichment of water by nutrients, particularly compounds of nitrogen and/or phosphorus, leading to increased growth, primary production and biomass of algae; changes in the balance of nutrients causing changes to the balance of organisms; and water quality degradation (NOAA, 2007; UNEP, 2015)." ;
+.
+
+hip:definition.ET0002
+    a hip:Definition ;
+    skos:definition "A geomagnetic storm is a worldwide disturbance of the Earth’s magnetic field induced by a solar storm" ;
+.
+
+hip:definition.ET0003
+    a hip:Definition ;
+    skos:definition "UV radiation is the portion of the electromagnetic (EM) spectrum between X-rays and visible light. Depending on its wavelength, UV radiation can penetrate the ozone layer and affect human health in different ways (Government of Canada, 2019)." ;
+.
+
+hip:definition.ET0004
+    a hip:Definition ;
+    skos:definition "A meteorite is an object that survives a trip through Earth’s atmosphere and hits the ground (adapted from NASA, no date)." ;
+.
+
+hip:definition.ET0005
+    a hip:Definition ;
+    skos:definition """An ionospheric storm is defined as turbulence in the F region of the ionosphere, usually due to a sudden burst of radiation from the Sun (WMO, 1992).
+
+NB. The F region is the highest region of the ionosphere, at altitudes greater than 160 km (100 miles).""" ;
+.
+
+hip:definition.ET0006
+    a hip:Definition ;
+    skos:definition "Radio blackout is a prolonged period of fading or faded radio communications, primarily in the high frequency range from ionospheric changes because of increased solar activity, in particular solar flares of C-class level or higher on the sunlit side of Earth" ;
+.
+
+hip:definition.ET0007
+    a hip:Definition ;
+    skos:definition "Solar radiation storms occur when large quantities of charged particles, primarily protons, accelerated by eruptive processes at or near the Sun reach the near-Earth environment" ;
+.
+
+hip:definition.ET0008
+    a hip:Definition ;
+    skos:definition "A space accident is any accident involving space objects that causes damage" ;
+.
+
+hip:definition.ET0009
+    a hip:Definition ;
+    skos:definition "A near-Earth object (NEO) is an asteroid or comet whose trajectory brings it to within 1.3 astronomical units of the Sun and hence within 0.3 astronomical units, or approximately 45 million kilometres, of the Earth’s orbit" ;
+.
+
+hip:definition.GH0001
+    a hip:Definition ;
+    skos:definition "Earthquake is a term used to describe both sudden slip on a fault, and the resulting ground shaking and radiated seismic energy caused by the slip, or by volcanic or magmatic activity, or other sudden stress changes in the Earth" ;
+.
+
+hip:definition.GH0002
+    a hip:Definition ;
+    skos:definition "Earthquake ground shaking is the movement of the Earth’s surface produced by seismic waves that are generated when an earthquake occurs." ;
+.
+
+hip:definition.GH0003
+    a hip:Definition ;
+    skos:definition "Soil liquefaction occurs when soil is transformed from a solid to a liquid state as a result of increased pore pressure and reduced effective stress. It is typically caused by rapid loading of the soil during earthquake shaking (AGI, 2017)." ;
+.
+
+hip:definition.GH0004
+    a hip:Definition ;
+    skos:definition "Earthquake surface ruptures and fissures are localised ground displacements that develop during and immediately after an earthquake, where the fault which hosted the earthquake intersects the Earth’s surface. Surface ruptures represent the upward continuation of fault slip at depth, while fissures are smaller displacements, or more distributed deformation in and around the rupture area (adapted from USGS, no date and PNSN, no date). Tectonic uplift and subsidence are the distributed vertical permanent ground deformations (warping) that result from displacement on a dipping (inclined) fault (Styron, 2019)." ;
+.
+
+hip:definition.GH0005
+    a hip:Definition ;
+    skos:definition "Tectonic uplift and subsidence are the distributed vertical permanent ground deformations (warping) that result from earthquake displacements on a dipping (inclined) fault (Styron, 2019). This includes changes to the shoreline as a result of uplift and subsidence." ;
+.
+
+hip:definition.GH0006
+    a hip:Definition ;
+    skos:definition "Tsunami is the Japanese term meaning wave (‘nami’) in a harbour (‘tsu’). It is a series of travelling waves of extremely long length and period, usually generated by disturbances associated with earthquakes occurring below or near the ocean floor (IOC, 2019)." ;
+.
+
+hip:definition.GH0007
+    a hip:Definition ;
+    skos:definition "Landslide is the downslope movement of soil, rock and organic materials under the effects of gravity, which occurs when the gravitational driving forces exceed the frictional resistance of the material resisting on the slope. Landslides could be terrestrial or submarine (Varnes, 1978)." ;
+.
+
+hip:definition.GH0008
+    a hip:Definition ;
+    skos:definition "Ground gases generated in the ground from magma (molten or semimolten natural material derived from the melting of land or oceanic crust) include carbon dioxide, sulphur dioxide, hydrogen sulphide and hydrogen halides (adapted from IVHHN, 2020 and USGS, no date)." ;
+.
+
+hip:definition.GH0009
+    a hip:Definition ;
+    skos:definition "A lava flow or lava dome is a body of lava that forms during an eruption, or main eruptive episode. Lava flows are outpourings of fluid, relatively low-viscosity molten rock, whereas a lava dome is a pile of relatively viscous lava that cannot flow far from the vent (Calder et al., 2015; Kilburn, 2015)." ;
+.
+
+hip:definition.GH0012
+    a hip:Definition ;
+    skos:definition "Pyroclastic density currents are hot, fast-moving mixtures of volcanic particles and gas that flow according to their density relative to the surrounding medium and the Earth’s gravity. They typically originate from the gravitational collapse of explosive eruption columns, lava domes or lava-flow fronts, and from explosive lateral blasts (adapted from Branney and Kokelaar, 2002 and Cole et al., 2015)." ;
+.
+
+hip:definition.GH0014
+    a hip:Definition ;
+    skos:definition "A landslide is the downslope movement of soil, rock and organic materials under the effects of gravity, which occurs when the gravitational driving forces exceed the frictional resistance of the material resisting on the slope. Landslides could be terrestrial or submarine (Varnes, 1978)." ;
+.
+
+hip:definition.GH0015
+    a hip:Definition ;
+    skos:definition """Ground shaking is the movement of the Earth’s surface from earthquakes. Ground shaking is produced by waves that travel through the earth and along its surface (USGS, no date).
+
+A volcanic earthquake is any earthquake that results from tectonic forces which occur in conjunction with volcanic activity (UN-SPIDER, no date).""" ;
+.
+
+hip:definition.GH0016
+    a hip:Definition ;
+    skos:definition "Volcanic gas includes any gas-phase substance that is emitted by volcanic or volcanic-geothermal activity. Volcanic aerosols include liquid or solid particles that are small enough to be suspended in the air, and that are emitted by volcanic or volcanic-geothermal activity (adapted from Baxter and Horwell, 2015, Fischer and Chiodini 2015, and Williams- Jones and Rymer 2015)." ;
+.
+
+hip:definition.GH0017
+    a hip:Definition ;
+    skos:definition "Volcano tsunamis (pronounced soo-ná-mees), are a series of waves created when water surrounding a volcano is displaced following an eruption, a landslide, or failure of a volcanic edifice into surrounding water. If the generating mechanism is large enough, the waves can be significant on local, regional or even transoceanic scales (Day, 2015)." ;
+.
+
+hip:definition.GH0018
+    a hip:Definition ;
+    skos:definition "Volcanic lightning is an electrical discharge caused by a volcanic eruption. It is typically associated with ash-rich eruption plumes but can also arise from a range of volcanic processes including ground-hugging ash flows and lava-ocean entry (adapted from Mather and Harrison, 2006; Behnke and McNutt, 2014; and McNutt and Thomas, 2015)." ;
+.
+
+hip:definition.GH0019
+    a hip:Definition ;
+    skos:definition "Urban fires are fire involving buildings or structures in cities or towns with potential to spread to adjoining structures. Triggers of urban fires are numerous, from human actions (e.g., knocking over a candle) and technological triggers (e.g., power surge overloading appliances), to natural triggers (e.g., wildland fires interacting with urban areas). Triggers from volcanic eruptions include lava flows, pyroclastic density currents, tephra, and ground shaking (adapted from Baxter et al., 2005 and ISO, 2020)." ;
+.
+
+hip:definition.GH0020
+    a hip:Definition ;
+    skos:definition "Volcanic uplift and subsidence are deformations of the ground associated with volcanic unrest and eruptions (Dzurisin, 2007)." ;
+.
+
+hip:definition.GH0021
+    a hip:Definition ;
+.
+
+hip:definition.GH0022
+    a hip:Definition ;
+    skos:definition "Liquefaction is the term applied to the loss of strength experienced in loosely packed, saturated or close to saturated sediments at or near the ground surface in response to strong ground shaking, such as earthquakes, cyclic loading, and vibration from machinery, or due to the development of excess pore pressure resulting from a change in head or confining pressures. The loss of strength causes the soil to behave like a viscous fluid, sometimes referred to as ‘running sand’, until the excess pore pressure returns to hydrostatic (USGS, no date)." ;
+.
+
+hip:definition.GH0023
+    a hip:Definition ;
+    skos:definition "Ground fissures form in response to tensional stresses, most commonly in unconsolidated sediment, but also in rock (Arizona Geological Survey, 2020)." ;
+.
+
+hip:definition.GH0024
+    a hip:Definition ;
+    skos:definition "Subsidence is a lowering or collapse of the ground (BGS, 2020). Uplift is the converse." ;
+.
+
+hip:definition.GH0025
+    a hip:Definition ;
+    skos:definition "Subsidence is a lowering or collapse of the ground, caused by various factors, including groundwater lowering, sub-surface mining or tunnelling, consolidation, sinkholes, or changes in moisture content in expansive soils. Shrink-swell is the term applied to the behaviour of expansive soils, which are a group of soils that exhibit volumetric change in response to changes in moisture content, such that they shrink in response to desiccation and swell by hydration, resulting in ground subsidence and ground heave respectively (BGS, 2020)." ;
+.
+
+hip:definition.GH0026
+    a hip:Definition ;
+    skos:definition "A sinkhole is a closed depression in karst (a landscape resulting from the dissolution of soluble rock) by current or palaeo internal drainage, also known as a doline. This is one of several hazards that result in subsidence, i.e., lowering or collapse of the ground (adapted from USGS, no date; and BGS, no date)." ;
+.
+
+hip:definition.GH0027
+    a hip:Definition ;
+    skos:definition "Ground gases that result from material decay (natural or anthropogenic) typically include radon, methane, carbon dioxide, hydrogen sulphide, but may also include the break down products of other compounds, such as nitrogen, alcohols, alkanes, cycloalkanes and alkenes, aromatic hydrocarbons (monocyclic or polycyclic); esters and ethers, as well as halogenated compounds and organosulphur. Ground gases derived from magma (molten or semi-molten natural material derived from the melting of land or oceanic crust) include carbon dioxide, sulphur dioxide, hydrogen sulphide and hydrogen halides. Ground gases are gases released in combination with water vapour and particulate matter during volcanogenic events, or via fumaroles, and hydrothermal systems (adapted from NHBC (UK), 2007; IVHHN, 2020; US EPA, no date; and USGS, no date)." ;
+.
+
+hip:definition.GH0028
+    a hip:Definition ;
+    skos:definition "Riverbank erosion is the removal of material from the banks of rivers when flowing water forces exceed bank resisting forces by the soil and vegetation, for example, when river levels are sufficiently high, primarily due to fluvial energy and atmospheric processes and secondarily because of the resultant geotechnical instability and consequential riverbank failure. Riverbank failure can also occur as a consequence of Earth hazards, such as volcanos and earthquakes (USDA, no date)." ;
+.
+
+hip:definition.GH0029
+    a hip:Definition ;
+    skos:definition "Sand encroachment occurs generally in arid to semi-arid regions when grains of sand are carried by winds and form sandy accumulation on coasts, along water courses and on cultivated or uncultivated land. As the accumulations of sand (dunes) move, they bury towns, roads, oases, crops, market gardens, irrigation channels and dams, thus causing major material and socioeconomic damage (FAO, 2010)." ;
+.
+
+hip:definition.GH0031
+    a hip:Definition ;
+    skos:definition "A submarine landslide is a downslope movement of sediment or rock under the effect of gravity, which occurs when the stresses acting downslope exceed the available strength of the sediment on the slope (Lee et al., 2007)." ;
+.
+
+hip:definition.GH0032
+    a hip:Definition ;
+    skos:definition "Rockfall is a fragment of rock (a block) detached by sliding, toppling, or falling, that falls along a vertical or sub-vertical cliff, and proceeds down slope by bouncing and flying along ballistic trajectories or by rolling on talus or debris slopes (Highland and Bobrowsky, 2008)." ;
+.
+
+hip:definition.GH0033
+    a hip:Definition ;
+.
+
+hip:definition.GH0034
+    a hip:Definition ;
+    skos:definition "Rock avalanches are a translational form of mass movement where the transported material is dry rock that is fragmented before or during slope failure. They are rapid with long runouts and large volumes and often involve the entrainment of slope material, commonly therefore, giving rise to debris slides or flows. The motion of rock avalanches is massive such that the bulk of the rock fragments move together as a largely coherent mass (adapted from Collins, 2014 and USGS, no date)." ;
+.
+
+hip:definition.MH0002
+    a hip:Definition ;
+    skos:definition "Lightning is the luminous manifestation accompanying a sudden electrical discharge which takes place from or inside a cloud or, less often, from high structures on the ground or from mountains" ;
+.
+
+hip:definition.MH0003
+    a hip:Definition ;
+    skos:definition "A thunderstorm is defined as one or more sudden electrical discharges, manifested by a flash of light (lightning) and a sharp or rumbling sound (thunder)" ;
+.
+
+hip:definition.MH0007
+    a hip:Definition ;
+    skos:definition "A fluvial flood is a rise, usually brief, in the water level of a stream or water body to a peak from which the water level recedes at a slower rate" ;
+.
+
+hip:definition.MH0008
+    a hip:Definition ;
+    skos:definition "A groundwater flood is the emergence of groundwater at the ground surface away from perennial river channels or the rising of groundwater into man-made ground, under conditions where the ‘normal’ ranges of groundwater level and groundwater flow are exceeded" ;
+.
+
+hip:definition.MH0009
+    a hip:Definition ;
+    skos:definition """An ice jam flood including debris is defined as an accumulation of shuga including ice cakes, below ice cover. It is broken ice in a river which causes a narrowing of the river channel, a rise in water level and local floods (WMO, 2012).
+
+Shuga is defined as accumulation of spongy white ice lumps, a few centimetres across, formed from grease ice or slush, and sometimes from anchor ice rising to the surface (WMO, 2012).""" ;
+.
+
+hip:definition.MH0010
+    a hip:Definition ;
+    skos:definition "A ponding flood is a flood which results from rainwater ponding at or near the point where it falls because it is falling faster than the drainage system (natural or man-made) can carry it away" ;
+.
+
+hip:definition.MH0011
+    a hip:Definition ;
+    skos:definition "A snowmelt flood is a significant flood rise in a river caused by the melting of snowpack accumulated during the winter" ;
+.
+
+hip:definition.MH0012
+    a hip:Definition ;
+    skos:definition "Surface water flooding is that part of the rain which remains on the ground surface during rain and either runs off or infiltrates after the rain ends, not including depression storage" ;
+.
+
+hip:definition.MH0013
+    a hip:Definition ;
+    skos:definition "A ‘glacial lake outburst flood’ is a phrase used to describe a sudden release of a significant amount of water retained in a glacial lake, irrespective of the cause" ;
+.
+
+hip:definition.MH0017
+    a hip:Definition ;
+    skos:definition "Haze is a suspension in the air of extremely small, dry particles invisible to the naked eye and sufficiently numerous to give the air an opalescent appearance" ;
+.
+
+hip:definition.MH0018
+    a hip:Definition ;
+    skos:definition """Polluted air is air containing dust, smoke, micro-organisms or gases different from those from which it would normally be composed (WMO, 1992).
+
+Alternative definition: Polluted air is air which contains gases and particles emitted to the atmosphere by a variety of human activities and natural sources, or formed in the atmosphere, that at critical levels have harmful effects on human health, animals, plants and ecosystems, or reduce visibility and corrode materials, buildings and cultural heritage sites (UNEP, no date).""" ;
+.
+
+hip:definition.MH0019
+    a hip:Definition ;
+    skos:definition "Sand haze is haze caused by the suspension in the atmosphere of small sand or dust particles, raised from the ground prior to the time of observation by a sandstorm or dust storm" ;
+.
+
+hip:definition.MH0020
+    a hip:Definition ;
+    skos:definition "Smoke is a suspension in the air of small particles produced by combustion" ;
+.
+
+hip:definition.MH0021
+    a hip:Definition ;
+    skos:definition "Ocean acidification refers to a reduction in the pH of the ocean over an extended period, which is caused primarily by uptake of carbon dioxide from the atmosphere and can also be caused by other chemical additions or subtractions from the ocean" ;
+.
+
+hip:definition.MH0022
+    a hip:Definition ;
+    skos:definition "Rogue waves are extreme waves with overall or crest heights that are abnormally high relative to the background significant wave height" ;
+.
+
+hip:definition.MH0023
+    a hip:Definition ;
+    skos:definition "Seawater intrusion is the process by which saltwater infiltrates a coastal aquifer, leading to contamination of fresh groundwater" ;
+.
+
+hip:definition.MH0024
+    a hip:Definition ;
+    skos:definition "Sea ice is any form of ice found at sea" ;
+.
+
+hip:definition.MH0025
+    a hip:Definition ;
+    skos:definition "Ice flow is the motion of ice driven by gravitational forces, ice stress or, for sea ice, wind, water currents and tide" ;
+.
+
+hip:definition.MH0026
+    a hip:Definition ;
+.
+
+hip:definition.MH0027
+    a hip:Definition ;
+    skos:definition "A storm surge reflects the difference between the actual water level under the influence of a meteorological disturbance (storm tide) and the level which would have occurred in the absence of the meteorological disturbance (i.e., astronomical tide)" ;
+.
+
+hip:definition.MH0028
+    a hip:Definition ;
+    skos:definition "A storm tides is the actual sea level as influenced by a weather disturbance. The storm tide consists of the normal astronomical tide plus the storm surge" ;
+.
+
+hip:definition.MH0029
+    a hip:Definition ;
+    skos:definition "Tsunami is the Japanese term meaning wave (‘nami’) in a harbour (‘tsu’). It is a series of travelling waves of extremely long length and period, usually generated by disturbances associated with earthquakes occurring below or near the ocean floor" ;
+.
+
+hip:definition.MH0031
+    a hip:Definition ;
+    skos:definition "An extra-tropical cyclone is a low-pressure system which develops in latitudes outside the tropics" ;
+.
+
+hip:definition.MH0032
+    a hip:Definition ;
+    skos:definition "A sub-tropical cyclone is a non-frontal low-pressure system that has characteristics of both tropical and extratropical cyclones. Like tropical cyclones, they are non-frontal, synoptic-scale cyclones that originate over tropical or subtropical waters and have a closed surface wind circulation about a welldefined centre" ;
+.
+
+hip:definition.MH0036
+    a hip:Definition ;
+    skos:definition "Hail is precipitation in the form of particles of ice (hailstones). These can be either transparent, or partly or completely opaque. They are usually spheroidal, conical or irregular in form, and generally 5−50 mm in diameter. The particles may fall from a cloud either separately or agglomerated in irregular lumps" ;
+.
+
+hip:definition.MH0037
+    a hip:Definition ;
+    skos:definition "An ice storm involves the intense formation of ice on objects by the freezing, on impact, of rain or drizzle" ;
+.
+
+hip:definition.MH0038
+    a hip:Definition ;
+    skos:definition "Snow is the precipitation of ice crystals, isolated or agglomerated, falling from a cloud" ;
+.
+
+hip:definition.MH0039
+    a hip:Definition ;
+    skos:definition "A snow storm is a meteorological disturbance giving rise to a heavy fall of snow, often accompanied by strong winds" ;
+.
+
+hip:definition.MH0047
+    a hip:Definition ;
+    skos:definition "A heatwave is a marked warming of the air, or the invasion of very warm air, over a large area; it usually lasts from a few days to a few weeks (WMO, 1992). Alternative definition: A heatwave is a marked unusual period of hot weather over a region persisting for at least two consecutive days during the hot period of the year based on local climatological conditions, with thermal conditions recorded above given thresholds" ;
+.
+
+hip:definition.MH0048
+    a hip:Definition ;
+    skos:definition "Icing refers to any deposit or coating of ice on an object caused by the impact of liquid hydrometeors, usually supercooled" ;
+.
+
+hip:definition.MH0049
+    a hip:Definition ;
+    skos:definition "Thaw is the melting of snow or ice at the Earth’s surface due to a temperature rise above 0°C" ;
+.
+
+hip:definition.MH0051
+    a hip:Definition ;
+    skos:definition "A mud flow is a flow of water so heavily charged with sediment and debris that the flowing mass is thick and viscous" ;
+.
+
+hip:definition.MH0052
+    a hip:Definition ;
+    skos:definition "A rock slide is a movement of a mass of soil or rock on an individualized failure surface" ;
+.
+
+hip:definition.MH0055
+    a hip:Definition ;
+    skos:definition "A squall is an atmospheric phenomenon characterised by a very large variation of wind speed: it begins suddenly, has a duration of the order of minutes and decreases suddenly in speed. It is often accompanied by a shower or thunderstorm" ;
+.
+
+hip:definition.MH0056
+    a hip:Definition ;
+    skos:definition "A subtropical storm is a subtropical cyclone in which the maximum sustained surface wind speed (using the U.S. 1-minute average) is 34 kt (39 mph or 63 km/hr) or more" ;
+.
+
+hip:definition.MH0057
+    a hip:Definition ;
+    skos:definition """A tropical cyclone is a cyclone of tropical origin of small diameter (some hundreds of kilometres) with a minimum surface pressure in some cases of less than 900 hPa, very violent winds and torrential rain; sometimes accompanied by thunderstorms. It usually contains a central region, known as the ‘eye’ of the storm, with a diameter of the order of some tens of kilometres, and with light winds and a more or less lightly clouded sky (WMO, 2017).
+
+Alternative definition: A tropical cyclone is a warm-core, non-frontal synoptic-scale cyclone, originating over tropical or subtropical waters, with organised deep convection and closed surface wind circulation about a well-defined centre""" ;
+.
+
+hip:definition.MH0058
+    a hip:Definition ;
+    skos:definition """A tropical storm is a rapid rotating storm originating over tropical oceans. It has a low pressure centre and clouds spiralling towards the eyewall surrounding the ‘eye’. Its diameter is typically around 200 to 500 km, but can reach 1000 km. The related hazards are very violent winds, torrential rain, high waves, storm surges and in some cases tornadoes, causing direct effects such as flash floods, flooding, coastal inundation, and indirect effects such as landslides and mudslides. The winds blow anti-clockwise in the Northern Hemisphere and clockwise in the Southern Hemisphere (WMO, 2020).
+
+The intensity of tropical storms is based on the wind speed. A tropical storm is a tropical cyclone with the maximum sustained winds of 34 knots (17.5 m/s, 63 km/h) to 47 knots (24.2 m/s, 87 km/h) near the centre. When reaching this intensity, they are named in the interests of public safety""" ;
+.
+
+hip:definition.MH0059
+    a hip:Definition ;
+    skos:definition "A tornado is a rotating column of air, extending from the base of a cumuliform cloud, and often visible as a condensation funnel in contact with the ground, and/or attendant circulating dust or debris cloud at the ground" ;
+.
+
+hip:definition.MH0060
+    a hip:Definition ;
+    skos:definition "Wind is air motion relative to the Earth’s surface. Unless otherwise specified, only the horizontal component is considered" ;
+.
+
+hip:definedAs
+    a
+        rdf:Property ,
+        owl:ObjectProperty ;
+    rdfs:label "defined as" ;
+    rdfs:subPropertyOf hip:definedAs ;
+.
+
+hip:definition.BI0008
+    a hip:Definition ;
+    skos:definition "Biological agents, according to the Convention on the Prohibition of the Development, Production and Stockpiling of Bacteriological (Biological) and Toxin Weapons and on their Destruction (1972), include germs, toxins and viruses that can sicken or kill people, livestock, or crops" ;
+.
+
+hip:definition.BI0010
+    a hip:Definition ;
+    skos:definition "Antimicrobial resistance is the ability of a microorganism to multiply or persist in the presence of an increased level of an antimicrobial agent relative to the susceptible counterpart of the same species" ;
+.
+
+hip:definition.BI0012
+    a hip:Definition ;
+    skos:definition "A bacterial plant disease is the occurrence of plant diseases caused by bacterial microorganisms over large areas with significant impacts on crop and forest productivity or natural habitat" ;
+.
+
+hip:definition.BI0015
+    a hip:Definition ;
+    skos:definition "Anthrax is a disease caused by the spore-forming bacteria Bacillus anthracis. Anthrax is primarily a disease of herbivorous animals, although all mammals, including humans can contract it. In humans, anthrax manifests itself in three distinct patterns (cutaneous, gastrointestinal, inhalational)" ;
+.
+
+hip:definition.BI0016
+    a hip:Definition ;
+    skos:definition "Airborne transmission of infectious agents refers to the transmission of disease caused by dissemination of very small droplets that remain infectious when suspended in air over long distance and time" ;
+.
+
+hip:definition.BI0017
+    a hip:Definition ;
+    skos:definition "Blood-borne viruses are viruses transmitted by direct contact with infected blood or other body fluids" ;
+.
+
+hip:definition.BI0025
+    a hip:Definition ;
+    skos:definition "Antimicrobial resistant microorganisms are those microorganisms (such as bacteria, fungi, viruses, and parasites) that change when they are exposed to antimicrobial drugs (such as antibiotics, antifungals, antivirals, antimalarials, and anthelmintic). Microorganisms that develop antimicrobial resistance are sometimes referred to as ‘superbugs’. As a result, the medicines become ineffective and infections persist in the body, increasing the risk of spread to others" ;
+.
+
+hip:definition.BI0026
+    a hip:Definition ;
+    skos:definition "Animal disease is an impairment of the normal state of an animal that interrupts or modifies its vital function. Infectious diseases of livestock and wildlife are a major threat to global animal health and welfare and their effective control is crucial for agronomic health, for safeguarding and securing national and international food supplies and for alleviating rural poverty in developing countries. This hazard information profile focusses on animal diseases not including zoonoses" ;
+.
+
+hip:definition.BI0028
+    a hip:Definition ;
+    skos:definition "Diarrhoeal diseases are infectious diseases, contaminants and other causes of diarrhoea. Diarrhoea is defined as the passage of three or more loose or liquid stools per day, or more frequently than is normal for the individual (WHO, no date). This includes the three clinical types of diarrhoea: acute watery diarrhoea – lasts several hours or days, and includes cholera; acute bloody diarrhoea – also called dysentery; and persistent diarrhoea – lasts 14 days or longer" ;
+.
+
+hip:definition.BI0033
+    a hip:Definition ;
+    skos:definition "COVID-19 is an infectious disease caused by the SARS Coronavirus 2 (SARS CoC2), a virus first identified in human populations in late 2019. Transmission occurs through droplets containing infectious virus, either by direct face to face contact (splash) generated by speaking, singing, coughing or sneezing; or by aerosolisation for up to 1 metre. Virus-containing aerosols that travel further than 1 metre are defined as airborne. The virus is thought to infect humans through the mucus membranes of the eyes, nose and mouth. Living virus has been isolated from faeces and urine but neither is thought to represent a major means of transmission. Fomites are thought to represent a low risk of transmission, but the risk has not yet been quantified. The risk of transmission is greatest in closed, poorly ventilated spaces where humans are in close proximity for ten to fifteen minutes and do not physically distance or wear a protective face covering" ;
+.
+
+hip:definition.BI0034
+    a hip:Definition ;
+    skos:definition "Cholera is an acute diarrhoeal infection caused by ingestion of food or water contaminated with the bacterium Vibrio cholerae. Cholera remains a global threat to public health" ;
+.
+
+hip:definition.BI0035
+    a hip:Definition ;
+    skos:definition "Cryptosporidium is a microscopic parasite that causes the watery diarrhoeal disease cryptosporidiosis" ;
+.
+
+hip:definition.BI0042
+    a hip:Definition ;
+    skos:definition "Avian influenza is an infectious disease of birds caused by type A influenza viruses of the Orthomyxoviridae family. Naturally occurring among wild bird populations, avian influenza viruses can infect domestic poultry and other bird species. Some avian influenza viruses can also infect mammals and those affecting humans are called zoonotic. A pandemic can occur when a novel zoonotic avian influenza virus spreads in human populations worldwide" ;
+.
+
+hip:definition.BI0045
+    a hip:Definition ;
+    skos:definition "Cysticercosis is a preventable intestinal infection in humans and animals caused by the tapeworm Taenia solium (pork tapeworm). Human cysticercosisi can result in devastating effects on human health resulting in neurocysticercosis with blindness, convulsions, and epileptic seizures, and can be fatal. It is estimated to affect between 2.56 and 8.30 million people, based on the range of epilepsy prevalence data available" ;
+.
+
+hip:definition.BI0049
+    a hip:Definition ;
+    skos:definition "Chikungunya is a mosquito-borne viral infection caused by the chikungunya virus. It causes fever and severe arthralgia (joint pain) which is often debilitating. The disease can be endemic and epidemic in countries" ;
+.
+
+hip:definition.BI0051
+    a hip:Definition ;
+    skos:definition "Diphtheria is a widespread severe infectious disease caused by the bacterium Corynebacterium diphtheriae and the toxin they produce. It is a potentially life-threatening, vaccine-preventable disease that primarily affects the throat and upper airways and has the potential for epidemics" ;
+.
+
+hip:definition.BI0059
+    a hip:Definition ;
+    skos:definition "Dengue is a mosquito-borne disease that is caused by a virus of the Flaviviridae family and transmitted by female mosquitoes mainly of the species Aedes aegypti and, to a lesser extent, A. albopictus" ;
+.
+
+hip:definition.BI0061
+    a hip:Definition ;
+    skos:definition "Crimean-Congo haemorrhagic fever (CCHF) is a tick-borne viral infection caused by the CCHF virus. It causes severe viral haemorrhagic fever outbreaks and epidemics" ;
+.
+
+hip:definition.BI0070
+    a hip:Definition ;
+    skos:definition "African swine fever is a devastating haemorrhagic viral disease of pigs, affecting domestic and wild pigs of all ages and both sexes" ;
+.
+
+hip:definition.BI0072
+    a hip:Definition ;
+    skos:definition "Brucellosis is a bacterial disease caused by various Brucella species, which mainly infect cattle, swine, goats, sheep and dogs" ;
+.
+
+hip:definition.BI0073
+    a hip:Definition ;
+    skos:definition "Classical swine fever, also known as hog cholera, is a contagious viral disease of domestic and wild swine. It is caused by a virus of the genus Pestivirus of the family Flaviviridae" ;
+.
+
+hip:definition.BI0074
+    a hip:Definition ;
+    skos:definition "Contagious bovine pleuropneumonia is an infectious and contagious respiratory disease of Bovidae caused by Mycoplasma mycoides subspecies mycoides SC (Mmm)" ;
+.
+
+hip:definition.BI0075
+    a hip:Definition ;
+    skos:definition "Contagious caprine pleuropneumonia is a severe disease of goats caused by Mycoplasma capricolum subsp. capripneumonIae (Mccp). The acute form of the disease is characterised by unilateral serofibrinous pleuropneumonia with severe pleural fluid" ;
+.
+
+hip:definition.CH0001
+    a hip:Definition ;
+    skos:definition "Ammonia (NH3) is a colourless acrid-smelling reactive gas at ambient temperature and pressure and is considered a significant public health hazard" ;
+.
+
+hip:definition.CH0002
+    a hip:Definition ;
+    skos:definition "Carbon monoxide is a colourless, odourless gas that can be poisonous to humans and is considered a significant public health hazard" ;
+.
+
+hip:definition.CH0003
+    a hip:Definition ;
+    skos:definition "Arsenic is a toxic heavy metal widely distributed throughout the Earth’s crust, generally as arsenic sulphide or as metal arsenates and arsenides. Human exposure to arsenic compounds represents a major public health concern as it has been associated with a range of acute and long-term adverse health effects and diseases" ;
+.
+
+hip:definition.CH0013
+    a hip:Definition ;
+    skos:definition "Dioxins and dioxin-like substances, including polychlorinated biphenyls (PCBs), polychlorinated dibenzo-p-dioxins (PCDDs) and polychlorinated dibenzofurans (PCDFs) are persistent organic pollutants (POPs) and are unwanted by-products of combustion and various industrial processes, such as chlorine bleaching of paper pulp and smelting. They can travel long distances from the source of emission, and bioaccumulate in food chains These substances represent a major public health concern. They have been associated with a range of acute and long-term adverse health effects and diseases" ;
+.
+
+hip:definition.CH0016
+    a hip:Definition ;
+    skos:definition "Chlorine is a reactive pale green gas with many uses including disinfection of water that is approximately three times heavier than air and has a characteristic odour similar to bleach. Most significant exposures to chlorine result from loss of containment of chlorine during storage and transport. Human exposure can result in symptoms ranging from mild irritation to rapid death related to pulmonary oedema. It is considered a significant public health hazard" ;
+.
+
+hip:definition.CH0018
+    a hip:Definition ;
+    skos:definition "Benzene is a clear, colourless, highly flammable and volatile, liquid aromatic hydrocarbon (molecular formula C6H6) with a gasoline-like odour" ;
+.
+
+hip:definition.CH0019
+    a hip:Definition ;
+    skos:definition "Chemical agents or ‘chemical warfare agents’ (chemical weapons) are chemicals used to cause intentional death or harm through their toxic properties. Munitions, devices and other equipment specifically designed to weaponise toxic chemicals also fall under the definition of chemical weapons. The Chemical Weapons Convention (CWC) prohibition against the use of toxic chemicals and their precursors and also covers toxins of biological origin" ;
+.
+
+hip:definition.CH0020
+    a hip:Definition ;
+    skos:definition "Asbestos is the term for a group of naturally occurring minerals widely used historically in building materials and other products (WHO, no date). All types of asbestos cause lung cancer, mesothelioma, cancer of the larynx and ovary, and asbestosis (fibrosis of the lungs)" ;
+.
+
+hip:definition.CH0021
+    a hip:Definition ;
+    skos:definition "Aflatoxins are mycotoxins – toxic compounds that are naturally produced by certain types of mould (fungi). Aflatoxins are among the most poisonous mycotoxins and are produced by certain moulds (Aspergillus flavus and A. parasiticus) that grow in soil, decaying vegetation, hay, and grains. Aflatoxins pose a serious health risk to humans and livestock" ;
+.
+
+hip:definition.EN0002
+    a hip:Definition ;
+    skos:definition "A point source of air pollution is an identifiable stationary location or fixed facility from which air pollutants are released, which may be manmade or natural in origin" ;
+.
+
+hip:definition.EN0003
+    a hip:Definition ;
+    skos:definition "Ambient (outdoor) air pollution is a leading environmental risk factor affecting urban and rural populations around the world, resulting in an estimated 4.2 million premature deaths in 2016" ;
+.
+
+hip:definition.EN0008
+    a hip:Definition ;
+    skos:definition "Biodiversity loss refers to the reduction of any aspect of biological diversity (i.e., diversity at the genetic, species and ecosystem levels) in a particular area through death (including extinction), destruction or manual removal; it can refer to many scales, from global extinctions to population extinctions, resulting in decreased total diversity at the same scale" ;
+.
+
+hip:definition.EN0009
+    a hip:Definition ;
+    skos:definition "Deforestation is the conversion of forest to other land use independently of whether human-induced or not" ;
+.
+
+hip:definition.EN0014
+    a hip:Definition ;
+    skos:definition "Desertification refers to land degradation in arid, semi-arid and dry subhumid areas resulting from various factors, including climatic variations and human activities" ;
+.
+
+hip:definition.EN0017
+    a hip:Definition ;
+    skos:definition "Corals are subject to ‘bleaching’ when the seawater temperature is too high: they lose the symbiotic algae that give coral its colour and part of its nutrients. Severe, prolonged or repeated bleaching can lead to the death of coral colonies" ;
+.
+
+hip:definition.EN0018
+    a hip:Definition ;
+    skos:definition "Compressible soils include both compressive and collapsible soils. Compressive soils are soils that are prone to volumetric change when subject to mechanical loading (USDA, 1990:30). Collapsible soils are metastable in that they are prone to volumetric change (collapse) on wetting and loading" ;
+.
+
+hip:definition.EN0020
+    a hip:Definition ;
+.
+
+hip:definition.ET0001
+    a hip:Definition ;
+    skos:definition "An airburst is defined as an explosion in the air, especially of a nuclear bomb or large meteorite" ;
+.
+
+hip:definition.GH0010
+    a hip:Definition ;
+    skos:definition "Tephra is a collective term for fragmented magma and old (i.e., preexisting) rocks ejected into the atmosphere from volcanic vents during an explosive eruption, irrespective of size, composition and shape (BGS, no date). The term ‘volcanic ash’ refers to the finest particles of tephra (less than 2 mm diameter)." ;
+.
+
+hip:definition.GH0011
+    a hip:Definition ;
+    skos:definition "Ballistics comprise fragments of magma and old (i.e., pre-existing) rocks ejected during an explosive eruption at variable velocity and angle on cannon ball-like trajectories; they are not entrained within the volcanic plume and are dispersed in proximity to the vent (typically 5 km)" ;
+.
+
+hip:definition.GH0013
+    a hip:Definition ;
+    skos:definition "Lahars are discrete, rapid, gravity-driven, water-saturated flows containing water and solid particles of volcanic rock, sediment, ice, wood, and other debris that originate at volcanoes" ;
+.
+
+hip:definition.GH0030
+    a hip:Definition ;
+    skos:definition "An aquifer is a water-bearing rock that readily transmits water to wells and springs. It can be recharged either naturally (precipitation including rainfall or snow) or artificially (e.g., pumped river recharge via wells). Failure or outage can be due to derogation, well failure or contamination" ;
+.
+
+hip:definition.MH0001
+    a hip:Definition ;
+    skos:definition "A downburst is a violent and damaging downdraught reaching the ground surface, associated with a severe thunderstorm" ;
+.
+
+hip:definition.MH0004
+    a hip:Definition ;
+    skos:definition "Coastal flooding is most frequently the result of storm surges and high winds coinciding with high tides. The surge itself is the result of the raising of sea levels due to low atmospheric pressure. In particular configurations, such as major estuaries or confined sea areas, the piling up of water is amplified by a combination of the shallowing of the seabed and retarding of return flow" ;
+.
+
+hip:definition.MH0005
+    a hip:Definition ;
+    skos:definition "Estuarine flooding is flooding over and near coastal areas caused by storm surges and high winds coincident with high tides, thereby obstructing the seaward river flow. Estuarine flooding can be caused by tsunamis in specific cases" ;
+.
+
+hip:definition.MH0006
+    a hip:Definition ;
+    skos:definition "A flash flood is a flood of short duration with a relatively high peak discharge in which the time interval between the observable causative event and the flood is less than four to six hours" ;
+.
+
+hip:definition.MH0014
+    a hip:Definition ;
+    skos:definition "Black carbon refers to the absorbing components of soot, often defined using elemental carbon and some condensed organics. Black carbon is an important part of the combustion product commonly referred to as soot. Black carbon in indoor environments is largely due to cooking with biofuels such as wood, dung and crop residue. Outdoors, it is due to fossil fuel combustion (diesel and coal), open biomass burning (associated with deforestation and crop residue burning), and cooking with biofuels" ;
+.
+
+hip:definition.MH0015
+    a hip:Definition ;
+    skos:definition "A dust storm is an ensemble of particles of dust or sand energetically lifted to great heights by a strong and turbulent wind" ;
+.
+
+hip:definition.MH0016
+    a hip:Definition ;
+    skos:definition "Fog is a suspension of very small, usually microscopic water droplets in the air, reducing visibility at the Earth’s surface" ;
+.
+
+hip:definition.MH0030
+    a hip:Definition ;
+    skos:definition "A depression or cyclone is a region of the atmosphere in which the pressures are lower than those of the surrounding region at the same level" ;
+.
+
+hip:definition.MH0033
+    a hip:Definition ;
+    skos:definition "Acid rain is rain which in the course of its history has combined with chemical elements or pollutants in the atmosphere and reaches the Earth’s surface as a weak acid solution." ;
+.
+
+hip:definition.MH0034
+    a hip:Definition ;
+    skos:definition "A blizzard is a severe snow storm characterised by poor visibility, usually occurring at high-latitude and in mountainous regions" ;
+.
+
+hip:definition.MH0035
+    a hip:Definition ;
+    skos:definition "A drought is a period of abnormally dry weather characterised by a prolonged deficiency of precipitation below a certain threshold over a large area and a period longer than a month" ;
+.
+
+hip:definition.MH0040
+    a hip:Definition ;
+    skos:definition "A cold wave is a period of marked and unusual cold weather characterised by a sharp and significant drop in air temperatures near the surface (maximum, minimum and daily average) over a large area and persisting below certain thresholds for at least two consecutive days during the cold season" ;
+.
+
+hip:definition.MH0041
+    a hip:Definition ;
+    skos:definition "A dzud (a Mongolian term that describes ‘severe winter conditions’’, sometimes spelled zud) is a cold-season disaster in which anomalous climatic (i.e., heavy snow and severe cold) and/or land-surface (snow/ ice cover and lack of pasture) conditions lead to reduced accessibility and/or availability of forage/pastures, and ultimately to high livestock mortality during winter–spring. Severe dzuds (high mortality) result from a combination of growing-season drought and severe weather" ;
+.
+
+hip:definition.MH0043
+    a hip:Definition ;
+    skos:definition "A hoar frost is a deposit of ice produced by the deposition of water vapour from the surrounding air and is generally crystalline in appearance" ;
+.
+
+hip:definition.MH0044
+    a hip:Definition ;
+    skos:definition "Freezing rain is rain where the temperature of the water droplets is below 0°C. Drops of supercooled rain may freeze on impact with the ground, in-flight aircraft or other objects" ;
+.
+
+hip:definition.MH0045
+    a hip:Definition ;
+    skos:definition "Glaze is a smooth compact deposit of ice, generally transparent, formed by the freezing of super-cooled drizzle droplets or raindrops on objects with a surface temperature below or slightly above 0°C" ;
+.
+
+hip:definition.MH0046
+    a hip:Definition ;
+    skos:definition "Ground frost is a covering of ice, in one of its many forms, produced by the sublimation of the water vapour on objects colder than 0°C (WMO, 1992). Ground frost occurs when the temperature of the upper layer of the soil is less than 0°C" ;
+.
+
+hip:definition.MH0050
+    a hip:Definition ;
+    skos:definition "An avalanche is a mass of snow and ice falling suddenly down a mountain slope and often taking with it earth, rocks and rubble of every description" ;
+.
+
+hip:definition.MH0053
+    a hip:Definition ;
+    skos:definition "Derechos are fast-moving bands of thunderstorms with destructive winds. The winds can be as strong as those found in hurricanes or even tornadoes. Unlike hurricanes and tornadoes, these winds follow straight lines" ;
+.
+
+hip:definition.MH0054
+    a hip:Definition ;
+    skos:definition "A gale is wind with a speed of between 34 and 40 knots (62–74 km/h, 32–38 mph). Also known as Beaufort scale wind force 8" ;
+.
+
+hip:definition.SO0003
+    a hip:Definition ;
+    skos:definition """‘Civil unrest’ is an umbrella term for a wide spectrum of phenomena, and although there is no commonly agreed United Nations definition the term is used widely among United Nations agencies, funds and programmes, particularly to describe violent and non-violent group acts.
+
+A suggested definition for ‘civil unrest’ is as follows: a term that includes limited political violence (such as acts of ‘terrorism’, individual assassinations, etc.), sporadic violent collective action (such as riots), or nonviolent and mildly violent collective action (such as protests, demonstrations, etc.) – all of which tend to take place in times of peace""" ;
+.
+
+hip:definition.TL0005
+    a hip:Definition ;
+    skos:definition "Building collapse is the failure of load-bearing structural elements, causing a building to fall or fail catastrophically / catastrophic failure" ;
+.
+
+hip:definition.TL0006
+    a hip:Definition ;
+    skos:definition "A building high-rise cladding fire hazard occurs when combustible materials such as cladding on a high-rise building greatly increases risk in the event of a fire and can have a catastrophic outcome" ;
+.
+
+hip:definition.TL0008
+    a hip:Definition ;
+    skos:definition "Bridge failure is the inability of a bridge, or its components, to perform as specified by its design and construction requirements (Wardhana and Hadipriono, 2003). Note: This definition includes bridges that have totally collapsed, partially collapsed and those that experienced distress, such as, exhibiting excessive deformation." ;
+.
+
+hip:definition.TL0009
+    a hip:Definition ;
+    skos:definition "Dam failure is the collapse or movement of part of a dam or its foundation, such that the dam cannot retain water. In general, a failure results in a release of large quantities of water imposing risks on the people or property downstream" ;
+.
+
+hip:definition.TL0011
+    a hip:Definition ;
+    skos:definition "Critical Infrastructure failure is defined as the failure in one or more of the physical structures, facilities, networks and other assets which provide services that are essential to the social and economic functioning of a community or society" ;
+.
+
+hip:definition.TL0020
+    a hip:Definition ;
+    skos:definition "A data breach is a compromise of security that leads to the accidental or unlawful destruction, loss, alteration, unauthorised disclosure of, or access to protected data transmitted, stored, or otherwise processed" ;
+.
+
+hip:definition.TL0021
+    a hip:Definition ;
+    skos:definition "Data security is related to the preservation of data to guarantee availability, confidentiality and data integrity. Data security-related hazards include risks arising from increased system complexity because this provides opportunities for malicious cyberattacks and data loss in the case of serious incidents, including natural disasters" ;
+.
+
+hip:definition.TL0022
+    a hip:Definition ;
+    skos:definition "A service procedure is disrupted by another service if the second service results in service primitives of the first service not being used as specified for the procedure of the first service" ;
+.
+
+hip:definition.TL0026
+    a hip:Definition ;
+    skos:definition "Cyberbullying is bullying that takes place using digital devices such as cell/mobile phones, computers, and tablets. Cyberbullying can occur through SMS, e-mail, apps, social media, forums, or gaming when people view, participate in, or share content. Cyberbullying includes the deliberate sending, posting, or sharing of negative, harmful, false, or mean content about someone else. It can include sharing personal or private information about someone else causing embarrassment or humiliation. Some cyberbullying may also be unlawful or criminal behaviour" ;
+.
+
+hip:definition.TL0035
+    a hip:Definition ;
+    skos:definition "Disaster waste is the waste generated by the impact of a disaster, both as a direct effect of the disaster as well as in the post-disaster phase as a result of poor waste management" ;
+.
+
+hip:definition.TL0046
+    a hip:Definition ;
+    skos:definition "Drain and sewer flooding is said to occur when sewage or foul water leaks from the sewerage system (through pipes, drains or manholes) or floods up through toilets, sinks or showers inside a building" ;
+.
+
+hip:definition.TL0048
+    a hip:Definition ;
+    skos:definition "An air transportation accident is defined as an occurrence associated with the operation of an aircraft which takes place between the time any person boards the aircraft with the intention of flight until such time as all such persons have disembarked, in which one of the following applies: a person is fatally or seriously injured, the aircraft sustains damage or structural failure, and the aircraft is missing or is completely inaccessible" ;
+.
+
+
+# Additional skos:definition triples attached to a dummy individual
+# - if removed, query works
+# - if values are changed to short, simple strings (e.g., definition XYZ), query works
+
+<ex:dummy-individual> skos:definition """
+  relation from a result to the Execution that created or caused it
+  """@en,
+    """
+  relation from an Property to a Stimulus that serves as its proxy
+  """@en, "A reservoir is an artificial lake where water is stored (National Geographic, 2020). Reservoir flooding occurs when excess rainfall causes the lake level to rise or flood water to spill downstream.",
+    "3D field of the relative humidity in the free troposphere. Relative humidity is the amount of water vapor in air divided by the temperature-dependent amount of water vapor in saturated air. RH can be expressed relative to water or ice saturation (to be specified in the metadata).",
+    "A rail accident is an unwanted or unintended sudden event or a specific chain of such events (occurring during train operation) which has harmful consequences (United Nations, European Union and the International Transport Forum at the OECD, 2019).",
+    """
+  relation from an entity to a Property of that entity
+  """@en, "The age of an ice parcel is the time since its formation or since the last significant (e.g. summer) melt.",
+    "Land Surface Temperature (LST) is a measure of how hot or cold the surface of the Earth would feel to the touch. When derived from radiometric measurements of ground-based, airborne, and spaceborne remote sensing instruments, LST is the aggregated radiometric surface temperature of the ensemble of components within the sensor field of view.",
+    "Wooded and open areas"@en, """
+  relation from a Procedure to a Property that it can observe or act on
+  """@en,
+    """
+  relation from an input value to an Execution that used it
+  """@en, """
+  relation from an Observation to the Stimulus that originated it
+  """@en,
+    """
+  relation from a Deployment or Execution to its ultimate subject entity
+
+  i.e., from an Actuation to the ultimate entity whose property was modified;
+  from an Observation to the ultimate entity whose property was observed;
+  from an act of Sampling to the ultimate entity that was sampled;
+  or from a Deployment to its ultimate target
+  """@en,
+    """
+Low-lying land usually flooded in winter and more or less saturated by water all year round.
+Extension:
+ Non-forested areas of low-lying land flooded or floodable by fresh, stagnant or circulating water. Covered by a specific low ligneous, semi-ligneous or herbaceous vegetation.
+This heading includes:
+ Fens and transitional bogs without peat deposition or on peaty ground (peat layer is less than 30 cm thick) with specific vegetation composed of reeds, bulrushes, rushes, willows, sedges and tall herbs, sphagnum hummocks, often with alder or willows and other water plants;
+ marsh vegetation located in margin zones of raised bogs;
+ water-fringe vegetation of reed beds, sedge communities, fen-sedge beds, tall rush swamps, riparian cane formations;
+ high floating vegetation;
+ sebkhas in north-african area;
+ inland saline (alkali) marshes (prevailing arheic).
+This heading excludes:
+ humid meadows (water logging of between 10 and 30 cm depth) (class 231);
+ rice fields (class 213);
+ free water space in wetlands (class 512);
+ salt marshes (class 421);
+ salt meadows in intertidal zone (class 421);
+ Garaat, (classified 211 or 411 according to land cover visible from the satellite image);
+ polders with reticulated channels bordered by hydrophitic vegetation (class 2xx);
+ humid forests with a crown cover more than 30 % (class 31x);
+ low floating aquatic vegetation (class 512)."""@en,
+    "The two-dimensional vector drag at the bottom of the atmosphere and the dynamical forcing at the top of the ocean.",
+    """
+  relation from a Sensor to an Observation or ObservationCollection it has made
+  """@en,
+    "Flux density of solar radiation, reflected by the Earth surface and atmosphere, emitted to space at the top of the atmosphere.",
+    "A discrete spatial phenomenon in a universe of discourse."@en, "Extremely Low Frequency (ELF) magnetic and electric field of the three first resonance modes (8 Hz, 14 Hz, 20 Hz).",
+    "Concentration of chlorophyll-a pigment in the surface water.", """Bushy sclerophyllous vegetation, including maquis and garrigue.
+Extension:
+ Evergreen sclerophyllous bushes and scrubs, which compose maquis, garrigue, mattoral and phrygana.
+This heading includes:
+ mattoral of arid zone with pre-desert brushes and tall Ziziphus lotus;
+ laurrel mattoral with Laurus nobilis;
+ cypress mattoral with native or planted cupressus;
+ tree-spurge formation with dense stands of Euphorbia dendroides in thermo-Mediterranean area;
+ palmetto brush formations with dominating Chamaerops-humilis;
+ pre-desert scrub with halo-nitrophyllous scrubs and gypsum scrubs : jujube brush (Ziziphus lotus), shrubs of African affinities (spiny brush formation of accacia);
+ abandoned olive groves.
+This heading excludes:
+ arborescent mattorals which are a pre- or post-broad-leaved evergreen forest formation with more or less dense arborescent cover with a usually thick high evergreen shrub stratum organised around evergreen oaks (Quercus suber/ilex/rotundifolia) olive trees or pines the crown cover of which is more than 30 % (class 311). If the crown cover is less than 30 %, it is assigned to 324."""@en,
+    "A leak or a spill is an incident involving the uncontrolled release of a toxic substance, potentially resulting in harm to public health and the environment. Chemical incidents can occur as a result of natural events, or as a result of accidental or intentional events. These incidents can be sudden and acute or have a slow onset when there is a ‘silent’ release of a chemical. Chemical leaks and spills can range from small releases to full-scale major emergencies (adapted from WHO, 2020).",
+    "Fraction of ocean area covered with sea ice.", "The snow water equivalent (SWE) is the depth of liquid water that would result if the snow cover melted completely, which equates to the snow cover mass per unit area (kg m-2). Also known as water equivalent of snow cover.",
+    "Depth of peat measured on a regular grid (where peat exists).", "A substance or a material emitting, or related to the emission of, ionizing radiation (either in the form of electro-magnetic waves or particle radiation) is radioactive. Depending on the magnitude of exposure, the radioactive substance may become a hazard to human health; as such it is subject to regulatory control by national laws and national regulatory authorities. Radioactive material may also be hazard to animal health, other forms of life and the environment (IAEA, 2018).",
+    "Stampede or crushing is the surge of individuals in a crowd, in response to a perceived danger or loss of physical space. It often disrupts the orderly movement of crowds resulting in irrational and dangerous movement for self-protection leading to injuries and fatalities (Illiyas et al., 2013).",
+    "Height of the top of the cloud (highest cloud in case of multi-layer clouds.", "High Resolution Land Cover is the observed (bio)-physical cover on the Earth’s surface for monitoring changes at local scales (suitable for adaptation and mitigation).",
+    "International armed conflict covers all cases of declared war and other de facto armed conflict between two or more States, even if the state of war is not recognised by one of them and/or the use of armed force is unilateral (ICRC, 2016).",
+    "The surface temperature of sea ice or snow on sea ice, either a calibrated radiometric or thermometric in situ measurement.",
+    "Relative humidity at a known height above surface, with the height specified in the metadata. Relative humidity is the ratio of the amount of atmospheric moisture present relative to the amount that would be present if the air were saturated with respect to water or ice to be specified in the metadata.",
+    "Varicella is an acute, highly contagious disease caused by varicellazoster virus (WHO, 2014).",
+    "If a proper interval T1 is intervalDisjoint another proper interval T2, then the beginning of T1 is after the end of T2, or the end of T1 is before the beginning of T2, i.e., the intervals do not overlap in any way, but their ordering relationship is not known."@en,
+    "2D field of total amount of HCHO molecules per unit area in an atmospheric column extending from the Earth’s surface to the tropopause.",
+    "A road traffic accident is any accident involving at least one road vehicle in motion on a public road or private road to which the public has right of access, resulting in at least one injured or killed person (United Nations, European Union and the International Transport Forum at the OECD, 2019).",
+    "2D field of total amount of O3 molecules per unit area in an atmospheric column extending from the Earth’s surface to the tropopause.",
+    "1つのエージェントによって公開またはキュレートされ、1つ以上の形式でアクセスまたはダウンロードできるデータの集合。"@ja, """
+Crops irrigated permanently or periodically, using a permanent infrastructure (irrigation channels, drainage network). Most of these crops could not be cultivated without an artificial water supply. Does not include sporadically irrigated land.
+Extension :
+ Excludes drainage network areas, which are assigned to 211, 231 or 242, applied for pumping infrastructure and irrigation system from superficial water supplying.
+This heading includes:
+ recently abandoned irrigation systems;
+ sown grassland (as part of crop rotation) if the irrigation infrastructure is permanently present.
+This heading excludes:
+ drainage network intended to clean up wet soils (classes 211, 231 or 242);
+ crops under greenhouses (classes 211 or 222);
+ underground irrigation pipes and above ground pipes and furrows (other cultivation classes);
+ spray sprinkler line (other cultivation classes);
+ rotory sprinkler (other cultivation classes);
+ rice fields (class 213)."""@en,
+    """
+Non-permanent crops (arable land or pastures) associated with permanent crop on the same parcel.
+Extension:
+ Permanent crops are either in juxtaposition with arable lands/pastures or located along the border of the parcels. The occupying rate of non-permanent crops is more than 50 %.
+This heading includes:
+ non-permanent crops areas in which they are shaded by a fairly closed canopy of fruit trees or olive trees or vines;
+ non-permanent crops areas which are bordered by a reticulated structure of fruit tree lines, vine lines;
+ some parcels of permanent crops more or less irregular with annual crops/pastures less than 25 ha and inserted into a dominating non-permanent crop whole where none of these crops is represented more than 75 %.
+This heading excludes:
+ permanent crops associated with fruit trees (classes 2.2.x);
+ non-permanent crops associated with forest trees (class 244);
+ natural grasslands shaded by permanent crops (class 324);
+ pastures planted with trees (class 231)."""@en,
+    "Direct measurement of local volume changes or inferred volume change from combining measurements.",
+    "A Well-known Text serialization of a Geometry object."@en, "A personally identifiable information (PII) breach is a situation where PII is processed in violation of one or more relevant PII protection requirements (ITU, 2018).",
+    "Impacts The consequences of realized risks on natural and human systems, where risks result from the interactions of climate-related hazards (including extreme weather/climate events), exposure, and vulnerability. Impacts generally refer to effects on lives, livelihoods, health and well-being, ecosystems and species, economic, social and cultural assets, services (including ecosystem services), and infrastructure. Impacts may be referred to as consequences or outcomes and can be adverse or beneficial. See also Adaptation, Exposure, Hazard, Vulnerability and Risk.",
+    """Pollution is defined as the presence of substances and/or heat in environmental media (air, water, land) whose nature, location, or quantity produces undesirable environmental effects (UN data, no date).
+
+Alternative definition: Pollution is defined as activity that generates pollutants (UN data, no date).""",
+    "Ratio of sample to reference value (Δ14) in the water column.", "3D field of the vertical component of the 3D wind vector in the mesosphere.",
+    "Si un intervalo propio T1 empieza otro intervalo propio T2, entonces del principio de T1 con el final de T2, y el final de T1 es anterior al final de T2."@es,
+    "Mining hazards can be defined as having major environmental impacts including the production of waste, release of toxic and hazardous waste, air pollution and emissions, water pollution and depletion, and the loss of productive land and ecosystems (adapted from UNDP and UN Environment, 2018).",
+    """
+  link from an Execution or Sample or Collection of these, to a collection that it is part of
+  """,
+    """
+  relation from an input to a Procedure that uses it in an Execution
+  """@en,
+    """
+Camping ground, sport ground, leasure parks, golf courses, race courses, etc. Includes formal parks not surrounded by urban areas.
+This heading includes:
+ camping and caravaning parking organized for recreational purpose (excluding commercial activities);
+ small airfields with grass runways and small buildings;
+ important archeological ruins;
+ indoor sport facilities;
+ cottage areas used for recreation and leasure activities outside the settlements only for temporary sejourns;
+ zoological/botanical gardens outside urban fabric;
+ forest parks outside built up areas;
+ vegetated and military cemeteries outside settlements, hoby/city gardens;
+ motor-racing circuit;
+ ski resorts (except the ski pistes).
+This heading excludes:
+ motor-racing circuit inside industrial unit areas used for test purpose (class 121);
+ beaches (class 331);
+ camping areas within forests that are not specially prepared with this object (class 31x);
+ stud farms (class 121)."""@en,
+    """
+Public, industrial or mine dump sites.
+Extension:
+ Dump sites of raw materials or liquid wastes.
+This heading includes:
+ dump sites areas within industrial units areas;
+ liquid wastes originating in mainly chemical industry;
+ sewage farms connected to sewage plants;
+ slag heaps which are un-vegetated.
+This heading excludes:
+ decanting basins of biological water treatment plants by means of lagoonage processing (class 121);
+ dump sites abandoned and reconverted to leisure areas (class 142);
+ vegetated slag heaps (class 3xx)."""@en,
+    "A temporal entity with zero extent or duration"@en, "Concentration of SF6 gas in the water column.",
+    "Nuclear agents are derived from neutron radiation (n) which is a neutron emitted by an unstable nucleus, in particular during atomic fission and nuclear fusion. Apart from a component in cosmic rays, neutrons are usually produced artificially. Because they are electrically neutral particles, neutrons can be very penetrating and when they interact with matter or tissue, they cause the emission of beta- and gamma-radiation. Neutron radiation therefore requires heavy shielding to reduce exposure (IAEA, 2004).",
+    """The mouth of a river, within which the tide ebbs and flows.
+This heading includes:
+ the water and the channel bed with the fringing vegetation zone > 25 ha.
+This heading excludes:
+ bays and narrow channels (class 523);
+ fjords or fiards, ryas and straits (class 523);
+ fringing vegetation along the estuary channel bed > 25 ha (class 421)."""@en,
+    "Asume una dirección en el tiempo. Si una entidad temporal T1 está después de otra entidad temporal T2, entonces el principio de T1 está después del final de T2."@es,
+    """
+  link from a Collection to an Execution or Sample or Collection of these that is part of it
+  """,
+    "Weight of zooplankton by volume.", "Si un intervalo propio T1 es 'intervalo solapado por' otro intervalo propio T2, entonces el principio de T1 es posterior al principio de T2, y el principio de T1 es anterior al final de T2, y el final de T1 es posterior al final de T2."@es,
+    """
+  relation from a Platform to an asset (System or Platform) hosted or mounted on it
+  """@en,
+    "Non-forested areas either partially, seasonally or permanently waterlogged. The water may be stagnant or circulating."@en,
+    """
+  relation from a Procedure to an output of its execution
+  """@en, "2D field of total amount of O3 molecules per unit area in an atmospheric column extending from the Earth’s surface to the upper edge of the atmosphere.",
+    "The surface layer of the ground, subject to annual thawing and freezing in areas underlain by permafrost.",
+    """
+Areas planted with vines.
+Extension:
+ Vineyard areas are classified as 221 if the vineyard parcels exceed 50 % of the area and/or they determine the land use of the area.
+This heading includes:
+ vine-growing nurseries inside vineyards areas;
+ vineyards for wine production;
+ vineyards for eating grapes and raisins;
+ complex cultivation pattern areas where vineyards parcels cover at least 50 % of the area.
+This heading excludes:
+ vines mixed with arable land and/or meadows within a single parcel (class 241);
+ vines mixed with arable land and/or meadows interspersed with significant amount of natural vegetation, and vineyards parcels cover less than 40% of the area (class 243)."""@en,
+    "The vertical extent of the snow cover on top of the sea ice.", "Temperature to which air must be cooled to become saturated with water vapor at a known height above surface, with the height specified in the metadata.",
+    "States that the subject SpatialObject is spatially within the object SpatialObject. DE-9IM: T*F**F***"@en,
+    "A substance or a material emitting, or related to the emission of, ionising radiation (either in the form of electromagnetic waves or particle radiation) is radioactive (IAEA, 2018).",
+    """
+  relation from a Deployment to a Platform on which Systems are hosted
+  """@en,
+    "Desertification refers to land degradation in arid, semi-arid and dry subhumid areas resulting from various factors, including climatic variations and human activities",
+    "If a proper interval T1 is intervalFinishedBy another proper interval T2, then the beginning of T1 is before the beginning of T2, and the end of T1 is coincident with the end of T2."@en,
+    "The WKT serialization of a Geometry."@en, "Air specific humidity at a known height above surface, with the height specified in the metadata. Specific humidity is the ratio of the mass of water vapour and the mass of moist air.",
+    "Amount of light emanating from within the ocean.", "Non-wooded areas either tidally, seasonally or permanently waterlogged with brackish or saline water."@en,
+    """
+  instant of time when the result of the Execution became available
+  """@en,
+    "The component of the total latent heat flux that corresponds to the vegetation consumption of water.",
+    "Wastewater is regarded as a combination of one or more of the following materials: domestic effluent consisting of ‘blackwater’ (excreta, urine and faecal sludge, contaminants from pharmaceutical and personal care products) and ‘greywater’ (used water from washing and bathing); water from commercial establishments and institutions, including hospitals; industrial effluent, stormwater and other urban runoff; and agricultural, horticultural and aquaculture runoff (UN Water, 2017).",
+    "Structural failure corresponds to the exceedance of ultimate limit state in many of the load-carrying elements, which compromise the structural stability of the building (Rossetto, 2013).",
+    "Ratio of integral of water droplets size distribution in volume divided by integral in area (µm).",
+    """
+  System that implements an ObservingProcedure to determine the value of an observable Property
+
+  This may be a device, a piece of infrastructure, an agent (including humans), or software (simulation).
+
+  A Sensor responds to a stimulus, e.g., a change in the environment, or input data composed from the results of prior Observations.
+  """@en,
+    "Si un intervalo propio T1 se encuentra con otro intervalo propio T2, entonces el final de T1 coincide con el principio de T2."@es,
+    """
+  relation from a Sensor to the Stimulus that it detects
+
+  The Stimulus itself will be serving as a proxy for some Property.
+  """@en,
+    "Concentration of N₂O gas in the water column.", "Sum of dissolved inorganic carbon species (CO2, HCO⁻, CO3²⁻) in water.",
+    """
+  event in the real world that triggers a Sensor
+  """@en, "Any artificial land surface"@en,
+    """Areas with vegetation within the urban fabric, including parks, cemeteries with vegetation, and mansions and their grounds.
+Extension:
+Cemeteries with important vegetation coverage.
+Green urban areas concern all laid out vegetated areas greater than 25 ha which are weither situated inside or in contact with urban fabrics.
+Greenery with strips of lanes and pathes may be found within these areas created for recreational use.
+This heading includes:
+park woodlots;
+park lawns;
+park basins;
+park flower bed, harbor and shrub berry;
+park and city squares;
+ornemental gardens;
+city blocks inner spaces;
+botanical and zoological gardens;
+vegetated areas which can be used for recreation purpose even it is not their main utilisation such as woods in urban fabric.
+This heading excludes:
+city gardens (class 242)
+vegetated cemeteries outside urban fabric (class 142);
+unvegetated cemeteries inside urban fabric (class 1.1.x)."""@en,
+    "Glacier surface elevation changes from geodetic methods." .
