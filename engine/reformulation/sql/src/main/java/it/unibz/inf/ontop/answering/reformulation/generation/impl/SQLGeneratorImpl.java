@@ -8,6 +8,7 @@ import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
+import it.unibz.inf.ontop.exception.NotFullyTranslatableToNativeQueryException;
 import it.unibz.inf.ontop.exception.OntopReformulationException;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.optimizer.splitter.ProjectionSplitter;
@@ -340,7 +341,7 @@ public class SQLGeneratorImpl implements NativeQueryGenerator {
         Set<Variable> missingVariables = Sets.difference(rdfTree.getVariables(), substitution.getDomain());
         if (!missingVariables.isEmpty())
             throw new NotFullyTranslatableToNativeQueryException(String.format(
-                    "its variables %s are missing an independent definition",
+                    "the variables %s are missing an independent definition",
                     missingVariables));
 
         return substitution;
@@ -397,16 +398,10 @@ public class SQLGeneratorImpl implements NativeQueryGenerator {
                     return ((RDFTermTypeConstant) termTypeFunctionalTerm.getTerm(1)).getRDFTermType();
             }
             throw new NotFullyTranslatableToNativeQueryRuntimeException(String.format(
-                    "its variable %s is not guaranteed to be uniquely typed", variable));
+                    "the variable %s is not guaranteed to be uniquely typed.\nConsider imposing a datatype through a FILTER in the input query", variable));
         }
         throw new NotFullyTranslatableToNativeQueryRuntimeException(String.format(
-                "could not infer the unique type of its variable %s", variable));
-    }
-
-    protected static class NotFullyTranslatableToNativeQueryException extends OntopReformulationException {
-        protected NotFullyTranslatableToNativeQueryException(String message) {
-            super("Not fully translatable to a native query: " + message);
-        }
+                "could not infer the unique type of the variable %s", variable));
     }
 
     /**

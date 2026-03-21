@@ -141,6 +141,10 @@ public class QuestQueryProcessor implements QueryReformulator {
 			queryLogger.declareReformulationException(reformulationException);
 			throw reformulationException;
 		}
+		catch (NotFullyTranslatableToNativeQueryException e) {
+			queryLogger.declareReformulationException(e);
+			throw e;
+		}
 		/*
 		 * Bug: should normally not be reached
 		 * TODO: remove it
