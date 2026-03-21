@@ -9,6 +9,7 @@ import it.unibz.inf.ontop.answering.reformulation.QueryCache;
 import it.unibz.inf.ontop.injection.OntopReformulationSettings;
 import it.unibz.inf.ontop.iq.IQ;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Objects;
 
@@ -23,7 +24,7 @@ public class GuiceBasedQueryCache implements QueryCache {
         private final QueryContext queryContext;
         private final boolean forNativeConsumption;
 
-        CacheKey(KGQuery<?> inputQuery, QueryContext queryContext, boolean forNativeConsumption) {
+        CacheKey(@Nonnull KGQuery<?> inputQuery, @Nullable QueryContext queryContext, boolean forNativeConsumption) {
             this.inputQuery = inputQuery;
             this.queryContext = queryContext;
             this.forNativeConsumption = forNativeConsumption;
@@ -35,7 +36,7 @@ public class GuiceBasedQueryCache implements QueryCache {
             if (!(o instanceof CacheKey)) return false;
             CacheKey other = (CacheKey) o;
             return forNativeConsumption == other.forNativeConsumption
-                    && Objects.equals(inputQuery, other.inputQuery)
+                    && inputQuery.equals(other.inputQuery)
                     && Objects.equals(queryContext, other.queryContext);
         }
 

@@ -10,6 +10,7 @@ import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.exception.NotFullyTranslatableToNativeQueryException;
 import it.unibz.inf.ontop.exception.OntopReformulationException;
+import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.iq.impl.IQTreeTools;
 import it.unibz.inf.ontop.iq.optimizer.splitter.ProjectionSplitter;
 import it.unibz.inf.ontop.injection.OntopReformulationSQLSettings;
@@ -74,31 +75,30 @@ public class SQLGeneratorImpl implements NativeQueryGenerator {
 
     @AssistedInject
     private SQLGeneratorImpl(@Assisted DBParameters dbParameters,
-                             IntermediateQueryFactory iqFactory,
                              UnionFlattener unionFlattener,
                              PostProcessingProjectionSplitter projectionSplitter,
                              TermTypeTermLifter rdfTypeLifter, PostProcessableFunctionLifter functionLifter,
                              IQTree2NativeNodeGenerator defaultIQTree2NativeNodeGenerator,
                              DialectExtraNormalizer extraNormalizer, BooleanExpressionPushDownTransformer pushDownTransformer,
                              EmptyRowsValuesNodeTransformer valuesNodeTransformer,
-                             OntopReformulationSQLSettings settings, ExplicitEqualityTransformer equalityTransformer, IQTreeTools iqTreeTools,
-                             TermFactory termFactory, SubstitutionFactory substitutionFactory)
+                             OntopReformulationSQLSettings settings, ExplicitEqualityTransformer equalityTransformer,
+                             CoreSingletons coreSingletons)
     {
         this.functionLifter = functionLifter;
         this.extraNormalizer = extraNormalizer;
         this.pushDownTransformer = pushDownTransformer;
         this.valuesNodeTransformer = valuesNodeTransformer;
         this.dbParameters = dbParameters;
-        this.iqFactory = iqFactory;
+        this.iqFactory = coreSingletons.getIQFactory();
         this.unionFlattener = unionFlattener;
         this.projectionSplitter = projectionSplitter;
         this.rdfTypeLifter = rdfTypeLifter;
         this.defaultIQTree2NativeNodeGenerator = defaultIQTree2NativeNodeGenerator;
         this.settings = settings;
         this.equalityTransformer = equalityTransformer;
-        this.iqTreeTools = iqTreeTools;
-        this.termFactory = termFactory;
-        this.substitutionFactory = substitutionFactory;
+        this.iqTreeTools = coreSingletons.getIQTreeTools();
+        this.termFactory = coreSingletons.getTermFactory();
+        this.substitutionFactory = coreSingletons.getSubstitutionFactory();
     }
 
     @Override

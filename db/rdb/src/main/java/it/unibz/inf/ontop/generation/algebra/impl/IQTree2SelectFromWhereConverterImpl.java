@@ -228,7 +228,7 @@ public class IQTree2SelectFromWhereConverterImpl implements IQTree2SelectFromWhe
             }
 
             private ImmutableSet<Variable> getSignature(IQTree tree) {
-                return ImmutableSet.copyOf(tree.getVariables());
+                return tree.getVariables();
             }
         });
     }

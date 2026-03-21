@@ -18,7 +18,7 @@ import java.util.Optional;
 public interface SelectFromWhereWithModifiers extends SQLExpression {
 
     /**
-     * The order in the ImmutableSet matters
+     * The order in the ImmutableSet is the insertion order and may matter
      */
     ImmutableSet<Variable> getProjectedVariables();
 
