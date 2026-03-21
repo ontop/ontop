@@ -1,9 +1,6 @@
 package it.unibz.inf.ontop.docker.lightweight;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableMultiset;
-import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.*;
 import it.unibz.inf.ontop.injection.OntopSQLOWLAPIConfiguration;
 import it.unibz.inf.ontop.rdf4j.repository.OntopRepository;
 import it.unibz.inf.ontop.rdf4j.repository.OntopRepositoryConnection;
@@ -18,11 +15,8 @@ import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
 import java.io.*;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Properties;
 
 import static org.junit.Assert.assertEquals;
 
@@ -142,7 +136,7 @@ public class AbstractDockerRDF4JTest {
     }
 
     protected String reformulate(String queryString) {
-        return REPO_CONNECTION.reformulate(queryString, false);
+        return REPO_CONNECTION.reformulate(queryString, ImmutableMultimap.of());
     }
 
     protected ImmutableList<String> runQuery(String queryString) {
