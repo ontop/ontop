@@ -90,7 +90,7 @@ public class StringTypesAliasingDremioTest {
         QueryContext queryContext = reformulator.getQueryContextFactory().create(ImmutableMap.of());
         return reformulator.reformulateIntoNativeQuery(kgQueryFactory.createSPARQLQuery(query),
                         queryContext,
-                        reformulator.getQueryLoggerFactory().create(queryContext))
+                        reformulator.getQueryLoggerFactory().create(queryContext), false)
                 .toString();
     }
 }

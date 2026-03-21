@@ -127,7 +127,7 @@ public abstract class QuestStatement implements OntopStatement {
 	private TupleResultSet executeSelectQuery(SelectQuery inputQuery, QueryContext queryContext, QueryLogger queryLogger,
 											  boolean shouldAlsoCloseStatement)
 			throws OntopQueryEvaluationException, OntopReformulationException {
-		IQ executableQuery = engine.reformulateIntoNativeQuery(inputQuery, queryContext, queryLogger);
+		IQ executableQuery = engine.reformulateIntoNativeQuery(inputQuery, queryContext, queryLogger, false);
 		logExecutionStartingMessage();
 		return executeSelectQuery(executableQuery, queryLogger, shouldAlsoCloseStatement);
 	}
@@ -144,7 +144,7 @@ public abstract class QuestStatement implements OntopStatement {
 
 	private BooleanResultSet executeBooleanQuery(AskQuery inputQuery, QueryContext queryContext, QueryLogger queryLogger)
 			throws OntopQueryEvaluationException, OntopReformulationException {
-		IQ executableQuery = engine.reformulateIntoNativeQuery(inputQuery, queryContext, queryLogger);
+		IQ executableQuery = engine.reformulateIntoNativeQuery(inputQuery, queryContext, queryLogger, false);
 		logExecutionStartingMessage();
 		return executeBooleanQuery(executableQuery, queryLogger);
 	}
@@ -157,7 +157,7 @@ public abstract class QuestStatement implements OntopStatement {
 	private GraphResultSet executeConstructQuery(ConstructQuery constructQuery, QueryContext queryContext, QueryLogger queryLogger,
 												 boolean shouldAlsoCloseStatement)
 			throws OntopQueryEvaluationException, OntopResultConversionException, OntopConnectionException, OntopReformulationException {
-		IQ executableQuery = engine.reformulateIntoNativeQuery(constructQuery, queryContext, queryLogger);
+		IQ executableQuery = engine.reformulateIntoNativeQuery(constructQuery, queryContext, queryLogger, false);
 		logExecutionStartingMessage();
 		return executeConstructQuery(constructQuery.getConstructTemplate(), executableQuery, queryLogger, shouldAlsoCloseStatement);
 	}
@@ -318,11 +318,11 @@ public abstract class QuestStatement implements OntopStatement {
 	}
 
 	@Override
-	public  <R extends OBDAResultSet>  IQ getExecutableQuery(KGQuery<R> inputQuery, ImmutableMultimap<String, String> httpHeaders) throws OntopReformulationException {
+	public  <R extends OBDAResultSet>  IQ getExecutableQuery(KGQuery<R> inputQuery, ImmutableMultimap<String, String> httpHeaders, boolean forNativeConsumption) throws OntopReformulationException {
 		ImmutableMap<String, String> normalizedHttpHeaders = normalizeHttpHeaders(httpHeaders);
 		QueryContext queryContext = queryContextFactory.create(normalizedHttpHeaders);
 
-		return engine.reformulateIntoNativeQuery(inputQuery, queryContext, queryLoggerFactory.create(queryContext));
+		return engine.reformulateIntoNativeQuery(inputQuery, queryContext, queryLoggerFactory.create(queryContext), forNativeConsumption);
 	}
 
 }

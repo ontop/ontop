@@ -17,8 +17,6 @@ import it.unibz.inf.ontop.owlapi.resultset.TupleOWLResultSet;
 import it.unibz.inf.ontop.owlapi.resultset.impl.OntopGraphOWLResultSet;
 import it.unibz.inf.ontop.owlapi.resultset.impl.OntopBooleanOWLResultSet;
 
-import java.security.SecureRandom;
-
 /***
  * A Statement to execute queries over a QuestOWLConnection. The logic of this
  * statement is equivalent to that of JDBC's Statements.
@@ -191,7 +189,7 @@ public class DefaultOntopOWLStatement implements OntopOWLStatement {
 
 	public IQ getExecutableQuery(String query) throws OntopOWLException {
 		try {
-			return st.getExecutableQuery(parseQueryString(query), ImmutableMultimap.of());
+			return st.getExecutableQuery(parseQueryString(query), ImmutableMultimap.of(), false);
 		} catch (OntopReformulationException e) {
 			throw new OntopOWLException(e);
 		}

@@ -143,7 +143,7 @@ public class DefaultSelectFromWhereSerializer implements SelectFromWhereSerializ
             return "";
         }
 
-        protected String serializeProjection(ImmutableSortedSet<Variable> projectedVariables, // only for ORDER
+        protected String serializeProjection(ImmutableSet<Variable> projectedVariables, // only for ORDER
                                              ImmutableMap<Variable, QuotedID> variableAliases,
                                              Substitution<? extends ImmutableTerm> substitution,
                                              ImmutableMap<Variable, QualifiedAttributeID> columnIDs) {

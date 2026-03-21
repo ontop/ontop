@@ -35,13 +35,15 @@ public class ReformulateController {
     @RequestMapping(value = "/ontop/reformulate")
     @ResponseBody
     public ResponseEntity<String> reformulate(@RequestParam(value = "query") String query,
-                                              HttpServletRequest request)
-            throws OntopConnectionException, OntopReformulationException {
+                                              @RequestParam(value = "forNativeConsumption", defaultValue = "false") boolean forNativeConsumption,
+                                              HttpServletRequest request) {
 
         ImmutableMultimap<String, String> inputHeaders = SparqlQueryExecutor.extractHttpHeaders(request);
 
         try (OntopRepositoryConnection connection = repository.getConnection()) {
-            String reformulation = connection.reformulate(query, inputHeaders);
+            String reformulation = forNativeConsumption
+                    ? connection.reformulateIntoNativeQuery(query, inputHeaders, true)
+                    : connection.reformulate(query, inputHeaders);
 
             HttpHeaders returnedHeaders = new HttpHeaders();
             returnedHeaders.set(CONTENT_TYPE, "text/plain; charset=UTF-8");

@@ -3,9 +3,7 @@ package it.unibz.inf.ontop.generation.algebra;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.ImmutableSortedSet;
 import com.google.inject.assistedinject.Assisted;
-import it.unibz.inf.ontop.dbschema.QuotedID;
 import it.unibz.inf.ontop.dbschema.RelationDefinition;
 import it.unibz.inf.ontop.model.term.*;
 import it.unibz.inf.ontop.model.type.DBTermType;
@@ -16,7 +14,7 @@ import java.util.Optional;
 @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 public interface SQLAlgebraFactory {
 
-    SelectFromWhereWithModifiers createSelectFromWhere(ImmutableSortedSet<Variable> projectedVariables,
+    SelectFromWhereWithModifiers createSelectFromWhere(ImmutableSet<Variable> projectedVariables,
                                                        Substitution<? extends ImmutableTerm> substitution,
                                                        @Assisted("fromExpression") SQLExpression fromExpression,
                                                        @Assisted("whereExpression") Optional<ImmutableExpression> whereExpression,

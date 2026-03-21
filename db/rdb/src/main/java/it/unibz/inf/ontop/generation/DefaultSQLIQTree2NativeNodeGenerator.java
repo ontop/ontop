@@ -1,7 +1,7 @@
 package it.unibz.inf.ontop.generation;
 
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSortedSet;
+import com.google.common.collect.ImmutableSet;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.iq.transform.IQTree2NativeNodeGenerator;
 import it.unibz.inf.ontop.generation.algebra.IQTree2SelectFromWhereConverter;
@@ -43,10 +43,17 @@ public class DefaultSQLIQTree2NativeNodeGenerator implements IQTree2NativeNodeGe
         abstractRootDBType = typeFactory.getDBTypeFactory().getAbstractRootDBType();
     }
 
-
     @Override
     public NativeNode generate(IQTree iqTree, DBParameters dbParameters, boolean tolerateUnknownTypes) {
-        ImmutableSortedSet<Variable> signature = ImmutableSortedSet.copyOf(iqTree.getVariables());
+        return generate(iqTree, iqTree.getVariables(), dbParameters, tolerateUnknownTypes);
+    }
+
+    @Override
+    public NativeNode generate(IQTree iqTree, ImmutableSet<Variable> signature, DBParameters dbParameters,
+                           boolean tolerateUnknownTypes) {
+        // Should be equals but the order may differ (ImmutableSet preserves the insertion order)
+        if (!iqTree.getVariables().equals(signature))
+            throw new MinorOntopInternalBugException("The signature should match the variables of the IQ tree");
 
         SelectFromWhereWithModifiers selectFromWhere = converter.convert(iqTree, signature);
         SelectFromWhereSerializer.QuerySerialization serializedQuery = serializer.serialize(selectFromWhere, dbParameters);

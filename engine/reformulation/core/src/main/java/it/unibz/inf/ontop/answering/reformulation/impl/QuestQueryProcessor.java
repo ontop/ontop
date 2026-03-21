@@ -76,12 +76,13 @@ public class QuestQueryProcessor implements QueryReformulator {
 	}
 
 	@Override
-	public IQ reformulateIntoNativeQuery(KGQuery<?> inputQuery, QueryContext queryContext, QueryLogger queryLogger)
+	public IQ reformulateIntoNativeQuery(KGQuery<?> inputQuery, QueryContext queryContext, QueryLogger queryLogger,
+										 boolean forNativeConsumption)
 			throws OntopReformulationException {
 
 		long beginning = System.currentTimeMillis();
 
-		IQ cachedQuery = queryCache.get(inputQuery, queryContext);
+		IQ cachedQuery = queryCache.get(inputQuery, queryContext, forNativeConsumption);
 		if (cachedQuery != null) {
 			queryLogger.declareReformulationFinishedAndSerialize(cachedQuery,true);
 			return cachedQuery;
@@ -119,8 +120,8 @@ public class QuestQueryProcessor implements QueryReformulator {
 
 				queryLogger.setPlannedQuery(plannedQuery);
 
-				IQ executableQuery = generateExecutableQuery(plannedQuery);
-				queryCache.put(inputQuery, queryContext, executableQuery);
+				IQ executableQuery = generateExecutableQuery(plannedQuery, forNativeConsumption);
+				queryCache.put(inputQuery, queryContext, forNativeConsumption, executableQuery);
 				queryLogger.declareReformulationFinishedAndSerialize(executableQuery, false);
 				LOGGER.debug("Reformulation time: {} ms\n", System.currentTimeMillis() - beginning);
 				return executableQuery;
@@ -140,6 +141,10 @@ public class QuestQueryProcessor implements QueryReformulator {
 			queryLogger.declareReformulationException(reformulationException);
 			throw reformulationException;
 		}
+		catch (NotFullyTranslatableToNativeQueryException e) {
+			queryLogger.declareReformulationException(e);
+			throw e;
+		}
 		/*
 		 * Bug: should normally not be reached
 		 * TODO: remove it
@@ -152,10 +157,10 @@ public class QuestQueryProcessor implements QueryReformulator {
 		}
 	}
 
-	protected IQ generateExecutableQuery(IQ iq) throws OntopReformulationException {
+	protected IQ generateExecutableQuery(IQ iq, boolean forNativeConsumption) throws OntopReformulationException {
 		LOGGER.debug("Producing the native query string...");
 
-		IQ executableQuery = datasourceQueryGenerator.generateSourceQuery(iq);
+		IQ executableQuery = datasourceQueryGenerator.generateSourceQuery(forNativeConsumption, iq);
 		LOGGER.debug("Resulting native query:\n{}\n", executableQuery);
 
 		return executableQuery;

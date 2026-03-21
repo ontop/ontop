@@ -2,7 +2,6 @@ package it.unibz.inf.ontop.answering.reformulation;
 
 
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.answering.OntopQueryEngine;
 import it.unibz.inf.ontop.answering.connection.OntopConnection;
@@ -90,7 +89,7 @@ public class OfflineOnlineMarriageTest {
 
         IQ executableQuery = queryReformulator.reformulateIntoNativeQuery(query,
                 queryContext,
-                queryReformulator.getQueryLoggerFactory().create(queryContext));
+                queryReformulator.getQueryLoggerFactory().create(queryContext), false);
         String sqlQuery = Optional.of(executableQuery.getTree())
                 .filter(t -> t instanceof UnaryIQTree)
                 .map(t -> ((UnaryIQTree) t).getChild().getRootNode())

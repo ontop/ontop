@@ -13,7 +13,8 @@ import it.unibz.inf.ontop.iq.IQ;
  */
 public interface QueryReformulator {
 
-    IQ reformulateIntoNativeQuery(KGQuery<?> inputQuery, QueryContext queryContext, QueryLogger queryLogger) throws OntopReformulationException;
+    IQ reformulateIntoNativeQuery(KGQuery<?> inputQuery, QueryContext queryContext, QueryLogger queryLogger,
+                                  boolean forNativeConsumption) throws OntopReformulationException;
 
     /**
      * For analysis purposes

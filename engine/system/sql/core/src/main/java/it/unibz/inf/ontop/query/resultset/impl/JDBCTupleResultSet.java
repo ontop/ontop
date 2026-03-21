@@ -33,7 +33,8 @@ public class JDBCTupleResultSet extends AbstractTupleResultSet {
     private final ImmutableMultimap<Variable, Variable> lexicalVariableMap;
 
     public JDBCTupleResultSet(ResultSet rs,
-                              ImmutableSortedSet<Variable> sqlSignature,
+                              // NB: ImmutableSet-s preserve the order
+                              ImmutableSet<Variable> sqlSignature,
                               ImmutableMap<Variable, DBTermType> sqlTypeMap,
                               ConstructionNode constructionNode,
                               DistinctVariableOnlyDataAtom answerAtom, QueryLogger queryLogger,

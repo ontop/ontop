@@ -2,7 +2,6 @@ package it.unibz.inf.ontop.generation.algebra.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.ImmutableSortedSet;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.generation.algebra.SQLExpression;
@@ -22,7 +21,7 @@ import java.util.Optional;
 @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 public class SelectFromWhereWithModifiersImpl implements SelectFromWhereWithModifiers {
 
-    private final ImmutableSortedSet<Variable> projectedVariables;
+    private final ImmutableSet<Variable> projectedVariables;
     private final Substitution<? extends ImmutableTerm> substitution;
     private final SQLExpression fromExpression;
     private final Optional<ImmutableExpression> whereExpression;
@@ -33,7 +32,7 @@ public class SelectFromWhereWithModifiersImpl implements SelectFromWhereWithModi
     private final ImmutableList<SQLOrderComparator> sortConditions;
 
     @AssistedInject
-    private SelectFromWhereWithModifiersImpl(@Assisted ImmutableSortedSet<Variable> projectedVariables,
+    private SelectFromWhereWithModifiersImpl(@Assisted ImmutableSet<Variable> projectedVariables,
                                              @Assisted Substitution<? extends ImmutableTerm> substitution,
                                              @Assisted("fromExpression") SQLExpression fromExpression,
                                              @Assisted("whereExpression") Optional<ImmutableExpression> whereExpression,
@@ -55,7 +54,7 @@ public class SelectFromWhereWithModifiersImpl implements SelectFromWhereWithModi
 
 
     @Override
-    public ImmutableSortedSet<Variable> getProjectedVariables() {
+    public ImmutableSet<Variable> getProjectedVariables() {
         return projectedVariables;
     }
 

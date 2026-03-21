@@ -3,7 +3,6 @@ package it.unibz.inf.ontop.injection;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.ImmutableSortedSet;
 import com.google.inject.Guice;
 import com.google.inject.assistedinject.Assisted;
 import it.unibz.inf.ontop.dbschema.QuotedID;
@@ -73,7 +72,7 @@ public interface IntermediateQueryFactory {
     ValuesNode createValuesNode(@Assisted("projectedVariables") ImmutableSet<Variable> projectedVariables,
                                 @Assisted("valueMaps") ImmutableList<ImmutableMap<Variable, Constant>> values);
 
-    NativeNode createNativeNode(ImmutableSortedSet<Variable> variables,
+    NativeNode createNativeNode(ImmutableSet<Variable> variables,
                                 @Assisted("variableTypeMap") ImmutableMap<Variable, DBTermType> variableTypeMap,
                                 @Assisted("columnNames") ImmutableMap<Variable, QuotedID> columnNames,
                                 String nativeQueryString, VariableNullability variableNullability);
