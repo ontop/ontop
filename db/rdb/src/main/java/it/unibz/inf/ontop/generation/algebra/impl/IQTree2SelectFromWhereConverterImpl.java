@@ -2,11 +2,9 @@ package it.unibz.inf.ontop.generation.algebra.impl;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.ImmutableSortedSet;
 import com.google.inject.Inject;
 import it.unibz.inf.ontop.generation.algebra.*;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
-import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
 import it.unibz.inf.ontop.iq.BinaryNonCommutativeIQTree;
 import it.unibz.inf.ontop.iq.IQTree;
 import it.unibz.inf.ontop.iq.NaryIQTree;
@@ -42,7 +40,7 @@ public class IQTree2SelectFromWhereConverterImpl implements IQTree2SelectFromWhe
     }
 
     @Override
-    public SelectFromWhereWithModifiers convert(IQTree tree, ImmutableSortedSet<Variable> signature) {
+    public SelectFromWhereWithModifiers convert(IQTree tree, ImmutableSet<Variable> signature) {
 
         var slice = UnaryIQTreeDecomposition.of(tree, SliceNode.class);
         var distinct = UnaryIQTreeDecomposition.of(slice, DistinctNode.class);
@@ -222,15 +220,15 @@ public class IQTree2SelectFromWhereConverterImpl implements IQTree2SelectFromWhe
 
             @Override
             public SQLExpression transformUnion(NaryIQTree tree, UnionNode unionNode, ImmutableList<IQTree> children) {
-                ImmutableSortedSet<Variable> signature = getSignature(tree);
+                ImmutableSet<Variable> signature = getSignature(tree);
                 ImmutableList<SQLExpression> subExpressions = NaryIQTreeTools.transformChildren(
                         tree.getChildren(),
                         c -> convert(c, signature));
                 return sqlAlgebraFactory.createSQLUnionExpression(subExpressions, unionNode.getVariables());
             }
 
-            private ImmutableSortedSet<Variable> getSignature(IQTree tree) {
-                return ImmutableSortedSet.copyOf(tree.getVariables());
+            private ImmutableSet<Variable> getSignature(IQTree tree) {
+                return ImmutableSet.copyOf(tree.getVariables());
             }
         });
     }

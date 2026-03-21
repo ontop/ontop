@@ -2,9 +2,7 @@ package it.unibz.inf.ontop.answering.connection.impl;
 
 import java.util.Optional;
 
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableMultimap;
-import com.google.common.collect.ImmutableSortedSet;
+import com.google.common.collect.*;
 import it.unibz.inf.ontop.answering.connection.JDBCStatementFinalizer;
 import it.unibz.inf.ontop.answering.logging.QueryLogger;
 import it.unibz.inf.ontop.query.*;
@@ -189,7 +187,7 @@ public class SQLQuestStatement extends QuestStatement {
             String sqlQuery = extractSQLQuery(executableQuery);
             ConstructionNode constructionNode = extractRootConstructionNode(executableQuery);
             NativeNode nativeNode = extractNativeNode(executableQuery);
-            ImmutableSortedSet<Variable> signature = nativeNode.getVariables();
+            ImmutableSet<Variable> signature = nativeNode.getVariables();
             ImmutableMap<Variable, DBTermType> typeMap = nativeNode.getTypeMap();
 
             OntopConnectionCloseable statementClosingCB = shouldAlsoCloseStatement ? this::close : null;
@@ -220,7 +218,7 @@ public class SQLQuestStatement extends QuestStatement {
             String sqlQuery = extractSQLQuery(executableQuery);
             ConstructionNode constructionNode = extractRootConstructionNode(executableQuery);
             NativeNode nativeNode = extractNativeNode(executableQuery);
-            ImmutableSortedSet<Variable> SQLSignature = nativeNode.getVariables();
+            ImmutableSet<Variable> SQLSignature = nativeNode.getVariables();
             ImmutableMap<Variable, DBTermType> SQLTypeMap = nativeNode.getTypeMap();
 
             OntopConnectionCloseable statementClosingCB = shouldAlsoCloseStatement ? this::close : null;

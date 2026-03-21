@@ -1,5 +1,6 @@
 package it.unibz.inf.ontop.cli;
 
+import com.google.common.collect.Lists;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.HttpGet;
@@ -16,6 +17,9 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -83,9 +87,10 @@ public class OntopEndpointReformulateTest {
 
     @Test
     public void testReformulateSelectForNativeConsumption() throws IOException {
-        String body = reformulate(SELECT_QUERY, true);
-        LOGGER.debug("Reformulation SELECT (for native consumption):\n{}", body);
-        assertTrue("Native consumption body should only contain the SQL query", body.trim().startsWith("SELECT"));
+        String query = reformulate(SELECT_QUERY, true);
+        LOGGER.debug("Reformulation SELECT (for native consumption):\n{}", query);
+        testColumnOrder(query, List.of("x", "title"));
+        assertTrue("Native consumption body should only contain the SQL query", query.trim().startsWith("SELECT"));
     }
 
     @Test
@@ -110,9 +115,22 @@ public class OntopEndpointReformulateTest {
 
     @Test
     public void testReformulateSelectJoinForNativeConsumption() throws IOException {
-        String body = reformulate(SELECT_QUERY_2, true);
-        LOGGER.debug("Reformulation SELECT JOIN (for native consumption):\n{}", body);
-        assertTrue("Native consumption body should only contain the SQL query", body.trim().startsWith("SELECT"));
+        String query = reformulate(SELECT_QUERY_2, true);
+        LOGGER.debug("Reformulation SELECT JOIN (for native consumption):\n{}", query);
+        testColumnOrder(query, List.of("x", "title", "author", "genre", "edition"));
+        assertTrue("Native consumption body should only contain the SQL query", query.trim().startsWith("SELECT"));
+    }
+
+    private void testColumnOrder(String query, List<String> expectedColumns) {
+        // Verify that the SQL projects columns in the same order as the SPARQL SELECT clause
+        Matcher matcher = Pattern.compile("AS \"(\\w+)\"")
+                .matcher(query.substring(0, query.indexOf("FROM")));
+        List<String> projectedColumns = Lists.newArrayList();
+        while (matcher.find()) {
+            projectedColumns.add(matcher.group(1));
+        }
+        assertEquals("Projected columns should follow SPARQL SELECT order",
+                expectedColumns, projectedColumns);
     }
 
     @Test

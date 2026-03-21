@@ -2,6 +2,7 @@ package it.unibz.inf.ontop.answering.reformulation.generation.impl;
 
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
@@ -41,6 +42,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
 
 import static it.unibz.inf.ontop.iq.impl.UnaryIQTreeTools.UnaryIQTreeDecomposition;
 
@@ -110,12 +112,12 @@ public class SQLGeneratorImpl implements NativeQueryGenerator {
 
     @Override
     public IQ generateSourceQuery(IQ query, boolean avoidPostProcessing) {
-        return generateSourceQueryForNonNativeConsumption(query, avoidPostProcessing, false);
+        return generateSourceQuery(query, avoidPostProcessing, false, Function.identity());
     }
 
     @Override
     public IQ generateSourceQuery(IQ query, boolean avoidPostProcessing, boolean tolerateUnknownTypes) {
-        return generateSourceQueryForNonNativeConsumption(query, avoidPostProcessing, tolerateUnknownTypes);
+        return generateSourceQuery(query, avoidPostProcessing, tolerateUnknownTypes, Function.identity());
     }
 
     protected IQ generateSourceQuery(boolean forNativeConsumption, IQ query, boolean avoidPostProcessing)
@@ -125,10 +127,11 @@ public class SQLGeneratorImpl implements NativeQueryGenerator {
 
         return forNativeConsumption
                 ? generateSourceQueryForNativeConsumption(query)
-                : generateSourceQueryForNonNativeConsumption(query, avoidPostProcessing, false);
+                : generateSourceQuery(query, avoidPostProcessing, false, Function.identity());
     }
 
-    protected IQ generateSourceQueryForNonNativeConsumption(IQ query, boolean avoidPostProcessing, boolean tolerateUnknownTypes) {
+    protected IQ generateSourceQuery(IQ query, boolean avoidPostProcessing, boolean tolerateUnknownTypes,
+                                     Function<ImmutableSet<Variable>, ImmutableSet<Variable>> signatureExtractor) {
         IQTree initialTree = query.getTree();
         if (initialTree.isDeclaredAsEmpty())
             return query;
@@ -149,7 +152,9 @@ public class SQLGeneratorImpl implements NativeQueryGenerator {
             return iqFactory.createIQ(query.getProjectionAtom(),
                     iqFactory.createEmptyNode(query.getProjectionAtom().getVariables()));
 
-        NativeNode nativeNode = defaultIQTree2NativeNodeGenerator.generate(normalizedSubTree, dbParameters, tolerateUnknownTypes);
+        NativeNode nativeNode = defaultIQTree2NativeNodeGenerator.generate(normalizedSubTree,
+                signatureExtractor.apply(normalizedSubTree.getVariables()),
+                dbParameters, tolerateUnknownTypes);
 
         UnaryIQTree newTree = iqFactory.createUnaryIQTree(split.getConstructionNode(), nativeNode);
 
@@ -257,7 +262,9 @@ public class SQLGeneratorImpl implements NativeQueryGenerator {
 
         IQ dbIQ = iqFactory.createIQ(initialProjectionAtom, dbTree);
 
-        IQTree nativeTree = generateSourceQueryForNonNativeConsumption(dbIQ, true, false)
+        IQTree nativeTree = generateSourceQuery(dbIQ, true, false,
+                // Preserves the variable order from the input query
+                vs -> initialProjectionAtom.getVariables())
                 .normalizeForOptimization().getTree();
 
         if (!(nativeTree instanceof NativeNode))

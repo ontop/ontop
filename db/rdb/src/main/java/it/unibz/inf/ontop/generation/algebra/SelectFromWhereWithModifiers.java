@@ -2,7 +2,6 @@ package it.unibz.inf.ontop.generation.algebra;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.ImmutableSortedSet;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.model.term.Variable;
@@ -18,7 +17,10 @@ import java.util.Optional;
  */
 public interface SelectFromWhereWithModifiers extends SQLExpression {
 
-    ImmutableSortedSet<Variable> getProjectedVariables();
+    /**
+     * The order in the ImmutableSet matters
+     */
+    ImmutableSet<Variable> getProjectedVariables();
 
     Substitution<? extends ImmutableTerm> getSubstitution();
 
