@@ -169,7 +169,7 @@ public class QueryLoggerImpl implements QueryLogger {
             } catch (IOException ex) {
                 REGULAR_LOGGER.error(OUTPUT_STREAM_JSON_ERROR + ex);
             }
-            sink.submit(stringWriter.toString());
+            sink.submit(queryId, stringWriter.toString());
         }
 
         if (isMergingEnabled) {
@@ -303,7 +303,7 @@ public class QueryLoggerImpl implements QueryLogger {
                 REGULAR_LOGGER.error(OUTPUT_STREAM_JSON_ERROR + e);
                 return;
             }
-            sink.submit(stringWriter.toString());
+            sink.submit(queryId, stringWriter.toString());
         }
     }
 
@@ -338,7 +338,7 @@ public class QueryLoggerImpl implements QueryLogger {
             } catch (IOException e) {
                 REGULAR_LOGGER.error(OUTPUT_STREAM_JSON_ERROR + e);
             }
-            sink.submit(stringWriter.toString());
+            sink.submit(queryId, stringWriter.toString());
         }
 
         if (isMergingEnabled) {
@@ -442,7 +442,7 @@ public class QueryLoggerImpl implements QueryLogger {
         } catch (IOException ex) {
             REGULAR_LOGGER.error(OUTPUT_STREAM_JSON_ERROR + ex);
         }
-        sink.submit(stringWriter.toString());
+        sink.submit(queryId, stringWriter.toString());
     }
 
     protected String serializeTimestamp(long time) {
@@ -471,6 +471,6 @@ public class QueryLoggerImpl implements QueryLogger {
         } catch (IOException e) {
             REGULAR_LOGGER.error(OUTPUT_STREAM_JSON_ERROR + e);
         }
-        sink.submit(stringWriter.toString());
+        sink.submit(queryId, stringWriter.toString());
     }
 }
