@@ -414,13 +414,16 @@ public class RDF4JTupleExprTranslator {
                 child.nullableVariables);
     }
 
-    private ImmutableExpression getLeftJoinCondition(InjectiveSubstitution<Variable> sharedVarsRenaming, TranslationResult leftTranslation, TranslationResult rightTranslation) {
+    private Optional<ImmutableExpression> getLeftJoinCondition(InjectiveSubstitution<Variable> sharedVarsRenaming, TranslationResult leftTranslation, TranslationResult rightTranslation) {
+        if (sharedVarsRenaming.isEmpty()) {
+            return Optional.empty();
+        }
+
         return termFactory.getConjunction(Stream.concat(
                         sharedVarsRenaming.builder()
                                 .toStream((v, t) -> getCompatibilityCondition(v, t, leftTranslation.nullableVariables.contains(v), rightTranslation.nullableVariables.contains(v))),
                         Stream.of(termFactory.getDisjunction(sharedVarsRenaming.builder()
-                                .toStream(termFactory::getStrictEquality).collect(ImmutableCollectors.toList()))))
-                .collect(ImmutableCollectors.toList()));
+                                .toStream(termFactory::getStrictEquality).collect(ImmutableCollectors.toList())))));
     }
 
     private IQTree createExistsSubtree(Exists exists, Variable rightProvenanceVar, TranslationResult leftTranslation) throws OntopUnsupportedKGQueryException, OntopInvalidKGQueryException {
@@ -431,7 +434,7 @@ public class RDF4JTupleExprTranslator {
 
         InjectiveSubstitution<Variable> sharedVarsRenaming = getSharedVariablesRenaming(leftTranslation.iqTree, rightTranslation.iqTree);
 
-        ImmutableExpression ljCond = getLeftJoinCondition(sharedVarsRenaming, leftTranslation, rightTranslation);
+        Optional<ImmutableExpression> ljCond = getLeftJoinCondition(sharedVarsRenaming, leftTranslation, rightTranslation);
 
         IQTree renamedRightTree = applyInDepthRenaming(
                 getRightConflictingProvenanceRenaming(rightTranslation, rightProvenanceVar),
@@ -485,6 +488,18 @@ public class RDF4JTupleExprTranslator {
 
         checkIfExistsIsTranslatable(leftTranslation, rightTranslation, exists.getSubQuery());
 
+        if (getSharedVariables(leftTranslation.iqTree, rightTranslation.iqTree).isEmpty()) {
+            Variable provenanceVar = variableGenerator.generateNewVariable("prov");
+            IQTree treeWithProv = createExistsSubtree(exists, provenanceVar, leftTranslation);
+            return createTranslationResult(
+                    iqFactory.createUnaryIQTree(
+                            iqFactory.createConstructionNode(leftTranslation.iqTree.getVariables()),
+                            iqFactory.createUnaryIQTree(
+                                    iqFactory.createFilterNode(termFactory.getDBIsNull(provenanceVar)),
+                                    treeWithProv)),
+                    leftTranslation.nullableVariables);
+        }
+
         return translateMinusOperation(leftTranslation, rightTranslation);
     }
 
@@ -493,7 +508,7 @@ public class RDF4JTupleExprTranslator {
 
         InjectiveSubstitution<Variable> sharedVarsRenaming = getSharedVariablesRenaming(leftTranslation.iqTree, rightTranslation.iqTree);
 
-        ImmutableExpression ljCond = getLeftJoinCondition(sharedVarsRenaming, leftTranslation, rightTranslation);
+        Optional<ImmutableExpression> ljCond = getLeftJoinCondition(sharedVarsRenaming, leftTranslation, rightTranslation);
 
         ImmutableExpression filter = termFactory.getConjunction(sharedVarsRenaming.getRangeSet().stream()
                 .map(termFactory::getDBIsNull)
@@ -509,20 +524,20 @@ public class RDF4JTupleExprTranslator {
     }
 
     private void checkIfExistsIsTranslatable(TranslationResult leftTranslation, TranslationResult rightTranslation, TupleExpr existsSubquery) throws OntopUnsupportedKGQueryException {
-        Sets.SetView<Variable> sharedVariables = getSharedVariables(leftTranslation.iqTree, rightTranslation.iqTree);
-
-        if (sharedVariables.isEmpty()) {
-            throw new OntopUnsupportedKGQueryException("The EXISTS operator is not supported with no common variables");
-        }
-
-        if (sharedVariables.stream().anyMatch(v -> v.isNullable(leftTranslation.nullableVariables)
-                || v.isNullable(rightTranslation.nullableVariables))) {
-            throw new OntopUnsupportedKGQueryException("The EXISTS operator is not supported when there are non-nullable common variables");
-        }
-
         ExistsSubtreeVisitor existsVisitor = new ExistsSubtreeVisitor(termFactory, existsSubquery);
         if (!existsVisitor.isExistsSubtreeSupported()) {
             throw new OntopUnsupportedKGQueryException("The EXISTS subquery is not supported: " + existsSubquery);
+        }
+
+        Sets.SetView<Variable> sharedVariables = getSharedVariables(leftTranslation.iqTree, rightTranslation.iqTree);
+
+        if (sharedVariables.isEmpty() && !existsVisitor.getVariables().isEmpty()) {
+            throw new OntopUnsupportedKGQueryException("The EXISTS operator is not supported with no common variables");
+        }
+
+        if (!sharedVariables.isEmpty() && sharedVariables.stream().anyMatch(v -> v.isNullable(leftTranslation.nullableVariables)
+                || v.isNullable(rightTranslation.nullableVariables))) {
+            throw new OntopUnsupportedKGQueryException("The EXISTS operator is not supported when there are non-nullable common variables");
         }
 
         Sets.SetView<Variable> unboundVariables = Sets.difference(existsVisitor.getVariables(), rightTranslation.iqTree.getKnownVariables());
