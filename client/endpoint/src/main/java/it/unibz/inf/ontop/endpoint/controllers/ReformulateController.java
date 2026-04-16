@@ -2,9 +2,8 @@ package it.unibz.inf.ontop.endpoint.controllers;
 
 import com.google.common.collect.ImmutableMultimap;
 import it.unibz.inf.ontop.endpoint.processor.SparqlQueryExecutor;
-import it.unibz.inf.ontop.exception.OntopConnectionException;
-import it.unibz.inf.ontop.exception.OntopReformulationException;
 import it.unibz.inf.ontop.rdf4j.repository.OntopRepositoryConnection;
+import it.unibz.inf.ontop.rdf4j.repository.OntopRepositoryConnection.ReformulationAndId;
 import it.unibz.inf.ontop.rdf4j.repository.impl.OntopVirtualRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnExpression;
@@ -41,13 +40,14 @@ public class ReformulateController {
         ImmutableMultimap<String, String> inputHeaders = SparqlQueryExecutor.extractHttpHeaders(request);
 
         try (OntopRepositoryConnection connection = repository.getConnection()) {
-            String reformulation = forNativeConsumption
-                    ? connection.reformulateIntoNativeQuery(query, inputHeaders, true)
-                    : connection.reformulate(query, inputHeaders);
+            ReformulationAndId reformulationAndId = forNativeConsumption
+                    ? connection.reformulateIntoNativeQueryWithId(query, inputHeaders, true)
+                    : connection.reformulateWithId(query, inputHeaders);
 
             HttpHeaders returnedHeaders = new HttpHeaders();
             returnedHeaders.set(CONTENT_TYPE, "text/plain; charset=UTF-8");
-            return new ResponseEntity<>(reformulation, returnedHeaders, HttpStatus.OK);
+            returnedHeaders.set("X-Query-ID", reformulationAndId.getQueryId().toString());
+            return new ResponseEntity<>(reformulationAndId.getReformulation(), returnedHeaders, HttpStatus.OK);
         }
     }
 }

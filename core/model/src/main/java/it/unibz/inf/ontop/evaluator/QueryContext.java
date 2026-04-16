@@ -30,6 +30,7 @@ public interface QueryContext {
 
     interface Factory {
         QueryContext create(ImmutableMap<String, String> normalizedHttpHeaders);
+        QueryContext create(ImmutableMap<String, String> normalizedHttpHeaders, UUID queryId);
     }
 
 }
