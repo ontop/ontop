@@ -102,19 +102,17 @@ public class ExistsTest extends AbstractRDF4JTest {
                 "http://person.example.org/person/2", "http://person.example.org/person/5"));
     }
 
-    // Not supported (no variables in the exists graph pattern)
-    @Test(expected = QueryEvaluationException.class)
+    @Test
     public void testOnlyConstantsInFilter() {
         String sparql = "PREFIX : <http://person.example.org/>\n" +
                 "SELECT ?s WHERE {\n" +
                 "   ?s a :Person .\n" +
                 "   FILTER EXISTS { <http://person.example.org/person/1> :firstName \"Roger\" }\n" +
                 "}";
-        Assert.assertEquals(5, runQueryAndCount(sparql));
+        Assert.assertEquals(6, runQueryAndCount(sparql));
     }
 
-    // Not supported (no variables in the exists graph pattern)
-    @Test(expected = QueryEvaluationException.class)
+    @Test
     public void testOnlyConstantsInFilter1() {
         String sparql = "PREFIX : <http://person.example.org/>\n" +
                 "SELECT ?s WHERE {\n" +
@@ -180,16 +178,14 @@ public class ExistsTest extends AbstractRDF4JTest {
         runQueryAndCompare(sparql, ImmutableSet.of("http://person.example.org/person/2"));
     }
 
-    // Not supported (no variables present in the not exists graph pattern)
-    @Test(expected = QueryEvaluationException.class)
+    @Test
     public void testFilterNotExistsAllConstants() {
         String sparql = "PREFIX : <http://person.example.org/>\n" +
                 "SELECT ?v WHERE { " +
                 "       ?v :firstName ?fname ; \n" +
                 "       FILTER NOT EXISTS { <http://person.example.org/person/1> :firstName \"Roger\" } \n" +
                 "}\n";
-        int countResults = runQueryAndCount(sparql);
-        assertEquals(0, countResults);
+        assertEquals(0, runQueryAndCount(sparql));
     }
 
     // The inner filter variables not bound in the not exists graph pattern is not supported
@@ -713,6 +709,58 @@ public class ExistsTest extends AbstractRDF4JTest {
                 "} GROUP BY ?person ?fname  \n";
 
         runQueryAndCompare(sparql, ImmutableList.of("1", "1", "1"));
+    }
+
+    @Test
+    public void testConstantTriplesInFilterExists() {
+        String sparql = "PREFIX : <http://person.example.org/>\n" +
+                "SELECT ?s WHERE {\n" +
+                "   ?s a :Person .\n" +
+                "   FILTER EXISTS { " +
+                "       <http://person.example.org/person/1> :firstName \"Roger\" ." +
+                "       <http://person.example.org/person/1> :lastName \"Smith\" ."+
+                "}\n" +
+                "}";
+        Assert.assertEquals(6, runQueryAndCount(sparql));
+    }
+
+    @Test
+    public void testConstantTriplesInFilterExists2() {
+        String sparql = "PREFIX : <http://person.example.org/>\n" +
+                "SELECT ?s WHERE {\n" +
+                "   ?s a :Person .\n" +
+                "   FILTER EXISTS { " +
+                "       <http://person.example.org/person/1> :firstName \"Roger\" ." +
+                "       <http://person.example.org/person/1> :lastName \"WrongLastName\" ."+
+                "}\n" +
+                "}";
+        Assert.assertEquals(0, runQueryAndCount(sparql));
+    }
+
+    @Test
+    public void testConstantTriplesInFilterNotExists() {
+        String sparql = "PREFIX : <http://person.example.org/>\n" +
+                "SELECT ?s WHERE {\n" +
+                "   ?s a :Person .\n" +
+                "   FILTER NOT EXISTS { " +
+                "       <http://person.example.org/person/1> :firstName \"Roger\" ." +
+                "       <http://person.example.org/person/1> :lastName \"Smith\" ."+
+                "}\n" +
+                "}";
+        Assert.assertEquals(0, runQueryAndCount(sparql));
+    }
+
+    @Test
+    public void testConstantTriplesInFilterNotExists2() {
+        String sparql = "PREFIX : <http://person.example.org/>\n" +
+                "SELECT ?s WHERE {\n" +
+                "   ?s a :Person .\n" +
+                "   FILTER NOT EXISTS { " +
+                "       <http://person.example.org/person/1> :firstName \"Roger\" ." +
+                "       <http://person.example.org/person/1> :lastName \"WrongLastName\" ."+
+                "}\n" +
+                "}";
+        Assert.assertEquals(6, runQueryAndCount(sparql));
     }
 
 }
