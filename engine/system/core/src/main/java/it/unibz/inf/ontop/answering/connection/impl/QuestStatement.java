@@ -18,6 +18,7 @@ import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.UUID;
 import java.util.concurrent.CountDownLatch;
 
 
@@ -321,6 +322,14 @@ public abstract class QuestStatement implements OntopStatement {
 	public  <R extends OBDAResultSet>  IQ getExecutableQuery(KGQuery<R> inputQuery, ImmutableMultimap<String, String> httpHeaders, boolean forNativeConsumption) throws OntopReformulationException {
 		ImmutableMap<String, String> normalizedHttpHeaders = normalizeHttpHeaders(httpHeaders);
 		QueryContext queryContext = queryContextFactory.create(normalizedHttpHeaders);
+
+		return engine.reformulateIntoNativeQuery(inputQuery, queryContext, queryLoggerFactory.create(queryContext), forNativeConsumption);
+	}
+
+	@Override
+	public  <R extends OBDAResultSet>  IQ getExecutableQuery(KGQuery<R> inputQuery, ImmutableMultimap<String, String> httpHeaders, boolean forNativeConsumption, UUID queryID) throws OntopReformulationException {
+		ImmutableMap<String, String> normalizedHttpHeaders = normalizeHttpHeaders(httpHeaders);
+		QueryContext queryContext = queryContextFactory.create(normalizedHttpHeaders, queryID);
 
 		return engine.reformulateIntoNativeQuery(inputQuery, queryContext, queryLoggerFactory.create(queryContext), forNativeConsumption);
 	}

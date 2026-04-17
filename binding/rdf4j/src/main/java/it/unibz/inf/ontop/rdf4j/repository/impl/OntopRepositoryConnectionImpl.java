@@ -611,9 +611,17 @@ public class OntopRepositoryConnectionImpl implements OntopRepositoryConnection 
     @Override
     public String reformulate(String sparql, ImmutableMultimap<String, String> httpHeaders)
             throws RepositoryException {
+        return reformulateWithId(sparql, httpHeaders).getReformulation();
+    }
+
+    @Override
+    public ReformulationAndId reformulateWithId(String sparql, ImmutableMultimap<String, String> httpHeaders) throws RepositoryException{
         try {
             SPARQLQuery<?> sparqlQuery = ontopConnection.getInputQueryFactory().createSPARQLQuery(sparql);
-            return ontopConnection.createStatement().getExecutableQuery(sparqlQuery, httpHeaders, false).toString();
+            UUID queryId = UUID.randomUUID();
+            String reformulation = ontopConnection.createStatement().getExecutableQuery(sparqlQuery, httpHeaders, false, queryId).toString();
+            return new ReformulationAndIdImpl(queryId, reformulation);
+
         } catch (OntopKGQueryException | OntopReformulationException | OntopConnectionException e) {
             throw new RepositoryException(e);
         }
@@ -622,21 +630,50 @@ public class OntopRepositoryConnectionImpl implements OntopRepositoryConnection 
     @Override
     public String reformulateIntoNativeQuery(String sparql, ImmutableMultimap<String, String> httpHeaders, boolean forNativeConsumption)
             throws RepositoryException {
+        return reformulateIntoNativeQueryWithId(sparql, httpHeaders, forNativeConsumption).getReformulation();
+    }
+
+    @Override
+    public ReformulationAndId reformulateIntoNativeQueryWithId(String sparql, ImmutableMultimap<String, String> httpHeaders, boolean forNativeConsumption) throws RepositoryException {
         try {
             SPARQLQuery<?> sparqlQuery = ontopConnection.getInputQueryFactory().createSPARQLQuery(sparql);
-            IQTree executableTree = ontopConnection.createStatement().getExecutableQuery(sparqlQuery, httpHeaders, forNativeConsumption)
+            UUID queryId = UUID.randomUUID();
+            IQTree executableTree = ontopConnection.createStatement().getExecutableQuery(sparqlQuery, httpHeaders, forNativeConsumption, queryId)
                     .getTree();
 
             var construction = UnaryIQTreeDecomposition.of(executableTree, ConstructionNode.class);
             if (construction.isPresent()) {
                 IQTree child = construction.getChild();
                 if (child instanceof NativeNode)
-                    return ((NativeNode) child).getNativeQueryString();
+                    return new ReformulationAndIdImpl(
+                            queryId,
+                            ((NativeNode) child).getNativeQueryString());
             }
             throw new MinorOntopInternalBugException("Unexpected structure of the executable IQTree: " + executableTree);
 
         } catch (OntopKGQueryException | OntopReformulationException | OntopConnectionException e) {
             throw new RepositoryException(e);
+        }
+    }
+
+    protected static class ReformulationAndIdImpl implements ReformulationAndId {
+
+        private final UUID queryId;
+        private final String nativeQuery;
+
+        protected ReformulationAndIdImpl(UUID queryId, String nativeQuery) {
+            this.queryId = queryId;
+            this.nativeQuery = nativeQuery;
+        }
+
+        @Override
+        public UUID getQueryId() {
+            return queryId;
+        }
+
+        @Override
+        public String getReformulation() {
+            return nativeQuery;
         }
     }
 

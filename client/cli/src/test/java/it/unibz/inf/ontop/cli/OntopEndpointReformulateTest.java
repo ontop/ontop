@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -159,6 +160,22 @@ public class OntopEndpointReformulateTest {
         String body = reformulate(ASK_QUERY, true);
         LOGGER.debug("Reformulation ASK (for native consumption):\n{}", body);
         assertTrue("Native consumption body should only contain the SQL query", body.trim().startsWith("SELECT"));
+    }
+
+    @Test
+    public void testReformulateReturnsQueryIdHeader() throws IOException {
+        String encodedQuery = URLEncoder.encode(SELECT_QUERY, StandardCharsets.UTF_8);
+        String url = "http://localhost:" + PORT + "/ontop/reformulate?query=" + encodedQuery;
+        HttpUriRequest request = new HttpGet(url);
+        HttpResponse response = HttpClientBuilder.create().build().execute(request);
+        assertThat("Reformulate endpoint should return 200",
+                response.getStatusLine().getStatusCode(),
+                equalTo(HttpStatus.SC_OK));
+
+        var header = response.getFirstHeader("X-Query-ID");
+        assertNotNull("Response should contain an X-Query-ID header", header);
+        UUID queryId = UUID.fromString(header.getValue());
+        assertNotNull("X-Query-ID header should be a valid UUID", queryId);
     }
 
     private String reformulate(String sparqlQuery) throws IOException {
