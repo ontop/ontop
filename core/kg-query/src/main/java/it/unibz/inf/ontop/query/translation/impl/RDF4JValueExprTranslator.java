@@ -26,7 +26,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.BinaryOperator;
 import java.util.function.Function;
-import java.util.function.UnaryOperator;
 
 public class RDF4JValueExprTranslator {
 
@@ -156,13 +155,13 @@ public class RDF4JValueExprTranslator {
         if (expr instanceof AbstractAggregateOperator) {
             AbstractAggregateOperator aggExpr = (AbstractAggregateOperator) expr;
             if (aggExpr instanceof Count) { //Unary count
-                return ExistsMapAnnotatedObject.of(extendedTerm, t -> getAggregateFunctionalTerm(SPARQL.COUNT, aggExpr.isDistinct(), t));
+                return ExistsMapAnnotatedObject.of(extendedTerm, t -> getAggregateUnaryFunctionalTerm(SPARQL.COUNT, aggExpr.isDistinct(), t));
             }
             if (aggExpr instanceof Avg) {
-                return ExistsMapAnnotatedObject.of(extendedTerm, t -> getAggregateFunctionalTerm(SPARQL.AVG, aggExpr.isDistinct(), t));
+                return ExistsMapAnnotatedObject.of(extendedTerm, t -> getAggregateUnaryFunctionalTerm(SPARQL.AVG, aggExpr.isDistinct(), t));
             }
             if (aggExpr instanceof Sum) {
-                return ExistsMapAnnotatedObject.of(extendedTerm, t -> getAggregateFunctionalTerm(SPARQL.SUM, aggExpr.isDistinct(), t));
+                return ExistsMapAnnotatedObject.of(extendedTerm, t -> getAggregateUnaryFunctionalTerm(SPARQL.SUM, aggExpr.isDistinct(), t));
             }
             if (aggExpr instanceof Min) {
                 return ExistsMapAnnotatedObject.of(extendedTerm, t -> getFunctionalTerm(SPARQL.MIN, t));
@@ -180,12 +179,6 @@ public class RDF4JValueExprTranslator {
 
                 return ExistsMapAnnotatedObject.of(extendedTerm, t -> termFactory.getImmutableFunctionalTerm(
                         functionSymbolFactory.getSPARQLGroupConcatFunctionSymbol(separator, aggExpr.isDistinct()), t));
-            }
-            if (aggExpr instanceof AggregateFunctionCall) {
-                AggregateFunctionCall call = (AggregateFunctionCall) aggExpr;
-                if (call.getIRI().startsWith(AGG.PREFIX)) {
-                    return ExistsMapAnnotatedObject.of(extendedTerm, t -> getAggregateFunctionalTerm(call.getIRI(), aggExpr.isDistinct(), t));
-                }
             }
             throw new RuntimeException("Unreachable: all subclasses covered");
         }
@@ -312,6 +305,14 @@ public class RDF4JValueExprTranslator {
                     .orElseThrow(() -> new MinorOntopInternalBugException("Cannot happen because there are at least 2 terms"));
             return ExistsMapAnnotatedObject.of(extendedTerms, terms -> orTerm);
         }
+        if (expr instanceof AggregateFunctionCall) {
+            AggregateFunctionCall call = (AggregateFunctionCall) expr;
+            if (call.getIRI().startsWith(AGG.PREFIX)) {
+                return ExistsMapAnnotatedObject.of(extendedTerms, terms -> getAggregateNAryFunctionalTerm(call.getIRI(), call.isDistinct(), terms));
+            } else {
+                throw new RuntimeException("Unsupported aggregate function: " + call.getIRI());
+            }
+        }
         throw new RuntimeException("Unreachable: all subclasses covered");
     }
 
@@ -331,12 +332,21 @@ public class RDF4JValueExprTranslator {
         return termFactory.getImmutableFunctionalTerm(functionSymbolFactory.getRequiredSPARQLFunctionSymbol(functionName, 3), t1, t2, t3);
     }
 
-    private ImmutableFunctionalTerm getAggregateFunctionalTerm(String officialName, boolean isDistinct, ImmutableTerm t) {
+    private ImmutableFunctionalTerm getAggregateUnaryFunctionalTerm(String officialName, boolean isDistinct, ImmutableTerm t) {
         return termFactory.getImmutableFunctionalTerm(
                 isDistinct
                         ? functionSymbolFactory.getRequiredSPARQLDistinctAggregateFunctionSymbol(officialName, 1)
                         : functionSymbolFactory.getRequiredSPARQLFunctionSymbol(officialName, 1),
                 t);
+    }
+
+    private ImmutableFunctionalTerm getAggregateNAryFunctionalTerm(String officialName, boolean isDistinct, ImmutableList<ImmutableTerm> terms) {
+        int arity = terms.size();
+        return termFactory.getImmutableFunctionalTerm(
+                isDistinct
+                        ? functionSymbolFactory.getRequiredSPARQLDistinctAggregateFunctionSymbol(officialName, arity)
+                        : functionSymbolFactory.getRequiredSPARQLFunctionSymbol(officialName, arity),
+                terms);
     }
 
 
