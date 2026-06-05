@@ -1,7 +1,6 @@
 package it.unibz.inf.ontop.iq.node;
 
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSortedSet;
 import it.unibz.inf.ontop.dbschema.QuotedID;
 import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.injection.IntermediateQueryFactory;
@@ -17,6 +16,9 @@ import it.unibz.inf.ontop.model.type.DBTermType;
  * and cannot occur in IQTrees during normalization, optimization, etc.
  *
  * See {@link IntermediateQueryFactory#createNativeNode} for creating a new instance.
+ *
+ * The variable order (in the immutable set) matches the order of the columns in the native query string
+ *
  */
 public interface NativeNode extends LeafIQTree {
 
@@ -24,12 +26,6 @@ public interface NativeNode extends LeafIQTree {
      * Every variable is guaranteed to have a type
      */
     ImmutableMap<Variable, DBTermType> getTypeMap();
-
-    /**
-     * This set is sorted, useful, for instance, for using JDBC result sets
-     */
-    @Override
-    ImmutableSortedSet<Variable> getVariables();
 
     /**
      * Needed because certain DBs like Oracle impose constraints on the length of a column name,

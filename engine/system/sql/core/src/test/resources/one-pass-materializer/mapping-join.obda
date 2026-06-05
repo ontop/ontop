@@ -1,0 +1,72 @@
+[PrefixDeclaration]
+:		http://example.org/company#
+ex:		http://example.org/company#
+owl:		http://www.w3.org/2002/07/owl#
+rdf:		http://www.w3.org/1999/02/22-rdf-syntax-ns#
+xml:		http://www.w3.org/XML/1998/namespace
+xsd:		http://www.w3.org/2001/XMLSchema#
+obda:		https://w3id.org/obda/vocabulary#
+rdfs:		http://www.w3.org/2000/01/rdf-schema#
+
+[MappingDeclaration] @collection [[
+
+mappingId	MAPID-employee-department-relation-1
+target		:employee/{emp_id} :worksOnProjectInDepartment :department/{dept_id} .
+source		SELECT e.emp_id, p.dept_id
+			FROM employees e
+			INNER JOIN project_assignments pa ON e.emp_id = pa.emp_id
+			INNER JOIN projects p ON pa.project_id = p.project_id
+			INNER JOIN departments d ON p.dept_id = d.dept_id
+
+mappingId	MAPID-employee-department-relation-2
+target		:department/{dept_id} :hasEmployeeWorkingOnProject :employee/{emp_id} .
+source		SELECT e.emp_id, p.dept_id
+			FROM employees e
+			INNER JOIN project_assignments pa ON e.emp_id = pa.emp_id
+			INNER JOIN projects p ON pa.project_id = p.project_id
+			INNER JOIN departments d ON p.dept_id = d.dept_id
+
+mappingId	MAPID-join-with-filter-1
+target		:assignment/{assignment_id} :involvesEngineeringDept "true"^^xsd:boolean .
+source		SELECT pa.assignment_id
+			FROM project_assignments pa
+			INNER JOIN projects p ON pa.project_id = p.project_id
+			INNER JOIN departments d ON p.dept_id = d.dept_id
+			WHERE d.dept_name = 'Engineering'
+
+mappingId	MAPID-employee-with-department-join-1
+target		:employee/{first_name} :belongsToDepartment :department/{dept_name} .
+source		SELECT e.first_name, d.dept_name
+			FROM employees e
+			INNER JOIN employee_dept ed ON e.emp_id = ed.emp_id
+			INNER JOIN departments d ON ed.dept_id = d.dept_id
+
+mappingId	MAPID-employee-with-department-join-2
+target		:employee/{first_name} :worksIn {location}^^xsd:string .
+source		SELECT e.first_name, d.location
+			FROM employees e
+			INNER JOIN employee_dept ed ON e.emp_id = ed.emp_id
+			INNER JOIN departments d ON ed.dept_id = d.dept_id
+
+mappingId	MAPID-employee-with-department-join-3
+target		:department/{dept_name} :hasEmployeeType {emp_type} .
+source		SELECT e.emp_type, d.dept_name
+			FROM employees e
+			INNER JOIN employee_dept ed ON e.emp_id = ed.emp_id
+			INNER JOIN departments d ON ed.dept_id = d.dept_id
+
+mappingId	MAPID-self-join-1
+target		:employee/{e_emp_id} :collaboratesWith :employee/{colleague_emp_id} .
+source		SELECT pa1.emp_id AS e_emp_id, pa2.emp_id AS colleague_emp_id
+			FROM project_assignments pa1
+			INNER JOIN project_assignments pa2 ON pa1.project_id = pa2.project_id
+			INNER JOIN projects p ON pa1.project_id = p.project_id
+
+mappingId	MAPID-self-join-2
+target		:employee/{colleague_emp_id} :worksWithColleague :employee/{e_emp_id} .
+source		SELECT pa1.emp_id AS e_emp_id, pa2.emp_id AS colleague_emp_id
+			FROM project_assignments pa1
+			INNER JOIN project_assignments pa2 ON pa1.project_id = pa2.project_id
+			INNER JOIN projects p ON pa1.project_id = p.project_id
+
+]]

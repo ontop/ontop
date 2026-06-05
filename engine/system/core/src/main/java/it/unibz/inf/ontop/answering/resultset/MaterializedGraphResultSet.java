@@ -45,4 +45,12 @@ public interface MaterializedGraphResultSet extends GraphResultSet {
      * NB: It is possible that for some predicate/classes, no RDF triple is produced (empty answer)
      */
     ImmutableSet<IRI> getSelectedVocabulary();
+
+    /**
+     * Number of SQL queries that have been executed so far to materialize RDF triples.
+     *
+     * Increases until the materialization completes.
+     */
+    long getSQLQueryCountSoFar();
+
 }

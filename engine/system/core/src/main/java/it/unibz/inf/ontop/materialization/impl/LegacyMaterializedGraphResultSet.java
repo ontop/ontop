@@ -1,18 +1,12 @@
 package it.unibz.inf.ontop.materialization.impl;
 
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.UnmodifiableIterator;
 import it.unibz.inf.ontop.answering.OntopQueryEngine;
-import it.unibz.inf.ontop.answering.connection.OntopConnection;
-import it.unibz.inf.ontop.answering.connection.OntopStatement;
+import it.unibz.inf.ontop.evaluator.QueryContext;
 import it.unibz.inf.ontop.query.KGQueryFactory;
 import it.unibz.inf.ontop.query.SelectQuery;
 import it.unibz.inf.ontop.answering.resultset.MaterializedGraphResultSet;
 import it.unibz.inf.ontop.query.resultset.OntopBindingSet;
-import it.unibz.inf.ontop.query.resultset.OntopCloseableIterator;
-import it.unibz.inf.ontop.query.resultset.TupleResultSet;
 import it.unibz.inf.ontop.exception.*;
 import it.unibz.inf.ontop.materialization.MaterializationParams;
 import it.unibz.inf.ontop.model.term.IRIConstant;
@@ -25,64 +19,34 @@ import org.apache.commons.rdf.api.IRI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nullable;
-import java.util.ArrayList;
-import java.util.List;
-
-class DefaultMaterializedGraphResultSet implements MaterializedGraphResultSet {
+class LegacyMaterializedGraphResultSet extends AbstractMaterializedGraphResultSet implements MaterializedGraphResultSet {
 
     private final TermFactory termFactory;
-    private final ImmutableMap<IRI, VocabularyEntry> vocabulary;
     private final KGQueryFactory kgQueryFactory;
-    private final boolean canBeIncomplete;
 
-    private final OntopQueryEngine queryEngine;
-    private final UnmodifiableIterator<VocabularyEntry> vocabularyIterator;
-
-    private int counter;
-    @Nullable
-    private OntopConnection ontopConnection;
-    @Nullable
-    private OntopStatement tmpStatement;
-    @Nullable
-    private TupleResultSet tmpContextResultSet;
-
-    private final Logger LOGGER = LoggerFactory.getLogger(DefaultMaterializedGraphResultSet.class);
-    private final List<IRI> possiblyIncompleteClassesAndProperties;
     private VocabularyEntry lastSeenPredicate;
     private IRIConstant lastSeenPredicateIRI;
-
     private final IRIConstant rdfTypeIRI;
 
+    private final Logger LOGGER = LoggerFactory.getLogger(LegacyMaterializedGraphResultSet.class);
 
-    DefaultMaterializedGraphResultSet(ImmutableMap<IRI, VocabularyEntry> vocabulary, MaterializationParams params,
-                                      OntopQueryEngine queryEngine,
-                                      KGQueryFactory kgQueryFactory,
-                                      TermFactory termFactory,
-                                      org.apache.commons.rdf.api.RDF rdfFactory) {
-
+    LegacyMaterializedGraphResultSet(ImmutableMap<IRI, VocabularyEntry> vocabulary, MaterializationParams params,
+                                     OntopQueryEngine queryEngine,
+                                     KGQueryFactory kgQueryFactory,
+                                     TermFactory termFactory,
+                                     QueryContext.Factory queryContextFactory) {
+        super(vocabulary, params, queryEngine, queryContextFactory);
         this.termFactory = termFactory;
-        this.vocabulary = vocabulary;
-        this.vocabularyIterator = vocabulary.values().iterator();
-
-        this.queryEngine = queryEngine;
-        this.canBeIncomplete = params.canMaterializationBeIncomplete();
         this.kgQueryFactory = kgQueryFactory;
-        this.possiblyIncompleteClassesAndProperties = new ArrayList<>();
 
-        counter = 0;
-
+        tripleCounter = 0;
+        queryCounter = 0;
         rdfTypeIRI = termFactory.getConstantIRI(RDF.TYPE.getIRIString());
 
         // Lately initiated
         ontopConnection = null;
         tmpStatement = null;
         tmpContextResultSet = null;
-    }
-
-    @Override
-    public ImmutableSet<IRI> getSelectedVocabulary() {
-        return vocabulary.keySet();
     }
 
     @Override
@@ -101,22 +65,8 @@ class DefaultMaterializedGraphResultSet implements MaterializedGraphResultSet {
             /*
              * Closes the previous result set and statement (if open)
              */
-            if (tmpContextResultSet != null) {
-                try {
-                    tmpContextResultSet.close();
-                } catch (OntopConnectionException e) {
-                    LOGGER.warn("Non-critical exception while closing the graph result set: " + e);
-                    // Not critical, continue
-                }
-            }
-            if (tmpStatement != null) {
-                try {
-                    tmpStatement.close();
-                } catch (OntopConnectionException e) {
-                    LOGGER.warn("Non-critical exception while closing the statement: " + e);
-                    // Not critical, continue
-                }
-            }
+            closeResource(tmpContextResultSet);
+            closeResource(tmpStatement);
 
             /*
              * New query for the next RDF property/class
@@ -127,7 +77,8 @@ class DefaultMaterializedGraphResultSet implements MaterializedGraphResultSet {
                 SelectQuery query = kgQueryFactory.createSelectQuery(predicate.getSelectQuery());
 
                 tmpStatement = ontopConnection.createStatement();
-                tmpContextResultSet = tmpStatement.execute(query);
+                tmpContextResultSet = tmpStatement.execute(query, queryContext);
+                queryCounter ++;
 
                 if (tmpContextResultSet.hasNext()) {
                     lastSeenPredicate = predicate;
@@ -137,11 +88,10 @@ class DefaultMaterializedGraphResultSet implements MaterializedGraphResultSet {
                 }
             } catch (OntopQueryAnsweringException | OntopConnectionException e) {
                 if (canBeIncomplete) {
-                    LOGGER.warn("Possibly incomplete class/property " + predicate + " (materialization problem).\n"
-                            + "Details: " + e);
+                    LOGGER.warn("Possibly incomplete class/property {} (materialization problem).\nDetails: {}", predicate, e);
                     possiblyIncompleteClassesAndProperties.add(predicate.name);
                 } else {
-                    LOGGER.error("Problem materializing the class/property " + predicate);
+                    LOGGER.error("Problem materializing the class/property {}", predicate);
                     throw e;
                 }
             } catch (OntopInvalidKGQueryException e) {
@@ -168,46 +118,22 @@ class DefaultMaterializedGraphResultSet implements MaterializedGraphResultSet {
 
     @Override
     public RDFFact next() throws OntopQueryAnsweringException {
-        counter++;
+        tripleCounter++;
 
         OntopBindingSet resultTuple;
         try {
             resultTuple = tmpContextResultSet.next();
             return toAssertion(resultTuple);
         } catch (OntopConnectionException e) {
-            try {
-                tmpContextResultSet.close();
-            } catch (OntopConnectionException ex) {
-                ex.printStackTrace();
-            }
-            e.printStackTrace();
+            LOGGER.error("Connection error while retrieving next RDF fact", e);
+            closeResource(tmpContextResultSet);
+            closeResource(tmpStatement);
+            throw new OntopQueryEvaluationException("Failed to retrieve next RDF fact", e);
         }
-        return null;
     }
 
-    //TODO implement a closable iterator
     @Override
-    public OntopCloseableIterator<RDFFact, OntopConnectionException> iterator() {
-        throw new UnsupportedOperationException("iterator");
-    }
-
-    /**
-     * Releases all the connection resources
-     */
-    public void close() throws OntopConnectionException {
-        if (tmpStatement != null) {
-            tmpStatement.close();
-        }
-        if (ontopConnection != null) {
-            ontopConnection.close();
-        }
-    }
-
-    public long getTripleCountSoFar() {
-        return counter;
-    }
-
-    public ImmutableList<IRI> getPossiblyIncompleteRDFPropertiesAndClassesSoFar() {
-        return ImmutableList.copyOf(possiblyIncompleteClassesAndProperties);
+    Logger getLogger() {
+        return LOGGER;
     }
 }

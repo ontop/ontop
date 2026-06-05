@@ -11,7 +11,7 @@ import it.unibz.inf.ontop.exception.OntopQueryAnsweringException;
 import it.unibz.inf.ontop.injection.OntopSystemConfiguration;
 import it.unibz.inf.ontop.materialization.MaterializationParams;
 import it.unibz.inf.ontop.materialization.OntopRDFMaterializer;
-import it.unibz.inf.ontop.materialization.impl.DefaultOntopRDFMaterializer;
+import it.unibz.inf.ontop.materialization.impl.Materializers;
 import it.unibz.inf.ontop.rdf4j.materialization.RDF4JMaterializer;
 import it.unibz.inf.ontop.rdf4j.query.MaterializationGraphQuery;
 import it.unibz.inf.ontop.rdf4j.utils.RDF4JHelper;
@@ -35,8 +35,9 @@ public class DefaultRDF4JMaterializer implements RDF4JMaterializer {
 
     private final OntopRDFMaterializer materializer;
 
-    public DefaultRDF4JMaterializer(OntopSystemConfiguration configuration, MaterializationParams materializationParams) throws OBDASpecificationException {
-        materializer = new DefaultOntopRDFMaterializer(configuration, materializationParams);
+    public DefaultRDF4JMaterializer(OntopSystemConfiguration configuration, MaterializationParams materializationParams)
+            throws OBDASpecificationException {
+        materializer = Materializers.create(configuration, materializationParams);
     }
 
     /**

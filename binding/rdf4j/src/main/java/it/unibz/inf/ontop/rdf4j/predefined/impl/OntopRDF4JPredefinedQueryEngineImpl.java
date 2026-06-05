@@ -314,7 +314,7 @@ public class OntopRDF4JPredefinedQueryEngineImpl implements OntopRDF4JPredefined
                 predefinedQuery.getId(),
                 bindingSet);
 
-        return queryReformulator.reformulateIntoNativeQuery(newQuery, emptyQueryContext, tmpQueryLogger);
+        return queryReformulator.reformulateIntoNativeQuery(newQuery, emptyQueryContext, tmpQueryLogger, false);
     }
 
     private QueryLogger createQueryLogger(PredefinedQuery<?> predefinedQuery, ImmutableMap<String, String> bindings,

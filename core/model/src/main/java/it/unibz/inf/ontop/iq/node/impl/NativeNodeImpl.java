@@ -2,7 +2,6 @@ package it.unibz.inf.ontop.iq.node.impl;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.ImmutableSortedSet;
 import com.google.inject.assistedinject.Assisted;
 import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.dbschema.QuotedID;
@@ -16,13 +15,10 @@ import it.unibz.inf.ontop.iq.node.*;
 import it.unibz.inf.ontop.iq.request.FunctionalDependencies;
 import it.unibz.inf.ontop.iq.request.VariableNonRequirement;
 import it.unibz.inf.ontop.model.term.Variable;
-import it.unibz.inf.ontop.model.term.VariableOrGroundTerm;
 import it.unibz.inf.ontop.model.type.DBTermType;
-import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.InjectiveSubstitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
 import it.unibz.inf.ontop.utils.CoreUtilsFactory;
-import it.unibz.inf.ontop.utils.VariableGenerator;
 
 import java.util.Objects;
 
@@ -34,13 +30,11 @@ public class NativeNodeImpl extends LeafIQTreeImpl implements NativeNode {
     private final ImmutableMap<Variable, DBTermType> variableTypeMap;
     private final String nativeQueryString;
     private final VariableNullability variableNullability;
-    // TODO: does sorted really here help?
-    //  (ImmutableSet would preserve the insertion order anyway)
-    private final ImmutableSortedSet<Variable> variables;
+    private final ImmutableSet<Variable> variables;
     private final ImmutableMap<Variable, QuotedID> columnNames;
 
     @AssistedInject
-    private NativeNodeImpl(@Assisted ImmutableSortedSet<Variable> variables,
+    private NativeNodeImpl(@Assisted ImmutableSet<Variable> variables,
                            @Assisted("variableTypeMap") ImmutableMap<Variable, DBTermType> variableTypeMap,
                            @Assisted("columnNames") ImmutableMap<Variable, QuotedID> columnNames,
                            @Assisted String nativeQueryString,
@@ -74,7 +68,7 @@ public class NativeNodeImpl extends LeafIQTreeImpl implements NativeNode {
 
 
     @Override
-    public ImmutableSortedSet<Variable> getVariables() {
+    public ImmutableSet<Variable> getVariables() {
         return variables;
     }
 

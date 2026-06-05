@@ -6,7 +6,7 @@ import it.unibz.inf.ontop.exception.OBDASpecificationException;
 import it.unibz.inf.ontop.injection.OntopSystemConfiguration;
 import it.unibz.inf.ontop.materialization.MaterializationParams;
 import it.unibz.inf.ontop.materialization.OntopRDFMaterializer;
-import it.unibz.inf.ontop.materialization.impl.DefaultOntopRDFMaterializer;
+import it.unibz.inf.ontop.materialization.impl.Materializers;
 import it.unibz.inf.ontop.owlapi.OntopOWLAPIMaterializer;
 import it.unibz.inf.ontop.owlapi.exception.OntopOWLException;
 import it.unibz.inf.ontop.owlapi.resultset.MaterializedGraphOWLResultSet;
@@ -25,7 +25,7 @@ public class DefaultOntopOWLAPIMaterializer implements OntopOWLAPIMaterializer {
 	private final RDF rdfFactory;
 
 	public DefaultOntopOWLAPIMaterializer(OntopSystemConfiguration configuration, MaterializationParams materializationParams) throws OBDASpecificationException {
-		materializer = new DefaultOntopRDFMaterializer(configuration, materializationParams);
+		materializer = Materializers.create(configuration, materializationParams);
 		rdfFactory = configuration.getInjector().getInstance(RDF.class);
 	}
 

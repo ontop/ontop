@@ -11,9 +11,9 @@ import it.unibz.inf.ontop.iq.IQ;
  *
  */
 public interface QueryCache {
-    IQ get(KGQuery<?> inputQuery, QueryContext queryContext);
+    IQ get(KGQuery<?> inputQuery, QueryContext queryContext, boolean forNativeConsumption);
 
-    void put(KGQuery<?> inputQuery, QueryContext queryContext, IQ executableQuery);
+    void put(KGQuery<?> inputQuery, QueryContext queryContext, boolean forNativeConsumption, IQ executableQuery);
 
     void clear();
 }
