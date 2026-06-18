@@ -5,10 +5,8 @@ import com.google.inject.assistedinject.AssistedInject;
 import it.unibz.inf.ontop.dbschema.RelationID;
 import it.unibz.inf.ontop.exception.MetadataExtractionException;
 import it.unibz.inf.ontop.injection.CoreSingletons;
-import it.unibz.inf.ontop.utils.ImmutableCollectors;
 
 import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -45,13 +43,15 @@ public class AthenaDBMetadataProvider extends TrinoDBMetadataProvider {
      */
     @Override
     protected ResultSet getColumnsResultSet(RelationID id) throws SQLException {
-        String catalog = getRelationCatalog(id);
-        String schema = getRelationSchema(id);
-        String table = getRelationName(id);
-        PreparedStatement st = connection.prepareStatement(
-                "SELECT ? AS TABLE_CAT, " +
-                        "       ? AS TABLE_SCHEM, " +
-                        "       ? AS TABLE_NAME, " +
+        Statement st = connection.createStatement();
+        st.closeOnCompletion();
+        String catalog = st.enquoteLiteral(getRelationCatalog(id));
+        String schema = st.enquoteLiteral(getRelationSchema(id));
+        String table = st.enquoteLiteral(getRelationName(id));
+        return st.executeQuery(
+                "SELECT " + catalog + " AS TABLE_CAT, " +
+                        "       " + schema + " AS TABLE_SCHEM, " +
+                        "       " + table + " AS TABLE_NAME, " +
                         "       column_name AS COLUMN_NAME, " +
                         "       data_type   AS TYPE_NAME, " +
                         // TYPE_NAME already carries parameters (varchar(100), decimal(38,2)), DATA_TYPE=OTHER avoids extractSQLTypeName re-appending precision.
@@ -61,18 +61,10 @@ public class AthenaDBMetadataProvider extends TrinoDBMetadataProvider {
                         "       CAST(0 AS INTEGER) AS DECIMAL_DIGITS, " +
                         "       CASE WHEN is_nullable = 'YES' THEN 1 ELSE 0 END AS NULLABLE " +
                         "FROM INFORMATION_SCHEMA.COLUMNS " +
-                        "WHERE LOWER(table_catalog) = LOWER(?) " +
-                        "  AND LOWER(table_schema)  = LOWER(?) " +
-                        "  AND LOWER(table_name)    = LOWER(?) " +
+                        "WHERE LOWER(table_catalog) = LOWER(" + catalog + ") " +
+                        "  AND LOWER(table_schema)  = LOWER(" + schema + ") " +
+                        "  AND LOWER(table_name)    = LOWER(" + table + ") " +
                         "ORDER BY ordinal_position");
-        st.closeOnCompletion();
-        st.setString(1, catalog);
-        st.setString(2, schema);
-        st.setString(3, table);
-        st.setString(4, catalog);
-        st.setString(5, schema);
-        st.setString(6, table);
-        return st.executeQuery();
     }
 
     @Override
