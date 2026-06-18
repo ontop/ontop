@@ -11,6 +11,8 @@ import it.unibz.inf.ontop.query.resultset.TupleResultSet;
 import it.unibz.inf.ontop.exception.*;
 import it.unibz.inf.ontop.iq.IQ;
 
+import java.util.UUID;
+
 /**
  * OBDAStatement specific to Ontop.
  *
@@ -27,6 +29,11 @@ public interface OntopStatement extends OBDAStatement {
     <R extends OBDAResultSet> String getRewritingRendering(KGQuery<R> inputQuery) throws OntopReformulationException;
 
     <R extends OBDAResultSet> IQ getExecutableQuery(KGQuery<R> inputQuery, ImmutableMultimap<String, String> httpHeaders, boolean forNativeConsumption) throws OntopReformulationException;
+
+    /**
+     * Make sure the queryId is unique
+     */
+    <R extends OBDAResultSet> IQ getExecutableQuery(KGQuery<R> inputQuery, ImmutableMultimap<String, String> httpHeaders, boolean forNativeConsumption, UUID queryId) throws OntopReformulationException;
 
     TupleResultSet executeSelectQuery(IQ executableQuery, QueryLogger queryLogger)
             throws OntopQueryEvaluationException;

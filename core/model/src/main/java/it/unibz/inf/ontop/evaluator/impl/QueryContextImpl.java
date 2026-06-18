@@ -36,8 +36,19 @@ public class QueryContextImpl implements QueryContext {
         this(normalizedHttpHeaders, settings, UUID.randomUUID());
     }
 
+    @AssistedInject
+    protected QueryContextImpl(@Assisted ImmutableMap<String, String> normalizedHttpHeaders,
+                               @Assisted UUID queryId, OntopModelSettings settings) {
+        this(normalizedHttpHeaders, queryId, settings, UUID.randomUUID());
+    }
+
     protected QueryContextImpl(ImmutableMap<String, String> normalizedHttpHeaders,
-                             OntopModelSettings settings, UUID salt) {
+                               OntopModelSettings settings, UUID salt) {
+        this(normalizedHttpHeaders, UUID.randomUUID(),settings, salt);
+    }
+
+    protected QueryContextImpl(ImmutableMap<String, String> normalizedHttpHeaders,
+                             UUID queryId, OntopModelSettings settings, UUID salt) {
         this.httpHeaders = normalizedHttpHeaders;
         if (settings.isAuthorizationEnabled()) {
             var commaSplitter = Splitter.on(",");
@@ -59,7 +70,7 @@ public class QueryContextImpl implements QueryContext {
 
         this.salt = salt;
         this.settings = settings;
-        this.queryId = UUID.randomUUID();
+        this.queryId = queryId;
     }
 
     @Override

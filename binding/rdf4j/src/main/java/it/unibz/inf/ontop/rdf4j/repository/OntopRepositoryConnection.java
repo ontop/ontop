@@ -4,6 +4,8 @@ import com.google.common.collect.ImmutableMultimap;
 import org.eclipse.rdf4j.query.*;
 import org.eclipse.rdf4j.repository.RepositoryException;
 
+import java.util.UUID;
+
 public interface OntopRepositoryConnection extends org.eclipse.rdf4j.repository.RepositoryConnection {
 
     Query prepareQuery(QueryLanguage ql, String query, ImmutableMultimap<String, String> httpHeaders)
@@ -30,10 +32,14 @@ public interface OntopRepositoryConnection extends org.eclipse.rdf4j.repository.
      */
     String reformulate(String sparql, ImmutableMultimap<String, String> httpHeaders) throws RepositoryException;
 
+    ReformulationAndId reformulateWithId(String sparql, ImmutableMultimap<String, String> httpHeaders) throws RepositoryException;
+
     /**
      * Renders the native query
      */
     String reformulateIntoNativeQuery(String sparql, ImmutableMultimap<String, String> httpHeaders, boolean forNativeConsumption) throws RepositoryException;
+
+    ReformulationAndId reformulateIntoNativeQueryWithId(String sparql, ImmutableMultimap<String, String> httpHeaders, boolean forNativeConsumption) throws RepositoryException;
 
     @Deprecated(since = "5.6.0")
     default String reformulateIntoNativeQuery(String sparql, ImmutableMultimap<String, String> httpHeaders) throws RepositoryException {
@@ -47,5 +53,13 @@ public interface OntopRepositoryConnection extends org.eclipse.rdf4j.repository.
 
     default String reformulateIntoNativeQuery(String sparql, boolean forNativeConsumption) throws RepositoryException {
         return reformulateIntoNativeQuery(sparql, ImmutableMultimap.of(), forNativeConsumption);
+    }
+
+    /**
+     * TODO: replace it by a record when upgrading to Java >= 17
+     */
+    interface ReformulationAndId {
+        UUID getQueryId();
+        String getReformulation();
     }
 }
