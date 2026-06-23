@@ -91,9 +91,30 @@ public class JDBCConnector implements DBConnector {
 
     public synchronized Connection getSQLPoolConnection() throws OntopConnectionException {
         try {
+            // Check if we need to bypass connection pooling for Authorization header processing
+            if (shouldBypassConnectionPool()) {
+                log.info("Bypassing connection pool due to Authorization header");
+                return LocalJDBCConnectionUtils.createConnection(settings);
+            }
+            
             return connectionPool.getConnection();
         } catch (SQLException e) {
             throw new OntopConnectionException(e);
+        }
+    }
+    
+    /**
+     * Checks if we should bypass the connection pool due to Authorization header presence.
+     */
+    private boolean shouldBypassConnectionPool() {
+        try {
+            // Use reflection to check AuthorizationContext to avoid circular dependencies
+            Class<?> authContextClass = Class.forName("it.unibz.inf.ontop.endpoint.processor.AuthorizationContext");
+            java.lang.reflect.Method hasAuthMethod = authContextClass.getMethod("hasAuthorizationHeader");
+            return (Boolean) hasAuthMethod.invoke(null);
+        } catch (Exception e) {
+            // If AuthorizationContext is not available, use the pool as normal
+            return false;
         }
     }
 
