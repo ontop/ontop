@@ -132,4 +132,22 @@ public class InconsistencyCheckingTest {
 
 		assertFalse(reasoner.isConsistent());
 	} 
+	@Test
+	public void testAsymmetricObjectPropConsistency() throws Exception {
+		// p asymmetric, single assertion p(a,b) -> consistent
+		manager.addAxiom(ontology, AsymmetricObjectProperty(r1));
+		manager.addAxiom(ontology, ObjectPropertyAssertion(r1, a, b));
+		startReasoner();
+		assertTrue(reasoner.isConsistent());
+	}
+
+	@Test
+	public void testAsymmetricObjectPropInconsistency() throws Exception {
+		// p asymmetric, p(a,b) and p(b,a) -> inconsistent
+		manager.addAxiom(ontology, AsymmetricObjectProperty(r1));
+		manager.addAxiom(ontology, ObjectPropertyAssertion(r1, a, b));
+		manager.addAxiom(ontology, ObjectPropertyAssertion(r1, b, a));
+		startReasoner();
+		assertFalse(reasoner.isConsistent());
+	}
 }
