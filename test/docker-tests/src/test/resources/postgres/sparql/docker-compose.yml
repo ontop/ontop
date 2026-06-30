@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+  # PostgreSQL with http extension for SPARQL federation testing
+  postgres-sparql:
+    image: postgres:13-alpine
+    container_name: ontop-postgres-sparql
+    environment:
+      POSTGRES_USER: testuser
+      POSTGRES_PASSWORD: testpass
+      POSTGRES_DB: ontop_test
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./init-sparql.sql:/docker-entrypoint-initdb.d/init-sparql.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U testuser -d ontop_test"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  # Optional: A local SPARQL endpoint for testing (using Apache Jena Fuseki)
+  # Uncomment if you want to test with a local SPARQL endpoint
+  # fuseki:
+  #   image: stain/jena-fuseki:4.3.2
+  #   container_name: ontop-fuseki
+  #   environment:
+  #     ADMIN_PASSWORD: admin
+  #     JVM_ARGS: -Xmx2G
+  #   ports:
+  #     - "3030:3030"
+  #   volumes:
+  #     - ./fuseki-data:/fuseki
+  #   healthcheck:
+  #     test: ["CMD", "curl", "-f", "http://localhost:3030/$/ping"]
+  #     interval: 10s
+  #     timeout: 5s
+  #     retries: 5
+  #   restart: unless-stopped
