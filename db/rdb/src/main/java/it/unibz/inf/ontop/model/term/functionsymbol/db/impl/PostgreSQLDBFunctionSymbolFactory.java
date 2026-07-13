@@ -275,7 +275,7 @@ public class PostgreSQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymb
     protected String serializeDateTimeNormWithTZ(ImmutableList<? extends ImmutableTerm> terms, Function<ImmutableTerm, String> termConverter, TermFactory termFactory) {
         // Enforces ISO 8601: https://stackoverflow.com/questions/38834022/turn-postgres-date-representation-into-iso-8601-string
         // However, use the local TZ instead of the stored TZ
-        return String.format("TO_JSON(%s)#>>'{}'", termConverter.apply(terms.get(0)));
+        return String.format("(TO_JSON(%s)#>>'{}')", termConverter.apply(terms.get(0)));
     }
 
     @Override

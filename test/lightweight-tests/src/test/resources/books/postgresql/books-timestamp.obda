@@ -1,0 +1,12 @@
+[PrefixDeclaration]
+:       http://example.org/book
+ns:     http://example.org/ns#
+rdfs:   http://www.w3.org/2000/01/rdf-schema#
+xsd:    http://www.w3.org/2001/XMLSchema#
+
+
+[MappingDeclaration] @collection [[
+mappingId	book-datetime-label
+target		:{id} a :Book ; rdfs:label "published on {publication_date}"^^xsd:string .
+source		SELECT id, publication_date FROM books WHERE lang = 'en'
+]]
