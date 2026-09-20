@@ -120,7 +120,7 @@
         <maven-surefire-plugin.version>3.0.0-M9</maven-surefire-plugin.version>
         <maven-surefire-report-plugin.version>3.0.0-M9</maven-surefire-report-plugin.version>
         <sortpom-maven-plugin.version>3.2.1</sortpom-maven-plugin.version>
-        <spring-boot-maven-plugin.version>2.7.9</spring-boot-maven-plugin.version> <!-- 3.0.0+ needs JDK17 (via Spring Boot 3) -->
+        <spring-boot-maven-plugin.version>3.5.16</spring-boot-maven-plugin.version>
         <versions-maven-plugin.version>2.15.0</versions-maven-plugin.version>
 
         <!-- Dependency versions: core dependencies -->
@@ -141,8 +141,9 @@
         <hikari-cp.version>3.4.5</hikari-cp.version>
         <httpclient.version>4.5.13</httpclient.version>
         <httpcore.version>4.4.14</httpcore.version>
-        <jackson.version>2.18.6</jackson.version>
-        <jackson-databind.version>2.18.6</jackson-databind.version>
+        <jackson.version>2.21.5</jackson.version>
+        <jackson-databind.version>2.21.5</jackson-databind.version>
+        <jackson-annotations.version>2.21</jackson-annotations.version>
         <javax-inject.version>1</javax-inject.version>
         <jgrapht.version>0.9.3</jgrapht.version>
         <jsqlparser.version>4.4</jsqlparser.version>
@@ -150,7 +151,7 @@
         <junit.version>4.13.2</junit.version>
         <junit-jupiter.version>5.8.2</junit-jupiter.version>
         <junit-system-stubs.version>2.1.5</junit-system-stubs.version>
-        <logback.version>1.2.13</logback.version>
+        <logback.version>1.5.34</logback.version>
         <nullanno.version>3.0.0</nullanno.version>
         <opencsv.version>5.7.1</opencsv.version>
         <owlapi.version>5.5.1</owlapi.version>
@@ -159,9 +160,9 @@
         <r2rml-api.version>0.9.1</r2rml-api.version>
         <rdf4j.version>5.1.6</rdf4j.version>
         <servlet2-api.version>2.5</servlet2-api.version>
-        <servlet4-api.version>4.0.1</servlet4-api.version>
-        <slf4j.version>1.7.36</slf4j.version>
-        <spring-boot.version>2.7.18</spring-boot.version>
+        <jakarta-servlet.version>6.0.0</jakarta-servlet.version>
+        <slf4j.version>2.0.18</slf4j.version>
+        <spring-boot.version>3.5.16</spring-boot.version>
         <urlbuilder.version>2.0.9</urlbuilder.version>
         <tomcat-jdbc.version>10.0.0-M7</tomcat-jdbc.version>
         <toml4j.version>0.7.2</toml4j.version>
@@ -174,12 +175,12 @@
         <jsonld-java.version>0.13.0</jsonld-java.version>
         <semargl-sesame.version>0.6.1</semargl-sesame.version>
         <semargl.version>0.7</semargl.version>
-        <thymeleaf.version>3.0.15.RELEASE</thymeleaf.version>
-        <tomcat-embed-core.version>9.0.117</tomcat-embed-core.version>
+        <thymeleaf.version>3.1.5.RELEASE</thymeleaf.version>
+        <tomcat-embed-core.version>10.1.57</tomcat-embed-core.version>
         <log4j2.version>2.19.0</log4j2.version>
 
         <!-- JDK version -->
-        <jdk.version>11</jdk.version>
+        <jdk.version>17</jdk.version>
     </properties>
 
     <dependencyManagement>
@@ -816,9 +817,9 @@
                 <version>${servlet2-api.version}</version>
             </dependency>
             <dependency>
-                <groupId>javax.servlet</groupId>
-                <artifactId>javax.servlet-api</artifactId>
-                <version>${servlet4-api.version}</version>
+                <groupId>jakarta.servlet</groupId>
+                <artifactId>jakarta.servlet-api</artifactId>
+                <version>${jakarta-servlet.version}</version>
             </dependency>
 
             <!-- Apache HttpClient -->
@@ -972,7 +973,7 @@
             <dependency>
                 <groupId>com.fasterxml.jackson.core</groupId>
                 <artifactId>jackson-annotations</artifactId>
-                <version>${jackson.version}</version>
+                <version>${jackson-annotations.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.fasterxml.jackson.core</groupId>
@@ -987,6 +988,16 @@
             <dependency>
                 <groupId>com.fasterxml.jackson.datatype</groupId>
                 <artifactId>jackson-datatype-jdk8</artifactId>
+                <version>${jackson.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.datatype</groupId>
+                <artifactId>jackson-datatype-jsr310</artifactId>
+                <version>${jackson.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.module</groupId>
+                <artifactId>jackson-module-parameter-names</artifactId>
                 <version>${jackson.version}</version>
             </dependency>
 
@@ -1119,6 +1130,16 @@
             <dependency>
                 <groupId>org.apache.tomcat.embed</groupId>
                 <artifactId>tomcat-embed-core</artifactId>
+                <version>${tomcat-embed-core.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.tomcat.embed</groupId>
+                <artifactId>tomcat-embed-el</artifactId>
+                <version>${tomcat-embed-core.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.tomcat.embed</groupId>
+                <artifactId>tomcat-embed-websocket</artifactId>
                 <version>${tomcat-embed-core.version}</version>
             </dependency>
             <dependency>
