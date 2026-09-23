@@ -1,6 +1,8 @@
 package it.unibz.inf.ontop.utils;
 
 import it.unibz.inf.ontop.injection.OntopSQLCredentialSettings;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.sql.*;
 import java.util.Map;
@@ -8,6 +10,8 @@ import java.util.Properties;
 import java.util.concurrent.Executor;
 
 public class LocalJDBCConnectionUtils {
+
+    private static final Logger logger = LoggerFactory.getLogger(LocalJDBCConnectionUtils.class);
 
     /**
      * Brings robustness to some Tomcat classloading issues.
@@ -20,11 +24,30 @@ public class LocalJDBCConnectionUtils {
                 .ifPresent(u -> jdbcInfo.put("user", u));
         settings.getJdbcPassword()
                 .ifPresent(p -> jdbcInfo.put("password", p));
+        
+        // Check if we need to add Authorization header as accessToken property
+        String authToken = getAuthorizationTokenFromContext();
+        if (authToken != null) {
+            jdbcInfo.put("accessToken", authToken);
+            logger.info("Added Authorization token to JDBC properties");
+        }
+
+        // Check if we need to modify JDBC URL to remove accessToken
+        String originalUrl = settings.getJdbcUrl();
+        String jdbcUrl = processJdbcUrlForAuthorization(originalUrl);
+        
+        // Log JDBC URL processing
+        logger.debug("Creating connection with URL: {}", originalUrl);
+        if (!originalUrl.equals(jdbcUrl)) {
+            logger.info("URL was modified to: {}", jdbcUrl);
+        } else {
+            logger.debug("URL was not modified");
+        }
 
         Connection connection;
         try {
             // This should work in most cases (e.g. from CLI, Protege, or Jetty)
-            connection = DriverManager.getConnection(settings.getJdbcUrl(), jdbcInfo);
+            connection = DriverManager.getConnection(jdbcUrl, jdbcInfo);
         } catch (SQLException ex) {
             // HACKY(xiao): This part is still necessary for Tomcat.
             // Otherwise, JDBC drivers are not initialized by default.
@@ -34,7 +57,7 @@ public class LocalJDBCConnectionUtils {
                 throw new SQLException("Cannot load the driver: " + e.getMessage());
             }
 
-            connection = DriverManager.getConnection(settings.getJdbcUrl(), jdbcInfo);
+            connection = DriverManager.getConnection(jdbcUrl, jdbcInfo);
         }
         if (!settings.initScript().isEmpty()) {
             runInitializationScript(connection, settings.initScript());
@@ -361,6 +384,87 @@ public class LocalJDBCConnectionUtils {
         public boolean isWrapperFor(Class<?> iface) throws SQLException {
             return getConnection().isWrapperFor(iface);
         }
+    }
+
+    /**
+     * Processes JDBC URL to remove accessToken parameter if Authorization header is present.
+     */
+    private static String processJdbcUrlForAuthorization(String originalUrl) {
+        // Check if we have an Authorization header via thread-local context
+        boolean hasAuthHeader = hasAuthorizationHeaderInContext();
+        
+        if (!hasAuthHeader) {
+            return originalUrl;
+        }
+        
+        // Remove accessToken parameter from JDBC URL
+        String modifiedUrl = removeAccessTokenFromUrl(originalUrl);
+        
+        // Log the URL modification for debugging
+        if (!originalUrl.equals(modifiedUrl)) {
+            logger.info("JDBC URL modified: accessToken removed due to Authorization header");
+            logger.debug("Original: {}", originalUrl);
+            logger.debug("Modified: {}", modifiedUrl);
+        }
+        
+        return modifiedUrl;
+    }
+    
+    /**
+     * Checks if Authorization header is present via thread-local context using reflection.
+     */
+    private static boolean hasAuthorizationHeaderInContext() {
+        try {
+            // Use reflection to access AuthorizationContext to avoid circular dependencies
+            Class<?> authContextClass = Class.forName("it.unibz.inf.ontop.endpoint.processor.AuthorizationContext");
+            java.lang.reflect.Method hasAuthMethod = authContextClass.getMethod("hasAuthorizationHeader");
+            return (Boolean) hasAuthMethod.invoke(null);
+        } catch (Exception e) {
+            // If AuthorizationContext is not available or any error occurs, assume no auth header
+            return false;
+        }
+    }
+    
+    /**
+     * Gets the Authorization token from thread-local context using reflection.
+     */
+    private static String getAuthorizationTokenFromContext() {
+        try {
+            // Use reflection to access AuthorizationContext to avoid circular dependencies
+            Class<?> authContextClass = Class.forName("it.unibz.inf.ontop.endpoint.processor.AuthorizationContext");
+            java.lang.reflect.Method getTokenMethod = authContextClass.getMethod("getAuthorizationToken");
+            return (String) getTokenMethod.invoke(null);
+        } catch (Exception e) {
+            // If AuthorizationContext is not available or any error occurs, return null
+            return null;
+        }
+    }
+    
+    /**
+     * Removes accessToken parameter from JDBC URL.
+     */
+    private static String removeAccessTokenFromUrl(String jdbcUrl) {
+        if (jdbcUrl == null) {
+            return null;
+        }
+        
+        logger.debug("Before accessToken removal: {}", jdbcUrl);
+        
+        // More careful approach to remove accessToken parameter
+        String result = jdbcUrl;
+        
+        // Case 1: ?accessToken=value& (accessToken is first parameter, followed by others)
+        result = result.replaceAll("\\?accessToken=[^&]*&", "?");
+        
+        // Case 2: ?accessToken=value (accessToken is the only parameter)
+        result = result.replaceAll("\\?accessToken=[^&]*$", "");
+        
+        // Case 3: &accessToken=value (accessToken is not the first parameter)
+        result = result.replaceAll("&accessToken=[^&]*", "");
+        
+        logger.debug("After accessToken removal: {}", result);
+        
+        return result;
     }
 
 }
