@@ -14,6 +14,7 @@ import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.cli.utils.Env;
 import it.unibz.inf.ontop.injection.OntopSQLCoreSettings;
 import it.unibz.inf.ontop.injection.OntopSQLCredentialSettings;
+import it.unibz.inf.ontop.spec.sqlparser.JSqlParserTools;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
 import net.sf.jsqlparser.schema.Table;
@@ -778,23 +779,22 @@ public class OntopMappingV1ToV3 implements OntopCommand {
             if (statement instanceof Select) {
                 Select select = (Select)statement;
 
-                PlainSelect plainSelect = (PlainSelect)select.getSelectBody();
+                PlainSelect plainSelect = (PlainSelect)select;
 
                 if (plainSelect.getJoins() == null) {
                     boolean ok = true;
-                    for (SelectItem si : plainSelect.getSelectItems()) {
-                        if (!(si instanceof SelectExpressionItem)) {
+                    for (SelectItem<?> sei : plainSelect.getSelectItems()) {
+                        if (sei.getExpression() instanceof AllColumns) {
                             ok = false;
                             break;
                         }
-                        SelectExpressionItem sei = (SelectExpressionItem) si;
                         if (sei.getAlias() != null) {
                             ok = false;
                             break;
                         }
                     }
                     if (ok) {
-                        plainSelect.setSelectItems(ImmutableList.of(new AllColumns()));
+                        plainSelect.setSelectItems(ImmutableList.of(SelectItem.from(new AllColumns())));
 
                         Matcher m = selectPattern.matcher(sql);
                         if (m.find()) {
@@ -827,22 +827,21 @@ public class OntopMappingV1ToV3 implements OntopCommand {
             net.sf.jsqlparser.statement.Statement statement = CCJSqlParserUtil.parse(sql);
             if (statement instanceof Select) {
                 Select select = (Select)statement;
-                PlainSelect plainSelect = (PlainSelect)select.getSelectBody();
+                PlainSelect plainSelect = (PlainSelect)select;
                 if (plainSelect.getJoins() == null) {
                     boolean ok = true;
-                    for (SelectItem si : plainSelect.getSelectItems()) {
-                        if (!(si instanceof SelectExpressionItem)) {
+                    for (SelectItem<?> sei : plainSelect.getSelectItems()) {
+                        if (sei.getExpression() instanceof AllColumns) {
                             ok = false;
                             break;
                         }
-                        SelectExpressionItem sei = (SelectExpressionItem) si;
                         if (sei.getAlias() != null) {
                             ok = false;
                             break;
                         }
                     }
                     if (ok && (plainSelect.getWhere() == null))
-                        return ((Table)plainSelect.getFromItem()).getName();
+                        return JSqlParserTools.getTableName((Table) plainSelect.getFromItem());
                 }
             }
         }

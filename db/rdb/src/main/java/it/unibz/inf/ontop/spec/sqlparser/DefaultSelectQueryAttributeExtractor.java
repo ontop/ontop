@@ -26,7 +26,7 @@ public class DefaultSelectQueryAttributeExtractor extends BasicSelectQueryParser
 
 
     @Override
-    protected RAExpressionAttributes translateSelect(SelectBody selectBody, List<WithItem> withItemsList) {
+    protected RAExpressionAttributes translateSelect(Select selectBody, List<WithItem<?>> withItemsList) {
         PlainSelect plainSelect = getPlainSelect(selectBody);
 
         RAExpressionAttributes attributes;

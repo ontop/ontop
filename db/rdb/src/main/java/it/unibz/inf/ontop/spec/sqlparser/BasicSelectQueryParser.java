@@ -44,7 +44,7 @@ public abstract class BasicSelectQueryParser<T> {
     protected T parseJSqlSelectQuery(String sql) throws InvalidQueryException, UnsupportedSelectQueryException, QueryParseException {
         try {
             Select select = JSqlParserTools.parse(sql, !idfac.supportsSquareBracketQuotation());
-            return translateSelect(select.getSelectBody(), select.getWithItemsList());
+            return translateSelect(select, select.getWithItemsList());
         }
         catch (InvalidSelectQueryRuntimeException e) {
             throw new InvalidQueryException(e.getMessage(), e.getObject());
@@ -55,7 +55,7 @@ public abstract class BasicSelectQueryParser<T> {
     }
 
 
-    protected abstract T translateSelect(SelectBody selectBody, List<WithItem> withItemsList);
+    protected abstract T translateSelect(Select selectBody, List<WithItem<?>> withItemsList);
 
     /**
      *
@@ -65,8 +65,8 @@ public abstract class BasicSelectQueryParser<T> {
      * @throws InvalidSelectQueryRuntimeException
      */
 
-    protected PlainSelect getPlainSelect(SelectBody selectBody) {
-        // other subclasses of SelectBody are
+    protected PlainSelect getPlainSelect(Select selectBody) {
+        // other subclasses of Select are
         //      SelectOperationList (INTERSECT, EXCEPT, MINUS, UNION),
         //      ValuesStatement (VALUES)
         //      WithItem ([RECURSIVE]...)
@@ -95,6 +95,12 @@ public abstract class BasicSelectQueryParser<T> {
     protected T translateJoins(FromItem left, List<Join> joins) throws IllegalJoinException {
         if (left == null)
             return operations.create();
+
+        Alias leftAlias = left.getAlias();
+        // 5.4 interprets the old malformed "P LEFT, Q" join modifier as an implicit alias.
+        if (leftAlias != null && !leftAlias.isUseAs() && "LEFT".equalsIgnoreCase(leftAlias.getName())
+                && joins != null && !joins.isEmpty() && joins.get(0).isSimple())
+            throw new InvalidSelectQueryRuntimeException("Invalid simple join", joins.get(0));
 
         T current = translateFromItem(left);
         if (joins != null)
@@ -273,16 +279,26 @@ public abstract class BasicSelectQueryParser<T> {
 
     protected void validateFromItem(Table table) {  }
 
-    private class FromItemProcessor implements FromItemVisitor {
+    private class FromItemProcessor {
 
         private T result;
 
         T translate(FromItem fromItem) {
-            fromItem.accept(this);
+            if (fromItem instanceof Table)
+                visit((Table) fromItem);
+            else if (fromItem instanceof LateralSubSelect)
+                visit((LateralSubSelect) fromItem);
+            else if (fromItem instanceof ParenthesedSelect)
+                visit((ParenthesedSelect) fromItem);
+            else if (fromItem instanceof ParenthesedFromItem)
+                visit((ParenthesedFromItem) fromItem);
+            else if (fromItem instanceof TableFunction)
+                visit((TableFunction) fromItem);
+            else
+                throw new UnsupportedSelectQueryRuntimeException("FROM item is not supported", fromItem);
             return result;
         }
 
-        @Override
         public void visit(Table table) {
             if (table.getPivot() != null || table.getUnPivot() != null)
                 throw new UnsupportedSelectQueryRuntimeException("PIVOT/UNPIVOT are not supported", table);
@@ -303,20 +319,25 @@ public abstract class BasicSelectQueryParser<T> {
         }
 
 
-        @Override
-        public void visit(SubSelect subSelect) {
+        public void visit(ParenthesedSelect subSelect) {
             if (subSelect.getAlias() == null || subSelect.getAlias().getName() == null)
                 throw new InvalidSelectQueryRuntimeException("SUB-SELECT must have an alias", subSelect);
 
             if (subSelect.getPivot() != null || subSelect.getUnPivot() != null)
                 throw new UnsupportedSelectQueryRuntimeException("PIVOT/UNPIVOT are not supported", subSelect);
 
-            T rae = translateSelect(subSelect.getSelectBody(), subSelect.getWithItemsList());
+            Select select = subSelect.getSelect();
+            T rae = translateSelect(select, select.getWithItemsList());
             result = alias(rae, subSelect.getAlias());
         }
 
-        @Override
-        public void visit(SubJoin subjoin) {
+        public void visit(ParenthesedFromItem subjoin) {
+            if (subjoin.getFromItem() instanceof Values)
+                throw new UnsupportedSelectQueryRuntimeException("ValuesLists are not supported", subjoin);
+
+            if (subjoin.getJoins() == null || subjoin.getJoins().isEmpty())
+                throw new UnsupportedSelectQueryRuntimeException("ParenthesisFromItem are not supported", subjoin);
+
             if (subjoin.getAlias() == null || subjoin.getAlias().getName() == null)
                 throw new InvalidSelectQueryRuntimeException("SUB-JOIN must have an alias", subjoin);
 
@@ -324,7 +345,7 @@ public abstract class BasicSelectQueryParser<T> {
                 throw new UnsupportedSelectQueryRuntimeException("PIVOT/UNPIVOT are not supported", subjoin);
 
             try {
-                T rae = translateJoins(subjoin.getLeft(), subjoin.getJoinList());
+                T rae = translateJoins(subjoin.getFromItem(), subjoin.getJoins());
                 result = alias(rae, subjoin.getAlias());
             }
             catch (IllegalJoinException e) {
@@ -332,24 +353,12 @@ public abstract class BasicSelectQueryParser<T> {
             }
         }
 
-        @Override
         public void visit(LateralSubSelect lateralSubSelect) {
             throw new UnsupportedSelectQueryRuntimeException("LateralSubSelects are not supported", lateralSubSelect);
         }
 
-        @Override
-        public void visit(ValuesList valuesList) {
-            throw new UnsupportedSelectQueryRuntimeException("ValuesLists are not supported", valuesList);
-        }
-
-        @Override
         public void visit(TableFunction tableFunction) {
             throw new UnsupportedSelectQueryRuntimeException("TableFunction are not supported", tableFunction);
-        }
-
-        @Override
-        public void visit(ParenthesisFromItem parenthesisFromItem) {
-            throw new UnsupportedSelectQueryRuntimeException("ParenthesisFromItem are not supported", parenthesisFromItem);
         }
 
         private T alias(T rae, Alias alias) {

@@ -5,17 +5,16 @@ import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.dbschema.QuotedIDFactory;
 import it.unibz.inf.ontop.dbschema.RelationID;
 import it.unibz.inf.ontop.exception.InvalidQueryException;
-import it.unibz.inf.ontop.exception.MinorOntopInternalBugException;
 import it.unibz.inf.ontop.spec.sqlparser.exception.QueryParseException;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
 import net.sf.jsqlparser.parser.ParseException;
+import net.sf.jsqlparser.parser.Token;
+import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.Statement;
 import net.sf.jsqlparser.statement.select.Select;
 
-import java.lang.reflect.Field;
-import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -28,10 +27,30 @@ public class JSqlParserTools {
             if (!(statement instanceof Select))
                 throw new InvalidQueryException("The query is not a SELECT statement", statement);
 
+            validateJoinModifiers(sql, (Select) statement);
             return (Select) statement;
         }
         catch (JSQLParserException e) {
-            throw new QueryParseException(sql, getJSQLParserErrorMessage(sql, e), e.getMessage());
+            Throwable cause = e;
+            while (cause.getCause() != null && !(cause instanceof ParseException))
+                cause = cause.getCause();
+            throw new QueryParseException(sql, getJSQLParserErrorMessage(sql, cause), cause.getMessage());
+        }
+    }
+
+    private static void validateJoinModifiers(String sql, Select select) throws QueryParseException {
+        // 5.4 accepts some contradictory modifiers and can silently discard one of them.
+        for (Token token = select.getASTNode().jjtGetFirstToken(); token != null; token = token.next) {
+            if (token.next == null || token.next.next == null)
+                continue;
+            String modifier = token.image.toUpperCase(java.util.Locale.ROOT);
+            String next = token.next.image.toUpperCase(java.util.Locale.ROOT);
+            if ("JOIN".equalsIgnoreCase(token.next.next.image)
+                    && (("NATURAL".equals(modifier) && ("INNER".equals(next) || "OUTER".equals(next)))
+                    || (("LEFT".equals(modifier) || "RIGHT".equals(modifier)) && "INNER".equals(next)))) {
+                String message = "Invalid JOIN modifiers: " + modifier + " " + next;
+                throw new QueryParseException(sql, MESSAGE + message, message);
+            }
         }
     }
 
@@ -39,15 +58,10 @@ public class JSqlParserTools {
     private static final int MAX_LENGTH = 40;
     private static final String MESSAGE = "Unable to parse SQL: ";
 
-    private static String getJSQLParserErrorMessage(String sql, JSQLParserException e) {
-        try {
-            if (e.getCause() instanceof ParseException)
-                return getJSQLParseExceptionMessage(sql, (ParseException)e.getCause());
-        }
-        catch (Exception e1) {
-            // NOP
-        }
-        return e.getCause().toString();
+    private static String getJSQLParserErrorMessage(String sql, Throwable e) {
+        if (e instanceof ParseException)
+            return getJSQLParseExceptionMessage(sql, (ParseException) e);
+        return e.toString();
     }
 
     private static String getJSQLParseExceptionMessage(String sql, ParseException e) {
@@ -72,35 +86,47 @@ public class JSqlParserTools {
     }
 
 
-    private static Field partsField;
-
     public static RelationID getRelationId(QuotedIDFactory idfac, Table table) {
+        // The single-name Table constructor in 5.4 splits even a quoted name on dots.
+        if (table.getASTNode() != null) {
+            Token first = table.getASTNode().jjtGetFirstToken();
+            if (isQuoted(first.image)) {
+                if (first == table.getASTNode().jjtGetLastToken()
+                        || first.next == null || !".".equals(first.next.image))
+                    return idfac.createRelationID(first.image);
+            }
+        }
         if (table.getSchemaName() == null)
             return idfac.createRelationID(table.getName());
         
         if (table.getDatabase().getDatabaseName() == null)
             return idfac.createRelationID(table.getSchemaName(), table.getName());
 
-        // a massive workaround for JSQLParser, which supports long names
-        // but does NOT give direct access to the components, so use Reflection API
-        if (partsField == null) {
-            try {
-                partsField = Table.class.getDeclaredField("partItems");
-                partsField.setAccessible(true);
-            }
-            catch (NoSuchFieldException e) {
-                throw new MinorOntopInternalBugException("Cannot find the partsItems field in JSQLParser: " + e);
-            }
-        }
-        try {
-            List<String> parts = (List<String>) partsField.get(table);
-            return idfac.createRelationID(ImmutableList.copyOf(parts).reverse().toArray(new String[0]));
-        }
-        catch (IllegalAccessException e) {
-            throw new MinorOntopInternalBugException("Cannot access the partsItems field in JSQLParser: " + e);
-        }
+        return idfac.createRelationID(ImmutableList.copyOf(table.getNameParts()).reverse().toArray(new String[0]));
+    }
 
-        //String s = table.getFullyQualifiedName();
-        //return idfac.createRelationID(s.split("\\."));
+    public static RelationID getRelationId(QuotedIDFactory idfac, Column column) {
+        Table table = column.getTable();
+        if (table.getASTNode() == null && column.getASTNode() != null) {
+            Token first = column.getASTNode().jjtGetFirstToken();
+            if (isQuoted(first.image) && first.next != null && ".".equals(first.next.image)
+                    && first.next.next != null && first.next.next.image.equals(column.getColumnName()))
+                return idfac.createRelationID(first.image);
+        }
+        return getRelationId(idfac, table);
+    }
+
+    public static String getTableName(Table table) {
+        if (table.getASTNode() != null) {
+            Token first = table.getASTNode().jjtGetFirstToken();
+            if (isQuoted(first.image) && (first == table.getASTNode().jjtGetLastToken()
+                    || first.next == null || !".".equals(first.next.image)))
+                return first.image;
+        }
+        return table.getName();
+    }
+
+    private static boolean isQuoted(String name) {
+        return name.startsWith("\"") || name.startsWith("`") || name.startsWith("[");
     }
 }
