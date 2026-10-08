@@ -50,6 +50,51 @@ public class ExpressionParserTest {
     }
 
     @Test
+    public void boolean_literal_test() throws Exception {
+        assertEquals(TERM_FACTORY.getDBBooleanConstant(true), parseTerm("TRUE", ImmutableMap.of()));
+        assertEquals(TERM_FACTORY.getDBBooleanConstant(false), parseTerm("FALSE", ImmutableMap.of()));
+    }
+
+    @Test
+    public void trim_test() throws Exception {
+        Variable v = TERM_FACTORY.getVariable("x0");
+        assertEquals(TERM_FACTORY.getImmutableFunctionalTerm(
+                        DB_FS_FACTORY.getRegularDBFunctionSymbol("TRIM", 1), v),
+                parseTerm("TRIM(X)", ImmutableMap.of(IDFAC.createAttributeID("X"), v)));
+        assertEquals(TERM_FACTORY.getImmutableFunctionalTerm(
+                        DB_FS_FACTORY.getRegularDBFunctionSymbol("TRIM", 2),
+                        TERM_FACTORY.getDBStringConstant("a"), v),
+                parseTerm("TRIM(LEADING 'a' FROM X)", ImmutableMap.of(IDFAC.createAttributeID("X"), v)));
+    }
+
+    @Test
+    public void try_cast_test() throws Exception {
+        var ex = assertThrows(UnsupportedOperationException.class, () ->
+                parseTerm("TRY_CAST(1 AS INTEGER)", ImmutableMap.of()));
+        assertEquals("TRY_CAST is not supported TRY_CAST(1 AS INTEGER)", ex.getMessage());
+    }
+
+    @Test
+    public void row_in_length_mismatch_test() throws Exception {
+        var ex = assertThrows(InvalidSelectQueryRuntimeException.class, () ->
+                parseBooleanExpression("(1, 2) IN ((1, 2, 3))", ImmutableMap.of()));
+        assertEquals("Mismatch in the length of the lists", ex.getMessage());
+    }
+
+    @Test
+    public void new_expression_is_rejected_test() throws Exception {
+        assertThrows(UnsupportedSelectQueryRuntimeException.class, () ->
+                parseTerm("1 IS UNKNOWN", ImmutableMap.of()));
+    }
+
+    @Test
+    public void in_subquery_is_rejected_test() throws Exception {
+        var ex = assertThrows(UnsupportedSelectQueryRuntimeException.class, () ->
+                parseBooleanExpression("1 IN (SELECT 1 FROM P)", ImmutableMap.of()));
+        assertEquals("Expression on the right in IN is not supported", ex.getMessage());
+    }
+
+    @Test
     public void double_test() throws Exception {
         ImmutableTerm translation = parseTerm("1.0", ImmutableMap.of());
         assertEquals(TERM_FACTORY.getDBConstant("1.0", DB_TYPE_FACTORY.getDBDoubleType()), translation);

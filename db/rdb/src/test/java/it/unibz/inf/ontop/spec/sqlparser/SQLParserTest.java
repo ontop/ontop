@@ -318,7 +318,7 @@ public class SQLParserTest {
         var ex = assertThrows(UnsupportedSelectQueryException.class, () ->
 		        parse("WITH  temp (n) AS (SELECT DISTINCT name FROM student) SELECT * FROM temp"));
 
-        assertEquals("WITH is not supported in SELECT statements [temp (n) AS (SELECT DISTINCT name FROM student)]", ex.getMessage());
+        assertEquals("WITH is not supported in SELECT statements [temp(n) AS (SELECT DISTINCT name FROM student)]", ex.getMessage());
 	}
 
 
@@ -376,7 +376,7 @@ public class SQLParserTest {
 		        parse("select DISTINCT ON (name,age,year) name,age FROM student"));
 
         // DISTINCT ON is PostgreSQL-specific
-        assertEquals("DISTINCT is not supported SELECT DISTINCT ON (name, age, year) name, age FROM student", ex.getMessage());
+        assertEquals("DISTINCT is not supported SELECT DISTINCT ON (name, age, YEAR) name, age FROM student", ex.getMessage());
 	}
 
 	@Test
@@ -783,7 +783,7 @@ public class SQLParserTest {
 		        parse("SELECT DISTINCT maker FROM Product "
 				+ "WHERE type = 'PC' AND NOT model = ANY (SELECT model FROM PC)"));
 
-        assertEquals("DISTINCT is not supported SELECT DISTINCT maker FROM Product WHERE type = 'PC' AND NOT model = ANY (SELECT model FROM PC )", ex.getMessage());
+        assertEquals("DISTINCT is not supported SELECT DISTINCT maker FROM Product WHERE type = 'PC' AND NOT model = ANY(SELECT model FROM PC)", ex.getMessage());
 	}
 
 
@@ -793,7 +793,7 @@ public class SQLParserTest {
 		        parse("SELECT DISTINCT maker FROM Product "
 				+ "WHERE type = 'PC' AND NOT model = SOME (SELECT model FROM PC)"));
 
-        assertEquals("DISTINCT is not supported SELECT DISTINCT maker FROM Product WHERE type = 'PC' AND NOT model = SOME (SELECT model FROM PC )", ex.getMessage());
+        assertEquals("DISTINCT is not supported SELECT DISTINCT maker FROM Product WHERE type = 'PC' AND NOT model = SOME(SELECT model FROM PC)", ex.getMessage());
 	}
 
 	@Test
@@ -833,7 +833,7 @@ public class SQLParserTest {
 		        parse("SELECT des_date,des_amount,ord_amount FROM despatch WHERE des_amount > ALL("
 				+ "SELECT ord_amount FROM orders WHERE ord_amount=2000)"));
 
-        assertEquals("ALL is not supported yet ALL (SELECT ord_amount FROM orders WHERE ord_amount = 2000 )", ex.getMessage());
+        assertEquals("ALL is not supported yet ALL(SELECT ord_amount FROM orders WHERE ord_amount = 2000)", ex.getMessage());
 	}
 
 	@Test
@@ -1428,7 +1428,7 @@ public class SQLParserTest {
 				"      ,\"INTERVAL\" as \"TEMPINTERVAL\"\n" +
 				"  FROM \"CIM\".\"dbo\".\"TEMPERATURE_DEVIATION\" where \"INTERVAL\" = '0-10'"));
 
-        assertEquals("Unsupported SQL function CONVERT(varchar(50), \"DATETIME\", 0)", ex.getMessage());
+        assertEquals("Unsupported SQL function CONVERT( varchar (50), \"DATETIME\", 0 )", ex.getMessage());
 	}
 
 	@Test
@@ -1533,6 +1533,22 @@ public class SQLParserTest {
                 0, TERM_FACTORY.getVariable("ID1"))), re.getIQTree());
         assertEquals(getSelectAttributes("id"), re.getAttributes());
 	}
+
+    @Test
+    public void test_qualified_column_table_with_dots() throws Exception {
+        RAExpression re = parse("SELECT \"table.with.dots\".id FROM \"table.with.dots\"");
+        assertEquals(IQ_FACTORY.createExtensionalDataNode(table_with_dots, ImmutableMap.of(
+                0, TERM_FACTORY.getVariable("ID1"))), re.getIQTree());
+        assertEquals(getSelectAttributes("id"), re.getAttributes());
+    }
+
+    @Test
+    public void test_qualified_star_table_with_dots() throws Exception {
+        RAExpression re = parse("SELECT \"table.with.dots\".* FROM \"table.with.dots\"");
+        assertEquals(IQ_FACTORY.createExtensionalDataNode(table_with_dots, ImmutableMap.of(
+                0, TERM_FACTORY.getVariable("ID1"))), re.getIQTree());
+        assertEquals(getSelectAttributes("id"), re.getAttributes());
+    }
 
 
 	@Test

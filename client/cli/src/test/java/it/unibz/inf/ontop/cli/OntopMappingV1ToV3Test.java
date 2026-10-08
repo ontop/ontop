@@ -3,7 +3,31 @@ package it.unibz.inf.ontop.cli;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+
 public class OntopMappingV1ToV3Test {
+
+    @Test
+    public void simplifyProjection() {
+        OntopMappingV1ToV3 command = new OntopMappingV1ToV3();
+        assertEquals("SELECT * FROM books", command.getSimplifiedProjection("SELECT id, title FROM books"));
+        assertEquals("SELECT id AS book_id FROM books",
+                command.getSimplifiedProjection("SELECT id AS book_id FROM books"));
+        assertEquals("SELECT books.* FROM books", command.getSimplifiedProjection("SELECT books.* FROM books"));
+        assertEquals("SELECT * FROM books", command.getSimplifiedProjection("SELECT * FROM books"));
+    }
+
+    @Test
+    public void extractSimpleTable() {
+        OntopMappingV1ToV3 command = new OntopMappingV1ToV3();
+        assertEquals("books", command.extractSimpleTable("SELECT id, title FROM books"));
+        assertEquals("\"books.with.dots\"", command.extractSimpleTable("SELECT id FROM \"books.with.dots\""));
+        assertNull(command.extractSimpleTable("SELECT * FROM books"));
+        assertNull(command.extractSimpleTable("SELECT books.* FROM books"));
+        assertNull(command.extractSimpleTable("SELECT id AS book_id FROM books"));
+        assertNull(command.extractSimpleTable("SELECT id FROM books WHERE id = 1"));
+    }
 
     @Ignore
     @Test

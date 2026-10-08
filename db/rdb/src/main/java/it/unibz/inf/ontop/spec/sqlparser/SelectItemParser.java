@@ -29,7 +29,7 @@ public class SelectItemParser {
         this.expressionParser = expressionParser;
     }
 
-    public RAExpressionAttributes parseSelectItems(List<SelectItem> selectItems) {
+    public RAExpressionAttributes parseSelectItems(List<SelectItem<?>> selectItems) {
         try {
             return RAExpressionAttributes.of(selectItems.stream()
                     .flatMap(si -> new SelectItemProcessor().getAttributes(si)));
@@ -44,20 +44,24 @@ public class SelectItemParser {
     }
 
 
-    private class SelectItemProcessor implements SelectItemVisitor {
+    private class SelectItemProcessor {
         Stream<Map.Entry<QuotedID, ImmutableTerm>> stream;
 
-        private Stream<Map.Entry<QuotedID, ImmutableTerm>> getAttributes(SelectItem si) {
-            si.accept(this);
+        private Stream<Map.Entry<QuotedID, ImmutableTerm>> getAttributes(SelectItem<?> si) {
+            Expression expression = si.getExpression();
+            if (expression instanceof AllTableColumns)
+                visit((AllTableColumns) expression);
+            else if (expression instanceof AllColumns)
+                visit((AllColumns) expression);
+            else
+                visit(si);
             return stream;
         }
 
-        @Override
         public void visit(AllColumns allColumns) {
             stream =  attributes.getUnqualifiedAttributesMap().entrySet().stream();
         }
 
-        @Override
         public void visit(AllTableColumns allTableColumns) {
             Table table = allTableColumns.getTable();
             RelationID id = JSqlParserTools.getRelationId(idfac, table);
@@ -65,8 +69,7 @@ public class SelectItemParser {
             stream = attributes.getRelationAttributesMap(id).entrySet().stream();
         }
 
-        @Override
-        public void visit(SelectExpressionItem selectExpressionItem) {
+        public void visit(SelectItem<?> selectExpressionItem) {
             Alias columnAlias = selectExpressionItem.getAlias();
             Expression expr = selectExpressionItem.getExpression();
             Optional<String> alias;

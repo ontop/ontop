@@ -34,7 +34,7 @@ public class SelectQueryParser extends BasicSelectQueryParser<RAExpression> {
 
 
     @Override
-    protected RAExpression translateSelect(SelectBody selectBody, List<WithItem> withItemsList) {
+    protected RAExpression translateSelect(Select selectBody, List<WithItem<?>> withItemsList) {
         PlainSelect plainSelect = getPlainSelect(selectBody);
 
         if (withItemsList != null && !withItemsList.isEmpty())
@@ -73,7 +73,7 @@ public class SelectQueryParser extends BasicSelectQueryParser<RAExpression> {
         if (plainSelect.getLimit() != null || plainSelect.getOffset() != null || plainSelect.getFetch() != null)
             throw new UnsupportedSelectQueryRuntimeException("LIMIT / OFFSET / FETCH are not supported", plainSelect);
 
-        if (plainSelect.isForUpdate())
+        if (plainSelect.getForClause() != null)
             throw new UnsupportedSelectQueryRuntimeException("FOR UPDATE is not supported", plainSelect);
 
         if (plainSelect.getOptimizeFor() != null)
@@ -82,7 +82,7 @@ public class SelectQueryParser extends BasicSelectQueryParser<RAExpression> {
         if (plainSelect.getForXmlPath() != null)
             throw new UnsupportedSelectQueryRuntimeException("FOR XML PATH is not supported", plainSelect);
 
-        if (plainSelect.getWithIsolation() != null)
+        if (plainSelect.getIsolation() != null)
             throw new UnsupportedSelectQueryRuntimeException("WITH isolation is not supported", plainSelect);
 
         RAExpression rae;
