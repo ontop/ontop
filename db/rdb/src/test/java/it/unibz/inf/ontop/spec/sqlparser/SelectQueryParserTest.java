@@ -190,7 +190,8 @@ public class SelectQueryParserTest {
         var ex = assertThrows(QueryParseException.class, () ->
                 parse("SELECT A FROM P APPLY Q"));
 
-        assertTrue(ex.getOriginalMessage().contains("\"Q\""));
+        assertEquals("Encountered: <S_IDENTIFIER> / \"Q\", at line 1, column 23, in lexical state DEFAULT.",
+                ex.getOriginalMessage().split("\\R", 2)[0]);
     }
 
     @Test
@@ -444,7 +445,7 @@ public class SelectQueryParserTest {
         var ex = assertThrows(QueryParseException.class, () ->
                 parse("SELECT * FROM P NATURAL OUTER JOIN Q"));
 
-        assertTrue(ex.getOriginalMessage().contains("NATURAL"));
+        assertEquals("Invalid JOIN modifiers: NATURAL OUTER", ex.getOriginalMessage());
     }
 
     @Test
@@ -452,7 +453,8 @@ public class SelectQueryParserTest {
         var ex = assertThrows(QueryParseException.class, () ->
                 parse("SELECT * FROM P CROSS OUTER JOIN Q"));
 
-        assertTrue(ex.getOriginalMessage().contains("CROSS"));
+        assertEquals("Encountered: <K_CROSS> / \"CROSS\", at line 1, column 17, in lexical state DEFAULT.",
+                ex.getOriginalMessage().split("\\R", 2)[0]);
     }
 
     @Test
@@ -460,7 +462,7 @@ public class SelectQueryParserTest {
         var ex = assertThrows(QueryParseException.class, () ->
                 parse("SELECT * FROM P NATURAL INNER JOIN Q"));
 
-        assertTrue(ex.getOriginalMessage().contains("NATURAL"));
+        assertEquals("Invalid JOIN modifiers: NATURAL INNER", ex.getOriginalMessage());
     }
 
     @Test
@@ -468,7 +470,8 @@ public class SelectQueryParserTest {
         var ex = assertThrows(QueryParseException.class, () ->
                 parse("SELECT * FROM P CROSS INNER JOIN Q"));
 
-        assertTrue(ex.getOriginalMessage().contains("CROSS"));
+        assertEquals("Encountered: <K_CROSS> / \"CROSS\", at line 1, column 17, in lexical state DEFAULT.",
+                ex.getOriginalMessage().split("\\R", 2)[0]);
     }
 
     @Test
@@ -476,7 +479,7 @@ public class SelectQueryParserTest {
         var ex = assertThrows(QueryParseException.class, () ->
                 parse("SELECT * FROM P RIGHT INNER JOIN Q"));
 
-        assertTrue(ex.getOriginalMessage().contains("RIGHT"));
+        assertEquals("Invalid JOIN modifiers: RIGHT INNER", ex.getOriginalMessage());
     }
 
     @Test
@@ -484,7 +487,8 @@ public class SelectQueryParserTest {
         var ex = assertThrows(QueryParseException.class, () ->
                 parse("SELECT * FROM P FULL INNER JOIN Q"));
 
-        assertTrue(ex.getOriginalMessage().contains("FULL"));
+        assertEquals("Encountered: <K_FULL> / \"FULL\", at line 1, column 17, in lexical state DEFAULT.",
+                ex.getOriginalMessage().split("\\R", 2)[0]);
     }
 
     @Test
@@ -492,7 +496,7 @@ public class SelectQueryParserTest {
         var ex = assertThrows(QueryParseException.class, () ->
                 parse("SELECT * FROM P LEFT INNER JOIN Q"));
 
-        assertTrue(ex.getOriginalMessage().contains("LEFT"));
+        assertEquals("Invalid JOIN modifiers: LEFT INNER", ex.getOriginalMessage());
     }
 
     @Test
@@ -500,7 +504,7 @@ public class SelectQueryParserTest {
         var ex = assertThrows(QueryParseException.class, () ->
                 parse("SELECT * FROM P NATURAL OUTER JOIN Q ON P.A = Q.A"));
 
-        assertTrue(ex.getOriginalMessage().contains("NATURAL"));
+        assertEquals("Invalid JOIN modifiers: NATURAL OUTER", ex.getOriginalMessage());
     }
 
     @Test
@@ -508,7 +512,8 @@ public class SelectQueryParserTest {
         var ex = assertThrows(QueryParseException.class, () ->
                 parse("SELECT * FROM P CROSS OUTER JOIN Q ON P.A = Q.A"));
 
-        assertTrue(ex.getOriginalMessage().contains("CROSS"));
+        assertEquals("Encountered: <K_CROSS> / \"CROSS\", at line 1, column 17, in lexical state DEFAULT.",
+                ex.getOriginalMessage().split("\\R", 2)[0]);
     }
 
     @Test
@@ -516,7 +521,7 @@ public class SelectQueryParserTest {
         var ex = assertThrows(QueryParseException.class, () ->
                 parse("SELECT * FROM P NATURAL INNER JOIN Q ON P.A = Q.A"));
 
-        assertTrue(ex.getOriginalMessage().contains("NATURAL"));
+        assertEquals("Invalid JOIN modifiers: NATURAL INNER", ex.getOriginalMessage());
     }
 
     @Test
@@ -524,7 +529,8 @@ public class SelectQueryParserTest {
         var ex = assertThrows(QueryParseException.class, () ->
                 parse("SELECT * FROM P CROSS INNER JOIN Q ON P.A = Q.A"));
 
-        assertTrue(ex.getOriginalMessage().contains("CROSS"));
+        assertEquals("Encountered: <K_CROSS> / \"CROSS\", at line 1, column 17, in lexical state DEFAULT.",
+                ex.getOriginalMessage().split("\\R", 2)[0]);
     }
 
     @Test
@@ -532,7 +538,7 @@ public class SelectQueryParserTest {
         var ex = assertThrows(QueryParseException.class, () ->
                 parse("SELECT * FROM P RIGHT INNER JOIN Q ON P.A = Q.A"));
 
-        assertTrue(ex.getOriginalMessage().contains("RIGHT"));
+        assertEquals("Invalid JOIN modifiers: RIGHT INNER", ex.getOriginalMessage());
     }
 
     @Test
@@ -540,7 +546,8 @@ public class SelectQueryParserTest {
         var ex = assertThrows(QueryParseException.class, () ->
                 parse("SELECT * FROM P FULL INNER JOIN Q ON P.A = Q.A"));
 
-        assertTrue(ex.getOriginalMessage().contains("FULL"));
+        assertEquals("Encountered: <K_FULL> / \"FULL\", at line 1, column 17, in lexical state DEFAULT.",
+                ex.getOriginalMessage().split("\\R", 2)[0]);
     }
 
     @Test
@@ -548,7 +555,7 @@ public class SelectQueryParserTest {
         var ex = assertThrows(QueryParseException.class, () ->
                 parse("SELECT * FROM P LEFT INNER JOIN Q ON P.A = Q.A"));
 
-        assertTrue(ex.getOriginalMessage().contains("LEFT"));
+        assertEquals("Invalid JOIN modifiers: LEFT INNER", ex.getOriginalMessage());
     }
 
     @Test
@@ -556,7 +563,7 @@ public class SelectQueryParserTest {
         var ex = assertThrows(QueryParseException.class, () ->
                 parse("SELECT * FROM P NATURAL OUTER JOIN Q USING(A)"));
 
-        assertTrue(ex.getOriginalMessage().contains("NATURAL"));
+        assertEquals("Invalid JOIN modifiers: NATURAL OUTER", ex.getOriginalMessage());
     }
 
     @Test
@@ -564,7 +571,8 @@ public class SelectQueryParserTest {
         var ex = assertThrows(QueryParseException.class, () ->
                 parse("SELECT * FROM P CROSS OUTER JOIN Q USING(A)"));
 
-        assertTrue(ex.getOriginalMessage().contains("CROSS"));
+        assertEquals("Encountered: <K_CROSS> / \"CROSS\", at line 1, column 17, in lexical state DEFAULT.",
+                ex.getOriginalMessage().split("\\R", 2)[0]);
     }
 
     @Test
@@ -572,7 +580,7 @@ public class SelectQueryParserTest {
         var ex = assertThrows(QueryParseException.class, () ->
                 parse("SELECT * FROM P NATURAL INNER JOIN Q USING(A)"));
 
-        assertTrue(ex.getOriginalMessage().contains("NATURAL"));
+        assertEquals("Invalid JOIN modifiers: NATURAL INNER", ex.getOriginalMessage());
     }
 
     @Test
@@ -580,7 +588,8 @@ public class SelectQueryParserTest {
         var ex = assertThrows(QueryParseException.class, () ->
                 parse("SELECT * FROM P CROSS INNER JOIN Q USING(A)"));
 
-        assertTrue(ex.getOriginalMessage().contains("CROSS"));
+        assertEquals("Encountered: <K_CROSS> / \"CROSS\", at line 1, column 17, in lexical state DEFAULT.",
+                ex.getOriginalMessage().split("\\R", 2)[0]);
     }
 
     @Test
@@ -588,7 +597,7 @@ public class SelectQueryParserTest {
         var ex = assertThrows(QueryParseException.class, () ->
                 parse("SELECT * FROM P RIGHT INNER JOIN Q USING(A)"));
 
-        assertTrue(ex.getOriginalMessage().contains("RIGHT"));
+        assertEquals("Invalid JOIN modifiers: RIGHT INNER", ex.getOriginalMessage());
     }
 
     @Test
@@ -596,7 +605,8 @@ public class SelectQueryParserTest {
         var ex = assertThrows(QueryParseException.class, () ->
                 parse("SELECT * FROM P FULL INNER JOIN Q USING(A)"));
 
-        assertTrue(ex.getOriginalMessage().contains("FULL"));
+        assertEquals("Encountered: <K_FULL> / \"FULL\", at line 1, column 17, in lexical state DEFAULT.",
+                ex.getOriginalMessage().split("\\R", 2)[0]);
     }
 
     @Test
@@ -604,7 +614,7 @@ public class SelectQueryParserTest {
         var ex = assertThrows(QueryParseException.class, () ->
                 parse("SELECT * FROM P LEFT INNER JOIN Q USING(A)"));
 
-        assertTrue(ex.getOriginalMessage().contains("LEFT"));
+        assertEquals("Invalid JOIN modifiers: LEFT INNER", ex.getOriginalMessage());
     }
 
 
