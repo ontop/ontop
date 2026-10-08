@@ -15,6 +15,7 @@ import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.Statement;
 import net.sf.jsqlparser.statement.select.Select;
 
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -87,15 +88,9 @@ public class JSqlParserTools {
 
 
     public static RelationID getRelationId(QuotedIDFactory idfac, Table table) {
-        // The single-name Table constructor in 5.4 splits even a quoted name on dots.
-        if (table.getASTNode() != null) {
-            Token first = table.getASTNode().jjtGetFirstToken();
-            if (isQuoted(first.image)) {
-                if (first == table.getASTNode().jjtGetLastToken()
-                        || first.next == null || !".".equals(first.next.image))
-                    return idfac.createRelationID(first.image);
-            }
-        }
+        Optional<String> quotedName = getUnqualifiedQuotedName(table);
+        if (quotedName.isPresent())
+            return idfac.createRelationID(quotedName.get());
         if (table.getSchemaName() == null)
             return idfac.createRelationID(table.getName());
         
@@ -117,13 +112,20 @@ public class JSqlParserTools {
     }
 
     public static String getTableName(Table table) {
-        if (table.getASTNode() != null) {
-            Token first = table.getASTNode().jjtGetFirstToken();
-            if (isQuoted(first.image) && (first == table.getASTNode().jjtGetLastToken()
-                    || first.next == null || !".".equals(first.next.image)))
-                return first.image;
-        }
-        return table.getName();
+        return getUnqualifiedQuotedName(table).orElseGet(table::getName);
+    }
+
+    private static Optional<String> getUnqualifiedQuotedName(Table table) {
+        if (table.getASTNode() == null)
+            return Optional.empty();
+
+        // JSqlParser 5.4 splits even a single quoted name on dots.
+        Token first = table.getASTNode().jjtGetFirstToken();
+        boolean qualified = first != table.getASTNode().jjtGetLastToken()
+                && first.next != null && ".".equals(first.next.image);
+        return isQuoted(first.image) && !qualified
+                ? Optional.of(first.image)
+                : Optional.empty();
     }
 
     private static boolean isQuoted(String name) {
