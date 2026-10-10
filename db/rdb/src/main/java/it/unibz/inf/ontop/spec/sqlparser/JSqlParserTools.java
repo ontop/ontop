@@ -41,15 +41,16 @@ public class JSqlParserTools {
 
     private static void validateJoinModifiers(String sql, Select select) throws QueryParseException {
         // 5.4 accepts some contradictory modifiers and can silently discard one of them.
-        for (Token token = select.getASTNode().jjtGetFirstToken(); token != null; token = token.next) {
-            if (token.next == null || token.next.next == null)
-                continue;
-            String modifier = token.image.toUpperCase(java.util.Locale.ROOT);
-            String next = token.next.image.toUpperCase(java.util.Locale.ROOT);
+        for (Token token = select.getASTNode().jjtGetFirstToken();
+             token != null && token.next != null && token.next.next != null;
+             token = token.next) {
             if ("JOIN".equalsIgnoreCase(token.next.next.image)
-                    && (("NATURAL".equals(modifier) && ("INNER".equals(next) || "OUTER".equals(next)))
-                    || (("LEFT".equals(modifier) || "RIGHT".equals(modifier)) && "INNER".equals(next)))) {
-                String message = "Invalid JOIN modifiers: " + modifier + " " + next;
+                    && (("NATURAL".equalsIgnoreCase(token.image)
+                    && ("INNER".equalsIgnoreCase(token.next.image) || "OUTER".equalsIgnoreCase(token.next.image)))
+                    || (("LEFT".equalsIgnoreCase(token.image) || "RIGHT".equalsIgnoreCase(token.image))
+                    && "INNER".equalsIgnoreCase(token.next.image)))) {
+                String modifiers = token.image + " " + token.next.image;
+                String message = "Invalid JOIN modifiers: " + modifiers;
                 throw new QueryParseException(sql, MESSAGE + message, message);
             }
         }
