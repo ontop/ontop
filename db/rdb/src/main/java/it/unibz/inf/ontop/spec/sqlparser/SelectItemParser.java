@@ -8,6 +8,7 @@ import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.spec.sqlparser.exception.InvalidSelectQueryRuntimeException;
 import it.unibz.inf.ontop.spec.sqlparser.exception.UnsupportedSelectQueryRuntimeException;
 import net.sf.jsqlparser.expression.Alias;
+import net.sf.jsqlparser.expression.DateUnitExpression;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
@@ -100,6 +101,9 @@ public class SelectItemParser {
             }
             else if (expr instanceof Column) {
                 alias = Optional.of(((Column) expr).getColumnName());
+            }
+            else if (expr instanceof DateUnitExpression) {
+                alias = Optional.of(expr.toString());
             }
             else {
                 // ignore complex expressions without an alias

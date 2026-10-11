@@ -1431,7 +1431,15 @@ public class ExpressionParser {
 
         @Override
         public <S> Void visit(DateUnitExpression expression, S context) {
-            throw new UnsupportedSelectQueryRuntimeException("DateUnitExpression is not supported", expression);
+            // JSqlParser 5.4 parses unquoted columns named YEAR, MONTH, etc. as date units.
+            try {
+                result = getTerm(new Column(expression.toString()));
+            }
+            catch (InvalidSelectQueryRuntimeException e) {
+                throw new UnsupportedSelectQueryRuntimeException(
+                        "DateUnitExpression is not supported", expression);
+            }
+            return null;
         }
 
         @Override
