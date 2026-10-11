@@ -33,7 +33,7 @@ public class OntopMappingV1ToV3Test {
 
     @Test
     public void preserveNonPlainSelectsAndComplexSources() throws JSQLParserException {
-        assertNotOptimized(
+        assertNotOptimised(
                 "SELECT id FROM books UNION SELECT id FROM books",
                 "(SELECT id FROM books)",
                 "VALUES (1)",
@@ -46,7 +46,7 @@ public class OntopMappingV1ToV3Test {
 
     @Test
     public void preserveNonColumnProjections() throws JSQLParserException {
-        assertNotOptimized(
+        assertNotOptimised(
                 "SELECT COUNT(*) FROM books",
                 "SELECT upper(title) FROM books",
                 "SELECT id + 1 FROM books",
@@ -64,7 +64,7 @@ public class OntopMappingV1ToV3Test {
 
     @Test
     public void preserveSelectModifiers() throws JSQLParserException {
-        assertNotOptimized(
+        assertNotOptimised(
                 "SELECT DISTINCT id FROM books",
                 "SELECT TOP 1 id FROM books",
                 "SELECT AS STRUCT id FROM books",
@@ -85,7 +85,7 @@ public class OntopMappingV1ToV3Test {
 
     @Test
     public void preserveNewSelectClauses() throws JSQLParserException {
-        assertNotOptimized(
+        assertNotOptimised(
                 "SELECT id FROM books FINAL",
                 "SELECT id FROM ONLY books",
                 "SELECT id FROM books PREWHERE id = 1",
@@ -97,7 +97,7 @@ public class OntopMappingV1ToV3Test {
 
     @Test
     public void preserveTableModifiers() throws JSQLParserException {
-        assertNotOptimized(
+        assertNotOptimised(
                 "SELECT id FROM books TABLESAMPLE SYSTEM (10)",
                 "SELECT id FROM books AS b(id)",
                 "SELECT id FROM books USE INDEX (idx)",
@@ -125,7 +125,7 @@ public class OntopMappingV1ToV3Test {
         assertNull(command.extractSimpleTable("SELECT id FROM library:books"));
     }
 
-    private void assertNotOptimized(String... queries) throws JSQLParserException {
+    private void assertNotOptimised(String... queries) throws JSQLParserException {
         OntopMappingV1ToV3 command = new OntopMappingV1ToV3();
         for (String sql : queries) {
             // Ensure these regressions exercise supported ASTs, not the parse-error fallback.
