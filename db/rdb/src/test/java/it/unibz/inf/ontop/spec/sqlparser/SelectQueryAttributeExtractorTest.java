@@ -7,12 +7,34 @@ import it.unibz.inf.ontop.dbschema.impl.SQLServerQuotedIDFactory;
 import it.unibz.inf.ontop.exception.InvalidQueryException;
 import it.unibz.inf.ontop.spec.sqlparser.exception.UnsupportedSelectQueryException;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import static it.unibz.inf.ontop.spec.sqlparser.SQLTestingTools.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class SelectQueryAttributeExtractorTest {
+
+    @ParameterizedTest
+    @ValueSource(strings = {
+            "SELECT * EXCEPT (A) FROM P",
+            "SELECT t.* EXCEPT (A) FROM P t",
+            "SELECT * REPLACE (A + 1 AS A) FROM P",
+            "SELECT t.* REPLACE (A + 1 AS A) FROM P t",
+            "SELECT AS STRUCT A FROM P",
+            "SELECT AS VALUE A FROM P",
+            "SELECT A AS x(y) FROM P",
+            "SELECT A FROM P LATERAL VIEW explode(A) t AS x",
+            "SELECT p.A FROM P p ANY INNER JOIN P Q ON p.A = Q.A"
+    })
+    public void rejectsUnsupportedAttributeShapes(String sql) {
+        OfflineMetadataProviderBuilder builder = createMetadataProviderBuilder();
+        builder.createDatabaseRelation("P", "A", builder.getDBTypeFactory().getDBLargeIntegerType(), false);
+        DefaultSelectQueryAttributeExtractor extractor =
+                new DefaultSelectQueryAttributeExtractor(builder.build(), CORE_SINGLETONS);
+        assertThrows(UnsupportedSelectQueryException.class, () -> extractor.getRAExpressionAttributes(sql), sql);
+    }
 
     @Test
     public void test_no_from() throws Exception {

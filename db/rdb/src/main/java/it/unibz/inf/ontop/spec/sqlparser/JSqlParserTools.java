@@ -6,6 +6,7 @@ import it.unibz.inf.ontop.dbschema.QuotedIDFactory;
 import it.unibz.inf.ontop.dbschema.RelationID;
 import it.unibz.inf.ontop.exception.InvalidQueryException;
 import it.unibz.inf.ontop.spec.sqlparser.exception.QueryParseException;
+import it.unibz.inf.ontop.spec.sqlparser.exception.UnsupportedSelectQueryRuntimeException;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
 import net.sf.jsqlparser.parser.ParseException;
@@ -110,6 +111,15 @@ public class JSqlParserTools {
                 return idfac.createRelationID(first.image);
         }
         return getRelationId(idfac, table);
+    }
+
+    static void validateTableQualifier(Table table) {
+        if (table.getClass() != Table.class || table.isTableVariable()
+                || table.getAlias() != null || table.getTimeTravel() != null
+                || table.getTimeTravelStrAfterAlias() != null || table.getSampleClause() != null
+                || table.getPivot() != null || table.getUnPivot() != null
+                || table.getIndexHint() != null || table.getSqlServerHints() != null)
+            throw new UnsupportedSelectQueryRuntimeException("Table qualifier modifiers are not supported", table);
     }
 
     public static String getTableName(Table table) {

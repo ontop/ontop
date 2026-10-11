@@ -12,14 +12,23 @@ import it.unibz.inf.ontop.model.term.Variable;
 import it.unibz.inf.ontop.spec.sqlparser.exception.*;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import net.sf.jsqlparser.expression.Alias;
+import net.sf.jsqlparser.expression.operators.relational.SupportsOldOracleJoinSyntax;
+import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.select.*;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Function;
 
 public abstract class BasicSelectQueryParser<T> {
+
+    private static final Set<Class<?>> FROM_ITEM_TYPES = Set.of(
+            Table.class, ParenthesedSelect.class, ParenthesedFromItem.class, LateralSubSelect.class,
+            TableFunction.class, Values.class, PlainSelect.class, PivotQuery.class,
+            SetOperationList.class, TableStatement.class, net.sf.jsqlparser.statement.imprt.Import.class,
+            net.sf.jsqlparser.statement.piped.FromQuery.class);
 
     protected final ExpressionParser expressionParser;
     protected final TermFactory termFactory;
@@ -71,7 +80,7 @@ public abstract class BasicSelectQueryParser<T> {
         //      ValuesStatement (VALUES)
         //      WithItem ([RECURSIVE]...)
 
-        if (!(selectBody instanceof PlainSelect))
+        if (selectBody.getClass() != PlainSelect.class)
             throw new UnsupportedSelectQueryRuntimeException("Complex SELECT statements are not supported", selectBody);
 
         PlainSelect plainSelect = (PlainSelect) selectBody;
@@ -79,9 +88,20 @@ public abstract class BasicSelectQueryParser<T> {
         if (plainSelect.getIntoTables() != null)
             throw new InvalidSelectQueryRuntimeException("SELECT INTO is not allowed in mappings", selectBody);
 
+        if (plainSelect.getMySqlSelectIntoClause() != null || plainSelect.getIntoTempTable() != null
+                || plainSelect.isUseWithNoLog())
+            throw new InvalidSelectQueryRuntimeException("SELECT INTO is not allowed in mappings", selectBody);
+        if (plainSelect.getBigQuerySelectQualifier() != null)
+            throw new UnsupportedSelectQueryRuntimeException("SELECT AS STRUCT/VALUE are not supported", selectBody);
+        if (plainSelect.getLateralViews() != null)
+            throw new UnsupportedSelectQueryRuntimeException("LATERAL VIEW is not supported", selectBody);
+        if (plainSelect.getAlias() != null || plainSelect.getPivot() != null || plainSelect.getUnPivot() != null)
+            throw new UnsupportedSelectQueryRuntimeException("SELECT aliases/PIVOT/UNPIVOT are not supported", selectBody);
+        validateSelectModifiers(plainSelect);
         return plainSelect;
     }
 
+    protected void validateSelectModifiers(Select select) { }
 
 
     /**
@@ -123,6 +143,9 @@ public abstract class BasicSelectQueryParser<T> {
      * @throws IllegalJoinException if incorrect combination of modifiers is used
      */
     protected T join(T left, Join join) throws IllegalJoinException {
+        if (join.getClass() != Join.class || join.isAsOf() || join.isGlobal() || join.isAny()
+                || join.isAll() || join.isArray() || join.isFetch() || join.getJoinHint() != null)
+            throw new UnsupportedSelectQueryRuntimeException("Unsupported JOIN modifiers", join);
 
         /*  JSQLParser modifiers grammar
           [   LEFT SEMI
@@ -232,6 +255,12 @@ public abstract class BasicSelectQueryParser<T> {
                 if (join.getUsingColumns().stream().anyMatch(p -> p.getTable() != null))
                     throw new InvalidSelectQueryRuntimeException("JOIN USING columns cannot be qualified", join);
 
+                if (join.getUsingColumns().stream().anyMatch(p -> p.getClass() != Column.class
+                        || p.getArrayConstructor() != null
+                        || p.getOldOracleJoinSyntax() != SupportsOldOracleJoinSyntax.NO_ORACLE_JOIN
+                        || p.getReturningReferenceType() != null || p.getReturningQualifier() != null))
+                    throw new UnsupportedSelectQueryRuntimeException("Unsupported JOIN USING columns", join);
+
                 ImmutableSet<QuotedID> using = join.getUsingColumns().stream()
                         .map(p -> idfac.createAttributeID(p.getColumnName()))
                         .collect(ImmutableCollectors.toSet());
@@ -282,13 +311,23 @@ public abstract class BasicSelectQueryParser<T> {
     private class FromItemProcessor implements FromItemVisitor<T> {
 
         T translate(FromItem fromItem) {
-            return fromItem.accept(this, null);
+            if (!FROM_ITEM_TYPES.contains(fromItem.getClass()))
+                throw new UnsupportedSelectQueryRuntimeException("Unsupported FROM item subclass", fromItem);
+            if (fromItem.getSampleClause() != null)
+                throw new UnsupportedSelectQueryRuntimeException("Sampling is not supported", fromItem);
+            T translated = fromItem.accept(this, null);
+            if (translated == null)
+                throw new UnsupportedSelectQueryRuntimeException("FROM item is not supported", fromItem);
+            return translated;
         }
 
         @Override
         public <S> T visit(Table table, S context) {
             if (table.getPivot() != null || table.getUnPivot() != null)
                 throw new UnsupportedSelectQueryRuntimeException("PIVOT/UNPIVOT are not supported", table);
+            if (table.isTableVariable() || table.getTimeTravel() != null
+                    || table.getTimeTravelStrAfterAlias() != null || table.getSqlServerHints() != null)
+                throw new UnsupportedSelectQueryRuntimeException("Table variables/time travel/SQL Server hints are not supported", table);
 
             validateFromItem(table);
 
@@ -314,6 +353,7 @@ public abstract class BasicSelectQueryParser<T> {
             if (subSelect.getPivot() != null || subSelect.getUnPivot() != null)
                 throw new UnsupportedSelectQueryRuntimeException("PIVOT/UNPIVOT are not supported", subSelect);
 
+            validateSelectModifiers(subSelect);
             Select select = subSelect.getSelect();
             T rae = translateSelect(select, select.getWithItemsList());
             return alias(rae, subSelect.getAlias());
@@ -388,7 +428,7 @@ public abstract class BasicSelectQueryParser<T> {
         }
 
         private T alias(T rae, Alias alias) {
-            if (alias.getAliasColumns() != null)
+            if (alias.getClass() != Alias.class || alias.getAliasColumns() != null)
                 throw new UnsupportedSelectQueryRuntimeException("Alias columns are not supported", alias);
 
             RelationID aliasId = idfac.createRelationID(alias.getName());

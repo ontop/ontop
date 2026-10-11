@@ -1288,11 +1288,17 @@ public class SQLParserTest {
 
 	@Test
 	public void testCast1() throws Exception {
-		RAExpression re = parse("SELECT CAST(\"view0\".\"nick2\" AS CHAR (8000) CHARACTER SET utf8) AS \"v0\" FROM people \"view0\" WHERE \"view0\".\"nick2\" IS NOT NULL");
+		RAExpression re = parse("SELECT CAST(\"view0\".\"nick2\" AS CHAR) AS \"v0\" FROM people \"view0\" WHERE \"view0\".\"nick2\" IS NOT NULL");
 
         assertEquals(filter(TERM_FACTORY.getDBNot(TERM_FACTORY.getDBIsNull(TERM_FACTORY.getVariable("nick21"))), people()), re.getIQTree());
-        assertEquals(getSelectAttributes("\"v0\"", TERM_FACTORY.getDBCastFunctionalTerm(dbTypeFactory.getDBTermType("CHAR", 8000), TERM_FACTORY.getVariable("nick21"))), re.getAttributes());
+        assertEquals(getSelectAttributes("\"v0\"", TERM_FACTORY.getDBCastFunctionalTerm(dbTypeFactory.getDBTermType("CHAR"), TERM_FACTORY.getVariable("nick21"))), re.getAttributes());
 	}
+
+    @Test
+    public void testCastCharacterSetUnsupported() {
+        assertThrows(UnsupportedSelectQueryException.class, () ->
+                parse("SELECT CAST(\"view0\".\"nick2\" AS CHAR (8000) CHARACTER SET utf8) AS \"v0\" FROM people \"view0\""));
+    }
 
 	@Test
 	public void testCast2() throws Exception {
