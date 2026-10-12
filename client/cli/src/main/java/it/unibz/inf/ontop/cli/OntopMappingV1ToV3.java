@@ -823,7 +823,7 @@ public class OntopMappingV1ToV3 implements OntopCommand {
     }
 
     private boolean isSimpleColumnSelect(net.sf.jsqlparser.statement.Statement statement) {
-        if (statement == null || statement.getClass() != PlainSelect.class)
+        if (!(statement instanceof PlainSelect))
             return false;
         PlainSelect select = (PlainSelect) statement;
         // Explicitly whitelist the 5.4 AST shape: WHERE is retained only when simplifying SQL.
