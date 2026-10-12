@@ -114,7 +114,7 @@ public class JSqlParserTools {
     }
 
     static void validateTableQualifier(Table table) {
-        if (table.getClass() != Table.class || table.isTableVariable()
+        if (table.isTableVariable()
                 || table.getAlias() != null || table.getTimeTravel() != null
                 || table.getTimeTravelStrAfterAlias() != null || table.getSampleClause() != null
                 || table.getPivot() != null || table.getUnPivot() != null
