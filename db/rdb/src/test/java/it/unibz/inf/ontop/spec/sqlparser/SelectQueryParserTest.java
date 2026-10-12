@@ -221,9 +221,6 @@ public class SelectQueryParserTest {
         PlainSelect select = JSqlParserTools.parse("SELECT P.A FROM P JOIN Q USING (A)", false).getPlainSelect();
         select.getJoins().get(0).getUsingColumns().get(0).setReturningQualifier("OLD");
         assertThrows(UnsupportedSelectQueryRuntimeException.class, () -> parser.translateSelect(select, null));
-        select.getJoins().get(0).getUsingColumns().get(0).setReturningQualifier(null);
-        select.getJoins().get(0).getUsingColumns().set(0, new net.sf.jsqlparser.schema.Column("A") { });
-        assertThrows(UnsupportedSelectQueryRuntimeException.class, () -> parser.translateSelect(select, null));
     }
 
     private RAExpression parse(String sql) throws QueryParseException, InvalidQueryException, UnsupportedSelectQueryException {

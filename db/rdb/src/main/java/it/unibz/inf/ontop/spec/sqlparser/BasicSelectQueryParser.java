@@ -255,8 +255,7 @@ public abstract class BasicSelectQueryParser<T> {
                 if (join.getUsingColumns().stream().anyMatch(p -> p.getTable() != null))
                     throw new InvalidSelectQueryRuntimeException("JOIN USING columns cannot be qualified", join);
 
-                if (join.getUsingColumns().stream().anyMatch(p -> p.getClass() != Column.class
-                        || p.getArrayConstructor() != null
+                if (join.getUsingColumns().stream().anyMatch(p -> p.getArrayConstructor() != null
                         || p.getOldOracleJoinSyntax() != SupportsOldOracleJoinSyntax.NO_ORACLE_JOIN
                         || p.getReturningReferenceType() != null || p.getReturningQualifier() != null))
                     throw new UnsupportedSelectQueryRuntimeException("Unsupported JOIN USING columns", join);
