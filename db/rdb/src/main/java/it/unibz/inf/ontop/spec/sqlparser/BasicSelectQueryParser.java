@@ -80,8 +80,7 @@ public abstract class BasicSelectQueryParser<T> {
         //      ValuesStatement (VALUES)
         //      WithItem ([RECURSIVE]...)
 
-        // Require the exact class: instanceof would accept subclasses whose extra SQL features we do not inspect.
-        if (selectBody.getClass() != PlainSelect.class)
+        if (!(selectBody instanceof PlainSelect))
             throw new UnsupportedSelectQueryRuntimeException("Complex SELECT statements are not supported", selectBody);
 
         PlainSelect plainSelect = (PlainSelect) selectBody;

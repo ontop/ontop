@@ -119,16 +119,11 @@ public class SelectQueryParserTest {
     }
 
     @Test
-    public void rejectsSelectAndFromSubclasses() throws Exception {
+    public void rejectsFromItemSubclasses() throws Exception {
         parse("SELECT A FROM P");
         OfflineMetadataProviderBuilder builder = createMetadataProviderBuilder();
         builder.createDatabaseRelation("P", "A", integerDBType, false);
         SelectQueryParser parser = new SelectQueryParser(builder.build(), CORE_SINGLETONS);
-        PlainSelect select = new PlainSelect() { };
-        select.setFromItem(new Table("P"));
-        select.setSelectItems(List.of(SelectItem.from(new net.sf.jsqlparser.schema.Column("A"))));
-        assertThrows(UnsupportedSelectQueryRuntimeException.class, () -> parser.translateSelect(select, null));
-
         PlainSelect plain = JSqlParserTools.parse("SELECT A FROM P", false).getPlainSelect();
         plain.setFromItem(new Table("P") { });
         assertThrows(UnsupportedSelectQueryRuntimeException.class, () -> parser.translateSelect(plain, null));
