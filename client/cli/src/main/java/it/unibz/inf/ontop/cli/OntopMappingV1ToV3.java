@@ -890,8 +890,7 @@ public class OntopMappingV1ToV3 implements OntopCommand {
     }
 
     private boolean isSimpleTable(Table table) {
-        return table.getClass() == Table.class
-                && !table.isTableVariable() && table.getTimeTravel() == null
+        return !table.isTableVariable() && table.getTimeTravel() == null
                 && table.getNameParts().stream().noneMatch(p -> p != null && p.contains("@"))
                 && table.getTimeTravelStrAfterAlias() == null && table.getSampleClause() == null
                 && table.getPivot() == null && table.getUnPivot() == null
