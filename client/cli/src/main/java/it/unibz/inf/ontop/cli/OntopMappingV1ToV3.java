@@ -896,8 +896,7 @@ public class OntopMappingV1ToV3 implements OntopCommand {
                 && table.getTimeTravelStrAfterAlias() == null && table.getSampleClause() == null
                 && table.getPivot() == null && table.getUnPivot() == null
                 && table.getIndexHint() == null && table.getSqlServerHints() == null
-                && (table.getAlias() == null || (table.getAlias().getClass() == net.sf.jsqlparser.expression.Alias.class
-                    && table.getAlias().getAliasColumns() == null));
+                && (table.getAlias() == null || table.getAlias().getAliasColumns() == null);
     }
 
     /**
