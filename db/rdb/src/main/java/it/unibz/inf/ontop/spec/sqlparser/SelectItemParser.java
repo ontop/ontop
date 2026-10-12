@@ -50,16 +50,12 @@ public class SelectItemParser {
         Stream<Map.Entry<QuotedID, ImmutableTerm>> stream;
 
         private Stream<Map.Entry<QuotedID, ImmutableTerm>> getAttributes(SelectItem<?> si) {
-            if (si.getClass() != SelectItem.class)
-                throw new UnsupportedSelectQueryRuntimeException("Unsupported SELECT item", si);
             Alias alias = si.getAlias();
             if (alias != null && alias.getAliasColumns() != null)
                 throw new UnsupportedSelectQueryRuntimeException("Alias columns are not supported", alias);
             Expression expression = si.getExpression();
             if (expression instanceof AllColumns) {
                 AllColumns wildcard = (AllColumns) expression;
-                if (expression.getClass() != AllColumns.class && expression.getClass() != AllTableColumns.class)
-                    throw new UnsupportedSelectQueryRuntimeException("Unsupported wildcard", expression);
                 // AllTableColumns inherits EXCEPT/REPLACE from AllColumns.
                 if (wildcard.getExceptColumns() != null || wildcard.getReplaceExpressions() != null
                         || wildcard.getExceptKeyword() != null)

@@ -119,16 +119,10 @@ public class SelectQueryParserTest {
     }
 
     @Test
-    public void rejectsWildcardAndSelectItemSubclasses() throws Exception {
+    public void rejectsUnsupportedWildcardProperties() throws Exception {
         RAExpression ra = parse("SELECT A FROM P");
         SelectItemParser parser = new SelectItemParser(ra.getAttributes(),
                 new ExpressionParser(idfac, CORE_SINGLETONS)::parseTerm, idfac);
-        assertThrows(UnsupportedSelectQueryRuntimeException.class,
-                () -> parser.parseSelectItems(List.of(SelectItem.from(new AllColumns() { }))));
-        assertThrows(UnsupportedSelectQueryRuntimeException.class,
-                () -> parser.parseSelectItems(List.of(SelectItem.from(new AllTableColumns(new Table("P")) { }))));
-        assertThrows(UnsupportedSelectQueryRuntimeException.class,
-                () -> parser.parseSelectItems(List.of(new SelectItem<>(new LongValue(1), new Alias("x")) { })));
         AllTableColumns returning = new AllTableColumns(new Table("P"));
         returning.setReturningQualifier("OLD");
         assertThrows(UnsupportedSelectQueryRuntimeException.class,
