@@ -900,6 +900,10 @@ public class OntopMappingV1ToV3 implements OntopCommand {
                     && table.getAlias().getAliasColumns() == null));
     }
 
+    /**
+     * Converts JSqlParser's 1-based line and column to a 0-based string offset.
+     * Returns -1 when the position is outside the SQL text.
+     */
     private int getTokenOffset(String sql, int targetLine, int targetColumn) {
         int line = 1;
         int column = 1;
@@ -908,6 +912,7 @@ public class OntopMappingV1ToV3 implements OntopCommand {
                 return i;
             char c = sql.charAt(i);
             if (c == '\r' || c == '\n') {
+                // CRLF is one line break, so skip its second character.
                 if (c == '\r' && i + 1 < sql.length() && sql.charAt(i + 1) == '\n')
                     i++;
                 line++;
