@@ -143,7 +143,7 @@ public abstract class BasicSelectQueryParser<T> {
      * @throws IllegalJoinException if incorrect combination of modifiers is used
      */
     protected T join(T left, Join join) throws IllegalJoinException {
-        if (join.getClass() != Join.class || join.isAsOf() || join.isGlobal() || join.isAny()
+        if (join.isAsOf() || join.isGlobal() || join.isAny()
                 || join.isAll() || join.isArray() || join.isFetch() || join.getJoinHint() != null)
             throw new UnsupportedSelectQueryRuntimeException("Unsupported JOIN modifiers", join);
 
