@@ -826,31 +826,7 @@ public class OntopMappingV1ToV3 implements OntopCommand {
         if (!(statement instanceof PlainSelect))
             return false;
         PlainSelect select = (PlainSelect) statement;
-        // Explicitly whitelist the 5.4 AST shape: WHERE is retained only when simplifying SQL.
-        if (select.getFromItem() == null || select.getFromItem().getClass() != Table.class
-                || select.getWithItemsList() != null || select.getJoins() != null
-                || select.getDistinct() != null || select.getBigQuerySelectQualifier() != null
-                || select.getIntoTables() != null || select.getMySqlSelectIntoClause() != null
-                || select.getLateralViews() != null || select.getPreWhere() != null
-                || select.getGroupBy() != null || select.getHaving() != null || select.getQualify() != null
-                || select.getOptimizeFor() != null || select.getSkip() != null || select.getFirst() != null
-                || select.getTop() != null || select.getOracleHierarchical() != null
-                || select.getPreferringClause() != null || select.getOracleHint() != null
-                || select.getMySqlHintStraightJoin() || select.getMySqlSqlCalcFoundRows()
-                || select.getMySqlSqlCacheFlag() != null || select.getForXmlPath() != null
-                || select.getKsqlWindow() != null || select.getEmitMode() != PlainSelect.EmitMode.NONE
-                || select.getWindowDefinitions() != null || select.isUsingFinal() || select.isUsingOnly()
-                || select.isUseWithNoLog() || select.getIntoTempTable() != null || select.getSettings() != null
-                || select.getOrderByElements() != null || select.getInterpolate() != null
-                || select.getLimit() != null || select.getLimitBy() != null || select.getOffset() != null
-                || select.getFetch() != null || select.getIsolation() != null
-                || select.getMySqlProcedureAnalyse() != null || select.getForClause() != null
-                || select.getOption() != null || select.getForMode() != null
-                || select.getForUpdateTables() != null || select.getWait() != null
-                || select.isSkipLocked() || select.isNoWait() || select.isForUpdateBeforeOrderBy()
-                || select.isOracleSiblings() || select.getAlias() != null
-                || select.getPivot() != null || select.getUnPivot() != null
-                || !isSimpleTable((Table) select.getFromItem())
+        if (!isSimpleSource(select) || hasUnsupportedSelectFeatures(select)
                 || select.getSelectItems() == null || select.getSelectItems().isEmpty())
             return false;
 
@@ -866,6 +842,51 @@ public class OntopMappingV1ToV3 implements OntopCommand {
                 return false;
         }
         return true;
+    }
+
+    private boolean isSimpleSource(PlainSelect select) {
+        if (!(select.getFromItem() instanceof Table))
+            return false;
+        return select.getJoins() == null && isSimpleTable((Table) select.getFromItem());
+    }
+
+    private boolean hasUnsupportedSelectFeatures(PlainSelect select) {
+        // WHERE is intentionally allowed: projection simplification preserves it.
+        return hasUnsupportedSelectClauses(select)
+                || hasUnsupportedSelectModifiers(select)
+                || hasUnsupportedOrderingOrLocking(select);
+    }
+
+    private boolean hasUnsupportedSelectClauses(PlainSelect select) {
+        return select.getWithItemsList() != null || select.getDistinct() != null
+                || select.getBigQuerySelectQualifier() != null
+                || select.getIntoTables() != null || select.getMySqlSelectIntoClause() != null
+                || select.getIntoTempTable() != null || select.isUseWithNoLog()
+                || select.getLateralViews() != null || select.getPreWhere() != null
+                || select.getGroupBy() != null || select.getHaving() != null || select.getQualify() != null
+                || select.getWindowDefinitions() != null || select.getKsqlWindow() != null;
+    }
+
+    private boolean hasUnsupportedSelectModifiers(PlainSelect select) {
+        return select.getOptimizeFor() != null || select.getSkip() != null || select.getFirst() != null
+                || select.getTop() != null || select.getOracleHierarchical() != null
+                || select.getPreferringClause() != null || select.getOracleHint() != null
+                || select.getMySqlHintStraightJoin() || select.getMySqlSqlCalcFoundRows()
+                || select.getMySqlSqlCacheFlag() != null || select.getForXmlPath() != null
+                || select.getEmitMode() != PlainSelect.EmitMode.NONE
+                || select.isUsingFinal() || select.isUsingOnly() || select.getSettings() != null
+                || select.getOption() != null || select.getInterpolate() != null
+                || select.getMySqlProcedureAnalyse() != null;
+    }
+
+    private boolean hasUnsupportedOrderingOrLocking(PlainSelect select) {
+        return select.getOrderByElements() != null || select.getLimit() != null
+                || select.getLimitBy() != null || select.getOffset() != null || select.getFetch() != null
+                || select.getIsolation() != null || select.getForClause() != null
+                || select.getForMode() != null || select.getForUpdateTables() != null
+                || select.getWait() != null || select.isSkipLocked() || select.isNoWait()
+                || select.isForUpdateBeforeOrderBy() || select.isOracleSiblings()
+                || select.getAlias() != null || select.getPivot() != null || select.getUnPivot() != null;
     }
 
     private boolean isSimpleTable(Table table) {
