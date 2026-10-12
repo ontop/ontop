@@ -53,7 +53,7 @@ public class SelectItemParser {
             if (si.getClass() != SelectItem.class)
                 throw new UnsupportedSelectQueryRuntimeException("Unsupported SELECT item", si);
             Alias alias = si.getAlias();
-            if (alias != null && (alias.getClass() != Alias.class || alias.getAliasColumns() != null))
+            if (alias != null && alias.getAliasColumns() != null)
                 throw new UnsupportedSelectQueryRuntimeException("Alias columns are not supported", alias);
             Expression expression = si.getExpression();
             if (expression instanceof AllColumns) {

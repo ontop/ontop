@@ -417,7 +417,7 @@ public abstract class BasicSelectQueryParser<T> {
         }
 
         private T alias(T rae, Alias alias) {
-            if (alias.getClass() != Alias.class || alias.getAliasColumns() != null)
+            if (alias.getAliasColumns() != null)
                 throw new UnsupportedSelectQueryRuntimeException("Alias columns are not supported", alias);
 
             RelationID aliasId = idfac.createRelationID(alias.getName());
