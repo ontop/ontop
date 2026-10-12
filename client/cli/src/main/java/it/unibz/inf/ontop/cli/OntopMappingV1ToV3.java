@@ -831,8 +831,7 @@ public class OntopMappingV1ToV3 implements OntopCommand {
             return false;
 
         for (SelectItem<?> item : select.getSelectItems()) {
-            if (item.getClass() != SelectItem.class || item.getAlias() != null
-                    || item.getExpression() == null || item.getExpression().getClass() != Column.class)
+            if (item.getAlias() != null || !(item.getExpression() instanceof Column))
                 return false;
             Column column = (Column) item.getExpression();
             if (column.getArrayConstructor() != null || column.getOldOracleJoinSyntax() != 0
