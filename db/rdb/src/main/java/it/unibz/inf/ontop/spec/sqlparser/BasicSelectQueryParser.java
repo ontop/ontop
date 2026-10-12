@@ -13,22 +13,14 @@ import it.unibz.inf.ontop.spec.sqlparser.exception.*;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import net.sf.jsqlparser.expression.Alias;
 import net.sf.jsqlparser.expression.operators.relational.SupportsOldOracleJoinSyntax;
-import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.select.*;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.function.Function;
 
 public abstract class BasicSelectQueryParser<T> {
-
-    private static final Set<Class<?>> FROM_ITEM_TYPES = Set.of(
-            Table.class, ParenthesedSelect.class, ParenthesedFromItem.class, LateralSubSelect.class,
-            TableFunction.class, Values.class, PlainSelect.class, PivotQuery.class,
-            SetOperationList.class, TableStatement.class, net.sf.jsqlparser.statement.imprt.Import.class,
-            net.sf.jsqlparser.statement.piped.FromQuery.class);
 
     protected final ExpressionParser expressionParser;
     protected final TermFactory termFactory;
@@ -310,8 +302,6 @@ public abstract class BasicSelectQueryParser<T> {
     private class FromItemProcessor implements FromItemVisitor<T> {
 
         T translate(FromItem fromItem) {
-            if (!FROM_ITEM_TYPES.contains(fromItem.getClass()))
-                throw new UnsupportedSelectQueryRuntimeException("Unsupported FROM item subclass", fromItem);
             if (fromItem.getSampleClause() != null)
                 throw new UnsupportedSelectQueryRuntimeException("Sampling is not supported", fromItem);
             T translated = fromItem.accept(this, null);

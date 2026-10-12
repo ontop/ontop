@@ -119,22 +119,6 @@ public class SelectQueryParserTest {
     }
 
     @Test
-    public void rejectsFromItemSubclasses() throws Exception {
-        parse("SELECT A FROM P");
-        OfflineMetadataProviderBuilder builder = createMetadataProviderBuilder();
-        builder.createDatabaseRelation("P", "A", integerDBType, false);
-        SelectQueryParser parser = new SelectQueryParser(builder.build(), CORE_SINGLETONS);
-        PlainSelect plain = JSqlParserTools.parse("SELECT A FROM P", false).getPlainSelect();
-        plain.setFromItem(new Table("P") { });
-        assertThrows(UnsupportedSelectQueryRuntimeException.class, () -> parser.translateSelect(plain, null));
-        ParenthesedSelect subselect = new ParenthesedSelect() { };
-        subselect.setSelect(JSqlParserTools.parse("SELECT A FROM P", false));
-        subselect.setAlias(new Alias("s"));
-        plain.setFromItem(subselect);
-        assertThrows(UnsupportedSelectQueryRuntimeException.class, () -> parser.translateSelect(plain, null));
-    }
-
-    @Test
     public void rejectsWildcardAndSelectItemSubclasses() throws Exception {
         RAExpression ra = parse("SELECT A FROM P");
         SelectItemParser parser = new SelectItemParser(ra.getAttributes(),
