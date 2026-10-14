@@ -142,7 +142,6 @@
         <httpclient.version>4.5.13</httpclient.version>
         <httpcore.version>4.4.14</httpcore.version>
         <jackson.version>2.18.11</jackson.version>
-        <jackson-databind.version>2.18.11</jackson-databind.version>
         <javax-inject.version>1</javax-inject.version>
         <jgrapht.version>0.9.3</jgrapht.version>
         <jsqlparser.version>4.4</jsqlparser.version>
@@ -779,6 +778,13 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-starter-thymeleaf</artifactId>
                 <version>${spring-boot.version}</version>
+                <exclusions>
+                    <!-- Thymeleaf 3.1 integrated the java8time extras module into its core -->
+                    <exclusion>
+                        <groupId>org.thymeleaf.extras</groupId>
+                        <artifactId>thymeleaf-extras-java8time</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.springframework.boot</groupId>
@@ -811,14 +817,53 @@
                 <version>${spring-boot.version}</version>
             </dependency>
 
-            <!-- Spring Framework: Spring Boot 2.7.18 declares Spring Framework 5.3.31. Importing the BOM lifts every
-                 Spring Framework module to the last open-source 5.3.x release (compatible with Spring Boot 2.7) -->
+            <!-- Spring Framework: Spring Boot 2.7.18 declares Spring Framework 5.3.31, so these modules would
+                 otherwise arrive at that version through the Boot starters. They are pinned to the last
+                 open-source 5.3.x release (compatible with Spring Boot 2.7) -->
             <dependency>
                 <groupId>org.springframework</groupId>
-                <artifactId>spring-framework-bom</artifactId>
+                <artifactId>spring-aop</artifactId>
                 <version>${spring-framework.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework</groupId>
+                <artifactId>spring-beans</artifactId>
+                <version>${spring-framework.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework</groupId>
+                <artifactId>spring-context</artifactId>
+                <version>${spring-framework.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework</groupId>
+                <artifactId>spring-core</artifactId>
+                <version>${spring-framework.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework</groupId>
+                <artifactId>spring-expression</artifactId>
+                <version>${spring-framework.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework</groupId>
+                <artifactId>spring-jcl</artifactId>
+                <version>${spring-framework.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework</groupId>
+                <artifactId>spring-test</artifactId>
+                <version>${spring-framework.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework</groupId>
+                <artifactId>spring-web</artifactId>
+                <version>${spring-framework.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework</groupId>
+                <artifactId>spring-webmvc</artifactId>
+                <version>${spring-framework.version}</version>
             </dependency>
 
             <!-- Servlet API -->
@@ -989,7 +1034,7 @@
             <dependency>
                 <groupId>com.fasterxml.jackson.core</groupId>
                 <artifactId>jackson-databind</artifactId>
-                <version>${jackson-databind.version}</version>
+                <version>${jackson.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.fasterxml.jackson.datatype</groupId>
@@ -1001,14 +1046,21 @@
                 <artifactId>jackson-datatype-jdk8</artifactId>
                 <version>${jackson.version}</version>
             </dependency>
+            <!-- Reach the build only transitively (Spring Boot starters, AWS SDK) -->
             <dependency>
-                <!-- Keeps the Jackson modules that only arrive transitively (e.g. jackson-datatype-jsr310 and
-                     jackson-module-parameter-names via Spring Boot) on the same version as the ones declared above -->
-                <groupId>com.fasterxml.jackson</groupId>
-                <artifactId>jackson-bom</artifactId>
+                <groupId>com.fasterxml.jackson.datatype</groupId>
+                <artifactId>jackson-datatype-jsr310</artifactId>
                 <version>${jackson.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.module</groupId>
+                <artifactId>jackson-module-parameter-names</artifactId>
+                <version>${jackson.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.dataformat</groupId>
+                <artifactId>jackson-dataformat-cbor</artifactId>
+                <version>${jackson.version}</version>
             </dependency>
 
             <!-- Gson -->
@@ -1175,8 +1227,7 @@
             </dependency>
             <dependency>
                 <!-- Spring Boot 2.7 declares Thymeleaf 3.0 and pulls in the matching Spring integration
-                     artifact transitively, so this one is pinned next to thymeleaf itself to keep the two
-                     on the same version. -->
+                     artifact transitively. -->
                 <groupId>org.thymeleaf</groupId>
                 <artifactId>thymeleaf-spring5</artifactId>
                 <version>${thymeleaf.version}</version>
