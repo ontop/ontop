@@ -120,7 +120,7 @@
         <maven-surefire-plugin.version>3.0.0-M9</maven-surefire-plugin.version>
         <maven-surefire-report-plugin.version>3.0.0-M9</maven-surefire-report-plugin.version>
         <sortpom-maven-plugin.version>3.2.1</sortpom-maven-plugin.version>
-        <spring-boot-maven-plugin.version>2.7.9</spring-boot-maven-plugin.version> <!-- 3.0.0+ needs JDK17 (via Spring Boot 3) -->
+        <spring-boot-maven-plugin.version>2.7.18</spring-boot-maven-plugin.version> <!-- 3.0.0+ needs JDK17 (via Spring Boot 3) -->
         <versions-maven-plugin.version>2.15.0</versions-maven-plugin.version>
 
         <!-- Dependency versions: core dependencies -->
@@ -141,8 +141,7 @@
         <hikari-cp.version>3.4.5</hikari-cp.version>
         <httpclient.version>4.5.13</httpclient.version>
         <httpcore.version>4.4.14</httpcore.version>
-        <jackson.version>2.18.6</jackson.version>
-        <jackson-databind.version>2.18.6</jackson-databind.version>
+        <jackson.version>2.18.11</jackson.version>
         <javax-inject.version>1</javax-inject.version>
         <jgrapht.version>0.9.3</jgrapht.version>
         <jsqlparser.version>4.4</jsqlparser.version>
@@ -168,15 +167,17 @@
 
         <!-- Dependency versions: indirectly used & pinned for enforcer plugin -->
         <checkerframework.version>3.8.0</checkerframework.version>
+        <commons-beanutils.version>1.11.0</commons-beanutils.version>
         <commons-io.version>2.14.0</commons-io.version>
         <commons-logging.version>1.2</commons-logging.version>
         <errorprone.version>2.5.1</errorprone.version>
         <jsonld-java.version>0.13.0</jsonld-java.version>
         <semargl-sesame.version>0.6.1</semargl-sesame.version>
         <semargl.version>0.7</semargl.version>
-        <thymeleaf.version>3.0.15.RELEASE</thymeleaf.version>
-        <tomcat-embed-core.version>9.0.117</tomcat-embed-core.version>
-        <log4j2.version>2.19.0</log4j2.version>
+        <spring-framework.version>5.3.39</spring-framework.version>
+        <thymeleaf.version>3.1.5.RELEASE</thymeleaf.version>
+        <tomcat-embed.version>9.0.122</tomcat-embed.version>
+        <log4j2.version>2.25.5</log4j2.version>
 
         <!-- JDK version -->
         <jdk.version>11</jdk.version>
@@ -777,6 +778,13 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-starter-thymeleaf</artifactId>
                 <version>${spring-boot.version}</version>
+                <exclusions>
+                    <!-- Thymeleaf 3.1 integrated the java8time extras module into its core -->
+                    <exclusion>
+                        <groupId>org.thymeleaf.extras</groupId>
+                        <artifactId>thymeleaf-extras-java8time</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.springframework.boot</groupId>
@@ -807,6 +815,55 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-starter-test</artifactId>
                 <version>${spring-boot.version}</version>
+            </dependency>
+
+            <!-- Spring Framework: Spring Boot 2.7.18 declares Spring Framework 5.3.31, so these modules would
+                 otherwise arrive at that version through the Boot starters. They are pinned to the last
+                 open-source 5.3.x release (compatible with Spring Boot 2.7) -->
+            <dependency>
+                <groupId>org.springframework</groupId>
+                <artifactId>spring-aop</artifactId>
+                <version>${spring-framework.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework</groupId>
+                <artifactId>spring-beans</artifactId>
+                <version>${spring-framework.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework</groupId>
+                <artifactId>spring-context</artifactId>
+                <version>${spring-framework.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework</groupId>
+                <artifactId>spring-core</artifactId>
+                <version>${spring-framework.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework</groupId>
+                <artifactId>spring-expression</artifactId>
+                <version>${spring-framework.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework</groupId>
+                <artifactId>spring-jcl</artifactId>
+                <version>${spring-framework.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework</groupId>
+                <artifactId>spring-test</artifactId>
+                <version>${spring-framework.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework</groupId>
+                <artifactId>spring-web</artifactId>
+                <version>${spring-framework.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.springframework</groupId>
+                <artifactId>spring-webmvc</artifactId>
+                <version>${spring-framework.version}</version>
             </dependency>
 
             <!-- Servlet API -->
@@ -977,7 +1034,7 @@
             <dependency>
                 <groupId>com.fasterxml.jackson.core</groupId>
                 <artifactId>jackson-databind</artifactId>
-                <version>${jackson-databind.version}</version>
+                <version>${jackson.version}</version>
             </dependency>
             <dependency>
                 <groupId>com.fasterxml.jackson.datatype</groupId>
@@ -987,6 +1044,22 @@
             <dependency>
                 <groupId>com.fasterxml.jackson.datatype</groupId>
                 <artifactId>jackson-datatype-jdk8</artifactId>
+                <version>${jackson.version}</version>
+            </dependency>
+            <!-- Reach the build only transitively (Spring Boot starters, AWS SDK) -->
+            <dependency>
+                <groupId>com.fasterxml.jackson.datatype</groupId>
+                <artifactId>jackson-datatype-jsr310</artifactId>
+                <version>${jackson.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.module</groupId>
+                <artifactId>jackson-module-parameter-names</artifactId>
+                <version>${jackson.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.dataformat</groupId>
+                <artifactId>jackson-dataformat-cbor</artifactId>
                 <version>${jackson.version}</version>
             </dependency>
 
@@ -1117,9 +1190,25 @@
                 <version>${commons-logging.version}</version>
             </dependency>
             <dependency>
+                <!-- transitive dependency of opencsv (via rdf4j-queryresultio-text) -->
+                <groupId>commons-beanutils</groupId>
+                <artifactId>commons-beanutils</artifactId>
+                <version>${commons-beanutils.version}</version>
+            </dependency>
+            <dependency>
                 <groupId>org.apache.tomcat.embed</groupId>
                 <artifactId>tomcat-embed-core</artifactId>
-                <version>${tomcat-embed-core.version}</version>
+                <version>${tomcat-embed.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.tomcat.embed</groupId>
+                <artifactId>tomcat-embed-el</artifactId>
+                <version>${tomcat-embed.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.tomcat.embed</groupId>
+                <artifactId>tomcat-embed-websocket</artifactId>
+                <version>${tomcat-embed.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.checkerframework</groupId>
@@ -1134,6 +1223,13 @@
             <dependency>
                 <groupId>org.thymeleaf</groupId>
                 <artifactId>thymeleaf</artifactId>
+                <version>${thymeleaf.version}</version>
+            </dependency>
+            <dependency>
+                <!-- Spring Boot 2.7 declares Thymeleaf 3.0 and pulls in the matching Spring integration
+                     artifact transitively. -->
+                <groupId>org.thymeleaf</groupId>
+                <artifactId>thymeleaf-spring5</artifactId>
                 <version>${thymeleaf.version}</version>
             </dependency>
         </dependencies>

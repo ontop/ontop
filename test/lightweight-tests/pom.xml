@@ -408,6 +408,13 @@
                     <groupId>log4j</groupId>
                     <artifactId>log4j</artifactId>
                 </exclusion>
+                <!-- Not needed: Hive logs through SLF4J and Logback is the test binding. log4j-core must also stay off
+                     the classpath, as the signed Simba Athena driver bundles unrelocated log4j classes and javac fails
+                     with a signer mismatch when it discovers log4j-core's annotation processors -->
+                <exclusion>
+                    <groupId>org.apache.logging.log4j</groupId>
+                    <artifactId>*</artifactId>
+                </exclusion>
                 <exclusion>
                     <groupId>com.github.ben-manes.caffeine</groupId>
                     <artifactId>caffeine</artifactId>
