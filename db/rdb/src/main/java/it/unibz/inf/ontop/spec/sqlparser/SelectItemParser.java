@@ -56,17 +56,17 @@ public class SelectItemParser {
             Expression expression = si.getExpression();
             if (expression instanceof AllColumns) {
                 AllColumns wildcard = (AllColumns) expression;
-                // AllTableColumns inherits EXCEPT/REPLACE from AllColumns.
                 if (wildcard.getExceptColumns() != null || wildcard.getReplaceExpressions() != null
                         || wildcard.getExceptKeyword() != null)
                     throw new UnsupportedSelectQueryRuntimeException("Wildcard EXCEPT/REPLACE are not supported", expression);
                 if (alias != null)
                     throw new UnsupportedSelectQueryRuntimeException("Wildcard aliases are not supported", si);
+
+                if (wildcard instanceof AllTableColumns)
+                    visit((AllTableColumns) wildcard);
+                else
+                    visit(wildcard);
             }
-            if (expression instanceof AllTableColumns)
-                visit((AllTableColumns) expression);
-            else if (expression instanceof AllColumns)
-                visit((AllColumns) expression);
             else
                 visit(si);
             return stream;

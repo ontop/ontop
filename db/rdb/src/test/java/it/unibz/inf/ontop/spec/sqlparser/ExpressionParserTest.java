@@ -1805,17 +1805,14 @@ public class ExpressionParserTest {
 
     @Test
     public void named_function_parameters_must_have_supported_names_and_shape() {
-        for (boolean subclass : List.of(false, true)) {
-            NamedExpressionList<Expression> named = subclass
-                    ? new NamedExpressionList<>() {} : new NamedExpressionList<>();
-            named.add(new StringValue("abc"));
-            named.setNames(List.of("", "FROM"));
-            Function function = new Function();
-            function.setName("SUBSTRING");
-            function.setNamedParameters(named);
-            assertUnsupported(function);
-        }
+        NamedExpressionList<Expression> named = new NamedExpressionList<>();
+        named.add(new StringValue("abc"));
+        named.setNames(List.of("", "FROM"));
         Function function = new Function();
+        function.setName("SUBSTRING");
+        function.setNamedParameters(named);
+        assertUnsupported(function);
+        function = new Function();
         function.setName("RAND");
         function.setNamedParameters(new NamedExpressionList<>());
         assertUnsupported(function);
@@ -1918,17 +1915,6 @@ public class ExpressionParserTest {
                 t -> t.setNationalCharacterType(ColDataType.NationalCharacterType.CHAR),
                 t -> t.setIntervalQualifier(new IntervalQualifier("DAY", null, "SECOND", null)),
                 t -> t.setXmlTypeModifier(new XmlTypeModifier(XmlTypeModifier.Kind.CONTENT, List.of("schema_collection"))));
-    }
-
-    @Test
-    public void case_when_subclasses_must_not_be_flattened() {
-        WhenClause when = new WhenClause() {};
-        when.setWhenExpression(new LongValue(1));
-        when.setThenExpression(new LongValue(2));
-        CaseExpression expression = new CaseExpression();
-        expression.setSwitchExpression(new LongValue(1));
-        expression.setWhenClauses(List.of(when));
-        assertUnsupported(expression);
     }
 
     @Test

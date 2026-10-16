@@ -205,8 +205,7 @@ public class ExpressionParser {
         }
         else if (expression.getNamedParameters() != null) {
             List<String> names = expression.getNamedParameters().getNames();
-            if (expression.getNamedParameters().getClass() != NamedExpressionList.class
-                    || names == null || names.size() != expression.getNamedParameters().size()
+            if (names == null || names.size() != expression.getNamedParameters().size()
                     || !"SUBSTRING".equalsIgnoreCase(expression.getName())
                     || !(List.of("", "FROM").equals(names) || List.of("", "FROM", "FOR").equals(names)))
                 throw new UnsupportedSelectQueryRuntimeException("Unsupported named SQL function parameters", expression);
@@ -230,7 +229,7 @@ public class ExpressionParser {
 
         ImmutableTerm term = termVisitor.getTerm(parameters.get(1));
         Expression datatypeExpression = parameters.get(0);
-        if (datatypeExpression.getClass() != Column.class || ((Column) datatypeExpression).getTable() != null
+        if (!(datatypeExpression instanceof Column) || ((Column) datatypeExpression).getTable() != null
                 || ((Column) datatypeExpression).getArrayConstructor() != null
                 || ((Column) datatypeExpression).getOldOracleJoinSyntax() != SupportsOldOracleJoinSyntax.NO_ORACLE_JOIN
                 || ((Column) datatypeExpression).getReturningReferenceType() != null
@@ -303,7 +302,7 @@ public class ExpressionParser {
 
     private static String getCastTypeName(ColDataType type, Expression expression) {
         // The DB type factory normalizes away precision/length, so passing toString() is not sufficient.
-        if (type.getClass() != ColDataType.class || type.getCharacterSet() != null || type.getIntervalQualifier() != null
+        if (type.getCharacterSet() != null || type.getIntervalQualifier() != null
                 || !type.getArrayData().isEmpty() || type.getSignedness() != null || type.isZerofill()
                 || type.getTypeModifiers() != null && !type.getTypeModifiers().isEmpty()
                 || type.getNationalCharacterType() != null || type.getXmlTypeModifier() != null
@@ -672,7 +671,7 @@ public class ExpressionParser {
             }
             ArrayConstructor array = expression.getArrayConstructor();
             if (array != null) {
-                if (array.getClass() != ArrayConstructor.class || array.isArrayKeyword() || array.getDataType() != null)
+                if (array.isArrayKeyword() || array.getDataType() != null)
                     throw new UnsupportedSelectQueryRuntimeException("Array access modifiers are not supported", expression);
                 checkExpressionList(array.getExpressions());
                 for (Expression index : array.getExpressions()) {
@@ -1104,7 +1103,7 @@ public class ExpressionParser {
             }
             ImmutableList<Map.Entry<ImmutableExpression, ImmutableTerm>> whenPairs = expression.getWhenClauses().stream()
                     .map(w -> Maps.immutableEntry(
-                            w.getClass() == WhenClause.class ? whenTranslation.apply(w) : rejectWhenClause(w),
+                            whenTranslation.apply(w),
                             getTerm(w.getThenExpression())))
                     .collect(ImmutableCollectors.toList());
 
@@ -1119,10 +1118,6 @@ public class ExpressionParser {
         @Override
         public <S> Void visit(WhenClause expression, S context) { // handled in CaseExpression
             throw new UnsupportedSelectQueryRuntimeException("Unexpected WHEN", expression);
-        }
-
-        private ImmutableExpression rejectWhenClause(WhenClause expression) {
-            throw new UnsupportedSelectQueryRuntimeException("Unsupported WHEN subclass", expression);
         }
 
         @Override
