@@ -17,10 +17,26 @@ import it.unibz.inf.ontop.spec.sqlparser.exception.InvalidSelectQueryRuntimeExce
 import it.unibz.inf.ontop.spec.sqlparser.exception.UnsupportedSelectQueryException;
 import it.unibz.inf.ontop.spec.sqlparser.exception.UnsupportedSelectQueryRuntimeException;
 import it.unibz.inf.ontop.utils.ImmutableCollectors;
+import net.sf.jsqlparser.expression.*;
+import net.sf.jsqlparser.expression.operators.arithmetic.Addition;
+import net.sf.jsqlparser.expression.operators.relational.*;
+import net.sf.jsqlparser.schema.Column;
+import net.sf.jsqlparser.schema.Table;
+import net.sf.jsqlparser.statement.ReturningReferenceType;
+import net.sf.jsqlparser.statement.create.table.ColDataType;
+import net.sf.jsqlparser.statement.create.table.XmlTypeModifier;
+import net.sf.jsqlparser.statement.select.FunctionAllColumns;
+import net.sf.jsqlparser.statement.select.Limit;
+import net.sf.jsqlparser.statement.select.TableFunction;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 
+import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 import static it.unibz.inf.ontop.model.term.functionsymbol.InequalityLabel.*;
@@ -47,6 +63,49 @@ public class ExpressionParserTest {
     public void null_test() throws Exception {
         ImmutableTerm translation = parseTerm("NULL", ImmutableMap.of());
         assertEquals(TERM_FACTORY.getNullConstant(), translation);
+    }
+
+    @Test
+    public void boolean_literal_test() throws Exception {
+        assertEquals(TERM_FACTORY.getDBBooleanConstant(true), parseTerm("TRUE", ImmutableMap.of()));
+        assertEquals(TERM_FACTORY.getDBBooleanConstant(false), parseTerm("FALSE", ImmutableMap.of()));
+    }
+
+    @Test
+    public void trim_test() throws Exception {
+        Variable v = TERM_FACTORY.getVariable("x0");
+        assertEquals(TERM_FACTORY.getImmutableFunctionalTerm(
+                        DB_FS_FACTORY.getRegularDBFunctionSymbol("TRIM", 1), v),
+                parseTerm("TRIM(X)", ImmutableMap.of(IDFAC.createAttributeID("X"), v)));
+        assertThrows(UnsupportedSelectQueryRuntimeException.class, () ->
+                parseTerm("TRIM(LEADING 'a' FROM X)", ImmutableMap.of(IDFAC.createAttributeID("X"), v)));
+    }
+
+    @Test
+    public void try_cast_test() throws Exception {
+        var ex = assertThrows(UnsupportedSelectQueryRuntimeException.class, () ->
+                parseTerm("TRY_CAST(1 AS INTEGER)", ImmutableMap.of()));
+        assertEquals("Cast keyword is not supported", ex.getMessage());
+    }
+
+    @Test
+    public void row_in_length_mismatch_test() throws Exception {
+        var ex = assertThrows(InvalidSelectQueryRuntimeException.class, () ->
+                parseBooleanExpression("(1, 2) IN ((1, 2, 3))", ImmutableMap.of()));
+        assertEquals("Mismatch in the length of the lists", ex.getMessage());
+    }
+
+    @Test
+    public void new_expression_is_rejected_test() throws Exception {
+        assertThrows(UnsupportedSelectQueryRuntimeException.class, () ->
+                parseTerm("1 IS UNKNOWN", ImmutableMap.of()));
+    }
+
+    @Test
+    public void in_subquery_is_rejected_test() throws Exception {
+        var ex = assertThrows(UnsupportedSelectQueryRuntimeException.class, () ->
+                parseBooleanExpression("1 IN (SELECT 1 FROM P)", ImmutableMap.of()));
+        assertEquals("Expression on the right in IN is not supported", ex.getMessage());
     }
 
     @Test
@@ -173,7 +232,7 @@ public class ExpressionParserTest {
     @Test
     public void modulo_test() throws Exception {
         Variable v = TERM_FACTORY.getVariable("x0");
-        var ex = assertThrows(UnsupportedOperationException.class, () ->
+        var ex = assertThrows(UnsupportedSelectQueryRuntimeException.class, () ->
                 parseTerm("X % 2", ImmutableMap.of(IDFAC.createAttributeID("X"), v)));
 
         assertEquals("The untyped math operator % is not supported", ex.getMessage());
@@ -186,7 +245,7 @@ public class ExpressionParserTest {
     @Test
     public void integer_div_test() throws Exception {
         Variable v = TERM_FACTORY.getVariable("x0");
-        var ex = assertThrows(UnsupportedOperationException.class, () ->
+        var ex = assertThrows(UnsupportedSelectQueryRuntimeException.class, () ->
                 parseTerm("X DIV 2", ImmutableMap.of(IDFAC.createAttributeID("X"), v)));
 
         assertEquals("The untyped math operator DIV is not supported", ex.getMessage());
@@ -1636,11 +1695,243 @@ public class ExpressionParserTest {
     @Test
     public void function_CONVERT_test() throws Exception {
         Variable v = TERM_FACTORY.getVariable("x0");
-        ImmutableTerm translation = parseTerm("CONVERT(VARCHAR(50), X)", ImmutableMap.of(
+        ImmutableTerm translation = parseTerm("CONVERT(VARCHAR, X)", ImmutableMap.of(
                 IDFAC.createAttributeID("X"), v));
 
-        DBFunctionSymbol castFunctionSymbol = DB_FS_FACTORY.getDBCastFunctionSymbol(DB_TYPE_FACTORY.getDBTermType("VARCHAR(50)"));
+        DBFunctionSymbol castFunctionSymbol = DB_FS_FACTORY.getDBCastFunctionSymbol(DB_TYPE_FACTORY.getDBTermType("VARCHAR"));
         assertEquals(TERM_FACTORY.getImmutableFunctionalTerm(castFunctionSymbol, v), translation);
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {
+            "F(1 IGNORE NULLS)", "F(1 RESPECT NULLS)", "F(1) IGNORE NULLS",
+            "F(1 HAVING MAX 2)", "F(1 LIMIT 2)", "F(1)(2)",
+            "F(1 ON OVERFLOW TRUNCATE)", "F(1 SEPARATOR ',')", "APPROXIMATE F(1)",
+            "RAND() IGNORE NULLS", "POSITION('a' IN 'abc')",
+            "OVERLAY('abc' PLACING 'x' FROM 1)",
+            "'a' ILIKE 'A'", "'a' LIKE BINARY 'A'", "'a' LIKE 'a' ESCAPE '_'",
+            "'a' REGEXP 'a' ESCAPE '_'", "'a' SIMILAR TO 'a' ESCAPE '_'",
+            "1 GLOBAL IN (1)", "1 GLOBAL NOT IN (1)",
+            "1 BETWEEN SYMMETRIC 2 AND 0",
+            "TRIM(LEADING 'a' FROM 'aaa')", "TRIM(TRAILING 'a' FROM 'aaa')",
+            "TRIM(BOTH 'a' FROM 'aaa')", "TRIM('a' FROM 'aaa')",
+            "SAFE_CAST(1 AS INTEGER)", "CAST(1 AS INTEGER FORMAT '9')",
+            "TRY_CONVERT(INTEGER, 1)", "CONVERT(1 USING utf8)",
+            "CAST('abc' AS CHAR(1))", "CAST(1 AS DECIMAL(4, 2))",
+            "CAST(1 AS INTEGER UNSIGNED)", "CAST(1 AS INTEGER[])", "CONVERT(VARCHAR(50), 1)",
+            "TIMESTAMPTZ '2000-01-01 00:00:00+01'", "DATETIME '2000-01-01 00:00:00'",
+            "N'abc'", "E'abc'", "B'101'", "R'abc'", "_utf8'abc'",
+            "~1", "1 DIV 2", "1 NOTNULL", "CAST(1 AS ROW(x INTEGER, y INTEGER))",
+            "0xFFFFFFFFFFFFFFFF", "X'FFFFFFFFFFFFFFFF'", "CAST(1 AS CHAR CHARACTER SET utf8)"
+    })
+    public void ignored_expression_syntax_is_rejected(String sql) {
+        assertThrows(UnsupportedSelectQueryRuntimeException.class, () -> parseTerm(sql, ImmutableMap.of()));
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"1, 2", "1 AS x", "DISTINCT 1", "TOP 1 1",
+            "1 INTO X", "1 FROM P UNION SELECT 2 --"})
+    public void expression_string_must_not_discard_select_syntax(String sql) {
+        assertThrows(UnsupportedSelectQueryException.class, () -> parseTerm(sql, ImmutableMap.of()));
+    }
+
+    @ParameterizedTest
+    @MethodSource("functionModifiers")
+    public void function_modifiers_are_checked_before_specialized_dispatch(Consumer<Function> modifier) {
+        for (String name : List.of("F", "RAND", "CONVERT", "COUNT")) {
+            Function function = new Function();
+            function.setName(name);
+            modifier.accept(function);
+            assertUnsupported(function);
+        }
+    }
+
+    private static Stream<Consumer<Function>> functionModifiers() {
+        return Stream.of(
+                f -> f.setDistinct(true), f -> f.setUnique(true), f -> f.setAllColumns(true),
+                f -> f.setOrderByElements(List.of()), f -> f.setKeep(new KeepExpression()),
+                f -> f.setAttribute(new Column("x")), f -> f.setEscaped(true),
+                f -> f.setHavingClause("MAX", new LongValue(1)),
+                f -> f.setNullHandling(Function.NullHandling.IGNORE_NULLS),
+                f -> f.setNullHandling(Function.NullHandling.RESPECT_NULLS),
+                f -> f.setIgnoreNullsOutside(true), f -> f.setLimit(new Limit()),
+                f -> f.setChainedParameters(new ExpressionList<>(new LongValue(1))),
+                f -> f.setOnOverflowTruncate("TRUNCATE"), f -> f.setExtraKeyword("BOTH"),
+                f -> f.setKeywordArguments(List.of()));
+    }
+
+    @Test
+    public void inherited_expression_visitors_must_not_discard_subclass_fields() {
+        assertUnsupported(new RawFunction("F", "1 AS INTEGER"));
+        assertUnsupported(new JsonTableFunction());
+        assertUnsupported(new XmlTableFunction());
+        assertUnsupported(new TableFunction("F", new LongValue(1)));
+        assertUnsupported(new Addition() {});
+        assertUnsupported(new Column("x") {});
+    }
+
+    @Test
+    public void unknown_expression_dispatch_must_not_return_a_child_term() {
+        class UnknownExpression extends net.sf.jsqlparser.parser.ASTNodeAccessImpl implements Expression {
+            @Override
+            public <T, S> T accept(ExpressionVisitor<T> visitor, S context) {
+                return new LongValue(1).accept(visitor, context);
+            }
+        }
+        assertUnsupported(new UnknownExpression());
+    }
+
+    @Test
+    public void new_expression_nodes_are_rejected_even_when_nested() {
+        List<Expression> expressions = List.of(
+                new DateUnitExpression("DAY"), new KeyExpression(new LongValue(1)),
+                new PostgresNamedFunctionParameter("x", new LongValue(1)),
+                new DoubleAnd(), new Contains(), new ContainedBy(),
+                new MemberOfExpression(new LongValue(1), new LongValue(2)),
+                new FunctionAllColumns(new Function()), new Intersects(),
+                new RangeExpression(new LongValue(1), new LongValue(2)),
+                new TernaryExpression(), new TSQLLeftJoin(), new TSQLRightJoin(),
+                new HighExpression(), new LowExpression(), new Plus(new LongValue(1), new LongValue(2)),
+                new PriorTo(new LongValue(1), new LongValue(2)),
+                new Inverse(), new CosineSimilarity());
+        for (Expression expression : expressions) {
+            assertUnsupported(expression);
+            Function function = new Function();
+            function.setName("F");
+            function.setParameters(new ExpressionList<>(new LongValue(1), expression));
+            assertUnsupported(function);
+        }
+    }
+
+    @Test
+    public void named_function_parameters_must_have_supported_names_and_shape() {
+        NamedExpressionList<Expression> named = new NamedExpressionList<>();
+        named.add(new StringValue("abc"));
+        named.setNames(List.of("", "FROM"));
+        Function function = new Function();
+        function.setName("SUBSTRING");
+        function.setNamedParameters(named);
+        assertUnsupported(function);
+        function = new Function();
+        function.setName("RAND");
+        function.setNamedParameters(new NamedExpressionList<>());
+        assertUnsupported(function);
+        function.setName("F");
+        function.setParameters(new ExpressionList<>(new LongValue(1)));
+        assertUnsupported(function);
+    }
+
+    @Test
+    public void in_expression_lists_must_not_discard_row_or_named_metadata() {
+        RowConstructor<Expression> row = new RowConstructor<>();
+        row.setName("ROW");
+        row.add(new LongValue(1));
+        NamedExpressionList<Expression> named = new NamedExpressionList<>();
+        named.add(new LongValue(1));
+        named.setNames(List.of("FROM"));
+        for (ExpressionList<?> list : List.of(row, named, new PartitionByClause())) {
+            InExpression right = new InExpression();
+            right.setLeftExpression(new LongValue(1));
+            right.setRightExpression(list);
+            assertUnsupported(right);
+            InExpression left = new InExpression();
+            left.setLeftExpression(list);
+            left.setRightExpression(new ParenthesedExpressionList<>(new LongValue(1)));
+            assertUnsupported(left);
+        }
+    }
+
+    @Test
+    public void oracle_prior_is_checked_on_all_supported_relational_nodes() {
+        List<Expression> expressions = List.of(new LikeExpression(), new SimilarToExpression(),
+                new Between(), new InExpression(), new IsNullExpression(),
+                new IsBooleanExpression(), new IsDistinctExpression());
+        for (Expression expression : expressions) {
+            ((SupportsOldOracleJoinSyntax) expression).setOraclePriorPosition(
+                    SupportsOldOracleJoinSyntax.ORACLE_PRIOR_START);
+            assertUnsupported(expression);
+        }
+    }
+
+    @Test
+    public void column_and_array_access_modifiers_are_rejected() {
+        Column oracle = new Column("x");
+        oracle.setOldOracleJoinSyntax(SupportsOldOracleJoinSyntax.ORACLE_JOIN_LEFT);
+        assertUnsupported(oracle);
+        Column returning = new Column("x");
+        returning.setReturningQualifier("OLD");
+        assertUnsupported(returning);
+        returning.setReturningQualifier(null);
+        returning.setReturningReferenceType(ReturningReferenceType.values()[0]);
+        assertUnsupported(returning);
+        Column delimiter = new Column("x");
+        delimiter.setTableDelimiter(":");
+        assertUnsupported(delimiter);
+        Table qualifier = new Table("P");
+        qualifier.setTimeTravel("FOR SYSTEM_TIME AS OF '2020-01-01'");
+        assertUnsupported(new Column(qualifier, "x"));
+        ArrayExpression slice = new ArrayExpression();
+        slice.setObjExpression(new LongValue(1));
+        slice.setIndexExpression(new LongValue(1));
+        slice.setStartIndexExpression(new LongValue(2));
+        assertUnsupported(slice);
+        slice.setStartIndexExpression(null);
+        slice.setStopIndexExpression(new LongValue(3));
+        assertUnsupported(slice);
+        for (boolean keyword : List.of(false, true)) {
+            Column column = new Column("TRUE");
+            ArrayConstructor array = new ArrayConstructor();
+            array.setExpressions(new ExpressionList<>(new LongValue(1)));
+            array.setArrayKeyword(keyword);
+            if (!keyword)
+                array.setDataType(new ColDataType("INTEGER"));
+            column.setArrayConstructor(array);
+            assertUnsupported(column);
+        }
+    }
+
+    @ParameterizedTest
+    @MethodSource("castTypeModifiers")
+    public void casts_and_conversions_must_not_discard_type_modifiers(Consumer<ColDataType> modifier) {
+        ColDataType type = new ColDataType("INTEGER");
+        modifier.accept(type);
+        CastExpression cast = new CastExpression();
+        cast.setColDataType(type);
+        cast.setLeftExpression(new LongValue(1));
+        assertUnsupported(cast);
+        assertUnsupported(new TranscodingFunction(type, new LongValue(1), null));
+    }
+
+    private static Stream<Consumer<ColDataType>> castTypeModifiers() {
+        return Stream.of(
+                t -> t.setArgumentsStringList(List.of("2")),
+                t -> t.setArrayData(List.of(2)),
+                t -> t.setCharacterSet("utf8"),
+                t -> t.setSignedness(ColDataType.Signedness.UNSIGNED),
+                t -> t.setZerofill(true),
+                t -> t.setPrecision(4),
+                t -> t.setScale(2),
+                t -> t.setTypeModifiers(List.of(ColDataType.TypeModifier.UNSIGNED)),
+                t -> t.setNationalCharacterType(ColDataType.NationalCharacterType.CHAR),
+                t -> t.setIntervalQualifier(new IntervalQualifier("DAY", null, "SECOND", null)),
+                t -> t.setXmlTypeModifier(new XmlTypeModifier(XmlTypeModifier.Kind.CONTENT, List.of("schema_collection"))));
+    }
+
+    @Test
+    public void supported_expression_forms_are_preserved() throws Exception {
+        assertEquals(parseTerm("1", ImmutableMap.of()), parseTerm("((1))", ImmutableMap.of()));
+        assertEquals(parseTerm("CAST(1 AS INTEGER)", ImmutableMap.of()), parseTerm("1::INTEGER", ImmutableMap.of()));
+        assertEquals(parseBooleanExpression("1 BETWEEN 0 AND 2", ImmutableMap.of()),
+                parseBooleanExpression("1 BETWEEN ASYMMETRIC 0 AND 2", ImmutableMap.of()));
+        assertEquals(TERM_FACTORY.getDBStringConstant("it's"), parseTerm("'it''s'", ImmutableMap.of()));
+        assertEquals(TERM_FACTORY.getDBStringConstant("it''s"), parseTerm("$$it''s$$", ImmutableMap.of()));
+        assertEquals(parseTerm("0xFF", ImmutableMap.of()), parseTerm("0XFF", ImmutableMap.of()));
+    }
+
+    private void assertUnsupported(Expression expression) {
+        ExpressionParser parser = new ExpressionParser(IDFAC, CORE_SINGLETONS);
+        assertThrows(UnsupportedSelectQueryRuntimeException.class,
+                () -> parser.parseTerm(expression, RAExpressionAttributes.ofUnqualifiedAttributesMap(ImmutableMap.of())));
     }
 
     private ImmutableTerm parseTerm(String sql, ImmutableMap<QuotedID, ImmutableTerm> map) throws UnsupportedSelectQueryException, InvalidQueryException {

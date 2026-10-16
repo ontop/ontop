@@ -6,7 +6,9 @@ import it.unibz.inf.ontop.dbschema.QuotedIDFactory;
 import it.unibz.inf.ontop.dbschema.RelationID;
 import it.unibz.inf.ontop.model.term.ImmutableTerm;
 import it.unibz.inf.ontop.spec.sqlparser.exception.InvalidSelectQueryRuntimeException;
+import it.unibz.inf.ontop.spec.sqlparser.exception.UnsupportedSelectQueryRuntimeException;
 import net.sf.jsqlparser.expression.Alias;
+import net.sf.jsqlparser.expression.DateUnitExpression;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
@@ -29,7 +31,7 @@ public class SelectItemParser {
         this.expressionParser = expressionParser;
     }
 
-    public RAExpressionAttributes parseSelectItems(List<SelectItem> selectItems) {
+    public RAExpressionAttributes parseSelectItems(List<SelectItem<?>> selectItems) {
         try {
             return RAExpressionAttributes.of(selectItems.stream()
                     .flatMap(si -> new SelectItemProcessor().getAttributes(si)));
@@ -44,29 +46,49 @@ public class SelectItemParser {
     }
 
 
-    private class SelectItemProcessor implements SelectItemVisitor {
+    private class SelectItemProcessor {
         Stream<Map.Entry<QuotedID, ImmutableTerm>> stream;
 
-        private Stream<Map.Entry<QuotedID, ImmutableTerm>> getAttributes(SelectItem si) {
-            si.accept(this);
+        private Stream<Map.Entry<QuotedID, ImmutableTerm>> getAttributes(SelectItem<?> si) {
+            Alias alias = si.getAlias();
+            if (alias != null && alias.getAliasColumns() != null)
+                throw new UnsupportedSelectQueryRuntimeException("Alias columns are not supported", alias);
+            Expression expression = si.getExpression();
+            if (expression instanceof AllColumns) {
+                AllColumns wildcard = (AllColumns) expression;
+                if (wildcard.getExceptColumns() != null || wildcard.getReplaceExpressions() != null
+                        || wildcard.getExceptKeyword() != null)
+                    throw new UnsupportedSelectQueryRuntimeException("Wildcard EXCEPT/REPLACE are not supported", expression);
+                if (alias != null)
+                    throw new UnsupportedSelectQueryRuntimeException("Wildcard aliases are not supported", si);
+
+                if (wildcard instanceof AllTableColumns)
+                    visit((AllTableColumns) wildcard);
+                else
+                    visit(wildcard);
+            }
+            else
+                visit(si);
             return stream;
         }
 
-        @Override
         public void visit(AllColumns allColumns) {
             stream =  attributes.getUnqualifiedAttributesMap().entrySet().stream();
         }
 
-        @Override
         public void visit(AllTableColumns allTableColumns) {
+            if (allTableColumns.getReturningReferenceType() != null || allTableColumns.getReturningQualifier() != null)
+                throw new UnsupportedSelectQueryRuntimeException("Returning wildcards are not supported", allTableColumns);
             Table table = allTableColumns.getTable();
+            if (table == null)
+                throw new UnsupportedSelectQueryRuntimeException("Missing wildcard table qualifier", allTableColumns);
+            JSqlParserTools.validateTableQualifier(table);
             RelationID id = JSqlParserTools.getRelationId(idfac, table);
 
             stream = attributes.getRelationAttributesMap(id).entrySet().stream();
         }
 
-        @Override
-        public void visit(SelectExpressionItem selectExpressionItem) {
+        public void visit(SelectItem<?> selectExpressionItem) {
             Alias columnAlias = selectExpressionItem.getAlias();
             Expression expr = selectExpressionItem.getExpression();
             Optional<String> alias;
@@ -76,13 +98,18 @@ public class SelectItemParser {
             else if (expr instanceof Column) {
                 alias = Optional.of(((Column) expr).getColumnName());
             }
+            else if (expr instanceof DateUnitExpression) {
+                alias = Optional.of(expr.toString());
+            }
             else {
                 // ignore complex expressions without an alias
                 // see https://www.w3.org/TR/r2rml/#r2rml-views
                 alias = Optional.empty();
             }
+            // Unnamed expressions do not contribute attributes, but still need feature validation.
+            ImmutableTerm term = expressionParser.apply(expr, attributes);
             stream = alias.stream()
-                    .map(a -> Maps.immutableEntry(idfac.createAttributeID(a), expressionParser.apply(expr, attributes)));
+                    .map(a -> Maps.immutableEntry(idfac.createAttributeID(a), term));
         }
     }
 }
