@@ -1,0 +1,104 @@
+[PrefixDeclaration]
+ex:		http://example.org/
+exd:		http://example.org/data/
+rdf:		http://www.w3.org/1999/02/22-rdf-syntax-ns#
+xsd:		http://www.w3.org/2001/XMLSchema#
+
+[MappingDeclaration] @collection [[
+mappingId	item
+target		exd:item/{id} a ex:Item ; ex:code {id} .
+source		SELECT id FROM "t"
+
+; Same as issue952.obda, with more distinct IRI templates
+mappingId	itemline
+target		exd:itemline/{id}-{sub} a ex:ItemLine .
+source		SELECT id, sub FROM "t"
+
+mappingId	decoy0
+target		exd:decoy0/{id} a ex:Ddecoy0 .
+source		SELECT id FROM "t"
+
+mappingId	decoy1
+target		exd:decoy1/{id} a ex:Ddecoy1 .
+source		SELECT id FROM "t"
+
+mappingId	decoy2
+target		exd:decoy2/{id} a ex:Ddecoy2 .
+source		SELECT id FROM "t"
+
+mappingId	decoy3
+target		exd:decoy3/{id} a ex:Ddecoy3 .
+source		SELECT id FROM "t"
+
+mappingId	decoy4
+target		exd:decoy4/{id} a ex:Ddecoy4 .
+source		SELECT id FROM "t"
+
+mappingId	decoy5
+target		exd:decoy5/{id} a ex:Ddecoy5 .
+source		SELECT id FROM "t"
+
+mappingId	decoy6
+target		exd:decoy6/{id} a ex:Ddecoy6 .
+source		SELECT id FROM "t"
+
+mappingId	decoy7
+target		exd:decoy7/{id} a ex:Ddecoy7 .
+source		SELECT id FROM "t"
+
+mappingId	decoy8
+target		exd:decoy8/{id} a ex:Ddecoy8 .
+source		SELECT id FROM "t"
+
+mappingId	decoy9
+target		exd:decoy9/{id} a ex:Ddecoy9 .
+source		SELECT id FROM "t"
+
+mappingId	decoy10
+target		exd:decoy10/{id} a ex:Ddecoy10 .
+source		SELECT id FROM "t"
+
+mappingId	decoy11
+target		exd:decoy11/{id} a ex:Ddecoy11 .
+source		SELECT id FROM "t"
+
+mappingId	decoy12
+target		exd:decoy12/{id} a ex:Ddecoy12 .
+source		SELECT id FROM "t"
+
+mappingId	decoy13
+target		exd:decoy13/{id} a ex:Ddecoy13 .
+source		SELECT id FROM "t"
+
+mappingId	decoy14
+target		exd:decoy14/{id} a ex:Ddecoy14 .
+source		SELECT id FROM "t"
+
+mappingId	decoy15
+target		exd:decoy15/{id} a ex:Ddecoy15 .
+source		SELECT id FROM "t"
+
+mappingId	decoy16
+target		exd:decoy16/{id} a ex:Ddecoy16 .
+source		SELECT id FROM "t"
+
+mappingId	decoy17
+target		exd:decoy17/{id} a ex:Ddecoy17 .
+source		SELECT id FROM "t"
+
+mappingId	decoy18
+target		exd:decoy18/{id} a ex:Ddecoy18 .
+source		SELECT id FROM "t"
+
+mappingId	decoy19
+target		exd:decoy19/{id} a ex:Ddecoy19 .
+source		SELECT id FROM "t"
+
+mappingId	decoy20
+target		exd:decoy20/{id} a ex:Ddecoy20 .
+source		SELECT id FROM "t"
+
+mappingId	decoy21
+target		exd:decoy21/{id} a ex:Ddecoy21 .
+source		SELECT id FROM "t"
+]]

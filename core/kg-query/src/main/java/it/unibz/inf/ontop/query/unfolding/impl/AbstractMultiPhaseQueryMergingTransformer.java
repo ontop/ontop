@@ -1,10 +1,12 @@
 package it.unibz.inf.ontop.query.unfolding.impl;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import it.unibz.inf.ontop.injection.CoreSingletons;
 import it.unibz.inf.ontop.iq.IQ;
 import it.unibz.inf.ontop.iq.optimizer.impl.AbstractQueryMergingTransformer;
 import it.unibz.inf.ontop.model.atom.RDFAtomPredicate;
+import it.unibz.inf.ontop.model.template.Template;
 import it.unibz.inf.ontop.model.term.IRIConstant;
 import it.unibz.inf.ontop.model.term.ImmutableExpression;
 import it.unibz.inf.ontop.model.term.ObjectConstant;
@@ -45,6 +47,9 @@ public abstract class AbstractMultiPhaseQueryMergingTransformer extends Abstract
     }
 
     protected boolean isTemplateCompatibleWithConstant(ObjectStringTemplateFunctionSymbol template, ObjectConstant objectConstant) {
+        if (!hasPrefixCompatibleWithConstant(template, objectConstant))
+            return false;
+
         ImmutableExpression strictEquality = termFactory.getStrictEquality(
                 objectConstant,
                 termFactory.getRDFFunctionalTerm(
@@ -62,28 +67,45 @@ public abstract class AbstractMultiPhaseQueryMergingTransformer extends Abstract
     }
 
     /**
+     * Sound but incomplete: only considers the leading component.
+     * Needed for non-injective templates, for which the strict equality cannot be evaluated.
+     */
+    private boolean hasPrefixCompatibleWithConstant(ObjectStringTemplateFunctionSymbol template,
+                                                    ObjectConstant objectConstant) {
+        ImmutableList<Template.Component> components = template.getTemplateComponents();
+        if (components.isEmpty())
+            return true;
+
+        Template.Component firstComponent = components.get(0);
+
+        return firstComponent.isColumn()
+                || objectConstant.getValue().startsWith(firstComponent.getComponent());
+    }
+
+    /**
      * TODO: introduce some cache?
      * TODO: use an index data structure based on prefixes and/or suffixes?
      *
      */
-    private Optional<ObjectStringTemplateFunctionSymbol> selectCompatibleTemplateWithConstant(ObjectConstant objectConstant) {
-        if (objectConstant instanceof IRIConstant)
-            return iriTemplates.stream()
-                    .filter(t -> isTemplateCompatibleWithConstant(t, objectConstant))
-                    .findAny();
+    private ImmutableSet<ObjectStringTemplateFunctionSymbol> selectCompatibleTemplatesWithConstant(ObjectConstant objectConstant) {
+        ImmutableSet<ObjectStringTemplateFunctionSymbol> templates = (objectConstant instanceof IRIConstant)
+                ? iriTemplates
+                : bnodeTemplates;
 
-        return bnodeTemplates.stream()
+        return templates.stream()
                 .filter(t -> isTemplateCompatibleWithConstant(t, objectConstant))
-                .findAny();
+                .collect(ImmutableSet.toImmutableSet());
     }
 
     protected Optional<IQ> getDefinitionCompatibleWithConstant(RDFAtomPredicate rdfAtomPredicate,
                                                                Mapping.RDFAtomIndexPattern indexPattern,
                                                                ObjectConstant objectConstant) {
-        Optional<ObjectStringTemplateFunctionSymbol> selectedTemplate = selectCompatibleTemplateWithConstant(objectConstant);
+        ImmutableSet<ObjectStringTemplateFunctionSymbol> compatibleTemplates = selectCompatibleTemplatesWithConstant(objectConstant);
 
-        if (selectedTemplate.isPresent())
-            return mapping.getCompatibleDefinitions(rdfAtomPredicate, indexPattern, selectedTemplate.get(), variableGenerator);
+        // NB: restricting to one template would lose the definitions of the other compatible ones
+        if (compatibleTemplates.size() == 1)
+            return mapping.getCompatibleDefinitions(rdfAtomPredicate, indexPattern,
+                    compatibleTemplates.iterator().next(), variableGenerator);
 
         return indexPattern == SUBJECT_OF_ALL_CLASSES
                 ? mapping.getMergedClassDefinitions(rdfAtomPredicate)
