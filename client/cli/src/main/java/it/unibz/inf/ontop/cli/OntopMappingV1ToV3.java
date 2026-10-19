@@ -123,9 +123,8 @@ public class OntopMappingV1ToV3 implements OntopCommand {
 
     public void processOBDA(File inputFile, File outputFile) throws Exception {
 
-        BufferedWriter writer = new BufferedWriter(new FileWriter(outputFile));
-
-        try (Scanner sc = new Scanner(inputFile)) {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(outputFile));
+             Scanner sc = new Scanner(inputFile)) {
             while (sc.hasNextLine()) {
                 String line = sc.nextLine();
                 if (line.startsWith("[SourceDeclaration]")) {
@@ -197,11 +196,6 @@ public class OntopMappingV1ToV3 implements OntopCommand {
                 }
             }
         }
-
-        writer.flush();
-        writer.close();
-
-
     }
 
     //read and store datasource information
@@ -237,13 +231,12 @@ public class OntopMappingV1ToV3 implements OntopCommand {
     }
 
     private void processR2RML(File outputFile) throws Exception {
-
-        BufferedWriter writer = new BufferedWriter(new FileWriter(outputFile));
-        RDFParser parser = Rio.createParser(RDFFormat.TURTLE);
-        parser.setPreserveBNodeIDs(true);
-        InputStream in = new FileInputStream(mappingFile);
-        URL documentUrl = new URL("file://" + mappingFile);
-        parser.setRDFHandler(new RDFHandler() {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(outputFile));
+             InputStream in = new FileInputStream(mappingFile)) {
+            RDFParser parser = Rio.createParser(RDFFormat.TURTLE);
+            parser.setPreserveBNodeIDs(true);
+            URL documentUrl = new URL("file://" + mappingFile);
+            parser.setRDFHandler(new RDFHandler() {
             final Map<Resource, List<Statement>> bmap = new HashMap<>();
 
             final Map<Resource, Resource> logicalTable = new HashMap<>();
@@ -659,8 +652,8 @@ public class OntopMappingV1ToV3 implements OntopCommand {
                         List<Statement> list = bmap.get(value);
                         boolean first = true;
                         IRI current_pred = null;
-                        for (Statement st : list) {
-                            if (current_pred == st.getPredicate()) {
+                         for (Statement st : list) {
+                             if (current_pred != null && current_pred.equals(st.getPredicate())) {
                                 sb.append(", ").append(getO(st));
                                 continue;
                             }
@@ -701,11 +694,9 @@ public class OntopMappingV1ToV3 implements OntopCommand {
             public void handleComment(String s) throws RDFHandlerException {
 
             }
-        });
-        parser.parse(in, documentUrl.toString());
-
-        writer.flush();
-        writer.close();
+            });
+            parser.parse(in, documentUrl.toString());
+        }
     }
 
       /*
@@ -762,7 +753,7 @@ public class OntopMappingV1ToV3 implements OntopCommand {
         String replacementSelectClause = selectClause;
 
         for (Map.Entry<String, String> r : renaming.entrySet()) {
-            Pattern p = Pattern.compile("\\b" + r.getKey() + "\\b", Pattern.DOTALL);
+            Pattern p = Pattern.compile("\\b" + Pattern.quote(r.getKey()) + "\\b", Pattern.DOTALL);
             Matcher mp = p.matcher(replacementSelectClause);
             if (mp.find())
                 replacementSelectClause = mp.replaceFirst(r.getValue());
