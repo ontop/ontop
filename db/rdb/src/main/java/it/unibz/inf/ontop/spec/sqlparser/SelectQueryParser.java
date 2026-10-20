@@ -34,7 +34,7 @@ public class SelectQueryParser extends BasicSelectQueryParser<RAExpression> {
 
 
     @Override
-    protected RAExpression translateSelect(SelectBody selectBody, List<WithItem> withItemsList) {
+    protected RAExpression translateSelect(Select selectBody, List<WithItem<?>> withItemsList) {
         PlainSelect plainSelect = getPlainSelect(selectBody);
 
         if (withItemsList != null && !withItemsList.isEmpty())
@@ -73,7 +73,7 @@ public class SelectQueryParser extends BasicSelectQueryParser<RAExpression> {
         if (plainSelect.getLimit() != null || plainSelect.getOffset() != null || plainSelect.getFetch() != null)
             throw new UnsupportedSelectQueryRuntimeException("LIMIT / OFFSET / FETCH are not supported", plainSelect);
 
-        if (plainSelect.isForUpdate())
+        if (plainSelect.getForClause() != null)
             throw new UnsupportedSelectQueryRuntimeException("FOR UPDATE is not supported", plainSelect);
 
         if (plainSelect.getOptimizeFor() != null)
@@ -82,8 +82,15 @@ public class SelectQueryParser extends BasicSelectQueryParser<RAExpression> {
         if (plainSelect.getForXmlPath() != null)
             throw new UnsupportedSelectQueryRuntimeException("FOR XML PATH is not supported", plainSelect);
 
-        if (plainSelect.getWithIsolation() != null)
+        if (plainSelect.getIsolation() != null)
             throw new UnsupportedSelectQueryRuntimeException("WITH isolation is not supported", plainSelect);
+
+        if (plainSelect.getPreWhere() != null || plainSelect.getQualify() != null
+                || plainSelect.getPreferringClause() != null || plainSelect.getWindowDefinitions() != null
+                || plainSelect.getEmitMode() != PlainSelect.EmitMode.NONE || plainSelect.getSettings() != null
+                || plainSelect.isUsingFinal() || plainSelect.isUsingOnly()
+                || plainSelect.getMySqlHintStraightJoin())
+            throw new UnsupportedSelectQueryRuntimeException("Unsupported SELECT modifiers", plainSelect);
 
         RAExpression rae;
         try {
@@ -104,6 +111,22 @@ public class SelectQueryParser extends BasicSelectQueryParser<RAExpression> {
         return new RAExpression(rae.getIQTree(), attributes);
     }
 
+    @Override
+    protected void validateSelectModifiers(Select select) {
+        if (select.getLimitBy() != null || select.getInterpolate() != null || select.getOption() != null
+                || select.getMySqlProcedureAnalyse() != null)
+            throw new UnsupportedSelectQueryRuntimeException("Unsupported SELECT clauses", select);
+        if (select.getForMode() != null || select.getForUpdateTables() != null || select.getWait() != null
+                || select.isNoWait() || select.isSkipLocked() || select.isForUpdateBeforeOrderBy())
+            throw new UnsupportedSelectQueryRuntimeException("SELECT locking is not supported", select);
+        // Parenthesized SELECTs carry their own clauses in addition to the inner SELECT's clauses.
+        if (select instanceof ParenthesedSelect
+                && (select.getWithItemsList() != null || select.getOrderByElements() != null
+                    || select.isOracleSiblings() || select.getLimit() != null || select.getOffset() != null
+                    || select.getFetch() != null || select.getIsolation() != null || select.getForClause() != null))
+            throw new UnsupportedSelectQueryRuntimeException("Unsupported parenthesized SELECT clauses", select);
+    }
+
 
     @Override
     protected RAExpression join(RAExpression left, Join join) throws IllegalJoinException {
@@ -119,6 +142,9 @@ public class SelectQueryParser extends BasicSelectQueryParser<RAExpression> {
 
         if (join.isWindowJoin())
             throw new UnsupportedSelectQueryRuntimeException("WITHIN WINDOW is not supported", join);
+
+        if (join.isNatural() && (join.isLeft() || join.isRight() || join.isFull() || join.isOuter() || join.isSemi()))
+            throw new UnsupportedSelectQueryRuntimeException("NATURAL OUTER/SEMI JOINs are not supported", join);
 
         if ((join.isFull() || join.isRight() || (join.isLeft() && !join.isSemi()) || join.isOuter())
             && (!join.getUsingColumns().isEmpty() || !join.getOnExpressions().isEmpty()))
