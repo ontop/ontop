@@ -330,16 +330,15 @@ public class QuestOWL extends OWLReasonerBase implements OntopOWLReasoner {
 		
 		//deal with disjoint properties
 		{
-			final String strQueryProp = "ASK {?x <%s> ?y; <%s> ?y }";
-
 			for(NaryAxiom<ObjectPropertyExpression> dda
 						: classifiedTBox.disjointObjectProperties()) {
-				// TODO: handle role inverses and multiple arguments			
+				// build each atom from the property IRI + direction so inverse expressions
+				// (e.g. an asymmetric property p, classified as p disjoint inv(p)) are handled
 				Collection<ObjectPropertyExpression> props = dda.getComponents();
 				Iterator<ObjectPropertyExpression> iterator = props.iterator();
 				ObjectPropertyExpression p1 = iterator.next();
 				ObjectPropertyExpression p2 = iterator.next();
-				String strQuery = String.format(strQueryProp, p1, p2);
+				String strQuery = "ASK { " + objectPropertyAtom(p1) + " . " + objectPropertyAtom(p2) + " }";
 				
 				boolean isConsistent = executeConsistencyQuery(strQuery);
 				if (!isConsistent) {
@@ -404,6 +403,15 @@ public class QuestOWL extends OWLReasonerBase implements OntopOWLReasoner {
 		return true;
 	}
 	
+	// Renders a disjoint-object-property component as a SPARQL triple atom, honouring inverses:
+	// an inverse expression inv(q) becomes the swapped pattern "?y <q> ?x" instead of being
+	// string-formatted into an IRI slot (which produced a malformed query for inverse roles).
+	private static String objectPropertyAtom(ObjectPropertyExpression p) {
+		String iri = p.getIRI().getIRIString();
+		return p.isInverse() ? String.format("?y <%s> ?x", iri)
+		                     : String.format("?x <%s> ?y", iri);
+	}
+
 	private boolean executeConsistencyQuery(String strQuery) throws OWLException {
 		try (OntopConnection connection = queryEngine.getConnection();
 			 OntopStatement st = connection.createStatement()) {
