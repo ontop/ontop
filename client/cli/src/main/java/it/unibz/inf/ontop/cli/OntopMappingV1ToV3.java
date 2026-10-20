@@ -646,26 +646,26 @@ public class OntopMappingV1ToV3 implements OntopCommand {
                     return "<" + uri + ">";
                 } else if (value instanceof BNode) {
                     if (PRETTY_PRINT) {
-                        StringBuilder sb = new StringBuilder();
+                        String s = "";
                         String saved_pref = pref;
                         pref += "    ";
                         List<Statement> list = bmap.get(value);
                         boolean first = true;
                         IRI current_pred = null;
-                         for (Statement st : list) {
-                             if (current_pred != null && current_pred.equals(st.getPredicate())) {
-                                sb.append(", ").append(getO(st));
+                        for (Statement st : list) {
+                            if (current_pred != null && current_pred.equals(st.getPredicate())) {
+                                s += ", " + getO(st);
                                 continue;
                             }
                             current_pred = st.getPredicate();
                             if (!first)
-                                sb.append(" ;\n");
+                                s += " ;\n";
                             first = false;
 
-                            sb.append(pref).append(out(current_pred)).append(" ").append(getO(st));
+                            s += pref + out(current_pred) + " " + getO(st);
                         }
                         pref = saved_pref;
-                        return "[\n" + sb + "\n" + pref + "]";
+                        return "[\n" + s + "\n" + pref + "]";
                     }
                 } else if (value instanceof Literal) {
                     Literal literal = (Literal) value;
@@ -852,67 +852,61 @@ public class OntopMappingV1ToV3 implements OntopCommand {
     }
 
     private boolean containsUnsupportedSelectClauses(PlainSelect select) {
-        return anyTrue(
-                select.getWithItemsList() != null,
-                select.getDistinct() != null,
-                select.getBigQuerySelectQualifier() != null,
-                select.getIntoTables() != null,
-                select.getMySqlSelectIntoClause() != null,
-                select.getIntoTempTable() != null,
-                select.isUseWithNoLog(),
-                select.getLateralViews() != null,
-                select.getPreWhere() != null,
-                select.getGroupBy() != null,
-                select.getHaving() != null,
-                select.getQualify() != null,
-                select.getWindowDefinitions() != null,
-                select.getKsqlWindow() != null
-        );
+        return select.getWithItemsList() != null
+                || select.getDistinct() != null
+                || select.getBigQuerySelectQualifier() != null
+                || select.getIntoTables() != null
+                || select.getMySqlSelectIntoClause() != null
+                || select.getIntoTempTable() != null
+                || select.isUseWithNoLog()
+                || select.getLateralViews() != null
+                || select.getPreWhere() != null
+                || select.getGroupBy() != null
+                || select.getHaving() != null
+                || select.getQualify() != null
+                || select.getWindowDefinitions() != null
+                || select.getKsqlWindow() != null;
     }
 
     private boolean containsUnsupportedSelectModifiers(PlainSelect select) {
-        return anyTrue(
-                select.getOptimizeFor() != null,
-                select.getSkip() != null,
-                select.getFirst() != null,
-                select.getTop() != null,
-                select.getOracleHierarchical() != null,
-                select.getPreferringClause() != null,
-                select.getOracleHint() != null,
-                select.getMySqlHintStraightJoin(),
-                select.getMySqlSqlCalcFoundRows(),
-                select.getMySqlSqlCacheFlag() != null,
-                select.getForXmlPath() != null,
-                select.getEmitMode() != PlainSelect.EmitMode.NONE,
-                select.isUsingFinal(),
-                select.isUsingOnly(),
-                select.getSettings() != null,
-                select.getOption() != null,
-                select.getInterpolate() != null,
-                select.getMySqlProcedureAnalyse() != null
-        );
+        return select.getOptimizeFor() != null
+                || select.getSkip() != null
+                || select.getFirst() != null
+                || select.getTop() != null
+                || select.getOracleHierarchical() != null
+                || select.getPreferringClause() != null
+                || select.getOracleHint() != null
+                || select.getMySqlHintStraightJoin()
+                || select.getMySqlSqlCalcFoundRows()
+                || select.getMySqlSqlCacheFlag() != null
+                || select.getForXmlPath() != null
+                || select.getEmitMode() != PlainSelect.EmitMode.NONE
+                || select.isUsingFinal()
+                || select.isUsingOnly()
+                || select.getSettings() != null
+                || select.getOption() != null
+                || select.getInterpolate() != null
+                || select.getMySqlProcedureAnalyse() != null;
     }
 
     private boolean containsUnsupportedOrderingOrLocking(PlainSelect select) {
-        return anyTrue(
-                select.getOrderByElements() != null,
-                select.getLimit() != null,
-                select.getLimitBy() != null,
-                select.getOffset() != null,
-                select.getFetch() != null,
-                select.getIsolation() != null,
-                select.getForClause() != null,
-                select.getForMode() != null,
-                select.getForUpdateTables() != null,
-                select.getWait() != null,
-                select.isSkipLocked(),
-                select.isNoWait(),
-                select.isForUpdateBeforeOrderBy(),
-                select.isOracleSiblings(),
-                select.getAlias() != null,
-                select.getPivot() != null,
-                select.getUnPivot() != null
-        );
+        return select.getOrderByElements() != null
+                || select.getLimit() != null
+                || select.getLimitBy() != null
+                || select.getOffset() != null
+                || select.getFetch() != null
+                || select.getIsolation() != null
+                || select.getForClause() != null
+                || select.getForMode() != null
+                || select.getForUpdateTables() != null
+                || select.getWait() != null
+                || select.isSkipLocked()
+                || select.isNoWait()
+                || select.isForUpdateBeforeOrderBy()
+                || select.isOracleSiblings()
+                || select.getAlias() != null
+                || select.getPivot() != null
+                || select.getUnPivot() != null;
     }
 
     private boolean isSimpleTable(Table table) {
@@ -930,13 +924,6 @@ public class OntopMappingV1ToV3 implements OntopCommand {
         return table.getAlias() == null || table.getAlias().getAliasColumns() == null;
     }
 
-    private boolean anyTrue(boolean... conditions) {
-        for (boolean condition : conditions) {
-            if (condition)
-                return true;
-        }
-        return false;
-    }
 
     /**
      * Converts JSqlParser's 1-based line and column to a 0-based string offset.
