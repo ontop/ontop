@@ -153,13 +153,37 @@ public class SQLGeneratorImpl implements NativeQueryGenerator {
             return iqFactory.createIQ(query.getProjectionAtom(),
                     iqFactory.createEmptyNode(query.getProjectionAtom().getVariables()));
 
-        NativeNode nativeNode = defaultIQTree2NativeNodeGenerator.generate(normalizedSubTree,
-                signatureExtractor.apply(normalizedSubTree.getVariables()),
+        ImmutableSet<Variable> signature = signatureExtractor.apply(normalizedSubTree.getVariables());
+        /*
+         * ProjectionSplitter may keep a proper superset of the variables required by the
+         * post-processing Construction (e.g. aggregation outputs still needed by HAVING).
+         * Project explicitly so the NativeNode signature matches the SPARQL projection.
+         */
+        IQTree treeToSerialize = projectToSignature(normalizedSubTree, signature);
+
+        NativeNode nativeNode = defaultIQTree2NativeNodeGenerator.generate(treeToSerialize,
+                signature,
                 dbParameters, tolerateUnknownTypes);
 
         UnaryIQTree newTree = iqFactory.createUnaryIQTree(split.getConstructionNode(), nativeNode);
 
         return iqFactory.createIQ(query.getProjectionAtom(), newTree);
+    }
+
+    /**
+     * When the requested signature is a strict subset of the tree variables, inserts a
+     * Construction that projects exactly those variables (empty substitution).
+     * Otherwise returns the tree unchanged (signature mismatches are left to the generator).
+     */
+    private IQTree projectToSignature(IQTree tree, ImmutableSet<Variable> signature) {
+        if (tree.getVariables().equals(signature))
+            return tree;
+        if (!tree.getVariables().containsAll(signature))
+            return tree;
+
+        return iqFactory.createUnaryIQTree(
+                iqFactory.createConstructionNode(signature),
+                tree);
     }
 
     /**
@@ -263,15 +287,16 @@ public class SQLGeneratorImpl implements NativeQueryGenerator {
 
         IQ dbIQ = iqFactory.createIQ(initialProjectionAtom, dbTree);
 
-        IQTree nativeTree = generateSourceQuery(dbIQ, true, false,
-                // Preserves the variable order from the input query
-                vs -> initialProjectionAtom.getVariables())
-                .normalizeForOptimization().getTree();
-
-        if (!(nativeTree instanceof NativeNode))
-            throw new NotFullyTranslatableToNativeQueryException("the post-processing step could not be eliminated");
-
-        NativeNode nativeNode = (NativeNode) nativeTree;
+        /*
+         * NativeNode must not be visited or normalized. Drop only an identity Construction
+         * wrapping the NativeNode; any remaining post-processing means the query is not
+         * fully native.
+         */
+        NativeNode nativeNode = extractFullyNativeNode(
+                generateSourceQuery(dbIQ, true, false,
+                        // Preserves the variable order from the input query
+                        vs -> initialProjectionAtom.getVariables())
+                        .getTree());
 
         ImmutableMap<Variable, DBTermType> dbTypeMap = nativeNode.getTypeMap();
 
@@ -284,7 +309,7 @@ public class SQLGeneratorImpl implements NativeQueryGenerator {
          */
 
         ConstructionNode postProcessingToRDFNode = iqFactory.createConstructionNodeForNativeQuery(
-                nativeTree.getVariables().stream()
+                nativeNode.getVariables().stream()
                         .collect(substitutionFactory.toSubstitution(
                                 v -> termFactory.getRDFFunctionalTerm(
                                         termFactory.getConversion2RDFLexical(
@@ -297,13 +322,32 @@ public class SQLGeneratorImpl implements NativeQueryGenerator {
 
         IQTree executableTree = iqFactory.createUnaryIQTree(
                 postProcessingToRDFNode,
-                nativeTree);
+                nativeNode);
 
         IQ executableQuery = iqFactory.createIQ(dbIQ.getProjectionAtom(), executableTree);
 
         LOGGER.debug("Resulting native query:\n{}\n", executableQuery);
 
         return executableQuery;
+    }
+
+    /**
+     * Accepts a bare {@link NativeNode}, or an identity Construction (empty substitution,
+     * same projected variables as its NativeNode child). Any other shape means post-processing
+     * could not be eliminated.
+     */
+    private NativeNode extractFullyNativeNode(IQTree tree) throws NotFullyTranslatableToNativeQueryException {
+        if (tree instanceof NativeNode)
+            return (NativeNode) tree;
+
+        var construction = UnaryIQTreeDecomposition.of(tree, ConstructionNode.class);
+        if (construction.isPresent()
+                && construction.getChild() instanceof NativeNode
+                && construction.getNode().getSubstitution().isEmpty()
+                && construction.getNode().getVariables().equals(construction.getChild().getVariables()))
+            return (NativeNode) construction.getChild();
+
+        throw new NotFullyTranslatableToNativeQueryException("the post-processing step could not be eliminated");
     }
 
     private IQTree replaceRDFByDBTerms(IQTree tree, ImmutableMap<Variable, RDFTermType> rdfTypes) {

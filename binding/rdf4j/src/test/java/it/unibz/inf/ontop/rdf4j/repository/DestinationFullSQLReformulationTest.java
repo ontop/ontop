@@ -116,4 +116,27 @@ public class DestinationFullSQLReformulationTest extends AbstractRDF4JTest {
         assertTrue(sql.toUpperCase().contains("UNION ALL"));
     }
 
+    /**
+     * Regression for <a href="https://github.com/ontop/ontop/issues/951">#951</a>:
+     * SELECT DISTINCT + GROUP BY + HAVING COUNT(DISTINCT ...) with forNativeConsumption
+     * must not fail with "NativeNode cannot accept a visitor".
+     */
+    @Test
+    public void testDistinctGroupByHavingCountDistinct() {
+        String sparql = "PREFIX schema: <http://schema.org/>\n" +
+                "SELECT DISTINCT ?focus_node\n" +
+                "WHERE {\n" +
+                "  ?focus_node schema:name ?value .\n" +
+                "}\n" +
+                "GROUP BY ?focus_node\n" +
+                "HAVING (COUNT(DISTINCT ?value) < 2)\n";
+
+        String sql = reformulateIntoNativeQuery(sparql, true);
+        assertNotNull(sql);
+        assertFalse(sql.isEmpty());
+
+        // Must execute without "NativeNode cannot accept a visitor"
+        assertEquals(1, runQueryAndCount(sparql));
+    }
+
 }
