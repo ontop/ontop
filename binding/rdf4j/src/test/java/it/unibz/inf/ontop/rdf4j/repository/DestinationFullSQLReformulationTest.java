@@ -116,4 +116,51 @@ public class DestinationFullSQLReformulationTest extends AbstractRDF4JTest {
         assertTrue(sql.toUpperCase().contains("UNION ALL"));
     }
 
+    /**
+     * Regression for <a href="https://github.com/ontop/ontop/issues/956">#956</a>:
+     * a FILTER that is statically false (schema:name is langString, not xsd:integer) must
+     * reformulate to empty SQL for native consumption, not throw
+     * NotFullyTranslatableToNativeQueryException.
+     */
+    @Test
+    public void testEmptyQueryStaticallyFalseDatatypeFilter() {
+        String sparql = "PREFIX schema: <http://schema.org/>\n" +
+                "PREFIX xsd: <http://www.w3.org/2001/XMLSchema#>\n" +
+                "SELECT DISTINCT ?focus_node ?value\n" +
+                "WHERE {\n" +
+                "  ?focus_node schema:name ?value .\n" +
+                "  FILTER (!isLiteral(?value) || datatype(?value) = xsd:integer)\n" +
+                "}\n";
+
+        String sql = reformulateIntoNativeQuery(sparql, true);
+        assertNotNull(sql);
+        assertFalse(sql.isEmpty());
+        assertTrue(sql.contains("focus_node"));
+        assertTrue(sql.contains("value"));
+        assertTrue(sql.indexOf("focus_node") < sql.indexOf("value"));
+        assertEquals(0, runQueryAndCount(sparql));
+    }
+
+    /**
+     * Regression for <a href="https://github.com/ontop/ontop/issues/956">#956</a>:
+     * an unmapped predicate yields EmptyNode at unfold time; native reformulation must
+     * still emit empty SQL.
+     */
+    @Test
+    public void testEmptyQueryUnmappedPredicate() {
+        String sparql = "PREFIX : <http://destination.example.org/ontology/dest#>\n" +
+                "SELECT ?focus_node ?value\n" +
+                "WHERE {\n" +
+                "  ?focus_node :unmappedPredicate ?value .\n" +
+                "}\n";
+
+        String sql = reformulateIntoNativeQuery(sparql, true);
+        assertNotNull(sql);
+        assertFalse(sql.isEmpty());
+        assertTrue(sql.contains("focus_node"));
+        assertTrue(sql.contains("value"));
+        assertTrue(sql.indexOf("focus_node") < sql.indexOf("value"));
+        assertEquals(0, runQueryAndCount(sparql));
+    }
+
 }
