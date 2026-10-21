@@ -36,8 +36,10 @@ import it.unibz.inf.ontop.model.term.functionsymbol.RDFTermFunctionSymbol;
 import it.unibz.inf.ontop.model.term.functionsymbol.db.DBIfElseNullFunctionSymbol;
 import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.model.type.RDFTermType;
+import it.unibz.inf.ontop.model.type.TypeFactory;
 import it.unibz.inf.ontop.substitution.Substitution;
 import it.unibz.inf.ontop.substitution.SubstitutionFactory;
+import it.unibz.inf.ontop.utils.ImmutableCollectors;
 import it.unibz.inf.ontop.utils.VariableGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -72,6 +74,7 @@ public class SQLGeneratorImpl implements NativeQueryGenerator {
     private final IQTreeTools iqTreeTools;
     private final TermFactory termFactory;
     private final SubstitutionFactory substitutionFactory;
+    private final TypeFactory typeFactory;
 
     @AssistedInject
     private SQLGeneratorImpl(@Assisted DBParameters dbParameters,
@@ -99,6 +102,7 @@ public class SQLGeneratorImpl implements NativeQueryGenerator {
         this.iqTreeTools = coreSingletons.getIQTreeTools();
         this.termFactory = coreSingletons.getTermFactory();
         this.substitutionFactory = coreSingletons.getSubstitutionFactory();
+        this.typeFactory = coreSingletons.getTypeFactory();
     }
 
     @Override
@@ -253,6 +257,17 @@ public class SQLGeneratorImpl implements NativeQueryGenerator {
 
         DistinctVariableOnlyDataAtom initialProjectionAtom = query.getProjectionAtom();
         IQTree initialTree = query.getTree();
+        ImmutableSet<Variable> projectedVariables = initialProjectionAtom.getVariables();
+
+        /*
+         * Proven-empty IQ: emit tautologically empty SQL (typed null projection + WHERE false)
+         * instead of failing for lack of a top Construction.
+         */
+        if (initialTree.isDeclaredAsEmpty()) {
+            return wrapNativeNodeWithRdf(initialProjectionAtom,
+                    generateEmptyNativeNode(projectedVariables),
+                    placeholderRdfTypes(projectedVariables));
+        }
 
         Substitution<ImmutableTerm> definitions = extractDefinitions(initialTree);
         ImmutableMap<Variable, RDFTermType> rdfTypes = extractRDFTypes(definitions);
@@ -263,28 +278,37 @@ public class SQLGeneratorImpl implements NativeQueryGenerator {
 
         IQ dbIQ = iqFactory.createIQ(initialProjectionAtom, dbTree);
 
-        IQTree nativeTree = generateSourceQuery(dbIQ, true, false,
+        IQ generatedQuery = generateSourceQuery(dbIQ, true, false,
                 // Preserves the variable order from the input query
-                vs -> initialProjectionAtom.getVariables())
-                .normalizeForOptimization().getTree();
+                vs -> projectedVariables);
+
+        // Late emptiness: do not normalize EmptyNode / NativeNode
+        if (generatedQuery.getTree().isDeclaredAsEmpty()) {
+            return wrapNativeNodeWithRdf(initialProjectionAtom,
+                    generateEmptyNativeNode(projectedVariables),
+                    placeholderRdfTypes(projectedVariables));
+        }
+
+        IQTree nativeTree = generatedQuery.normalizeForOptimization().getTree();
 
         if (!(nativeTree instanceof NativeNode))
             throw new NotFullyTranslatableToNativeQueryException("the post-processing step could not be eliminated");
 
-        NativeNode nativeNode = (NativeNode) nativeTree;
+        return wrapNativeNodeWithRdf(initialProjectionAtom, (NativeNode) nativeTree, rdfTypes);
+    }
 
+    /**
+     * HACK! The construction node reuses the same variables for the constructed RDF terms and the DB ones.
+     * This is illegal but does the trick, as the IQTree does not get normalized anymore at that stage.
+     *
+     * TODO: find an alternative to that hack while preserving good variable names in the native query.
+     */
+    private IQ wrapNativeNodeWithRdf(DistinctVariableOnlyDataAtom projectionAtom, NativeNode nativeNode,
+                                     ImmutableMap<Variable, RDFTermType> rdfTypes) {
         ImmutableMap<Variable, DBTermType> dbTypeMap = nativeNode.getTypeMap();
 
-        /*
-         * HACK! The construction node reuses the same variables for the constructed RDF terms and the DB ones.
-         * This is illegal but does the trick, as the IQTree does not get normalized anymore at that stage.
-         *
-         * TODO: find an alternative to that hack while preserving good variable names in the native query.
-         *
-         */
-
         ConstructionNode postProcessingToRDFNode = iqFactory.createConstructionNodeForNativeQuery(
-                nativeTree.getVariables().stream()
+                nativeNode.getVariables().stream()
                         .collect(substitutionFactory.toSubstitution(
                                 v -> termFactory.getRDFFunctionalTerm(
                                         termFactory.getConversion2RDFLexical(
@@ -295,15 +319,36 @@ public class SQLGeneratorImpl implements NativeQueryGenerator {
                                                         .orElseThrow(() -> new MinorOntopInternalBugException("Was expecting an RDF type"))),
                                         termFactory.getRDFTermTypeConstant(rdfTypes.get(v))))));
 
-        IQTree executableTree = iqFactory.createUnaryIQTree(
-                postProcessingToRDFNode,
-                nativeTree);
-
-        IQ executableQuery = iqFactory.createIQ(dbIQ.getProjectionAtom(), executableTree);
+        IQTree executableTree = iqFactory.createUnaryIQTree(postProcessingToRDFNode, nativeNode);
+        IQ executableQuery = iqFactory.createIQ(projectionAtom, executableTree);
 
         LOGGER.debug("Resulting native query:\n{}\n", executableQuery);
 
         return executableQuery;
+    }
+
+    /**
+     * Dialect-aware empty SELECT: typed-null projection over a dummy relation filtered by FALSE.
+     * Serialized directly so Filter-false is not normalized away to EmptyNode.
+     */
+    private NativeNode generateEmptyNativeNode(ImmutableSet<Variable> variables) {
+        DBTermType dbStringType = dbParameters.getDBTypeFactory().getDBStringType();
+        Substitution<ImmutableTerm> nullSubstitution = variables.stream()
+                .collect(substitutionFactory.toSubstitution(v -> termFactory.getTypedNull(dbStringType)));
+
+        IQTree emptyTree = iqTreeTools.unaryIQTreeBuilder()
+                .append(iqFactory.createConstructionNode(variables, nullSubstitution))
+                .append(iqFactory.createFilterNode(
+                        termFactory.getIsTrue(termFactory.getDBBooleanConstant(false))))
+                .build(iqFactory.createTrueNode());
+
+        return defaultIQTree2NativeNodeGenerator.generate(emptyTree, variables, dbParameters, false);
+    }
+
+    private ImmutableMap<Variable, RDFTermType> placeholderRdfTypes(ImmutableSet<Variable> variables) {
+        RDFTermType xsdString = typeFactory.getXsdStringDatatype();
+        return variables.stream()
+                .collect(ImmutableCollectors.toMap(Function.identity(), v -> xsdString));
     }
 
     private IQTree replaceRDFByDBTerms(IQTree tree, ImmutableMap<Variable, RDFTermType> rdfTypes) {

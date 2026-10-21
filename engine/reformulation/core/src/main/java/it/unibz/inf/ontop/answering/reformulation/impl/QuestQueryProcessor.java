@@ -107,9 +107,20 @@ public class QuestQueryProcessor implements QueryReformulator {
                 LOGGER.debug("Start the unfolding...");
                 IQ unfoldedIQ = queryUnfolder.optimize(simplifiedQuery);
                 if (unfoldedIQ.getTree().isDeclaredAsEmpty()) {
-					queryLogger.declareReformulationFinishedAndSerialize(unfoldedIQ, false);
-                	LOGGER.debug("Reformulation time: {} ms\n", System.currentTimeMillis() - beginning);
-					return unfoldedIQ;
+					/*
+					 * Native consumers need empty SQL rather than an EmptyNode. Non-native evaluation
+					 * keeps the EmptyNode short-circuit (no JDBC).
+					 */
+					if (!forNativeConsumption) {
+						queryLogger.declareReformulationFinishedAndSerialize(unfoldedIQ, false);
+						LOGGER.debug("Reformulation time: {} ms\n", System.currentTimeMillis() - beginning);
+						return unfoldedIQ;
+					}
+					IQ executableEmptyQuery = generateExecutableQuery(unfoldedIQ, true);
+					queryCache.put(inputQuery, queryContext, true, executableEmptyQuery);
+					queryLogger.declareReformulationFinishedAndSerialize(executableEmptyQuery, false);
+					LOGGER.debug("Reformulation time: {} ms\n", System.currentTimeMillis() - beginning);
+					return executableEmptyQuery;
 				}
 
 				LOGGER.debug("Unfolded query:\n{}\n", unfoldedIQ);
