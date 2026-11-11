@@ -14,14 +14,19 @@ import com.google.common.collect.ImmutableList;
 import it.unibz.inf.ontop.cli.utils.Env;
 import it.unibz.inf.ontop.injection.OntopSQLCoreSettings;
 import it.unibz.inf.ontop.injection.OntopSQLCredentialSettings;
+import it.unibz.inf.ontop.spec.sqlparser.JSqlParserTools;
 import net.sf.jsqlparser.JSQLParserException;
 import net.sf.jsqlparser.parser.CCJSqlParserUtil;
+import net.sf.jsqlparser.parser.Token;
+import net.sf.jsqlparser.schema.Column;
 import net.sf.jsqlparser.schema.Table;
 import net.sf.jsqlparser.statement.select.*;
 import org.eclipse.rdf4j.model.*;
 
 import org.eclipse.rdf4j.model.impl.SimpleValueFactory;
 import org.eclipse.rdf4j.rio.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.net.URL;
@@ -38,6 +43,8 @@ import java.util.stream.Collectors;
                 "  (2) for both Ontop native and R2RML files, for each full qualified columns (e.g `table1.col1`), it generates an alias (e.g `table1.col1 AS table1_col1`")
 
 public class OntopMappingV1ToV3 implements OntopCommand {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(OntopMappingV1ToV3.class);
 
     @Option(type = OptionType.COMMAND, name = {"-m", "--mapping"}, title = "mapping file",
             description = "Mapping file in R2RML (.ttl) or in Ontop native format (.obda)")
@@ -110,15 +117,14 @@ public class OntopMappingV1ToV3 implements OntopCommand {
             System.err.println("Error occurred during v1-to-v3 mapping conversion: "
                     + e.getMessage());
             System.err.println("Debugging information for developers: ");
-            e.printStackTrace();
+            LOGGER.error("Unexpected error during v1-to-v3 mapping conversion", e);
         }
     }
 
     public void processOBDA(File inputFile, File outputFile) throws Exception {
 
-        BufferedWriter writer = new BufferedWriter(new FileWriter(outputFile));
-
-        try (Scanner sc = new Scanner(inputFile)) {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(outputFile));
+             Scanner sc = new Scanner(inputFile)) {
             while (sc.hasNextLine()) {
                 String line = sc.nextLine();
                 if (line.startsWith("[SourceDeclaration]")) {
@@ -143,7 +149,7 @@ public class OntopMappingV1ToV3 implements OntopCommand {
                         args.addAll(getTemplateColumns(template));
 
                     String sql = source.substring("source".length());
-                    String selectClause = extractMappingColumnsFromSQL(args, sql, mapping);
+                    String selectClause = extractMappingColumnsFromSQL(args, sql);
                     if (selectClause != null) {
                         BiMap<String, String> renaming = HashBiMap.create();
                         Map<String, String> sqlRenaming = new HashMap<>();
@@ -169,7 +175,7 @@ public class OntopMappingV1ToV3 implements OntopCommand {
                                 }
                             }
                         }
-                        writer.write(line + System.getProperty("line.separator"));
+                        writer.write(line + System.lineSeparator());
 
                         String replacementSelectClause = getRenaming(sqlRenaming, selectClause, mapping);
                         String resultingSql = sql.replace(selectClause, replacementSelectClause);
@@ -179,22 +185,17 @@ public class OntopMappingV1ToV3 implements OntopCommand {
                         for (Map.Entry<String, String> r : renaming.entrySet())
                             target = target.replace("{" + r.getKey() + "}", "{" + r.getValue() + "}");
 
-                        writer.write(target + System.getProperty("line.separator"));
+                        writer.write(target + System.lineSeparator());
 
-                        writer.write("source" + resultingSql + System.getProperty("line.separator"));
+                        writer.write("source" + resultingSql + System.lineSeparator());
                     } else
                         System.err.println("ERROR: cannot find the SELECT clause in " + mapping);
                 } else {
 
-                    writer.write(line + System.getProperty("line.separator"));
+                    writer.write(line + System.lineSeparator());
                 }
             }
         }
-
-        writer.flush();
-        writer.close();
-
-
     }
 
     //read and store datasource information
@@ -230,25 +231,24 @@ public class OntopMappingV1ToV3 implements OntopCommand {
     }
 
     private void processR2RML(File outputFile) throws Exception {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(outputFile));
+             InputStream in = new FileInputStream(mappingFile)) {
+            RDFParser parser = Rio.createParser(RDFFormat.TURTLE);
+            parser.setPreserveBNodeIDs(true);
+            URL documentUrl = new URL("file://" + mappingFile);
+            parser.setRDFHandler(new RDFHandler() {
+            final Map<Resource, List<Statement>> bmap = new HashMap<>();
 
-        BufferedWriter writer = new BufferedWriter(new FileWriter(outputFile));
-        RDFParser parser = Rio.createParser(RDFFormat.TURTLE);
-        parser.setPreserveBNodeIDs(true);
-        InputStream in = new FileInputStream(mappingFile);
-        URL documentUrl = new URL("file://" + mappingFile);
-        parser.setRDFHandler(new RDFHandler() {
-            Map<Resource, List<Statement>> bmap = new HashMap<>();
-
-            Map<Resource, Resource> logicalTable = new HashMap<>();
-            Map<Resource, String> sqlQuery = new HashMap<>();
-            Map<Resource, String> tableName = new HashMap<>();
-            Map<Resource, Resource> subjectMap = new HashMap<>();
-            Map<Resource, List<Resource>> predicateObjectMap = new HashMap<>();
-            Map<Resource, List<Resource>> objectMap = new HashMap<>();
-            Map<Resource, List<Resource>> predicateMap = new HashMap<>();
-            Map<Resource, String> template = new HashMap<>();
-            Map<Resource, String> column = new HashMap<>();
-            Set<Resource> TripleMap = new HashSet<>();
+            final Map<Resource, Resource> logicalTable = new HashMap<>();
+            final Map<Resource, String> sqlQuery = new HashMap<>();
+            final Map<Resource, String> tableName = new HashMap<>();
+            final Map<Resource, Resource> subjectMap = new HashMap<>();
+            final Map<Resource, List<Resource>> predicateObjectMap = new HashMap<>();
+            final Map<Resource, List<Resource>> objectMap = new HashMap<>();
+            final Map<Resource, List<Resource>> predicateMap = new HashMap<>();
+            final Map<Resource, String> template = new HashMap<>();
+            final Map<Resource, String> column = new HashMap<>();
+            final Set<Resource> TripleMap = new HashSet<>();
 
             List<Statement> statements = new ArrayList<>();
 
@@ -304,7 +304,7 @@ public class OntopMappingV1ToV3 implements OntopCommand {
                         String nid = id.toString();
                         nid = nid.substring(0, nid.length() - 5);
                         nid += Joiner.on("-").join(ids.stream()
-                                .map(i -> i.toString().substring(i.toString().length() - 5, i.toString().length()))
+                                .map(i -> i.toString().substring(i.toString().length() - 5))
                                 .collect(Collectors.toList()));
                         IRI to = SimpleValueFactory.getInstance().createIRI(nid);
                         Resource lt = logicalTable.get(id);
@@ -392,7 +392,7 @@ public class OntopMappingV1ToV3 implements OntopCommand {
 
                 } catch (IOException e) {
                     System.err.println("Error during process: " + e.getMessage());
-                    e.printStackTrace();
+                    LOGGER.error("I/O error while writing converted R2RML output", e);
 
                 }
             }
@@ -407,7 +407,7 @@ public class OntopMappingV1ToV3 implements OntopCommand {
                     PREFIXES.put(s1, s + ":");
                 } catch (IOException e) {
                     System.err.println("Error during process: " + e.getMessage());
-                    e.printStackTrace();
+                    LOGGER.error("I/O error while writing namespace declarations", e);
 
                 }
 
@@ -530,7 +530,7 @@ public class OntopMappingV1ToV3 implements OntopCommand {
 
                         Set<String> args = getMappingColumnsFromTemplates(mapping);
 
-                        String selectClause = extractMappingColumnsFromSQL(args, sql, outID(mapping));
+                        String selectClause = extractMappingColumnsFromSQL(args, sql);
                         if (selectClause != null) {
                             BiMap<String, String> renaming = HashBiMap.create();
                             Map<String, String> sqlRenaming = new HashMap<>();
@@ -653,7 +653,7 @@ public class OntopMappingV1ToV3 implements OntopCommand {
                         boolean first = true;
                         IRI current_pred = null;
                         for (Statement st : list) {
-                            if (current_pred == st.getPredicate()) {
+                            if (current_pred != null && current_pred.equals(st.getPredicate())) {
                                 s += ", " + getO(st);
                                 continue;
                             }
@@ -694,11 +694,9 @@ public class OntopMappingV1ToV3 implements OntopCommand {
             public void handleComment(String s) throws RDFHandlerException {
 
             }
-        });
-        parser.parse(in, documentUrl.toString());
-
-        writer.flush();
-        writer.close();
+            });
+            parser.parse(in, documentUrl.toString());
+        }
     }
 
       /*
@@ -731,7 +729,7 @@ public class OntopMappingV1ToV3 implements OntopCommand {
         return set;
     }
 
-    protected   String extractMappingColumnsFromSQL(Set<String> args, String sql, String mapping) {
+    protected   String extractMappingColumnsFromSQL(Set<String> args, String sql) {
         Matcher m = selectPattern.matcher(sql);
         if (m.find()) {
             String selectClause = m.group();
@@ -755,7 +753,7 @@ public class OntopMappingV1ToV3 implements OntopCommand {
         String replacementSelectClause = selectClause;
 
         for (Map.Entry<String, String> r : renaming.entrySet()) {
-            Pattern p = Pattern.compile("\\b" + r.getKey() + "\\b", Pattern.DOTALL);
+            Pattern p = Pattern.compile("\\b" + Pattern.quote(r.getKey()) + "\\b", Pattern.DOTALL);
             Matcher mp = p.matcher(replacementSelectClause);
             if (mp.find())
                 replacementSelectClause = mp.replaceFirst(r.getValue());
@@ -775,81 +773,180 @@ public class OntopMappingV1ToV3 implements OntopCommand {
     protected  String getSimplifiedProjection(String sql) {
         try {
             net.sf.jsqlparser.statement.Statement statement = CCJSqlParserUtil.parse(sql);
-            if (statement instanceof Select) {
-                Select select = (Select)statement;
-
-                PlainSelect plainSelect = (PlainSelect)select.getSelectBody();
-
-                if (plainSelect.getJoins() == null) {
-                    boolean ok = true;
-                    for (SelectItem si : plainSelect.getSelectItems()) {
-                        if (!(si instanceof SelectExpressionItem)) {
-                            ok = false;
-                            break;
-                        }
-                        SelectExpressionItem sei = (SelectExpressionItem) si;
-                        if (sei.getAlias() != null) {
-                            ok = false;
-                            break;
-                        }
-                    }
-                    if (ok) {
-                        plainSelect.setSelectItems(ImmutableList.of(new AllColumns()));
-
-                        Matcher m = selectPattern.matcher(sql);
-                        if (m.find()) {
-                            String selectClause = m.group();
-                            String projection = selectClause.substring("SELECT".length(), selectClause.length() - "FROM".length());
-                            Pattern endSpaces = Pattern.compile("\\S\\s+\\z", Pattern.DOTALL);
-                            Matcher es = endSpaces.matcher(projection);
-                            if (es.find())
-                                projection = projection.substring(0, projection.length() - es.group().length() + 1);
-                            return sql.replace(projection, " *");
-                        }
-                    }
-                }
+            if (isSimpleColumnSelect(statement)) {
+                PlainSelect select = (PlainSelect) statement;
+                SelectItem<?> first = select.getSelectItems().get(0);
+                SelectItem<?> last = select.getSelectItems().get(select.getSelectItems().size() - 1);
+                if (first.getASTNode() == null || last.getASTNode() == null)
+                    return sql;
+                Token start = first.getASTNode().jjtGetFirstToken();
+                Token end = last.getASTNode().jjtGetLastToken();
+                int startOffset = getTokenOffset(sql, start.beginLine, start.beginColumn);
+                int endOffset = getTokenOffset(sql, end.endLine, end.endColumn);
+                if (startOffset >= 0 && endOffset >= startOffset)
+                    return sql.substring(0, startOffset) + "*" + sql.substring(endOffset + 1);
             }
         }
         catch (JSQLParserException e) {
-            e.printStackTrace();
+            LOGGER.debug("Could not simplify SQL projection for query: {}", sql, e);
         }
         return sql;
     }
 
     /*
-        returns
-            table name if the SQL query contains no join, no where and no column aliases
-            null otherwise
+        Returns an unqualified table name only for an unmodified simple column query.
      */
 
     protected  String extractSimpleTable(String sql) {
         try {
             net.sf.jsqlparser.statement.Statement statement = CCJSqlParserUtil.parse(sql);
-            if (statement instanceof Select) {
-                Select select = (Select)statement;
-                PlainSelect plainSelect = (PlainSelect)select.getSelectBody();
-                if (plainSelect.getJoins() == null) {
-                    boolean ok = true;
-                    for (SelectItem si : plainSelect.getSelectItems()) {
-                        if (!(si instanceof SelectExpressionItem)) {
-                            ok = false;
-                            break;
-                        }
-                        SelectExpressionItem sei = (SelectExpressionItem) si;
-                        if (sei.getAlias() != null) {
-                            ok = false;
-                            break;
-                        }
-                    }
-                    if (ok && (plainSelect.getWhere() == null))
-                        return ((Table)plainSelect.getFromItem()).getName();
+            if (isSimpleColumnSelect(statement)) {
+                PlainSelect select = (PlainSelect) statement;
+                Table table = (Table) select.getFromItem();
+                if (select.getWhere() == null && table.getASTNode() != null) {
+                    Token first = table.getASTNode().jjtGetFirstToken();
+                    // Quoted names containing dots are one token in 5.4, despite name-part splitting.
+                    if (first.next == null || (!".".equals(first.next.image) && !":".equals(first.next.image)))
+                        return JSqlParserTools.getTableName(table);
                 }
             }
         }
         catch (JSQLParserException e) {
-            e.printStackTrace();
+            LOGGER.debug("Could not extract simple table from query: {}", sql, e);
         }
         return null;
+    }
+
+    private boolean isSimpleColumnSelect(net.sf.jsqlparser.statement.Statement statement) {
+        if (!(statement instanceof PlainSelect))
+            return false;
+        PlainSelect select = (PlainSelect) statement;
+        if (!isSimpleSource(select) || containsUnsupportedSelectFeatures(select)
+                || select.getSelectItems() == null || select.getSelectItems().isEmpty())
+            return false;
+
+        for (SelectItem<?> item : select.getSelectItems()) {
+            if (item.getAlias() != null || !(item.getExpression() instanceof Column))
+                return false;
+            Column column = (Column) item.getExpression();
+            if (column.getArrayConstructor() != null || column.getOldOracleJoinSyntax() != 0
+                    || column.getReturningReferenceType() != null || column.getReturningQualifier() != null
+                    || column.getCommentText() != null || !".".equals(column.getTableDelimiter())
+                    || (column.getTable() != null && !isSimpleTable(column.getTable())))
+                return false;
+        }
+        return true;
+    }
+
+    private boolean isSimpleSource(PlainSelect select) {
+        if (!(select.getFromItem() instanceof Table))
+            return false;
+        return select.getJoins() == null && isSimpleTable((Table) select.getFromItem());
+    }
+
+    private boolean containsUnsupportedSelectFeatures(PlainSelect select) {
+        // WHERE is intentionally allowed: projection simplification preserves it.
+        return containsUnsupportedSelectClauses(select)
+                || containsUnsupportedSelectModifiers(select)
+                || containsUnsupportedOrderingOrLocking(select);
+    }
+
+    private boolean containsUnsupportedSelectClauses(PlainSelect select) {
+        return select.getWithItemsList() != null
+                || select.getDistinct() != null
+                || select.getBigQuerySelectQualifier() != null
+                || select.getIntoTables() != null
+                || select.getMySqlSelectIntoClause() != null
+                || select.getIntoTempTable() != null
+                || select.isUseWithNoLog()
+                || select.getLateralViews() != null
+                || select.getPreWhere() != null
+                || select.getGroupBy() != null
+                || select.getHaving() != null
+                || select.getQualify() != null
+                || select.getWindowDefinitions() != null
+                || select.getKsqlWindow() != null;
+    }
+
+    private boolean containsUnsupportedSelectModifiers(PlainSelect select) {
+        return select.getOptimizeFor() != null
+                || select.getSkip() != null
+                || select.getFirst() != null
+                || select.getTop() != null
+                || select.getOracleHierarchical() != null
+                || select.getPreferringClause() != null
+                || select.getOracleHint() != null
+                || select.getMySqlHintStraightJoin()
+                || select.getMySqlSqlCalcFoundRows()
+                || select.getMySqlSqlCacheFlag() != null
+                || select.getForXmlPath() != null
+                || select.getEmitMode() != PlainSelect.EmitMode.NONE
+                || select.isUsingFinal()
+                || select.isUsingOnly()
+                || select.getSettings() != null
+                || select.getOption() != null
+                || select.getInterpolate() != null
+                || select.getMySqlProcedureAnalyse() != null;
+    }
+
+    private boolean containsUnsupportedOrderingOrLocking(PlainSelect select) {
+        return select.getOrderByElements() != null
+                || select.getLimit() != null
+                || select.getLimitBy() != null
+                || select.getOffset() != null
+                || select.getFetch() != null
+                || select.getIsolation() != null
+                || select.getForClause() != null
+                || select.getForMode() != null
+                || select.getForUpdateTables() != null
+                || select.getWait() != null
+                || select.isSkipLocked()
+                || select.isNoWait()
+                || select.isForUpdateBeforeOrderBy()
+                || select.isOracleSiblings()
+                || select.getAlias() != null
+                || select.getPivot() != null
+                || select.getUnPivot() != null;
+    }
+
+    private boolean isSimpleTable(Table table) {
+        if (table.isTableVariable() || table.getTimeTravel() != null)
+            return false;
+        if (table.getNameParts().stream().anyMatch(p -> p != null && p.contains("@")))
+            return false;
+        if (table.getTimeTravelStrAfterAlias() != null || table.getSampleClause() != null)
+            return false;
+        if (table.getPivot() != null || table.getUnPivot() != null)
+            return false;
+        if (table.getIndexHint() != null || table.getSqlServerHints() != null)
+            return false;
+
+        return table.getAlias() == null || table.getAlias().getAliasColumns() == null;
+    }
+
+
+    /**
+     * Converts JSqlParser's 1-based line and column to a 0-based string offset.
+     * Returns -1 when the position is outside the SQL text.
+     */
+    private int getTokenOffset(String sql, int targetLine, int targetColumn) {
+        int line = 1;
+        int column = 1;
+        for (int i = 0; i < sql.length(); i++) {
+            if (line == targetLine && column == targetColumn)
+                return i;
+            char c = sql.charAt(i);
+            if (c == '\r' || c == '\n') {
+                // CRLF is one line break, so skip its second character.
+                if (c == '\r' && i + 1 < sql.length() && sql.charAt(i + 1) == '\n')
+                    i++;
+                line++;
+                column = 1;
+            }
+            else
+                column++;
+        }
+        return -1;
     }
 
 }

@@ -13,6 +13,16 @@ import it.unibz.inf.ontop.model.type.DBTermType;
 import it.unibz.inf.ontop.spec.sqlparser.exception.QueryParseException;
 import it.unibz.inf.ontop.spec.sqlparser.exception.UnsupportedSelectQueryException;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
+import net.sf.jsqlparser.expression.Alias;
+import net.sf.jsqlparser.expression.LongValue;
+import net.sf.jsqlparser.schema.Table;
+import net.sf.jsqlparser.statement.select.*;
+import it.unibz.inf.ontop.spec.sqlparser.exception.UnsupportedSelectQueryRuntimeException;
+
+import java.util.List;
+import java.util.function.Consumer;
 
 import static it.unibz.inf.ontop.spec.sqlparser.SQLTestingTools.*;
 import static org.junit.jupiter.api.Assertions.*;
@@ -35,6 +45,161 @@ public class SelectQueryParserTest {
     private static final String D1 = "D1";
     private static final String D2 = "D2";
     private static final String D3 = "D3";
+
+    @ParameterizedTest
+    @ValueSource(strings = {
+            "SELECT * EXCEPT (A) FROM P",
+            "SELECT t.* EXCEPT (A) FROM P t",
+            "SELECT * EXCLUDE (A) FROM P",
+            "SELECT t.* EXCLUDE (A) FROM P t",
+            "SELECT * REPLACE (A + 1 AS A) FROM P",
+            "SELECT t.* REPLACE (A + 1 AS A) FROM P t",
+            "SELECT * EXCEPT (A) REPLACE (B + 1 AS B) FROM P",
+            "SELECT t.* EXCEPT (A) REPLACE (B + 1 AS B) FROM P t",
+            "SELECT * AS x FROM P",
+            "SELECT A AS x(y) FROM P",
+            "SELECT AS STRUCT A FROM P",
+            "SELECT AS VALUE A FROM P",
+            "SELECT STRAIGHT_JOIN A FROM P",
+            "SELECT A FROM P FINAL",
+            "SELECT A FROM ONLY P",
+            "SELECT A FROM P PREWHERE A = 1",
+            "SELECT A FROM P QUALIFY A = 1",
+            "SELECT A FROM P WINDOW w AS (PARTITION BY A)",
+            "SELECT A FROM P WHERE A = 1 EMIT CHANGES",
+            "SELECT A FROM P EMIT FINAL",
+            "SELECT A FROM P SETTINGS x = 1",
+            "SELECT A FROM P LIMIT 1 BY A",
+            "SELECT A FROM P FOR UPDATE",
+            "SELECT A FROM P FOR SHARE",
+            "SELECT A FROM P FOR UPDATE OF P NOWAIT",
+            "SELECT A FROM P FOR UPDATE SKIP LOCKED",
+            "SELECT A FROM P FOR UPDATE WAIT 5",
+            "SELECT A FROM P OPTION (RECOMPILE)",
+            "SELECT A FROM P PROCEDURE ANALYSE (1, 2)",
+            "SELECT A FROM P PREFERRING HIGH A",
+            "SELECT A FROM P TABLESAMPLE SYSTEM (10)",
+            "SELECT A FROM P FOR SYSTEM_TIME AS OF '2020-01-01'",
+            "SELECT A FROM P t FOR SYSTEM_TIME AS OF '2020-01-01'",
+            "SELECT A FROM P WITH (NOLOCK)",
+            "SELECT A FROM @P",
+            "SELECT P.A FROM P GLOBAL JOIN Q ON P.A = Q.A",
+            "SELECT P.A FROM P p ANY INNER JOIN Q ON p.A = Q.A",
+            "SELECT P.A FROM P ALL JOIN Q ON P.A = Q.A",
+            "SELECT P.A FROM P ASOF JOIN Q ON P.A = Q.A",
+            "SELECT P.A FROM P INNER HASH JOIN Q ON P.A = Q.A",
+            "SELECT P.A FROM P JOIN FETCH Q ON P.A = Q.A",
+            "SELECT P.A FROM P ARRAY JOIN Q",
+            "SELECT A FROM P LATERAL VIEW explode(B) t AS x",
+            "SELECT s.A FROM (SELECT A FROM P) s LIMIT 1",
+            "SELECT P.A FROM P NATURAL LEFT JOIN Q",
+            "SELECT P.A FROM P NATURAL RIGHT JOIN Q",
+            "SELECT P.A FROM P NATURAL FULL JOIN Q",
+            "SELECT s.A FROM (SELECT A FROM P) s TABLESAMPLE SYSTEM (10)",
+            "SELECT s.A FROM (P JOIN Q ON P.A = Q.A) s TABLESAMPLE SYSTEM (10)",
+            "SELECT COUNT(*) FROM P",
+            "SELECT A LIKE B COLLATE utf8 FROM P",
+            "SELECT A BETWEEN SYMMETRIC 1 AND 2 FROM P",
+            "SELECT CAST(A AS CHAR CHARACTER SET utf8) FROM P",
+            "SELECT A + 1 AS x FROM P WHERE A GLOBAL IN (1, 2)",
+            "SELECT LOWER(A IGNORE NULLS) AS x FROM P"
+    })
+    public void rejectsUnsupportedSyntax(String sql) {
+        assertThrows(UnsupportedSelectQueryException.class, () -> parse(sql), sql);
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {
+            "SELECT A FROM P INTO OUTFILE 'result.txt'",
+            "SELECT A FROM P INTO DUMPFILE 'result.txt'",
+            "SELECT A FROM P INTO TEMP result WITH NO LOG"
+    })
+    public void rejectsAdditionalSelectIntoForms(String sql) {
+        assertThrows(InvalidQueryException.class, () -> parse(sql), sql);
+    }
+
+    @Test
+    public void rejectsUnsupportedWildcardProperties() throws Exception {
+        RAExpression ra = parse("SELECT A FROM P");
+        SelectItemParser parser = new SelectItemParser(ra.getAttributes(),
+                new ExpressionParser(idfac, CORE_SINGLETONS)::parseTerm, idfac);
+        AllTableColumns returning = new AllTableColumns(new Table("P"));
+        returning.setReturningQualifier("OLD");
+        assertThrows(UnsupportedSelectQueryRuntimeException.class,
+                () -> parser.parseSelectItems(List.of(SelectItem.from(returning))));
+        returning.setReturningQualifier(null);
+        returning.setReturningReferenceType(net.sf.jsqlparser.statement.ReturningReferenceType.values()[0]);
+        assertThrows(UnsupportedSelectQueryRuntimeException.class,
+                () -> parser.parseSelectItems(List.of(SelectItem.from(returning))));
+        Table qualifier = new Table("P");
+        qualifier.setTimeTravel("FOR SYSTEM_TIME AS OF '2020-01-01'");
+        assertThrows(UnsupportedSelectQueryRuntimeException.class,
+                () -> parser.parseSelectItems(List.of(SelectItem.from(new AllTableColumns(qualifier)))));
+    }
+
+    @Test
+    public void rejectsPropertiesEvenWhenNotRendered() throws Exception {
+        parse("SELECT A FROM P");
+        OfflineMetadataProviderBuilder builder = createMetadataProviderBuilder();
+        builder.createDatabaseRelation("P", "A", integerDBType, false);
+        SelectQueryParser parser = new SelectQueryParser(builder.build(), CORE_SINGLETONS);
+        List<Consumer<PlainSelect>> modifiers = List.of(
+                s -> s.setSettings(List.of()),
+                s -> s.setInterpolate(List.of()),
+                s -> s.setForUpdateTables(List.of()),
+                s -> s.setNoWait(true),
+                s -> s.setSkipLocked(true),
+                s -> s.setForUpdateBeforeOrderBy(true));
+        for (Consumer<PlainSelect> modifier : modifiers) {
+            PlainSelect select = JSqlParserTools.parse("SELECT A FROM P", false).getPlainSelect();
+            modifier.accept(select);
+            assertThrows(UnsupportedSelectQueryRuntimeException.class, () -> parser.translateSelect(select, null));
+        }
+        RAExpression ra = parse("SELECT A FROM P");
+        SelectItemParser sip = new SelectItemParser(ra.getAttributes(),
+                new ExpressionParser(idfac, CORE_SINGLETONS)::parseTerm, idfac);
+        for (AllColumns wildcard : List.of(new AllColumns(), new AllTableColumns(new Table("P")))) {
+            wildcard.setExceptColumns(new net.sf.jsqlparser.expression.operators.relational.ExpressionList<>());
+            assertThrows(UnsupportedSelectQueryRuntimeException.class,
+                    () -> sip.parseSelectItems(List.of(SelectItem.from(wildcard))));
+            wildcard.setExceptColumns(null);
+            wildcard.setReplaceExpressions(List.of());
+            assertThrows(UnsupportedSelectQueryRuntimeException.class,
+                    () -> sip.parseSelectItems(List.of(SelectItem.from(wildcard))));
+            wildcard.setReplaceExpressions(null);
+            wildcard.setExceptKeyword("EXCLUDE");
+            assertThrows(UnsupportedSelectQueryRuntimeException.class,
+                    () -> sip.parseSelectItems(List.of(SelectItem.from(wildcard))));
+        }
+        PlainSelect outer = JSqlParserTools.parse("SELECT s.A FROM (SELECT A FROM P) s", false).getPlainSelect();
+        ParenthesedSelect wrapper = (ParenthesedSelect) outer.getFromItem();
+        wrapper.setLimit(new Limit().withRowCount(new LongValue(1)));
+        assertThrows(UnsupportedSelectQueryRuntimeException.class, () -> parser.translateSelect(outer, null));
+        wrapper.setLimit(null);
+        wrapper.setOrderByElements(List.of(new OrderByElement()));
+        assertThrows(UnsupportedSelectQueryRuntimeException.class, () -> parser.translateSelect(outer, null));
+    }
+
+    @Test
+    public void rejectsJoinModifiersAndUsingColumnProperties() throws Exception {
+        parse("SELECT A FROM P");
+        OfflineMetadataProviderBuilder builder = createMetadataProviderBuilder();
+        builder.createDatabaseRelation("P", "A", integerDBType, false);
+        builder.createDatabaseRelation("Q", "A", integerDBType, false);
+        SelectQueryParser parser = new SelectQueryParser(builder.build(), CORE_SINGLETONS);
+        List<Consumer<Join>> modifiers = List.of(
+                j -> j.setAny(true), j -> j.setAll(true), j -> j.setAsOf(true),
+                j -> j.setGlobal(true), j -> j.setArray(true), j -> j.setFetch(true),
+                j -> j.setJoinHint(new JoinHint("HASH")));
+        for (Consumer<Join> modifier : modifiers) {
+            PlainSelect select = JSqlParserTools.parse("SELECT P.A FROM P JOIN Q USING (A)", false).getPlainSelect();
+            modifier.accept(select.getJoins().get(0));
+            assertThrows(UnsupportedSelectQueryRuntimeException.class, () -> parser.translateSelect(select, null));
+        }
+        PlainSelect select = JSqlParserTools.parse("SELECT P.A FROM P JOIN Q USING (A)", false).getPlainSelect();
+        select.getJoins().get(0).getUsingColumns().get(0).setReturningQualifier("OLD");
+        assertThrows(UnsupportedSelectQueryRuntimeException.class, () -> parser.translateSelect(select, null));
+    }
 
     private RAExpression parse(String sql) throws QueryParseException, InvalidQueryException, UnsupportedSelectQueryException {
 
@@ -187,10 +352,11 @@ public class SelectQueryParserTest {
 
     @Test
     public void select_apply() throws Exception {
-        var ex = assertThrows(UnsupportedSelectQueryException.class, () ->
+        var ex = assertThrows(QueryParseException.class, () ->
                 parse("SELECT A FROM P APPLY Q"));
 
-        assertEquals("APPLY is not supported APPLY Q", ex.getMessage());
+        assertEquals("Encountered: <S_IDENTIFIER> / \"Q\", at line 1, column 23, in lexical state DEFAULT.",
+                ex.getOriginalMessage().split("\\R", 2)[0]);
     }
 
     @Test
@@ -444,7 +610,7 @@ public class SelectQueryParserTest {
         var ex = assertThrows(QueryParseException.class, () ->
                 parse("SELECT * FROM P NATURAL OUTER JOIN Q"));
 
-        assertTrue(ex.getOriginalMessage().startsWith("Encountered unexpected token: \"NATURAL\""));
+        assertEquals("Invalid JOIN modifiers: NATURAL OUTER", ex.getOriginalMessage());
     }
 
     @Test
@@ -452,7 +618,8 @@ public class SelectQueryParserTest {
         var ex = assertThrows(QueryParseException.class, () ->
                 parse("SELECT * FROM P CROSS OUTER JOIN Q"));
 
-        assertTrue(ex.getOriginalMessage().startsWith("Encountered unexpected token: \"CROSS\""));
+        assertEquals("Encountered: <K_CROSS> / \"CROSS\", at line 1, column 17, in lexical state DEFAULT.",
+                ex.getOriginalMessage().split("\\R", 2)[0]);
     }
 
     @Test
@@ -460,7 +627,7 @@ public class SelectQueryParserTest {
         var ex = assertThrows(QueryParseException.class, () ->
                 parse("SELECT * FROM P NATURAL INNER JOIN Q"));
 
-        assertTrue(ex.getOriginalMessage().startsWith("Encountered unexpected token: \"NATURAL\""));
+        assertEquals("Invalid JOIN modifiers: NATURAL INNER", ex.getOriginalMessage());
     }
 
     @Test
@@ -468,7 +635,8 @@ public class SelectQueryParserTest {
         var ex = assertThrows(QueryParseException.class, () ->
                 parse("SELECT * FROM P CROSS INNER JOIN Q"));
 
-        assertTrue(ex.getOriginalMessage().startsWith("Encountered unexpected token: \"CROSS\""));
+        assertEquals("Encountered: <K_CROSS> / \"CROSS\", at line 1, column 17, in lexical state DEFAULT.",
+                ex.getOriginalMessage().split("\\R", 2)[0]);
     }
 
     @Test
@@ -476,7 +644,7 @@ public class SelectQueryParserTest {
         var ex = assertThrows(QueryParseException.class, () ->
                 parse("SELECT * FROM P RIGHT INNER JOIN Q"));
 
-        assertTrue(ex.getOriginalMessage().startsWith("Encountered unexpected token: \"RIGHT\""));
+        assertEquals("Invalid JOIN modifiers: RIGHT INNER", ex.getOriginalMessage());
     }
 
     @Test
@@ -484,7 +652,8 @@ public class SelectQueryParserTest {
         var ex = assertThrows(QueryParseException.class, () ->
                 parse("SELECT * FROM P FULL INNER JOIN Q"));
 
-        assertTrue(ex.getOriginalMessage().startsWith("Encountered unexpected token: \"FULL\""));
+        assertEquals("Encountered: <K_FULL> / \"FULL\", at line 1, column 17, in lexical state DEFAULT.",
+                ex.getOriginalMessage().split("\\R", 2)[0]);
     }
 
     @Test
@@ -492,7 +661,7 @@ public class SelectQueryParserTest {
         var ex = assertThrows(QueryParseException.class, () ->
                 parse("SELECT * FROM P LEFT INNER JOIN Q"));
 
-        assertTrue(ex.getOriginalMessage().startsWith("Encountered unexpected token: \"LEFT\""));
+        assertEquals("Invalid JOIN modifiers: LEFT INNER", ex.getOriginalMessage());
     }
 
     @Test
@@ -500,7 +669,7 @@ public class SelectQueryParserTest {
         var ex = assertThrows(QueryParseException.class, () ->
                 parse("SELECT * FROM P NATURAL OUTER JOIN Q ON P.A = Q.A"));
 
-        assertTrue(ex.getOriginalMessage().startsWith("Encountered unexpected token: \"NATURAL\""));
+        assertEquals("Invalid JOIN modifiers: NATURAL OUTER", ex.getOriginalMessage());
     }
 
     @Test
@@ -508,7 +677,8 @@ public class SelectQueryParserTest {
         var ex = assertThrows(QueryParseException.class, () ->
                 parse("SELECT * FROM P CROSS OUTER JOIN Q ON P.A = Q.A"));
 
-        assertTrue(ex.getOriginalMessage().startsWith("Encountered unexpected token: \"CROSS\""));
+        assertEquals("Encountered: <K_CROSS> / \"CROSS\", at line 1, column 17, in lexical state DEFAULT.",
+                ex.getOriginalMessage().split("\\R", 2)[0]);
     }
 
     @Test
@@ -516,7 +686,7 @@ public class SelectQueryParserTest {
         var ex = assertThrows(QueryParseException.class, () ->
                 parse("SELECT * FROM P NATURAL INNER JOIN Q ON P.A = Q.A"));
 
-        assertTrue(ex.getOriginalMessage().startsWith("Encountered unexpected token: \"NATURAL\""));
+        assertEquals("Invalid JOIN modifiers: NATURAL INNER", ex.getOriginalMessage());
     }
 
     @Test
@@ -524,7 +694,8 @@ public class SelectQueryParserTest {
         var ex = assertThrows(QueryParseException.class, () ->
                 parse("SELECT * FROM P CROSS INNER JOIN Q ON P.A = Q.A"));
 
-        assertTrue(ex.getOriginalMessage().startsWith("Encountered unexpected token: \"CROSS\""));
+        assertEquals("Encountered: <K_CROSS> / \"CROSS\", at line 1, column 17, in lexical state DEFAULT.",
+                ex.getOriginalMessage().split("\\R", 2)[0]);
     }
 
     @Test
@@ -532,7 +703,7 @@ public class SelectQueryParserTest {
         var ex = assertThrows(QueryParseException.class, () ->
                 parse("SELECT * FROM P RIGHT INNER JOIN Q ON P.A = Q.A"));
 
-        assertTrue(ex.getOriginalMessage().startsWith("Encountered unexpected token: \"RIGHT\""));
+        assertEquals("Invalid JOIN modifiers: RIGHT INNER", ex.getOriginalMessage());
     }
 
     @Test
@@ -540,7 +711,8 @@ public class SelectQueryParserTest {
         var ex = assertThrows(QueryParseException.class, () ->
                 parse("SELECT * FROM P FULL INNER JOIN Q ON P.A = Q.A"));
 
-        assertTrue(ex.getOriginalMessage().startsWith("Encountered unexpected token: \"FULL\""));
+        assertEquals("Encountered: <K_FULL> / \"FULL\", at line 1, column 17, in lexical state DEFAULT.",
+                ex.getOriginalMessage().split("\\R", 2)[0]);
     }
 
     @Test
@@ -548,7 +720,7 @@ public class SelectQueryParserTest {
         var ex = assertThrows(QueryParseException.class, () ->
                 parse("SELECT * FROM P LEFT INNER JOIN Q ON P.A = Q.A"));
 
-        assertTrue(ex.getOriginalMessage().startsWith("Encountered unexpected token: \"LEFT\""));
+        assertEquals("Invalid JOIN modifiers: LEFT INNER", ex.getOriginalMessage());
     }
 
     @Test
@@ -556,7 +728,7 @@ public class SelectQueryParserTest {
         var ex = assertThrows(QueryParseException.class, () ->
                 parse("SELECT * FROM P NATURAL OUTER JOIN Q USING(A)"));
 
-        assertTrue(ex.getOriginalMessage().startsWith("Encountered unexpected token: \"NATURAL\""));
+        assertEquals("Invalid JOIN modifiers: NATURAL OUTER", ex.getOriginalMessage());
     }
 
     @Test
@@ -564,7 +736,8 @@ public class SelectQueryParserTest {
         var ex = assertThrows(QueryParseException.class, () ->
                 parse("SELECT * FROM P CROSS OUTER JOIN Q USING(A)"));
 
-        assertTrue(ex.getOriginalMessage().startsWith("Encountered unexpected token: \"CROSS\""));
+        assertEquals("Encountered: <K_CROSS> / \"CROSS\", at line 1, column 17, in lexical state DEFAULT.",
+                ex.getOriginalMessage().split("\\R", 2)[0]);
     }
 
     @Test
@@ -572,7 +745,7 @@ public class SelectQueryParserTest {
         var ex = assertThrows(QueryParseException.class, () ->
                 parse("SELECT * FROM P NATURAL INNER JOIN Q USING(A)"));
 
-        assertTrue(ex.getOriginalMessage().startsWith("Encountered unexpected token: \"NATURAL\""));
+        assertEquals("Invalid JOIN modifiers: NATURAL INNER", ex.getOriginalMessage());
     }
 
     @Test
@@ -580,7 +753,8 @@ public class SelectQueryParserTest {
         var ex = assertThrows(QueryParseException.class, () ->
                 parse("SELECT * FROM P CROSS INNER JOIN Q USING(A)"));
 
-        assertTrue(ex.getOriginalMessage().startsWith("Encountered unexpected token: \"CROSS\""));
+        assertEquals("Encountered: <K_CROSS> / \"CROSS\", at line 1, column 17, in lexical state DEFAULT.",
+                ex.getOriginalMessage().split("\\R", 2)[0]);
     }
 
     @Test
@@ -588,7 +762,7 @@ public class SelectQueryParserTest {
         var ex = assertThrows(QueryParseException.class, () ->
                 parse("SELECT * FROM P RIGHT INNER JOIN Q USING(A)"));
 
-        assertTrue(ex.getOriginalMessage().startsWith("Encountered unexpected token: \"RIGHT\""));
+        assertEquals("Invalid JOIN modifiers: RIGHT INNER", ex.getOriginalMessage());
     }
 
     @Test
@@ -596,7 +770,8 @@ public class SelectQueryParserTest {
         var ex = assertThrows(QueryParseException.class, () ->
                 parse("SELECT * FROM P FULL INNER JOIN Q USING(A)"));
 
-        assertTrue(ex.getOriginalMessage().startsWith("Encountered unexpected token: \"FULL\""));
+        assertEquals("Encountered: <K_FULL> / \"FULL\", at line 1, column 17, in lexical state DEFAULT.",
+                ex.getOriginalMessage().split("\\R", 2)[0]);
     }
 
     @Test
@@ -604,7 +779,7 @@ public class SelectQueryParserTest {
         var ex = assertThrows(QueryParseException.class, () ->
                 parse("SELECT * FROM P LEFT INNER JOIN Q USING(A)"));
 
-        assertTrue(ex.getOriginalMessage().startsWith("Encountered unexpected token: \"LEFT\""));
+        assertEquals("Invalid JOIN modifiers: LEFT INNER", ex.getOriginalMessage());
     }
 
 
