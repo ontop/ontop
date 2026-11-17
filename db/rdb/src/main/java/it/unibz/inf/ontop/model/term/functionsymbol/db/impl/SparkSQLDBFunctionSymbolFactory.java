@@ -344,9 +344,28 @@ public class SparkSQLDBFunctionSymbolFactory extends AbstractSQLDBFunctionSymbol
         return super.getDBDateTrunc(datePart);
     }
 
+    /**
+     * Spark/Databricks have no 3-arg REGEXP_LIKE. SPARQL/XPath flags are encoded as
+     * Java-style inline modifiers at the start of the pattern (e.g. (?i)), then matched
+     * with 2-arg RLIKE. Unlike PostgreSQL, do not rewrite s to n since Spark already
+     * uses s for DOTALL.
+     */
     @Override
     public DBBooleanFunctionSymbol getDBRegexpMatches3() {
-        throw new UnsupportedOperationException(REGEXP_LIKE_STR + "3: " + UNSUPPORTED_MSG);
+        return new DBBooleanFunctionSymbolWithSerializerImpl(REGEXP_LIKE_STR + "3",
+                ImmutableList.of(abstractRootDBType, abstractRootDBType, abstractRootType), dbBooleanType, false,
+                (terms, termConverter, termFactory) -> {
+                    ImmutableTerm extendedPatternTerm = termFactory.getNullRejectingDBConcatFunctionalTerm(ImmutableList.of(
+                                    termFactory.getDBStringConstant("(?"),
+                                    terms.get(2),
+                                    termFactory.getDBStringConstant(")"),
+                                    terms.get(1)))
+                            .simplify();
+
+                    return String.format("(%s RLIKE %s)",
+                            termConverter.apply(terms.get(0)),
+                            termConverter.apply(extendedPatternTerm));
+                });
     }
 }
 
