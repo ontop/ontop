@@ -1,0 +1,58 @@
+[PrefixDeclaration]
+ex:		http://example.org/
+exd:		http://example.org/data/
+rdf:		http://www.w3.org/1999/02/22-rdf-syntax-ns#
+xsd:		http://www.w3.org/2001/XMLSchema#
+
+[MappingDeclaration] @collection [[
+mappingId	item
+target		exd:item/{id} a ex:Item ; ex:code {id} .
+source		SELECT id FROM "t"
+
+; Non-injective template whose static prefix collides with the one of exd:item/{id}
+mappingId	itemline
+target		exd:itemline/{id}-{sub} a ex:ItemLine .
+source		SELECT id, sub FROM "t"
+
+; Unrelated assertions, only there to reach 12 distinct IRI templates
+
+mappingId	decoy0
+target		exd:decoy0/{id} a ex:Ddecoy0 .
+source		SELECT id FROM "t"
+
+mappingId	decoy1
+target		exd:decoy1/{id} a ex:Ddecoy1 .
+source		SELECT id FROM "t"
+
+mappingId	decoy2
+target		exd:decoy2/{id} a ex:Ddecoy2 .
+source		SELECT id FROM "t"
+
+mappingId	decoy3
+target		exd:decoy3/{id} a ex:Ddecoy3 .
+source		SELECT id FROM "t"
+
+mappingId	decoy4
+target		exd:decoy4/{id} a ex:Ddecoy4 .
+source		SELECT id FROM "t"
+
+mappingId	decoy5
+target		exd:decoy5/{id} a ex:Ddecoy5 .
+source		SELECT id FROM "t"
+
+mappingId	decoy6
+target		exd:decoy6/{id} a ex:Ddecoy6 .
+source		SELECT id FROM "t"
+
+mappingId	decoy7
+target		exd:decoy7/{id} a ex:Ddecoy7 .
+source		SELECT id FROM "t"
+
+mappingId	decoy8
+target		exd:decoy8/{id} a ex:Ddecoy8 .
+source		SELECT id FROM "t"
+
+mappingId	decoy9
+target		exd:decoy9/{id} a ex:Ddecoy9 .
+source		SELECT id FROM "t"
+]]
