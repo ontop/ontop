@@ -1,0 +1,17 @@
+[PrefixDeclaration]
+:		http://example.org/
+foaf:		http://xmlns.com/foaf/0.1/
+
+[MappingDeclaration] @collection [[
+mappingId	persons-a
+target		GRAPH <http://example.org/graphA> { :person/{"id"} a foaf:Person ; foaf:name {"name"} . }
+source		SELECT "id", "name" FROM "person_a"
+
+mappingId	persons-b
+target		GRAPH <http://example.org/graphB> { :person/{"id"} a foaf:Person ; foaf:name {"name"} . }
+source		SELECT "id", "name" FROM "person_b"
+
+mappingId	persons-c
+target		GRAPH <http://example.org/graphC> { :person/{"id"} a foaf:Person ; foaf:name {"name"} . }
+source		SELECT "id", "name" FROM "person_c"
+]]
